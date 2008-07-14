@@ -18,8 +18,7 @@ public:
 	~RobotHTTPServer();
 	void runThread();
 	void Run();
-	void ProcessGET(SimpleHTTPConn *conn);
-	void ProcessPOST(SimpleHTTPConn *conn);
+	bool HandleRequest(SimpleHTTPConn *conn);
 };
 
 #endif

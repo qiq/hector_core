@@ -59,7 +59,6 @@ struct thread_info {
 };
 
 void *http_service_thread(void *ptr) {
-fprintf(stderr, "new thread ...\n");
 	struct thread_info *info = (struct thread_info*)ptr;
 	SimpleHTTPServer *server = info->server;
 	SimpleHTTPConn *conn = info->conn;
@@ -71,19 +70,14 @@ fprintf(stderr, "new thread ...\n");
 void SimpleHTTPServer::HTTPServiceThread(SimpleHTTPConn *conn) {
 	pthread_detach(pthread_self());
 	while (1) {
-fprintf(stderr, "reading ...\n");
 		bool result = conn->readRequest();
-fprintf(stderr, "reading: %d\n", result ? 1 : 0);
 		// timeout or error
 		if (!result)
 			break;
-		string type = conn->getRequestType();
-		if (type == "GET") {
-			handler->ProcessGET(conn);
-		} else if (type == "POST") {
-			handler->ProcessPOST(conn);
-		} else {
-			conn->errorResponse(501, "Not implemented", "Not implemented");
+		if (!handler->HandleRequest(conn)) {
+			char s[1000];
+			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
+			conn->errorResponse(501, "Not implemented", s);
 		}
 		conn->sendResponse();
 		if (!conn->isKeepAlive())
@@ -122,7 +116,6 @@ void SimpleHTTPServer::Server() {
 	}
 
 	while (running) {
-fprintf(stderr, "running...\n");
 		sockaddr_in client_addr;
 		socklen_t client_addrlen = sizeof(client_addr);
 

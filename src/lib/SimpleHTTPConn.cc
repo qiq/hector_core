@@ -13,16 +13,26 @@
 SimpleHTTPConn::SimpleHTTPConn(int fd) {
 	this->socket = fd;
 	keep_alive = false;
-	request_body_length = -1;
-	request_body_offset = -1;
 	header_fields = NULL;
-	response_code = 200;
-	response_str = "OK";
 }
 
 SimpleHTTPConn::~SimpleHTTPConn() {
 	close(socket);
 	delete header_fields;
+}
+
+void SimpleHTTPConn::clear() {
+	request_body_length = -1;
+	request_method.clear();
+	request_path.clear();
+	request_buffer.clear();
+	request_body_offset = -1;
+	delete header_fields;
+	header_fields = NULL;
+	response_code = 200;
+	response_str = "OK";
+	response_header.clear();
+	response_body.clear();
 }
 
 /**
@@ -58,7 +68,7 @@ void SimpleHTTPConn::parseRequestHeader() {
 	if (offset_a == string::npos && offset_b == string::npos)
 		return;
 	size_t offset = offset_a < offset_b ? offset_a + 2 : offset_b + 1;
-	request_type = request_buffer.substr(0, sp1);
+	request_method = request_buffer.substr(0, sp1);
 	request_path = request_buffer.substr(sp1+1, sp2-(sp1+1));
 
 	// parse header fields, we do not support multi-line fields
@@ -118,7 +128,9 @@ bool SimpleHTTPConn::requestReady() {
 #define TIMEOUT 30
 
 bool SimpleHTTPConn::readRequest() {
-	// TODO: zero everything: for keep-alive
+	// clear everything for keep-alive
+	clear();
+
 	bool finished = false;
 	while (!finished) {
 		// set timeout for reading 
@@ -150,8 +162,12 @@ bool SimpleHTTPConn::readRequest() {
 	return finished;
 }
 
-string SimpleHTTPConn::getRequestType() {
-	return request_type;
+string SimpleHTTPConn::getRequestMethod() {
+	return request_method;
+}
+
+string SimpleHTTPConn::getRequestPath() {
+	return request_path;
 }
 
 string SimpleHTTPConn::getRequestHeaderField(string &field) {

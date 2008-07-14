@@ -20,7 +20,7 @@ class SimpleHTTPConn {
 	int request_body_length;	// request body content length
 
 	// request
-	string request_type;
+	string request_method;
 	string request_path;
 	string request_buffer;		// entire request
 	int request_body_offset;	// offset of data
@@ -38,10 +38,14 @@ class SimpleHTTPConn {
 public:
 	SimpleHTTPConn(int sock);
 	~SimpleHTTPConn();
+	void clear();
 	bool isKeepAlive();
 
 	bool readRequest();
-	string getRequestType();
+	void sendResponse();
+
+	string getRequestMethod();
+	string getRequestPath();
 	string getRequestHeaderField(string &field);
 	string getRequestBody();
 
@@ -49,7 +53,6 @@ public:
 	void setResponseCode(int code, const char *description);
 	void appendResponseHeader(const char *s, bool clear = false);
 	void appendResponseBody(const char *s, bool clear = false);
-	void sendResponse();
 };
 
 #endif

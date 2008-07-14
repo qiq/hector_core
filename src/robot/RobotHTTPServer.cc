@@ -26,16 +26,17 @@ RobotHTTPServer::~RobotHTTPServer() {
 
 void RobotHTTPServer::Run() {
 	server = new SimpleHTTPServer(this, NULL, 1234);
+	server->setMaxThreads(1);
 	pthread_t thread;
 	pthread_create(&thread, NULL, run_thread, (void *)this);
 }
 
-void RobotHTTPServer::ProcessGET(SimpleHTTPConn *conn) {
-fprintf(stderr, "GET!\n");
-	conn->setResponseCode(200, "xOK");
-	conn->appendResponseHeader("blah: blah");
-	conn->appendResponseBody("hehe!");
-}
-
-void RobotHTTPServer::ProcessPOST(SimpleHTTPConn *conn) {
+bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
+	string method = conn->getRequestMethod();
+	if (method == "SHUTDOWN") {
+		conn->setResponseCode(200, "OK");
+		conn->appendResponseBody("Shutting down\r\n");
+		return true;
+	}
+	return false;
 }

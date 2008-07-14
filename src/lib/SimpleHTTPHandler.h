@@ -12,8 +12,7 @@ public:
 	SimpleHTTPHandler() {};
 	~SimpleHTTPHandler() {};
 
-	virtual void ProcessGET(SimpleHTTPConn *conn) = 0;
-	virtual void ProcessPOST(SimpleHTTPConn *conn) = 0;
+	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
 };
 
 #endif
