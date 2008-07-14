@@ -1,0 +1,34 @@
+Obecne
+
+- C++ (+ nejake bindingy?)
+	- predevsim kvuli velikosti retezcu, dostupnosti knihoven
+- konfigurace v XML (libxml2 pro cteni)
+- knihovny:
+	- c-ares: async DNS
+	- libcurl: download
+	- libxml2: config soubory, html parser, uri
+	- libtidy (HTML -> XHTML)
+- programy:
+	- djbcache: name server
+- celkove: max. 8-16 GB RAM
+
+Struktura
+
+	- master, ktery zna vsechny domeny (ma v pameti)
+		- muze jich byt vic, propojenych one-to-one
+	- roboti, kteri znaji vsechny URL, co obsluhuji
+		- maji je v pameti (asi nejake trie?)
+		- + robots.txt
+
+MASTER
+	- prijima a prideluje domeny/URL ke zpracovani
+	- vede si evidenci o domenach (ma v pameti)
+
+ROBOT
+	- ma seznam URL (v pameti)
+	- ma obsah robots.txt ke svym domenam (taky v pameti)
+	- udrzuje si fronty pozadavku na disku v souborech
+	- pracuje jako s paskou, cte+modifikuje+zapisuje
+	- cilova rychlost stahovani: 1000 stranek/s
+	- cilovy pocet URL: 10 M na masinu (idealne vic)
+		- priklady URL: vytahnout od Galambose seznam URL, zkusit zahashovat
