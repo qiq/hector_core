@@ -37,8 +37,8 @@ public:
 	void setMaxThreads(int max);
 	void increaseThreadCount();
 	void decreaseThreadCount();
-	void RestrictAccess(string &addr);
-	void Server();
+	void RestrictAccess(const char *addr);
+	void Serve();
 	void HTTPServiceThread(SimpleHTTPConn *conn);
 	void Shutdown();
 };

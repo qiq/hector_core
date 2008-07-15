@@ -7,13 +7,14 @@
  */
 
 #include <sys/select.h>
+#include <stdio.h>
 #include "common.h"
 #include "SimpleHTTPConn.h"
 
 SimpleHTTPConn::SimpleHTTPConn(int fd) {
 	this->socket = fd;
-	keep_alive = false;
 	header_fields = NULL;
+	clear();
 }
 
 SimpleHTTPConn::~SimpleHTTPConn() {
@@ -22,10 +23,12 @@ SimpleHTTPConn::~SimpleHTTPConn() {
 }
 
 void SimpleHTTPConn::clear() {
+	keep_alive = false;
 	request_body_length = -1;
 	request_method.clear();
-	request_path.clear();
+	request_args.clear();
 	request_buffer.clear();
+	request_header_offset = -1;
 	request_body_offset = -1;
 	delete header_fields;
 	header_fields = NULL;
@@ -42,43 +45,52 @@ bool SimpleHTTPConn::isKeepAlive() {
 	return keep_alive;
 }
 
-void SimpleHTTPConn::parseRequestHeader() {
-	// no data to porcess
-	if (request_buffer.length() == 0)
-		return;
+request_ready_t SimpleHTTPConn::parseRequestHeader() {
 	// already processed
 	if (header_fields != NULL)
-		return;
-	size_t body_offset_a = request_buffer.find("\r\n\r\n");
-	size_t body_offset_b = request_buffer.find("\n\n");
+		return PARSED;
+	// no data to porcess
+	if (request_buffer.length() == 0)
+		return INCOMPLETE;
+
+	if (request_header_offset < 0) {
+		// at least one line read?
+		size_t second_line_a = request_buffer.find("\r\n");
+		size_t second_line_b = request_buffer.find("\n");
+		// header not complete
+		if (second_line_a == string::npos && second_line_b == string::npos)
+			return INCOMPLETE;
+		size_t eol = second_line_a < second_line_b ? second_line_a : second_line_b;
+		request_header_offset = second_line_a < second_line_b ? second_line_a + 2 : second_line_b + 1;
+
+		// parse first line
+		size_t sp1 = request_buffer.find(" ", 0);
+		if ((int)sp1 >= request_header_offset)
+			sp1 = string::npos;
+		if (sp1 == string::npos) {
+			request_method = request_buffer.substr(0, eol);
+		} else {
+			request_method = request_buffer.substr(0, sp1);
+			request_args = request_buffer.substr(sp1+1, eol-(sp1+1));
+		}
+	}
+
+	// header complete?
+	size_t body_offset_a = request_buffer.find("\r\n\r\n", request_header_offset-2);
+	size_t body_offset_b = request_buffer.find("\n\n", request_header_offset-1);
 	// header not complete
 	if (body_offset_a == string::npos && body_offset_b == string::npos)
-		return;
-	size_t body_offset = body_offset_a < body_offset_b ? body_offset_a + 4 : body_offset_b + 2;
-
-	// parse first line
-	size_t sp1 = request_buffer.find(" ", 0);
-	if (sp1 == string::npos)
-		return;
-	size_t sp2 = request_buffer.find(" ", sp1+1);
-	if (sp2 == string::npos)
-		return;
-	size_t offset_a = request_buffer.find("\r\n", sp2+1);
-	size_t offset_b = request_buffer.find("\n", sp2+1);
-	if (offset_a == string::npos && offset_b == string::npos)
-		return;
-	size_t offset = offset_a < offset_b ? offset_a + 2 : offset_b + 1;
-	request_method = request_buffer.substr(0, sp1);
-	request_path = request_buffer.substr(sp1+1, sp2-(sp1+1));
+		return INCOMPLETE;
+	request_body_offset = body_offset_a < body_offset_b ? body_offset_a + 4 : body_offset_b + 2;
 
 	// parse header fields, we do not support multi-line fields
-	request_body_offset = body_offset;
 	header_fields = new stdext::hash_map<string, string, string_hash>();
-	while (offset < body_offset) {
+	int offset = request_header_offset;
+	while (offset < request_body_offset) {
 		size_t nl_a = request_buffer.find("\r\n", offset);
 		size_t nl_b = request_buffer.find("\n", offset);
 		if (nl_a == string::npos && nl_b == string::npos)
-			return;
+			return FAILED;		// should not happen
 		size_t nl = nl_a < nl_b ? nl_a : nl_b;
 		// empty line: we are finished
 		if (nl - offset == 0)
@@ -87,11 +99,12 @@ void SimpleHTTPConn::parseRequestHeader() {
 		offset = nl + (nl_a < nl_b ? 2 : 1);
 		size_t col = field.find(": ");
 		if (col == string::npos)
-			continue;
+			continue;		// invalid line
 		string var = field.substr(0, col);
 		string val = field.substr(col+2);
 		(*header_fields)[var] = val;
 	}
+
 	// disable Connection: keep-alive when there is no Content-Length
 	stdext::hash_map<string, string, string_hash>::iterator iter = header_fields->find("Connection");
 	if (iter != header_fields->end()) {
@@ -106,19 +119,21 @@ void SimpleHTTPConn::parseRequestHeader() {
 			}
 		}
 	}
+	return PARSED;
 }
 
-bool SimpleHTTPConn::requestReady() {
+request_ready_t SimpleHTTPConn::requestReady() {
+	request_ready_t r = PARSED;
 	if (header_fields == NULL)
-		parseRequestHeader();
-	if (header_fields == NULL)
-		return false;
+		r = parseRequestHeader();
+	if (r != PARSED)
+		return r;
 	// check there is enough data (for keep-alive)
 	if (keep_alive) {
 		if ((int)request_buffer.length()-request_body_offset < request_body_length)
-			return false;
+			return INCOMPLETE;
 	}
-	return true;
+	return PARSED;
 }
 
 /**
@@ -128,11 +143,7 @@ bool SimpleHTTPConn::requestReady() {
 #define TIMEOUT 30
 
 bool SimpleHTTPConn::readRequest() {
-	// clear everything for keep-alive
-	clear();
-
-	bool finished = false;
-	while (!finished) {
+	while (true) {
 		// set timeout for reading 
 		fd_set recv_fd;
 		FD_ZERO(&recv_fd);
@@ -140,34 +151,39 @@ bool SimpleHTTPConn::readRequest() {
 		struct timeval timeout = { TIMEOUT, 0 };
 		int ready = select(socket+1, &recv_fd, NULL, NULL, &timeout);
 		if (ready < 0) {
-			fprintf(stderr, "Error selecting");
+			perror("Error selecting");
 			break;
 		}
 		if (ready == 0) {
-			fprintf(stderr, "Timeout");
+			perror("Timeout");
 			break;
 		}
 
 		char buffer[65537];
 		int r = read(socket, buffer, sizeof(buffer)-1);
 		if (r < 0) {
-			fprintf(stderr, "Error reading from socket");
+			perror("Error reading from socket");
 			break;
 		}
 		buffer[r] = '\0';
 		request_buffer += buffer;
-	
-		finished = requestReady();
+
+		request_ready_t	status = requestReady();
+		if (status == PARSED)
+			return true;
+		if (status == FAILED)
+			break;
+		// INCOMPLETE
 	}
-	return finished;
+	return false;
 }
 
 string SimpleHTTPConn::getRequestMethod() {
 	return request_method;
 }
 
-string SimpleHTTPConn::getRequestPath() {
-	return request_path;
+string SimpleHTTPConn::getRequestArgs() {
+	return request_args;
 }
 
 string SimpleHTTPConn::getRequestHeaderField(string &field) {
@@ -233,16 +249,16 @@ void SimpleHTTPConn::sendResponse() {
 		struct timeval timeout = { TIMEOUT, 0 };
 		int ready = select(socket+1, NULL, &send_fd, NULL, &timeout);
 		if (ready < 0) {
-			fprintf(stderr, "Error selecting");
+			perror("Error selecting");
 			break;
 		}
 		if (ready == 0) {
-			fprintf(stderr, "Timeout");
+			perror("Timeout");
 			break;
 		}
 		int w = write(socket, (void *)result.data(), result.length()-send);
 		if (w < 0) {
-			fprintf(stderr, "Error writing to socket");
+			perror("Error writing to socket");
 			break;
 		}
 		send += w;

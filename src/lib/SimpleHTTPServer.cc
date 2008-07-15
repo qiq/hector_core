@@ -29,7 +29,8 @@ SimpleHTTPServer::~SimpleHTTPServer() {
 	delete allowed_client;
 }
 
-void SimpleHTTPServer::RestrictAccess(string &addr) {
+void SimpleHTTPServer::RestrictAccess(const char *addr) {
+	string s(addr);
 	allowed_client->insert(addr);
 }
 
@@ -82,24 +83,25 @@ void SimpleHTTPServer::HTTPServiceThread(SimpleHTTPConn *conn) {
 		conn->sendResponse();
 		if (!conn->isKeepAlive())
 			break; 
+		conn->clear();
 	}
 	delete conn;
 	decreaseThreadCount();
 	pthread_exit(0);
 }
 
-void SimpleHTTPServer::Server() {
+void SimpleHTTPServer::Serve() {
 	int main_socket;
 	running = true;
 	struct sockaddr_in addr;
 
 	if ((main_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
-		fprintf(stderr, "Cannot open socket");
+		perror("Cannot open socket");
 		return;
 	}
 	int on = 1;
 	if (setsockopt(main_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-		fprintf(stderr, "Cannot set socket reusable");
+		perror("Cannot set socket reusable");
 		return;
 	}
 	memset(&addr, 0, sizeof(struct sockaddr_in));
@@ -107,11 +109,11 @@ void SimpleHTTPServer::Server() {
 	addr.sin_addr = server_addr;
 	addr.sin_port = htons(server_port);
 	if (bind(main_socket, (sockaddr *)&addr, sizeof(addr)) == -1) {
-		fprintf(stderr, "Cannot bind to socket");
+		perror("Cannot bind to socket");
 		return;
 	}
 	if (listen(main_socket, max_threads) == -1) {
-		fprintf(stderr, "Cannot listen on socket");
+		perror("Cannot listen on socket");
 		return;
 	}
 
@@ -122,9 +124,8 @@ void SimpleHTTPServer::Server() {
 		// wait until thread is available
 		increaseThreadCount();
 		int fd = accept(main_socket, (sockaddr*)&client_addr, &client_addrlen);
-fprintf(stderr, "accept (%d)...\n", fd);
 		if (fd == -1) {
-			fprintf(stderr, "Cannot accept connection");
+			perror("Cannot accept connection");
 			return;
 		}
 		char *client_ip = inet_ntoa((in_addr)client_addr.sin_addr);
@@ -134,6 +135,8 @@ fprintf(stderr, "accept (%d)...\n", fd);
 			// not found -> not allowed
 			if (iter == allowed_client->end()) {
 				close(fd);
+				decreaseThreadCount();
+				//TODO: log
 				continue;
 			}
 		}
@@ -142,10 +145,14 @@ fprintf(stderr, "accept (%d)...\n", fd);
 		struct thread_info *info = new struct thread_info;
 		info->server = this;
 		info->conn = new SimpleHTTPConn(fd);
-		if (!pthread_create(&tid, NULL, http_service_thread, (void *)info)) {
+#ifndef DEBUG
+		if (pthread_create(&tid, NULL, http_service_thread, (void *)info) != 0) {
 			close(fd);
 			continue;
 		}
+#else
+		http_service_thread((void *)info);
+#endif
 	}
 }
 

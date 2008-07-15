@@ -12,6 +12,12 @@ namespace stdext = ::__gnu_cxx;
 #include <string>
 #include "SimpleHTTPHandler.h"
 
+typedef enum {
+	INCOMPLETE,
+	PARSED,
+	FAILED
+} request_ready_t;
+
 class SimpleHTTPConn {
 	int socket;			// socket used
 
@@ -21,9 +27,10 @@ class SimpleHTTPConn {
 
 	// request
 	string request_method;
-	string request_path;
+	string request_args;
 	string request_buffer;		// entire request
 	int request_body_offset;	// offset of data
+	int request_header_offset;	// offset of second line (header)
 	stdext::hash_map<string, string, string_hash> *header_fields;	// parsed header field
 
 	// response
@@ -32,8 +39,8 @@ class SimpleHTTPConn {
 	string response_header;
 	string response_body;
 
-	void parseRequestHeader();
-	bool requestReady();
+	request_ready_t parseRequestHeader();
+	request_ready_t requestReady();
 
 public:
 	SimpleHTTPConn(int sock);
@@ -45,7 +52,7 @@ public:
 	void sendResponse();
 
 	string getRequestMethod();
-	string getRequestPath();
+	string getRequestArgs();
 	string getRequestHeaderField(string &field);
 	string getRequestBody();
 
