@@ -3,91 +3,69 @@
  * It is split into modules, modules have flat-config only
  */
 
+#include <libxml/xmlreader.h>
 #include "common.h"
 #include "ConfigParser.h"
 
-ConfigEntry::ConfigEntry(string &name) {
+ConfigEntry::ConfigEntry(const char *name) {
 	this->name = name;
 }
 
 ConfigEntry::~ConfigEntry() {
 }
 
-void ConfigEntry::setName(string &name) {
+void ConfigEntry::setName(const char *name) {
 	this->name = name;
 }
 
-string ConfigEntry::getName() {
-	return name;
+const char *ConfigEntry::getName() {
+	return name.c_str();
 }
 
-void ConfigEntry::setValue(string &value) {
+void ConfigEntry::setValue(const char *value) {
 	this->value = value;
 }
 
-string ConfigEntry::getValue() {
-	return value;
+const char *ConfigEntry::getValue() {
+	return value.c_str();
 }
 
-void ConfigEntry::setAttr(string &name, string &value) {
+void ConfigEntry::setAttr(const char *name, const char *value) {
 	attrs[name] = value;
 }
 
-string ConfigEntry::getAttr(string &name) {
-	string result;
+const char *ConfigEntry::getAttr(const char *name) {
 	stdext::hash_map<string, string, string_hash>::iterator iter = attrs.find(name);
-	if (iter != attrs.end())
-		result = iter->second;
-	return result;
+	if (iter == attrs.end())
+		return NULL;
+	return iter->second.c_str();
 }
 
 /****** ConfigModule ******/
 
-ConfigModule::ConfigModule(string &name) {
+ConfigModule::ConfigModule(const char *name) {
 	this->name = name;
 }
 
 ConfigModule::~ConfigModule() {
 }
 
-void ConfigModule::setName(string &name) {
+void ConfigModule::setName(const char *name) {
 	this->name = name;
 }
 
-string ConfigModule::getName() {
-	return name;
+const char *ConfigModule::getName() {
+	return name.c_str();
 }
 
-/*void ConfigModule::addEntry(ConfigEntry *entry) {
-	string name = entry->getName();
-	stdext::hash_map<string, vector<ConfigEntry*>*, string_hash>::iterator iter = entries->find(name);
-	vector<ConfigEntry*> *e;
-	if (iter == entries->end()) {
-		e = new vector<ConfigEntry*>(1);
-		entries[name] = e;
-	} else {
-		e = iter.second;
-	}
-	e.push_back(entry);
-}
-
-ConfigEntry *ConfigModule::getEntry(string &name, int index) {
-	stdext::hash_map<string, vector<ConfigEntry*>*, string_hash>::iterator iter = entries->find(name);
-	if (iter == entries->end())
-		return NULL;
-	vector<ConfigEntry*> *e = iter.second;
-	if (index >= e.size())
-		return NULL;
-	return e[index];
-}*/
-
-vector<ConfigEntry*> *ConfigModule::getEntryVector(string &name, bool create) {
+vector<ConfigEntry*> *ConfigModule::getEntryVector(const char *entryName, bool create) {
+	string name = entryName;
 	stdext::hash_map<string, vector<ConfigEntry*> *, string_hash>::iterator iter = entries.find(name);
 	vector<ConfigEntry*> *v;
 	if (iter == entries.end()) {
 		if (!create)
 			return NULL;
-		v = new vector<ConfigEntry*>(1);
+		v = new vector<ConfigEntry*>;
 		entries[name] = v;
 	} else {
 		v = iter->second;
@@ -95,15 +73,14 @@ vector<ConfigEntry*> *ConfigModule::getEntryVector(string &name, bool create) {
 	return v;
 }
 
-int ConfigModule::addValue(string &entryName, string &entryValue) {
+int ConfigModule::addEntry(const char *entryName) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName, true);
 	ConfigEntry *e = new ConfigEntry(entryName);
-	e->setValue(entryValue);
 	v->push_back(e);
 	return v->size()-1;
 }
 
-bool ConfigModule::setValue(string &entryName, string &entryValue, int index) {
+bool ConfigModule::setValue(const char *entryName, const char *entryValue, int index) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName, true);
 	if (index >= (int)v->size())
 		return false;
@@ -111,17 +88,16 @@ bool ConfigModule::setValue(string &entryName, string &entryValue, int index) {
 	return true;
 }
 
-string ConfigModule::getValue(string &entryName, int index) {
-	string s;
+const char *ConfigModule::getValue(const char *entryName, int index) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName);
 	if (!v)
-		return s;
+		return NULL;
 	if (index >= (int)v->size())
-		return s;
+		return NULL;
 	return (*v)[index]->getValue();
 }
 
-bool ConfigModule::setAttr(string &entryName, string &attrName, string &attrValue, int index) {
+bool ConfigModule::setAttr(const char *entryName, const char *attrName, const char *attrValue, int index) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName, true);
 	if (index >= (int)v->size())
 		return false;
@@ -129,66 +105,148 @@ bool ConfigModule::setAttr(string &entryName, string &attrName, string &attrValu
 	return true;
 }
 
-string ConfigModule::getAttr(string &entryName, string &attrName, int index) {
-	string s;
+const char *ConfigModule::getAttr(const char *entryName, const char *attrName, int index) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName);
 	if (!v)
-		return s;
+		return NULL;
 	if (index >= (int)v->size())
-		return s;
+		return NULL;
 	return (*v)[index]->getAttr(attrName);
 }
 
 /****** ConfigParser ******/
 
 ConfigParser::ConfigParser() {
+	moduleName = NULL;
 }
 
 ConfigParser::~ConfigParser() {
+	free(moduleName);
 }
 
-bool ConfigParser::parse(const char *fileName) {
-	return false;
+#ifndef LIBXML_READER_ENABLED
+  #error XMLReader not found, install libxml2 2.6+
+#endif
+
+#define ELEMENT 1
+#define ENDELEMENT 15
+#define TEXT 3
+
+void ConfigParser::processNode(void *p) {
+	xmlTextReaderPtr reader = (xmlTextReaderPtr)p;
+	const xmlChar *xname = xmlTextReaderConstName(reader);
+	if (xname == NULL)
+		return;
+	string name = (char *)xname;
+	const xmlChar *xvalue = xmlTextReaderConstValue(reader);
+	string value = xvalue ? (char *)xvalue : "";
+	int depth = xmlTextReaderDepth(reader);
+	int type = xmlTextReaderNodeType(reader);
+
+	switch (depth) {
+	case 1:
+		if (name == "module") {
+			if (type == ELEMENT) {
+				moduleName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
+			} else if (type == ENDELEMENT) {
+				free(moduleName);
+				moduleName = NULL;
+			}
+		}
+		break;
+	case 2:
+		if (type == ELEMENT) {
+			entryName = name;
+			entryText.clear();
+			entryIndex = addEntry(moduleName, entryName.c_str());
+			if (xmlTextReaderMoveToFirstAttribute(reader) == 1) {
+				do {
+					string attrName = (char *)xmlTextReaderConstName(reader);
+					string attrValue = (char *)xmlTextReaderConstValue(reader);
+					setAttr(moduleName, name.c_str(), attrName.c_str(), attrValue.c_str(), entryIndex);
+				} while (xmlTextReaderMoveToNextAttribute(reader) == 1);
+			}
+		} else if (type == ENDELEMENT) {
+			setValue(moduleName, name.c_str(), entryText.c_str(), entryIndex);
+			entryName.clear();
+			entryText.clear();
+			entryIndex = -1;
+		}
+		break;
+	case 3:
+		if (type == TEXT) {
+			if (entryName.length() > 0)
+				entryText += value;
+		}
+		break;
+	default:
+		break;
+	}
 }
 
-ConfigModule *ConfigParser::getModule(string &moduleName, bool create) {
-	stdext::hash_map<string, ConfigModule*, string_hash>::iterator iter = modules.find(moduleName);
+bool ConfigParser::parseFile(const char *fileName) {
+	xmlTextReaderPtr reader;
+	int ret;
+
+	reader = xmlReaderForFile(fileName, NULL, 0);
+	if (reader != NULL) {
+		ret = xmlTextReaderRead(reader);
+		while (ret == 1) {
+			processNode((void *)reader);
+			ret = xmlTextReaderRead(reader);
+		}
+		xmlFreeTextReader(reader);
+		if (ret != 0) {
+			fprintf(stderr, "%s : failed to parse\n", fileName);
+			return false;
+		}
+	} else {
+		fprintf(stderr, "Unable to open %s\n", fileName);
+		return false;
+	}
+	return true;
+}
+
+ConfigModule *ConfigParser::getModule(const char *moduleName, bool create) {
+	string name = moduleName;
+	stdext::hash_map<string, ConfigModule*, string_hash>::iterator iter = modules.find(name);
 	ConfigModule *m;
 	if (iter == modules.end()) {
 		if (!create)
 			return NULL;
 		m = new ConfigModule(moduleName);
-		modules[moduleName] = m;
+		modules[name] = m;
 	} else {
 		m = iter->second;
 	}
 	return m;
 }
 
-bool ConfigParser::setValue(string &moduleName, string &entryName, string &value, int index) {
+int ConfigParser::addEntry(const char *moduleName, const char *entryName) {
 	ConfigModule *m = getModule(moduleName, true);
-	return m->setValue(entryName, value);
+	return m->addEntry(entryName);
 }
 
-string ConfigParser::getValue(string &moduleName, string &entryName, int index) {
+bool ConfigParser::setValue(const char *moduleName, const char *entryName, const char *value, int index) {
+	ConfigModule *m = getModule(moduleName, true);
+	return m->setValue(entryName, value, index);
+}
+
+const char *ConfigParser::getValue(const char *moduleName, const char *entryName, int index) {
 	ConfigModule *m = getModule(moduleName);
-	if (!m) {
-		string s;
-		return s;
-	}
+	if (!m)
+		return NULL;
 	return m->getValue(entryName, index);
 }
 
-bool ConfigParser::setAttr(string &moduleName, string &entryName, string &attrName, string &attrValue, int index) {
+bool ConfigParser::setAttr(const char *moduleName, const char *entryName, const char *attrName, const char *attrValue, int index) {
 	ConfigModule *m = getModule(moduleName, true);
 	return m->setAttr(entryName, attrName, attrValue, index);
 }
 
-string ConfigParser::getAttr(string &moduleName, string &entryName, string &attrName, int index) {
+const char *ConfigParser::getAttr(const char *moduleName, const char *entryName, const char *attrName, int index) {
 	ConfigModule *m = getModule(moduleName);
-	if (!m) {
-		string s;
-		return s;
-	}
+	if (!m)
+		return NULL;
 	return m->getAttr(entryName, attrName, index);
 }

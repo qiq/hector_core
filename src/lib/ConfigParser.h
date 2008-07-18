@@ -41,47 +41,52 @@ class ConfigEntry {
 	string value;
 	stdext::hash_map<string, string, string_hash> attrs;
 public:
-	ConfigEntry(string &name);
+	ConfigEntry(const char *name);
 	~ConfigEntry();
-	void setName(string &name);
-	string getName();
-	void setValue(string &value);
-	string getValue();
-	void setAttr(string &name, string &value);
-	string getAttr(string &name);
+	void setName(const char *name);
+	const char *getName();
+	void setValue(const char *value);
+	const char *getValue();
+	void setAttr(const char *name, const char *value);
+	const char *getAttr(const char *name);
 };
 
 class ConfigModule {
 	string name;
 	stdext::hash_map<string, vector<ConfigEntry*> *, string_hash> entries;
-	vector<ConfigEntry*> *getEntryVector(string &name, bool create = false);
+	vector<ConfigEntry*> *getEntryVector(const char *name, bool create = false);
 public:
-	ConfigModule(string &name);
+	ConfigModule(const char *name);
 	~ConfigModule();
 	
-	void setName(string &name);
-	string getName();
+	void setName(const char *name);
+	const char *getName();
 
-	int addValue(string &entryName, string &entryValue);
-	bool setValue(string &entryName, string &entryValue, int index = 0);
-	string getValue(string &entryName, int index = 0);
-	bool setAttr(string &entryName, string &attrName, string &attrValue, int index = 0);
-	string getAttr(string &entryName, string &attrName, int index = 0);
+	int addEntry(const char *entryName);
+	bool setValue(const char *entryName, const char *entryValue, int index = 0);
+	const char *getValue(const char *entryName, int index = 0);
+	bool setAttr(const char *entryName, const char *attrName, const char *attrValue, int index = 0);
+	const char *getAttr(const char *entryName, const char *attrName, int index = 0);
 };
 
 class ConfigParser {
 	stdext::hash_map<string, ConfigModule*, string_hash> modules;
-	ConfigModule *getModule(string &moduleName, bool create = false);
+	ConfigModule *getModule(const char *moduleName, bool create = false);
+	char *moduleName;
+	string entryName;
+	string entryText;
+	int entryIndex;
+	void processNode(void *);
 public:
 	ConfigParser();
 	~ConfigParser();
-	bool parse(const char *fileName);
+	bool parseFile(const char *fileName);
 
-	int addValue(string &moduleName, string &entryName, string &value);
-	bool setValue(string &moduleName, string &entryName, string &value, int index = 0);
-	string getValue(string &moduleName, string &entryName, int index = 0);
-	bool setAttr(string &moduleName, string &entryName, string &attrName, string &attrValue, int index = 0);
-	string getAttr(string &moduleName, string &entryName, string &attrName, int index = 0);
+	int addEntry(const char *moduleName, const char *entryName);
+	bool setValue(const char *moduleName, const char *entryName, const char *value, int index = 0);
+	const char *getValue(const char *moduleName, const char *entryName, int index = 0);
+	bool setAttr(const char *moduleName, const char *entryName, const char *attrName, const char *attrValue, int index = 0);
+	const char *getAttr(const char *moduleName, const char *entryName, const char *attrName, int index = 0);
 };
 
 #endif
