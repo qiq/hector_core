@@ -10,7 +10,6 @@ namespace stdext = ::__gnu_cxx;
 
 #include <ext/hash_map>
 #include <string>
-#include "SimpleHTTPHandler.h"
 
 typedef enum {
 	INCOMPLETE,

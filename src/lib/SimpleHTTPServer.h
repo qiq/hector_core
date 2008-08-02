@@ -13,14 +13,12 @@
 #include <ext/hash_set>
 #include "common.h"
 #include "Lock.h"
-#include "SimpleHTTPHandler.h"
 #include "SimpleHTTPConn.h"
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;
 
 class SimpleHTTPServer {
-	SimpleHTTPHandler *handler;
 	struct in_addr server_addr;
 	int server_port;
 
@@ -32,15 +30,18 @@ class SimpleHTTPServer {
 	stdext::hash_set<string, string_hash> *allowed_client;
 	int running;
 public:
-	SimpleHTTPServer(SimpleHTTPHandler *handler, const char *addr, int port);
+	SimpleHTTPServer(const char *addr, int port);
 	~SimpleHTTPServer();
-	void setMaxThreads(int max);
+	void RestrictAccess(const char *addr);
+	void Start(int maxThreads);
+	void Stop();
+
+	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
+
 	void increaseThreadCount();
 	void decreaseThreadCount();
-	void RestrictAccess(const char *addr);
-	void Serve();
+	void HTTPMainThread();
 	void HTTPServiceThread(SimpleHTTPConn *conn);
-	void Shutdown();
 };
 
 #endif

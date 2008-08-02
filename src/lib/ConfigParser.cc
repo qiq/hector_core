@@ -58,6 +58,14 @@ const char *ConfigModule::getName() {
 	return name.c_str();
 }
 
+void ConfigModule::setType(const char *type) {
+	this->type = type;
+}
+
+const char *ConfigModule::getType() {
+	return type.c_str();
+}
+
 vector<ConfigEntry*> *ConfigModule::getEntryVector(const char *entryName, bool create) {
 	string name = entryName;
 	stdext::hash_map<string, vector<ConfigEntry*> *, string_hash>::iterator iter = entries.find(name);
@@ -95,6 +103,13 @@ const char *ConfigModule::getValue(const char *entryName, int index) {
 	if (index >= (int)v->size())
 		return NULL;
 	return (*v)[index]->getValue();
+}
+
+int ConfigModule::getSize(const char *entryName) {
+	vector<ConfigEntry*> *v = getEntryVector(entryName);
+	if (!v)
+		return 0;
+	return (int)v->size();
 }
 
 bool ConfigModule::setAttr(const char *entryName, const char *attrName, const char *attrValue, int index) {
@@ -145,13 +160,13 @@ void ConfigParser::processNode(void *p) {
 
 	switch (depth) {
 	case 1:
-		if (name == "module") {
-			if (type == ELEMENT) {
-				moduleName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
-			} else if (type == ENDELEMENT) {
-				free(moduleName);
-				moduleName = NULL;
-			}
+		if (type == ELEMENT) {
+			moduleName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
+			ConfigModule *module = getModule(moduleName, true);
+			module->setType(name.c_str());
+		} else if (type == ENDELEMENT) {
+			free(moduleName);
+			moduleName = NULL;
 		}
 		break;
 	case 2:
@@ -242,6 +257,13 @@ const char *ConfigParser::getValue(const char *moduleName, const char *entryName
 bool ConfigParser::setAttr(const char *moduleName, const char *entryName, const char *attrName, const char *attrValue, int index) {
 	ConfigModule *m = getModule(moduleName, true);
 	return m->setAttr(entryName, attrName, attrValue, index);
+}
+
+int ConfigParser::getSize(const char *moduleName, const char *entryName) {
+	ConfigModule *m = getModule(moduleName);
+	if (!m)
+		return 0;
+	return m->getSize(entryName);
 }
 
 const char *ConfigParser::getAttr(const char *moduleName, const char *entryName, const char *attrName, int index) {

@@ -12,8 +12,7 @@
 #include <ext/hash_set>
 #include "SimpleHTTPServer.h"
 
-SimpleHTTPServer::SimpleHTTPServer(SimpleHTTPHandler *handler, const char *addr, int port) {
-	this->handler = handler;
+SimpleHTTPServer::SimpleHTTPServer(const char *addr, int port) {
 	if (addr == NULL || !inet_aton(addr, &server_addr))
 		server_addr.s_addr = INADDR_ANY;
 	server_port = port;
@@ -32,10 +31,6 @@ SimpleHTTPServer::~SimpleHTTPServer() {
 void SimpleHTTPServer::RestrictAccess(const char *addr) {
 	string s(addr);
 	allowed_client->insert(addr);
-}
-
-void SimpleHTTPServer::setMaxThreads(int max) {
-	max_threads = max;
 }
 
 void SimpleHTTPServer::increaseThreadCount() {
@@ -75,7 +70,7 @@ void SimpleHTTPServer::HTTPServiceThread(SimpleHTTPConn *conn) {
 		// timeout or error
 		if (!result)
 			break;
-		if (!handler->HandleRequest(conn)) {
+		if (!HandleRequest(conn)) {
 			char s[1000];
 			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
 			conn->errorResponse(501, "Not implemented", s);
@@ -90,10 +85,18 @@ void SimpleHTTPServer::HTTPServiceThread(SimpleHTTPConn *conn) {
 	pthread_exit(0);
 }
 
-void SimpleHTTPServer::Serve() {
+void *http_main_thread(void *ptr) {
+	SimpleHTTPServer *server = (SimpleHTTPServer *)ptr;
+	server->HTTPMainThread();
+	return NULL;
+}
+
+void SimpleHTTPServer::HTTPMainThread() {
 	int main_socket;
 	running = true;
 	struct sockaddr_in addr;
+
+	pthread_detach(pthread_self());
 
 	if ((main_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
 		perror("Cannot open socket");
@@ -145,17 +148,19 @@ void SimpleHTTPServer::Serve() {
 		struct thread_info *info = new struct thread_info;
 		info->server = this;
 		info->conn = new SimpleHTTPConn(fd);
-#ifndef DEBUG
 		if (pthread_create(&tid, NULL, http_service_thread, (void *)info) != 0) {
 			close(fd);
 			continue;
 		}
-#else
-		http_service_thread((void *)info);
-#endif
 	}
 }
 
-void SimpleHTTPServer::Shutdown() {
+void SimpleHTTPServer::Start(int max_threads) {
+	this->max_threads = max_threads;
+	pthread_t thread;
+	pthread_create(&thread, NULL, http_main_thread, (void *)this);
+}
+
+void SimpleHTTPServer::Stop() {
 	running = false;
 }

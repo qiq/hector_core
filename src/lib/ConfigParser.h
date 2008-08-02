@@ -53,6 +53,7 @@ public:
 
 class ConfigModule {
 	string name;
+	string type;
 	stdext::hash_map<string, vector<ConfigEntry*> *, string_hash> entries;
 	vector<ConfigEntry*> *getEntryVector(const char *name, bool create = false);
 public:
@@ -61,10 +62,13 @@ public:
 	
 	void setName(const char *name);
 	const char *getName();
+	void setType(const char *type);
+	const char *getType();
 
 	int addEntry(const char *entryName);
 	bool setValue(const char *entryName, const char *entryValue, int index = 0);
 	const char *getValue(const char *entryName, int index = 0);
+	int getSize(const char *entryName);
 	bool setAttr(const char *entryName, const char *attrName, const char *attrValue, int index = 0);
 	const char *getAttr(const char *entryName, const char *attrName, int index = 0);
 };
@@ -85,8 +89,10 @@ public:
 	int addEntry(const char *moduleName, const char *entryName);
 	bool setValue(const char *moduleName, const char *entryName, const char *value, int index = 0);
 	const char *getValue(const char *moduleName, const char *entryName, int index = 0);
+	int getSize(const char *moduleName, const char *entryName);
 	bool setAttr(const char *moduleName, const char *entryName, const char *attrName, const char *attrValue, int index = 0);
 	const char *getAttr(const char *moduleName, const char *entryName, const char *attrName, int index = 0);
+
 };
 
 #endif

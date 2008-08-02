@@ -5,4 +5,5 @@ libwspy_la_LDFLAGS = -lxml2
 
 libwspy_la_SOURCES = SimpleHTTPServer.cc \
 		SimpleHTTPConn.cc \
-		ConfigParser.cc
+		ConfigParser.cc \
+		CyclicBuffer.cc
