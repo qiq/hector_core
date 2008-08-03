@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Main name="master">
+	<server-host>*</server-host>
+	<server-port>1234</server-port>
+	<dir>/tmp/xxx</dir>
+</Main>

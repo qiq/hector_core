@@ -27,8 +27,12 @@ public:
 	ResourceQueue(int size);
 	~ResourceQueue();
 
-	void putResource(Resource *r);
-	Resource *getResource();
+	bool isSpace();
+	bool putResource(Resource *r, bool sleep);
+	int putResources(Resource **r, int size, bool sleep);
+	bool isReady();
+	Resource *getResource(bool sleep);
+	int getResources(Resource **r, int size, bool sleep);
 };
 
 #endif

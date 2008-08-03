@@ -7,17 +7,12 @@
 
 #include <pthread.h>
 #include "SimpleHTTPServer.h"
-#include "SimpleHTTPHandler.h"
 #include "SimpleHTTPConn.h"
 
-class RobotHTTPServer : SimpleHTTPHandler {
-	SimpleHTTPServer *server;
-	pthread_t thread;
+class RobotHTTPServer : public SimpleHTTPServer {
 public:
-	RobotHTTPServer();
+	RobotHTTPServer(const char *addr, int port) : SimpleHTTPServer(addr, port) {};
 	~RobotHTTPServer();
-	void runThread();
-	void Run();
 	bool HandleRequest(SimpleHTTPConn *conn);
 };
 

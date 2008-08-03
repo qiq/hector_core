@@ -132,11 +132,11 @@ const char *ConfigItem::getAttr(const char *entryName, const char *attrName, int
 /****** Config ******/
 
 Config::Config() {
-	moduleName = NULL;
+	itemName = NULL;
 }
 
 Config::~Config() {
-	free(moduleName);
+	free(itemName);
 }
 
 #ifndef LIBXML_READER_ENABLED
@@ -161,28 +161,28 @@ void Config::processNode(void *p) {
 	switch (depth) {
 	case 1:
 		if (type == ELEMENT) {
-			moduleName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
-			ConfigItem *module = getModule(moduleName, true);
-			module->setType(name.c_str());
+			itemName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
+			ConfigItem *item = getItem(itemName, true);
+			item->setType(name.c_str());
 		} else if (type == ENDELEMENT) {
-			free(moduleName);
-			moduleName = NULL;
+			free(itemName);
+			itemName = NULL;
 		}
 		break;
 	case 2:
 		if (type == ELEMENT) {
 			entryName = name;
 			entryText.clear();
-			entryIndex = addEntry(moduleName, entryName.c_str());
+			entryIndex = addEntry(itemName, entryName.c_str());
 			if (xmlTextReaderMoveToFirstAttribute(reader) == 1) {
 				do {
 					string attrName = (char *)xmlTextReaderConstName(reader);
 					string attrValue = (char *)xmlTextReaderConstValue(reader);
-					setAttr(moduleName, name.c_str(), attrName.c_str(), attrValue.c_str(), entryIndex);
+					setAttr(itemName, name.c_str(), attrName.c_str(), attrValue.c_str(), entryIndex);
 				} while (xmlTextReaderMoveToNextAttribute(reader) == 1);
 			}
 		} else if (type == ENDELEMENT) {
-			setValue(moduleName, name.c_str(), entryText.c_str(), entryIndex);
+			setValue(itemName, name.c_str(), entryText.c_str(), entryIndex);
 			entryName.clear();
 			entryText.clear();
 			entryIndex = -1;
@@ -222,52 +222,70 @@ bool Config::parseFile(const char *fileName) {
 	return true;
 }
 
-ConfigItem *Config::getModule(const char *moduleName, bool create) {
-	string name = moduleName;
-	stdext::hash_map<string, ConfigItem*, string_hash>::iterator iter = modules.find(name);
+ConfigItem *Config::getItem(const char *itemName, bool create) {
+	string name = itemName;
+	stdext::hash_map<string, ConfigItem*, string_hash>::iterator iter = items.find(name);
 	ConfigItem *m;
-	if (iter == modules.end()) {
+	if (iter == items.end()) {
 		if (!create)
 			return NULL;
-		m = new ConfigItem(moduleName);
-		modules[name] = m;
+		m = new ConfigItem(itemName);
+		items[name] = m;
 	} else {
 		m = iter->second;
 	}
 	return m;
 }
 
-int Config::addEntry(const char *moduleName, const char *entryName) {
-	ConfigItem *m = getModule(moduleName, true);
+int Config::addEntry(const char *itemName, const char *entryName) {
+	ConfigItem *m = getItem(itemName, true);
 	return m->addEntry(entryName);
 }
 
-bool Config::setValue(const char *moduleName, const char *entryName, const char *value, int index) {
-	ConfigItem *m = getModule(moduleName, true);
+const char *Config::getType(const char *itemName) {
+	ConfigItem *m = getItem(itemName);
+	if (!m)
+		return NULL;
+	return m->getType();
+}
+
+bool Config::setValue(const char *itemName, const char *entryName, const char *value, int index) {
+	ConfigItem *m = getItem(itemName, true);
 	return m->setValue(entryName, value, index);
 }
 
-const char *Config::getValue(const char *moduleName, const char *entryName, int index) {
-	ConfigItem *m = getModule(moduleName);
+const char *Config::getValue(const char *itemName, const char *entryName, int index) {
+	ConfigItem *m = getItem(itemName);
 	if (!m)
 		return NULL;
 	return m->getValue(entryName, index);
 }
 
-bool Config::setAttr(const char *moduleName, const char *entryName, const char *attrName, const char *attrValue, int index) {
-	ConfigItem *m = getModule(moduleName, true);
+int Config::getValueInt(const char *itemName, const char *entryName, int index) {
+	ConfigItem *m = getItem(itemName);
+	if (!m)
+		return INT_MAX;
+	const char *s =  m->getValue(entryName, index);
+	int i;
+	if (sscanf(s, " %d", &i) != 1)
+		return INT_MAX;
+	return i;
+}
+
+bool Config::setAttr(const char *itemName, const char *entryName, const char *attrName, const char *attrValue, int index) {
+	ConfigItem *m = getItem(itemName, true);
 	return m->setAttr(entryName, attrName, attrValue, index);
 }
 
-int Config::getSize(const char *moduleName, const char *entryName) {
-	ConfigItem *m = getModule(moduleName);
+int Config::getSize(const char *itemName, const char *entryName) {
+	ConfigItem *m = getItem(itemName);
 	if (!m)
 		return 0;
 	return m->getSize(entryName);
 }
 
-const char *Config::getAttr(const char *moduleName, const char *entryName, const char *attrName, int index) {
-	ConfigItem *m = getModule(moduleName);
+const char *Config::getAttr(const char *itemName, const char *entryName, const char *attrName, int index) {
+	ConfigItem *m = getItem(itemName);
 	if (!m)
 		return NULL;
 	return m->getAttr(entryName, attrName, index);

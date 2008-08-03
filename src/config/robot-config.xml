@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example robot config file -->
+
+	<Main name="robot">
+		<run>processing-chain</run>
+	<!--	<run>md5server</run>-->
+		<server-host>*</server-host>
+		<server-port>8080</server-port>
+	</Main>
+
+	<ProcessingChain name="processing-chain">
+		<queueSize>1000</queueSize>
+		<item>load-resource</item>
+		<item>robots</item>
+	</ProcessingChain>
+
+	<ProcessorInput name="load-resource">
+		<threads>1</threads>
+		<module>load-resource-module</module>
+	</ProcessorInput>
+
+	<ModuleInput name="load-resource-module">
+		<inputDir>/tmp/input</inputDir>
+		<lib>libload-resource.so</lib>
+	</ModuleInput>
+
+	<ProcessorParallel name="robots">
+		<threads>2</threads>
+		<module>robots-check-url</module>
+		<maxRequests>100</maxRequests>
+	</ProcessorParallel>
+
+	<ModuleParallel name="robots-check-url">
+		<something></something>
+		<lib>librobots-check-url.so</lib>
+	</ModuleParallel>

@@ -1,3 +1,5 @@
+SUBDIRS = . modules
+
 bin_PROGRAMS = robot
 
 #nobase_include_HEADERS = \
@@ -11,10 +13,25 @@ robot_SOURCES = \
 	ResourceQueue.cc \
 	ResourceQueue.h \
 	RobotHTTPServer.cc \
-	RobotHTTPServer.h
+	RobotHTTPServer.h \
+	ProcessingChain.h \
+	ProcessingChain.cc \
+	Processor.h \
+	Processor.cc \
+	ProcessorInput.h \
+	ProcessorInput.cc \
+	ProcessorSimple.h \
+	ProcessorSimple.cc \
+	ProcessorParallel.h \
+	ProcessorParallel.cc \
+	ProcessorOutput.h \
+	ProcessorOutput.cc \
+	Module.h \
+	ModuleSimple.h
+	ModuleParallel.h
 
 robot_CXXFLAGS = -I ../lib
-robot_LDADD = -lpthread -L../lib -lwspy
+robot_LDADD = -lpthread -L../lib -lwspy -lltdl
 
 test:
 	echo "Test!"

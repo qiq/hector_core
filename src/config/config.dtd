@@ -1,0 +1,34 @@
+<!-- robot config definition -->
+
+<!ELEMENT config	(Main|ProcessingChain|ProcessorInput|ProcessorOutput|ProcessorSimple|ProcessorParallel)* >
+
+<!ELEMENT Main		(run|server-host|server-port)* >
+<!ATTLIST Main
+	name		CDATA		"" >
+
+<!ELEMENT ProcessingChain	(item*) >
+<!ATTLIST ProcessingChain
+	name		CDATA		"" >
+
+<!ELEMENT ProcessorInput	(threads?,lib*) >
+<!ATTLIST ProcessorInput
+	name		CDATA		"" >
+
+<!ELEMENT ProcessorOutput	(threads?,lib*) >
+<!ATTLIST ProcessorOutput
+	name		CDATA		"" >
+
+<!ELEMENT ProcessorParallel	(threads?,lib*) >
+<!ATTLIST ProcessorParallel
+	name		CDATA		"" >
+
+<!ELEMENT ProcessorSimple	(threads?,lib*) >
+<!ATTLIST ProcessorSimple
+	name		CDATA		"" >
+
+<!ELEMENT run		(#PCDATA) >
+<!ELEMENT server-host	(#PCDATA) >
+<!ELEMENT server-port	(#PCDATA) >
+<!ELEMENT item 		(#PCDATA) >
+<!ELEMENT threads	(#PCDATA) >
+<!ELEMENT lib		(#PCDATA) >
