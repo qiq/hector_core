@@ -12,6 +12,7 @@
 		<queueSize>1000</queueSize>
 		<item>load-resource</item>
 		<item>robots</item>
+		<item>test</item>
 	</ProcessingChain>
 
 	<ProcessorInput name="load-resource">
@@ -34,3 +35,15 @@
 		<something></something>
 		<lib>librobots-check-url.so</lib>
 	</ModuleParallel>
+
+	<ProcessorSimple name="test">
+		<threads>1</threads>
+		<module>test-module</module>
+	</ProcessorSimple>
+
+	<ModuleSimple name="test-module">
+		<lib>test-module-external.so</lib>
+		<path>/usr/bin/echo</path>
+		<arg>-ne</arg>
+		<arg>xxx</arg>
+	</ModuleSimple>

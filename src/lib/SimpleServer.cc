@@ -1,18 +1,16 @@
 /**
- * Simple multi-threaded HTTP server for management
- * Supports HTTP/1.0, keep-alive
- * Does not support pipelining, multi-line header fields
+ * Simple multi-threaded server
  */
 
-#include <pthread.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
-#include <arpa/inet.h>
-#include <ext/hash_set>
-#include "SimpleHTTPServer.h"
+#include <pthread.h>
+#include "SimpleServer.h"
 
-SimpleHTTPServer::SimpleHTTPServer(const char *addr, int port) {
+using namespace log4cxx;
+LoggerPtr SimpleServer::logger(Logger::getLogger("lib.SimpleServer"));
+
+SimpleServer::SimpleServer(const char *addr, int port) {
 	if (addr == NULL || !inet_aton(addr, &server_addr))
 		server_addr.s_addr = INADDR_ANY;
 	server_port = port;
@@ -23,17 +21,17 @@ SimpleHTTPServer::SimpleHTTPServer(const char *addr, int port) {
 	running = false;
 }
 
-SimpleHTTPServer::~SimpleHTTPServer() {
+SimpleServer::~SimpleServer() {
 	delete lock;
 	delete allowed_client;
 }
 
-void SimpleHTTPServer::RestrictAccess(const char *addr) {
+void SimpleServer::RestrictAccess(const char *addr) {
 	string s(addr);
 	allowed_client->insert(addr);
 }
 
-void SimpleHTTPServer::increaseThreadCount() {
+void SimpleServer::increaseThreadCount() {
 	lock->lock();
 	while (thread_count >= max_threads)
 		lock->waitSend();
@@ -41,7 +39,7 @@ void SimpleHTTPServer::increaseThreadCount() {
 	lock->unlock();
 }
 
-void SimpleHTTPServer::decreaseThreadCount() {
+void SimpleServer::decreaseThreadCount() {
 	lock->lock();
 	thread_count--;
 	lock->signalSend();
@@ -50,48 +48,26 @@ void SimpleHTTPServer::decreaseThreadCount() {
 
 // temporary structure to pass to a new thread
 struct thread_info {
-	SimpleHTTPServer *server;
-	SimpleHTTPConn *conn;
+	SimpleServer *server;
+	int fd;
 };
 
 void *http_service_thread(void *ptr) {
 	struct thread_info *info = (struct thread_info*)ptr;
-	SimpleHTTPServer *server = info->server;
-	SimpleHTTPConn *conn = info->conn;
+	SimpleServer *server = info->server;
+	int fd = info->fd;
 	delete info;
-	server->HTTPServiceThread(conn);
+	server->ServiceThread(fd);
 	return NULL;
-}
-
-void SimpleHTTPServer::HTTPServiceThread(SimpleHTTPConn *conn) {
-	pthread_detach(pthread_self());
-	while (1) {
-		bool result = conn->readRequest();
-		// timeout or error
-		if (!result)
-			break;
-		if (!HandleRequest(conn)) {
-			char s[1000];
-			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
-			conn->errorResponse(501, "Not implemented", s);
-		}
-		conn->sendResponse();
-		if (!conn->isKeepAlive())
-			break; 
-		conn->clear();
-	}
-	delete conn;
-	decreaseThreadCount();
-	pthread_exit(0);
 }
 
 void *http_main_thread(void *ptr) {
-	SimpleHTTPServer *server = (SimpleHTTPServer *)ptr;
-	server->HTTPMainThread();
+	SimpleServer *server = (SimpleServer *)ptr;
+	server->MainThread();
 	return NULL;
 }
 
-void SimpleHTTPServer::HTTPMainThread() {
+void SimpleServer::MainThread() {
 	int main_socket;
 	running = true;
 	struct sockaddr_in addr;
@@ -139,7 +115,7 @@ void SimpleHTTPServer::HTTPMainThread() {
 			if (iter == allowed_client->end()) {
 				close(fd);
 				decreaseThreadCount();
-				//TODO: log
+				LOG4CXX_INFO(logger, "Invalid client refused: " << client_ip);
 				continue;
 			}
 		}
@@ -147,7 +123,7 @@ void SimpleHTTPServer::HTTPMainThread() {
 		// create thread and a connection object
 		struct thread_info *info = new struct thread_info;
 		info->server = this;
-		info->conn = new SimpleHTTPConn(fd);
+		info->fd = fd;
 		if (pthread_create(&tid, NULL, http_service_thread, (void *)info) != 0) {
 			close(fd);
 			continue;
@@ -155,12 +131,12 @@ void SimpleHTTPServer::HTTPMainThread() {
 	}
 }
 
-void SimpleHTTPServer::Start(int max_threads) {
+void SimpleServer::Start(int max_threads) {
 	this->max_threads = max_threads;
 	pthread_t thread;
 	pthread_create(&thread, NULL, http_main_thread, (void *)this);
 }
 
-void SimpleHTTPServer::Stop() {
+void SimpleServer::Stop() {
 	running = false;
 }

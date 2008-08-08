@@ -7,15 +7,12 @@
 #define _RESOURCEQUEUE_H_
 
 #include <unistd.h>
-#include <pthread.h>
 #include <deque>
-#include <string>
 #include "Resource.h"
 #include "../lib/common.h"
 #include "../lib/Lock.h"
 
 using namespace std;
-//namespace stdext = ::__gnu_cxx;
 
 class ResourceQueue {
 private:

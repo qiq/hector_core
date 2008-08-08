@@ -7,7 +7,7 @@
 #include "common.h"
 #include "Config.h"
 
-ConfigEntry::ConfigEntry(const char *name) {
+ConfigEntry::ConfigEntry(const char *name, int xmlLine, int xmlColumn) {
 	this->name = name;
 }
 
@@ -39,6 +39,14 @@ const char *ConfigEntry::getAttr(const char *name) {
 	if (iter == attrs.end())
 		return NULL;
 	return iter->second.c_str();
+}
+
+int ConfigEntry::getXMLline() {
+	return xmlLine;
+}
+
+int ConfigEntry::getXMLcolumn() {
+	return xmlColumn;
 }
 
 /****** ConfigItem ******/
@@ -81,9 +89,9 @@ vector<ConfigEntry*> *ConfigItem::getEntryVector(const char *entryName, bool cre
 	return v;
 }
 
-int ConfigItem::addEntry(const char *entryName) {
+int ConfigItem::addEntry(const char *entryName, int xmlLine, int xmlColumn) {
 	vector<ConfigEntry*> *v = getEntryVector(entryName, true);
-	ConfigEntry *e = new ConfigEntry(entryName);
+	ConfigEntry *e = new ConfigEntry(entryName, xmlLine, xmlColumn);
 	v->push_back(e);
 	return v->size()-1;
 }
@@ -129,6 +137,24 @@ const char *ConfigItem::getAttr(const char *entryName, const char *attrName, int
 	return (*v)[index]->getAttr(attrName);
 }
 
+int ConfigItem::getXMLline(const char *entryName, int index) {
+	vector<ConfigEntry*> *v = getEntryVector(entryName);
+	if (!v)
+		return -1;
+	if (index >= (int)v->size())
+		return -1;
+	return (*v)[index]->getXMLline();
+}
+
+int ConfigItem::getXMLcolumn(const char *entryName, int index) {
+	vector<ConfigEntry*> *v = getEntryVector(entryName);
+	if (!v)
+		return -1;
+	if (index >= (int)v->size())
+		return -1;
+	return (*v)[index]->getXMLcolumn();
+}
+
 /****** Config ******/
 
 Config::Config() {
@@ -143,10 +169,6 @@ Config::~Config() {
   #error XMLReader not found, install libxml2 2.6+
 #endif
 
-#define ELEMENT 1
-#define ENDELEMENT 15
-#define TEXT 3
-
 void Config::processNode(void *p) {
 	xmlTextReaderPtr reader = (xmlTextReaderPtr)p;
 	const xmlChar *xname = xmlTextReaderConstName(reader);
@@ -157,23 +179,25 @@ void Config::processNode(void *p) {
 	string value = xvalue ? (char *)xvalue : "";
 	int depth = xmlTextReaderDepth(reader);
 	int type = xmlTextReaderNodeType(reader);
+	int line = xmlTextReaderGetParserLineNumber(reader);
+	int column = xmlTextReaderGetParserColumnNumber(reader);
 
 	switch (depth) {
 	case 1:
-		if (type == ELEMENT) {
+		if (type == XML_READER_TYPE_ELEMENT) {
 			itemName = (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)"name");
 			ConfigItem *item = getItem(itemName, true);
 			item->setType(name.c_str());
-		} else if (type == ENDELEMENT) {
+		} else if (type == XML_READER_TYPE_END_ELEMENT) {
 			free(itemName);
 			itemName = NULL;
 		}
 		break;
 	case 2:
-		if (type == ELEMENT) {
+		if (type == XML_READER_TYPE_ELEMENT) {
 			entryName = name;
 			entryText.clear();
-			entryIndex = addEntry(itemName, entryName.c_str());
+			entryIndex = addEntry(itemName, entryName.c_str(), line, column);
 			if (xmlTextReaderMoveToFirstAttribute(reader) == 1) {
 				do {
 					string attrName = (char *)xmlTextReaderConstName(reader);
@@ -181,7 +205,7 @@ void Config::processNode(void *p) {
 					setAttr(itemName, name.c_str(), attrName.c_str(), attrValue.c_str(), entryIndex);
 				} while (xmlTextReaderMoveToNextAttribute(reader) == 1);
 			}
-		} else if (type == ENDELEMENT) {
+		} else if (type == XML_READER_TYPE_END_ELEMENT) {
 			setValue(itemName, name.c_str(), entryText.c_str(), entryIndex);
 			entryName.clear();
 			entryText.clear();
@@ -189,7 +213,7 @@ void Config::processNode(void *p) {
 		}
 		break;
 	case 3:
-		if (type == TEXT) {
+		if (type == XML_READER_TYPE_TEXT) {
 			if (entryName.length() > 0)
 				entryText += value;
 		}
@@ -204,6 +228,9 @@ bool Config::parseFile(const char *fileName) {
 	int ret;
 
 	reader = xmlReaderForFile(fileName, NULL, 0);
+	xmlTextReaderSetParserProp(reader, XML_PARSER_SUBST_ENTITIES, 1);
+
+
 	if (reader != NULL) {
 		ret = xmlTextReaderRead(reader);
 		while (ret == 1) {
@@ -237,9 +264,9 @@ ConfigItem *Config::getItem(const char *itemName, bool create) {
 	return m;
 }
 
-int Config::addEntry(const char *itemName, const char *entryName) {
+int Config::addEntry(const char *itemName, const char *entryName, int xmlLine, int xmlColumn) {
 	ConfigItem *m = getItem(itemName, true);
-	return m->addEntry(entryName);
+	return m->addEntry(entryName, xmlLine, xmlColumn);
 }
 
 const char *Config::getType(const char *itemName) {
@@ -289,4 +316,18 @@ const char *Config::getAttr(const char *itemName, const char *entryName, const c
 	if (!m)
 		return NULL;
 	return m->getAttr(entryName, attrName, index);
+}
+
+int Config::getXMLline(const char *itemName, const char *entryName, int index) {
+	ConfigItem *m = getItem(itemName);
+	if (!m)
+		return -1;
+	return m->getXMLline(entryName, index);
+}
+
+int Config::getXMLcolumn(const char *itemName, const char *entryName, int index) {
+	ConfigItem *m = getItem(itemName);
+	if (!m)
+		return -1;
+	return m->getXMLcolumn(entryName, index);
 }

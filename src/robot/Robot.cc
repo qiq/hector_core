@@ -2,11 +2,18 @@
  * Main robot class
  */
 
+#include "log4cxx/logger.h"
+#include "log4cxx/propertyconfigurator.h"
 #include "Config.h"
 #include "ProcessingChain.h"
 #include "RobotHTTPServer.h"
 
+using namespace log4cxx;
+using namespace log4cxx::helpers;
+
 vector<ProcessingChain*> processingChains;
+
+log4cxx::LoggerPtr logger = Logger::getLogger("robot.Robot");
 
 bool parseConfig(const char *fileName) {
 	// read & parse config file
@@ -24,15 +31,18 @@ bool parseConfig(const char *fileName) {
 				return false;
 			processingChains.push_back(pc);
 		} else {
-			// TODO: log("Unknown process type");
+			LOG4CXX_ERROR(logger, "Unknown process type: " << pType);
 		}
 	}
 	return true;
 }
 
 int main(int argc, char *argv[]) {
+	// set up logging
+	PropertyConfigurator::configure("../config/robot.log.props");
 	// process Config file
-	parseConfig("../config/config.xml"); // FIXME: configurable config file path :-)
+	bool parsed = parseConfig("../config/config.xml"); // FIXME: configurable config file path :-)
+	printf("parsed: %d\n", parsed ? 1 : 0);
 
 	// create HTTP server
 	RobotHTTPServer *server = new RobotHTTPServer(NULL, 1234);

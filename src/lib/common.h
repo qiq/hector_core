@@ -6,6 +6,7 @@
 #define _COMMON_H_
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <pthread.h>
 #include <string>
@@ -32,5 +33,8 @@ struct string_hash : public unary_function<string, size_t> {
 		return stdext::hash<char*>()(v.c_str());
 	}
 };
+
+int writeBytes(int fd, const char *s, int length);
+int readBytes(int fd, char *s, int length);
 
 #endif

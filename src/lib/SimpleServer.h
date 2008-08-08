@@ -1,24 +1,23 @@
 /**
- * Simple HTTP server for management
- * Only supports HTTP/1.0
+ * Simple multi-threaded server
  */
 
-#ifndef _SIMPLE_HTTP_SERVER_
-#define _SIMPLE_HTTP_SERVER_
+#ifndef _SIMPLE_SERVER_
+#define _SIMPLE_SERVER_
 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <log4cxx/logger.h>
 #include <string>
 #include <ext/hash_set>
 #include "common.h"
 #include "Lock.h"
-#include "SimpleHTTPConn.h"
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;
 
-class SimpleHTTPServer {
+class SimpleServer {
 	struct in_addr server_addr;
 	int server_port;
 
@@ -29,19 +28,20 @@ class SimpleHTTPServer {
 
 	stdext::hash_set<string, string_hash> *allowed_client;
 	int running;
+
+	static log4cxx::LoggerPtr logger;
 public:
-	SimpleHTTPServer(const char *addr, int port);
-	~SimpleHTTPServer();
+	SimpleServer(const char *addr, int port);
+	~SimpleServer();
 	void RestrictAccess(const char *addr);
 	void Start(int maxThreads);
 	void Stop();
 
-	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
-
 	void increaseThreadCount();
 	void decreaseThreadCount();
-	void HTTPMainThread();
-	void HTTPServiceThread(SimpleHTTPConn *conn);
+	void MainThread();
+
+	virtual void ServiceThread(int fd) = 0;
 };
 
 #endif

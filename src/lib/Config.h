@@ -42,8 +42,10 @@ class ConfigEntry {
 	string name;	// this is redundant :-)
 	string value;
 	stdext::hash_map<string, string, string_hash> attrs;
+	int xmlLine;
+	int xmlColumn;
 public:
-	ConfigEntry(const char *name);
+	ConfigEntry(const char *name, int xmlLine = -1, int xmlColumn = -1);
 	~ConfigEntry();
 	void setName(const char *name);
 	const char *getName();
@@ -51,6 +53,8 @@ public:
 	const char *getValue();
 	void setAttr(const char *name, const char *value);
 	const char *getAttr(const char *name);
+	int getXMLline();
+	int getXMLcolumn();
 };
 
 class ConfigItem {
@@ -67,12 +71,14 @@ public:
 	void setType(const char *type);
 	const char *getType();
 
-	int addEntry(const char *entryName);
+	int addEntry(const char *entryName, int xmlLine = -1, int xmlColumn = -1);
 	bool setValue(const char *entryName, const char *entryValue, int index = 0);
 	const char *getValue(const char *entryName, int index = 0);
 	int getSize(const char *entryName);
 	bool setAttr(const char *entryName, const char *attrName, const char *attrValue, int index = 0);
 	const char *getAttr(const char *entryName, const char *attrName, int index = 0);
+	int getXMLline(const char *entryName, int index = 0);
+	int getXMLcolumn(const char *entryName, int index = 0);
 };
 
 class Config {
@@ -88,7 +94,7 @@ public:
 	~Config();
 	bool parseFile(const char *fileName);
 
-	int addEntry(const char *itemName, const char *entryName);
+	int addEntry(const char *itemName, const char *entryName, int xmlLine = -1, int xmlColumn = -1);
 	const char *getType(const char *itemName);
 	bool setValue(const char *itemName, const char *entryName, const char *value, int index = 0);
 	const char *getValue(const char *itemName, const char *entryName, int index = 0);
@@ -96,7 +102,8 @@ public:
 	int getSize(const char *itemName, const char *entryName);
 	bool setAttr(const char *itemName, const char *entryName, const char *attrName, const char *attrValue, int index = 0);
 	const char *getAttr(const char *itemName, const char *entryName, const char *attrName, int index = 0);
-
+	int getXMLline(const char *itemName, const char *entryName, int index = 0);
+	int getXMLcolumn(const char *itemName, const char *entryName, int index = 0);
 };
 
 #endif
