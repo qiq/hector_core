@@ -10,6 +10,8 @@
 #include "ProcessorParallel.h"
 #include "ProcessorOutput.h"
 
+log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("robot.ProcessingChain"));
+
 ProcessingChain::ProcessingChain() {
 	running = false;
 }
@@ -22,11 +24,11 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 	// queueSize
 	int queueSize = config->getValueInt(name, "queueSize");
 	if (queueSize == INT_MAX) {
-		// TODO: log("Missing/invalid queueSize (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "queueSize"), config->getXMLcolumn(name, "queueSize"), "Missing/invalid queueSize");
 		return false;
 	}
 	if (queueSize < 0 || queueSize > 100000) {
-		// TODO: log("Invalid queueSize")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "queueSize"), config->getXMLcolumn(name, "queueSize"), "Invalid queueSize");
 		return false;
 	}
 
@@ -37,12 +39,12 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 		assert(item != NULL);
 		const char *ptype = config->getType(item);
 		if (ptype == NULL) {
-			// TODO: log("Unknown module");
+			LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Unknown module");
 			return false;
 		}
 		if (!strcmp(ptype, "ProcessorInput")) {
 			if (i != 0) {
-				// TODO log("Invalid module (ProcessorInput must be first)");
+				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorInput must be first)");
 				return false;
 			}
 			ResourceQueue *rqDst = new ResourceQueue(queueSize);
@@ -53,7 +55,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 			processors.push_back(p);
 		} else if (!strcmp(ptype, "ProcessorSimple")) {
 			if (i == 0 || i == items-1) {
-				// TODO log("Invalid module (ProcessorSimple cannot be first or last in a chain)");
+				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorSimple cannot be first or last in a chain)");
 				return false;
 			}
 			ResourceQueue *rqSrc = queues.back();
@@ -65,7 +67,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 			processors.push_back(p);
 		} else if (!strcmp(ptype, "ProcessorParallel")) {
 			if (i == 0 || i == items-1) {
-				// TODO log("Invalid module (ProcessorParallel cannot be first or last in a chain)");
+				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorParallel cannot be first or last in a chain)");
 				return false;
 			}
 			ResourceQueue *rqSrc = queues.back();
@@ -77,7 +79,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 			processors.push_back(p);
 		} else if (!strcmp(ptype, "ProcessorOutput")) {
 			if (i != items-1) {
-				// TODO log("Invalid module (ProcessorOutput must be last)");
+				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorOutput must be last)");
 				return false;
 			}
 			ResourceQueue *rqSrc = queues.back();
@@ -86,7 +88,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 				return false;
 			processors.push_back(p);
 		} else {
-			// TODO: log("Unknown type")
+			LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Unknown type");
 			return false;
 		}
 	}

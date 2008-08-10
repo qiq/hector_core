@@ -6,11 +6,12 @@
 #ifndef _RESOURCE_H_
 #define _RESOURCE_H_
 
-using namespace std;
-
+#include <log4cxx/logger.h>
 #include <stdint.h>
 #include <string>
 #include <vector>
+
+using namespace std;
 
 class Resource {
 	string url;
@@ -20,6 +21,8 @@ class Resource {
 	vector<string*> header_field;
 	vector<string*> extracted_url;
 	uint32_t ip_addr;
+
+	static log4cxx::LoggerPtr logger;
 public:
 	Resource();
 	~Resource();

@@ -9,6 +9,8 @@
 
 ConfigEntry::ConfigEntry(const char *name, int xmlLine, int xmlColumn) {
 	this->name = name;
+	this->xmlLine = xmlLine;
+	this->xmlColumn = xmlColumn;
 }
 
 ConfigEntry::~ConfigEntry() {

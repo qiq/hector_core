@@ -2,10 +2,11 @@
 #include <assert.h>
 #include "ProcessorSimple.h"
 
+log4cxx::LoggerPtr ProcessorSimple::logger(log4cxx::Logger::getLogger("robot.ProcessorSimple"));
+
 ProcessorSimple::ProcessorSimple(ResourceQueue *srcQueue, ResourceQueue *dstQueue) {
 	this->srcQueue = srcQueue;
 	this->dstQueue = dstQueue;
-	resource = NULL;
 }
 
 ProcessorSimple::~ProcessorSimple() {
@@ -27,11 +28,11 @@ bool ProcessorSimple::Init(Config *config, const char *name) {
 	// threads
 	nThreads = config->getValueInt(name, "threads");
 	if (nThreads == INT_MAX) {
-		// TODO: log("Missing threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "threads"), config->getXMLcolumn(name, "threads"), "Missing threads (int)");
 		return false;
 	}
 	if (nThreads < 0 || nThreads > 100) {
-		// TODO: log("Invalid number of threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "threads"), config->getXMLcolumn(name, "threads"), "Invalid number of threads (int)");
 		return false;
 	}
 
@@ -42,17 +43,17 @@ bool ProcessorSimple::Init(Config *config, const char *name) {
 		assert(m != NULL);
 		const char *mtype = config->getType(m);
 		if (mtype == NULL) {
-			// TODO: log("Unknown type");
+			LOG_CONFIG_ERROR1(logger, config->getXMLline(name, "module"), config->getXMLcolumn(name, "module"), "Unknown type: %s", mtype);
 			return false;
 		}
 		if (strcmp(mtype, "ModuleSimple")) {
-			// TODO log("Invalid module (must be ModuleSimple)"
+			LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "module"), config->getXMLcolumn(name, "module"), "Invalid module (must be ModuleSimple)");
 			return false;
 		}
 		const char *lib = config->getValue(m, "lib");
 		ModuleSimple *(*create)() = (ModuleSimple*(*)())loadLibrary(lib, "create");
 		if (create == NULL) {
-			// TODO log("Cannot use module");
+			LOG_CONFIG_ERROR0(logger, config->getXMLline(m, "lib"), config->getXMLcolumn(m, "lib"), "Cannot use module");
 			return false;
 		}
 		ModuleSimple *module = (*create)();

@@ -7,8 +7,7 @@
 #include <pthread.h>
 #include "SimpleServer.h"
 
-using namespace log4cxx;
-LoggerPtr SimpleServer::logger(Logger::getLogger("lib.SimpleServer"));
+log4cxx::LoggerPtr SimpleServer::logger(log4cxx::Logger::getLogger("lib.SimpleServer"));
 
 SimpleServer::SimpleServer(const char *addr, int port) {
 	if (addr == NULL || !inet_aton(addr, &server_addr))

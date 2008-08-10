@@ -2,18 +2,15 @@
  * Main robot class
  */
 
-#include "log4cxx/logger.h"
-#include "log4cxx/propertyconfigurator.h"
+#include <log4cxx/logger.h>
+#include <log4cxx/propertyconfigurator.h>
 #include "Config.h"
 #include "ProcessingChain.h"
 #include "RobotHTTPServer.h"
 
-using namespace log4cxx;
-using namespace log4cxx::helpers;
-
 vector<ProcessingChain*> processingChains;
 
-log4cxx::LoggerPtr logger = Logger::getLogger("robot.Robot");
+log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("robot.Robot");
 
 bool parseConfig(const char *fileName) {
 	// read & parse config file
@@ -39,18 +36,16 @@ bool parseConfig(const char *fileName) {
 
 int main(int argc, char *argv[]) {
 	// set up logging
-	PropertyConfigurator::configure("../config/robot.log.props");
+	log4cxx::PropertyConfigurator::configure("../config/robot.log.props");
 	// process Config file
 	bool parsed = parseConfig("../config/config.xml"); // FIXME: configurable config file path :-)
-	printf("parsed: %d\n", parsed ? 1 : 0);
+	if (!parsed)
+		exit(1);
 
 	// create HTTP server
 	RobotHTTPServer *server = new RobotHTTPServer(NULL, 1234);
 	server->RestrictAccess("127.0.0.1");
 	server->Start(2);
-
-//	fprintf(stderr, "x: %s\n", config->getValue("robot", "server-port"));
-//	fprintf(stderr, "x: %s\n", config->getValue("robot", "server-port", 1));
 
 	printf("Server running\n");
 	char s[10];

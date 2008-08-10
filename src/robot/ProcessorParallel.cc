@@ -2,6 +2,8 @@
 #include <assert.h>
 #include "ProcessorParallel.h"
 
+log4cxx::LoggerPtr ProcessorParallel::logger(log4cxx::Logger::getLogger("robot.ProcessorParallel"));
+
 ProcessorParallel::ProcessorParallel(ResourceQueue *srcQueue, ResourceQueue *dstQueue) {
 	this->srcQueue = srcQueue;
 	this->dstQueue = dstQueue;
@@ -43,45 +45,45 @@ bool ProcessorParallel::Init(Config *config, const char *name) {
 	// threads
 	nThreads = config->getValueInt(name, "threads");
 	if (nThreads == INT_MAX) {
-		// TODO: log("Missing threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "threads"), config->getXMLcolumn(name, "threads"), "Missing threads (int)");
 		return false;
 	}
 	if (nThreads < 0 || nThreads > 100) {
-		// TODO: log("Invalid number of threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "threads"), config->getXMLcolumn(name, "threads"), "Invalid number of threads (int)");
 		return false;
 	}
 
 	// maxRequests
 	maxRequests = config->getValueInt(name, "maxRequests");
 	if (maxRequests == INT_MAX) {
-		// TODO: log("Missing threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "maxRequests"), config->getXMLcolumn(name, "maxRequests"), "Missing number of requests (int)");
 		return false;
 	}
 	if (maxRequests < 0 || maxRequests > 100) {
-		// TODO: log("Invalid number of threads (int)")
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "maxRequests"), config->getXMLcolumn(name, "maxRequests"), "Invalid number of requests (int)");
 		return false;
 	}
 
 	// construct module
 	if (config->getSize(name, "module") != 1) {
-		// TODO: log("no module/too many modules");
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "module"), config->getXMLcolumn(name, "module"), "no module/too many modules");
 		return false;
 	}
 	const char *m = config->getValue(name, "module");
 	assert(m != NULL);
 	const char *mtype = config->getType(m);
 	if (mtype == NULL) {
-		// TODO: log("Unknown type");
+		LOG_CONFIG_ERROR1(logger, config->getXMLline(name, "module"), config->getXMLcolumn(name, "module"), "Unknown type %s", mtype);
 		return false;
 	}
 	if (strcmp(mtype, "ModuleParallel")) {
-		// TODO log("Invalid module (must be ModuleParallel)"
+		LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "module"), config->getXMLcolumn(name, "module"), "Invalid module (must be ModuleParallel)");
 		return false;
 	}
 	const char *lib = config->getValue(m, "lib");
 	ModuleParallel *(*create)() = (ModuleParallel*(*)())loadLibrary(lib, "create");
 	if (create == NULL) {
-		// TODO log("Cannot use module");
+		LOG_CONFIG_ERROR1(logger, config->getXMLline(m, "lib"), config->getXMLcolumn(m, "lib"), "Cannot use module %s", lib);
 		return false;
 	}
 	module = (*create)();

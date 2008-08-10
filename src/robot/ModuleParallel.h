@@ -11,8 +11,8 @@
 class ModuleParallel : public Module {
 public:
 	ModuleParallel() {};
-	virtual ~ModuleParallel();
-	virtual int Process(Resource **in, Resource **out);
+	virtual ~ModuleParallel() {};
+	virtual int Process(Resource **in, Resource **out) = 0;
 };
 
 #endif

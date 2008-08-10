@@ -5,6 +5,7 @@
 #ifndef _PROCESSOR_H_
 #define _PROCESSOR_H_
 
+#include <log4cxx/logger.h>
 #include <pthread.h>
 #include "Config.h"
 #include "Resource.h"
@@ -15,6 +16,8 @@ protected:
 	int nThreads;
 	pthread_t *threads;
 	bool running;
+
+	static log4cxx::LoggerPtr logger;
 public:
 	Processor();
 	virtual ~Processor();

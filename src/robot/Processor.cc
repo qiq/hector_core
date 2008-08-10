@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include "Processor.h"
 
+log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("robot.Processor"));
+
 Processor::Processor() {
 	this->running = false;
 }
@@ -34,9 +36,11 @@ void Processor::Stop() {
 }
 
 void *Processor::loadLibrary(const char *lib, const char *sym) {
+	if (lt_dlinit() != 0)
+		LOG4CXX_ERROR(logger, "Cannot initialize ltdl");
 	lt_dlhandle handle = lt_dlopen(lib);
 	if (handle == NULL) {
-		// TODO: log(lt_dlerror());
+		LOG4CXX_ERROR(logger, "Cannot load library " << lib << " (" << lt_dlerror() << ")");
 		return NULL;
 	}
 	void *p = lt_dlsym(handle, sym);

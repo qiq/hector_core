@@ -9,11 +9,13 @@
 #include "Module.h"
 
 class ModuleOutput : public Module {
-	Resource *resource;
 public:
-	ModuleOutput() {};
-	virtual ~ModuleOutput();
-	virtual void Process(Resource *resource);
+	ModuleOutput() {}
+	virtual ~ModuleOutput() {};
+	virtual void Process(Resource *resource) = 0;
 };
+
+//typedef ModuleOutput* create_t();
+//typedef void destroy_t(ModuleOutput*);
 
 #endif

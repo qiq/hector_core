@@ -1,8 +1,10 @@
 
+#include "Resource.h"
 #include "Resource.pb.h"
+
 using namespace std;
 
-#include "Resource.h"
+log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("robot.Resource"));
 
 Resource::Resource() {
 	// check library vs header file versions
@@ -26,7 +28,7 @@ Resource::~Resource() {
 //xmlURIPtr uri = xmlParseURI(url);
 //xmlFreeURI(uri);
 string *Resource::serialize(bool serializeContent) {
-	wspy::robot::Resource r;
+	hector::robot::Resource r;
 
 	r.set_url(url);
 	if (time != 0)
@@ -47,7 +49,7 @@ string *Resource::serialize(bool serializeContent) {
 
 	string *result = new string;
 	if (!r.SerializeToString(result)) {
-		// TODO: log();
+		LOG4CXX_ERROR(logger, "Cannot serialize result");
 		delete result;
 		return NULL;
 	}
@@ -55,7 +57,7 @@ string *Resource::serialize(bool serializeContent) {
 }
 
 bool Resource::deserialize(string *s) {
-	wspy::robot::Resource r;
+	hector::robot::Resource r;
 	r.ParseFromString(*s);
 
 	url = r.url();

@@ -5,7 +5,9 @@
 #ifndef _PROCESSING_CHAIN_H_
 #define _PROCESSING_CHAIN_H_
 
+#include <log4cxx/logger.h>
 #include <vector>
+#include "common.h"
 #include "Processor.h"
 #include "Resource.h"
 #include "ResourceQueue.h"
@@ -16,6 +18,8 @@ class ProcessingChain {
 	int queueSize;
 
 	bool running;
+
+	static log4cxx::LoggerPtr logger;
 public:
 	ProcessingChain();
 	~ProcessingChain();

@@ -12,8 +12,8 @@ class ModuleSimple : public Module {
 	Resource *resource;
 public:
 	ModuleSimple() {};
-	virtual ~ModuleSimple();
-	virtual void Process(Resource *resource);
+	virtual ~ModuleSimple() {};
+	virtual void Process(Resource *resource) = 0;
 };
 
 #endif

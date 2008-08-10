@@ -9,9 +9,10 @@
 
 class ModuleDummy : public ModuleSimple {
 public:
-	ModuleDummy() {};
-	~ModuleDummy() {};
-	void Process(Resource *resource);
+	ModuleDummy() {}
+	virtual ~ModuleDummy() {}
+	virtual bool Init(Config *config, const char *name);
+	virtual void Process(Resource *resource);
 };
 
 #endif

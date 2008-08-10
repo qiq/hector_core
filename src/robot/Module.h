@@ -10,9 +10,8 @@
 class Module {
 public:
 	Module() {};
-	virtual ~Module();
-	virtual bool Init(Config *config, const char *name);
-	virtual void Process();
+	virtual ~Module() {};
+	virtual bool Init(Config *config, const char *name) = 0;
 };
 
 #endif
