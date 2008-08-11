@@ -20,8 +20,8 @@
 	<ProcessingChain name="processing-chain">
 		<queueSize>1000</queueSize>
 		<item>load-resource</item>
-		<item>robots</item>
-		<item>test</item>
+		<item>external-test</item>
+		<item>save-resource</item>
 	</ProcessingChain>
 
 	<ProcessorInput name="load-resource">
@@ -31,30 +31,28 @@
 
 	<ModuleInput name="load-resource-module">
 		<inputDir>/tmp/input</inputDir>
-		<lib>libmodule-dummy.so</lib>
-		<!--<lib>libmodule-load-resource.so</lib>-->
+		<lib>libmodule-load-resource.so</lib>
+		<!--<lib>libmodule-dummy.so</lib>-->
 	</ModuleInput>
 
-	<ProcessorParallel name="robots">
+	<ProcessorSimple name="external-test">
 		<threads>2</threads>
-		<module>robots-check-url</module>
+		<module>external-test-module</module>
 		<maxRequests>100</maxRequests>
-	</ProcessorParallel>
+	</ProcessorSimple>
 
-	<ModuleParallel name="robots-check-url">
+	<ModuleSimple name="external-test-module">
 		<something></something>
-		<lib>libmodule-dummy.so</lib>
-	</ModuleParallel>
+		<lib>libmodule-external-simple.so</lib>
+		<path>/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.pl</path>
+	</ModuleSimple>
 
-	<ProcessorOutput name="test">
+	<ProcessorOutput name="save-resource">
 		<threads>1</threads>
-		<module>test-module</module>
+		<module>save-resource-module</module>
 	</ProcessorOutput>
 
-	<ModuleOutput name="test-module">
-		<lib>libmodule-dummy.so</lib>
-		<path>/usr/bin/echo</path>
-		<arg>-ne</arg>
-		<arg>xxx</arg>
+	<ModuleOutput name="save-resource-module">
+		<lib>libmodule-save-resource.so</lib>
 	</ModuleOutput>
 </config>

@@ -31,6 +31,7 @@ AC_CONFIG_FILES([Makefile
 		src/lib/Makefile
 		src/robot/Makefile
 		src/robot/modules/Makefile
+		src/robot/external-modules/Makefile
 		src/master/Makefile
 ])
 AC_OUTPUT
