@@ -5,7 +5,6 @@
 #ifndef _MODULE_OUTPUT_H_
 #define _MODULE_OUTPUT_H_
 
-#include "Resource.h"
 #include "Module.h"
 
 class ModuleOutput : public Module {

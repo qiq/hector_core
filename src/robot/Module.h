@@ -6,6 +6,7 @@
 #define _MODULE_H_
 
 #include "Config.h"
+#include "Resource.h"
 
 class Module {
 public:

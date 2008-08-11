@@ -27,7 +27,6 @@ public:
 	virtual void Stop();
 
 	void *loadLibrary(const char *lib, const char *sym);
-	//TODO: init external module
 };
 
 #endif

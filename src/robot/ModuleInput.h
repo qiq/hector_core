@@ -5,15 +5,13 @@
 #ifndef _MODULE_INPUT_H_
 #define _MODULE_INPUT_H_
 
-#include "Resource.h"
 #include "Module.h"
 
 class ModuleInput : public Module {
-	Resource *resource;
 public:
 	ModuleInput() {};
-	virtual ~ModuleInput();
-	virtual void Process(Resource *resource);
+	virtual ~ModuleInput() {};
+	virtual void Process(Resource *resource) = 0;
 };
 
 #endif

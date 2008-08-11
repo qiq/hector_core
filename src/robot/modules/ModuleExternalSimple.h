@@ -17,7 +17,7 @@ class ModuleExternalSimple : public ModuleSimple {
 	const char *path;
 	const char **args;
 
-	static pthread_key_t buffer_key;
+	pthread_key_t buffer_key;
 
 	static log4cxx::LoggerPtr logger;
 public:

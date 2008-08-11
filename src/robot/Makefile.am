@@ -10,7 +10,7 @@ bin_PROGRAMS = robot
 #	ResourceQueue.h
 
 robot_SOURCES = \
-	Robot.h Robot.cc \
+	Robot.cc \
 	Resource.h Resource.cc \
 	Resource.pb.h Resource.pb.cc Resource.proto \
 	ResourceQueue.h ResourceQueue.cc \
@@ -36,6 +36,3 @@ Resource.pb.cc Resource.pb.h: Resource.proto
 
 clean-local:
 	rm -f Resource.pb.cc Resource.pb.h
-
-test:
-	echo "Test!"

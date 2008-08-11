@@ -39,7 +39,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 		assert(item != NULL);
 		const char *ptype = config->getType(item);
 		if (ptype == NULL) {
-			LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Unknown module");
+			LOG_CONFIG_ERROR1(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Unknown module: %s", item);
 			return false;
 		}
 		if (!strcmp(ptype, "ProcessorInput")) {
