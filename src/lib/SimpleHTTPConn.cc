@@ -11,6 +11,8 @@
 #include "common.h"
 #include "SimpleHTTPConn.h"
 
+log4cxx::LoggerPtr SimpleHTTPConn::logger(log4cxx::Logger::getLogger("lib.SimpleHTTPConn"));
+
 SimpleHTTPConn::SimpleHTTPConn(int fd) {
 	this->socket = fd;
 	header_fields = NULL;
@@ -151,18 +153,18 @@ bool SimpleHTTPConn::readRequest() {
 		struct timeval timeout = { TIMEOUT, 0 };
 		int ready = select(socket+1, &recv_fd, NULL, NULL, &timeout);
 		if (ready < 0) {
-			perror("Error selecting");
+			LOG4CXX_ERROR(logger, "Error selecting");
 			break;
 		}
 		if (ready == 0) {
-			perror("Timeout");
+			LOG4CXX_INFO(logger, "Timeout");
 			break;
 		}
 
 		char buffer[65537];
 		int r = read(socket, buffer, sizeof(buffer)-1);
 		if (r < 0) {
-			perror("Error reading from socket");
+			LOG4CXX_ERROR(logger, "Error reading from socket");
 			break;
 		}
 		buffer[r] = '\0';
@@ -249,16 +251,16 @@ void SimpleHTTPConn::sendResponse() {
 		struct timeval timeout = { TIMEOUT, 0 };
 		int ready = select(socket+1, NULL, &send_fd, NULL, &timeout);
 		if (ready < 0) {
-			perror("Error selecting");
+			LOG4CXX_ERROR(logger, "Error selecting");
 			break;
 		}
 		if (ready == 0) {
-			perror("Timeout");
+			LOG4CXX_INFO(logger, "Timeout");
 			break;
 		}
 		int w = write(socket, (void *)result.data(), result.length()-send);
 		if (w < 0) {
-			perror("Error writing to socket");
+			LOG4CXX_ERROR(logger, "Error reading from socket");
 			break;
 		}
 		send += w;

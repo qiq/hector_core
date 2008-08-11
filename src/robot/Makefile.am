@@ -12,7 +12,7 @@ bin_PROGRAMS = robot
 robot_SOURCES = \
 	Robot.h Robot.cc \
 	Resource.h Resource.cc \
-	Resource.pb.h Resource.pb.cc \
+	Resource.pb.h Resource.pb.cc Resource.proto \
 	ResourceQueue.h ResourceQueue.cc \
 	RobotHTTPServer.h RobotHTTPServer.cc \
 	ProcessingChain.h ProcessingChain.cc \
@@ -26,7 +26,7 @@ robot_SOURCES = \
 	ModuleSimple.h \
 	ModuleParallel.h \
 	ModuleOutput.h \
-	Resource.proto
+	ExternalProcess.h ExternalProcess.cc
 
 robot_CXXFLAGS = -I ../lib -I /usr/local/lib
 robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf -llog4cxx

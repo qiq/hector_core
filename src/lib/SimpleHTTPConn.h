@@ -5,11 +5,12 @@
 #ifndef _SIMPLE_HTTP_CONN_
 #define _SIMPLE_HTTP_CONN_
 
-using namespace std;
-namespace stdext = ::__gnu_cxx;
-
+#include <log4cxx/logger.h>
 #include <ext/hash_map>
 #include <string>
+
+using namespace std;
+namespace stdext = ::__gnu_cxx;
 
 typedef enum {
 	INCOMPLETE,
@@ -41,6 +42,7 @@ class SimpleHTTPConn {
 	request_ready_t parseRequestHeader();
 	request_ready_t requestReady();
 
+	static log4cxx::LoggerPtr logger;
 public:
 	SimpleHTTPConn(int sock);
 	~SimpleHTTPConn();

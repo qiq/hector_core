@@ -1,2 +1,2 @@
 #!/bin/bash
-CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure 
+CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/

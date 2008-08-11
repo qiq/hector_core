@@ -1,0 +1,1 @@
+- requires XMLReader, libxml2 2.6+

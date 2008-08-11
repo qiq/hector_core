@@ -1,0 +1,42 @@
+
+START (start crawling), specifikuje frontu
+STOP
+
+SelectModule
+- zpracovava vice pozadavku naraz, ale jen v jednom vlakne
+- omezeny max. pocet zpracovavanych pozadavku (napr. 1000)
+- neblokovane operace cteni/zapis do fronty
+- pokud neni co cist -> nic nedelej, zpracovavej pozadavky a zapisuj do vystupni fronty
+- pokud neni kam psat -> nepribirej dalsi pozadavky
+	- celkem 1000 rozdelanych pozadavku
+- vzdy precti tolik pozadavku, kolik se jich podarilo zapsat (aby celkem jich porad bylo 1000)
+- cyklus:
+	- cti pozadavky (bud kolik jich je k dispozici, nebo do 1000)
+		- neblokovane, pokud se aspon jeden provadi
+		- blokovane jinak
+	- Process()
+		- udelej select() se sleepem a zpracuj pozadavky, co prisly
+	- zapis pozadavky, co jsou hotove (spojovy seznam, resp. pole)
+		- neblokovane, pokud se aspon jeden provadi
+		- blokovane jinak
+
+Processor()
+- ProcessorSimple(ResourceQueue *srcQueue, ResourceQueue *dstQueue)
+- ProcessorParallel(ResourceQueue *srcQueue, ResourceQueue *dstQueue)
+- ProcessorInput(ResourceQueue *dstQueue)
+- ProcessorOutput(ResourceQueue *srcQueue);
+
+Module()
+- SimpleModule(Resource *resource)
+- ParallelModule(Resource *src, Resource *dst)
+
+
+ProcessingChain(config, name)
+	- precte svuj config, zjisti ktere procesory a fronty ma vytvorit
+	- vytvori fronty a vytvori procesory, tem preda config
+
+Processor(fronty, config, name)
+	- precte svuj config, zjisti ktere moduly vytvorit a pridat
+	- vytvori moduly a provaze je
+
+Module

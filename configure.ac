@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(wspy, 0.0.0, qiq@ucw.cz)
+AC_INIT(hector, 0.0.1-dev, qiq@ucw.cz)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -30,6 +30,7 @@ AC_CONFIG_FILES([Makefile
                 src/Makefile
 		src/lib/Makefile
 		src/robot/Makefile
+		src/robot/modules/Makefile
 		src/master/Makefile
 ])
 AC_OUTPUT

@@ -1,0 +1,9 @@
+- server co slouzi k testovani duplicit
+- dostane md5 a posoudi, jestli ji uz ma, nebo ne
+
+SEARCH md5 -> 0/1
+PUT md5
+DELETE md5
+SAVE file
+LOAD file
+SHUTDOWN
