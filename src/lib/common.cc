@@ -35,7 +35,7 @@ int readBytes(int fd, char *s, int length) {
 	return rd;
 }
 
-inline uint32_t bytes2int(char (*bytes)[4]) {
+uint32_t bytes2int(char (*bytes)[4]) {
         uint32_t result = 0;
         for (int i = 0; i < 4; i++) {
                 result = (result << 8) | (*bytes)[3-i];
@@ -43,7 +43,7 @@ inline uint32_t bytes2int(char (*bytes)[4]) {
 	return result;
 }
 
-inline void int2bytes(uint32_t n, char (*bytes)[4]) {
+void int2bytes(uint32_t n, char (*bytes)[4]) {
 	for (int i = 0; i < 4; i++) {
 		(*bytes)[i] = (char)(n & 0xFF);
 		n >>= 8;

@@ -1,4 +1,4 @@
-SUBDIRS = . modules
+SUBDIRS = . modules external-modules
 
 #AM_LDADD = -Wall
 AM_CXXFLAGS = -Wall
@@ -29,6 +29,7 @@ robot_SOURCES = \
 	ExternalProcess.h ExternalProcess.cc
 
 robot_CXXFLAGS = -I ../lib -I /usr/local/lib
+robot_LDFLAGS = -Wl,-export-dynamic
 robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf -llog4cxx
 
 Resource.pb.cc Resource.pb.h: Resource.proto

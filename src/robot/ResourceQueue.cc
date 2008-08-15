@@ -11,7 +11,7 @@
 ResourceQueue::ResourceQueue(int size = 1000) {
 
 	this->queue_size = size;
-	queue = new deque<Resource*>(size);
+	queue = new deque<Resource*>();
 }
 
 ResourceQueue::~ResourceQueue() {

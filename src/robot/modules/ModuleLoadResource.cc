@@ -2,6 +2,7 @@
  * Dummy module.
  */
 
+#include <stdlib.h>
 #include "ModuleLoadResource.h"
 
 bool ModuleLoadResource::Init(Config *config, const char *name) {
@@ -9,6 +10,11 @@ bool ModuleLoadResource::Init(Config *config, const char *name) {
 }
 
 void ModuleLoadResource::Process(Resource *resource) {
+	
+	char s[1024];
+	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());
+	resource->setURL(s);
+	fprintf(stderr, "Loading resource (URL: %s)\n", resource->getURL());
 	return;
 }
 

@@ -13,11 +13,15 @@
 log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("robot.ProcessingChain"));
 
 ProcessingChain::ProcessingChain() {
-	running = false;
 }
 
 ProcessingChain::~ProcessingChain() {
-	// TODO: delete processors, queues, ???
+	for (unsigned i = 0; i < processors.size(); i++) {
+		delete processors[i];
+	}
+	for (unsigned i = 0; i < queues.size(); i++) {
+		delete queues[i];
+	}
 }
 
 bool ProcessingChain::Init(Config *config, const char *name) {
@@ -97,8 +101,13 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 }
 
 void ProcessingChain::Start() {
-	
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->Start();
+	}
 }
 
 void ProcessingChain::Stop() {
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->Stop();
+	}
 }

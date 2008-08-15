@@ -25,6 +25,14 @@ Resource::~Resource() {
 	}
 }
 
+void Resource::setURL(const char *url) {
+	this->url = url;
+}
+
+const char *Resource::getURL() {
+	return url.c_str();
+}
+
 //xmlURIPtr uri = xmlParseURI(url);
 //xmlFreeURI(uri);
 string *Resource::serialize(bool serializeContent) {

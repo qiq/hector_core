@@ -18,22 +18,22 @@ bool ExternalProcess::Init(const char *path, const char *argv[]) {
 	int pipeout[2];
 	int pipeerr[2];
 
-	if (!pipe(pipein)) {
-		LOG4CXX_ERROR(logger, "Cannot open pipe");
+	if (pipe(pipein) < 0) {
+		LOG4CXX_ERROR(logger, "Cannot open pipe: " << strerror(errno));
 		return false;
 	}
-	if (!pipe(pipeout)) {
-		LOG4CXX_ERROR(logger, "Cannot open pipe");
+	if (pipe(pipeout) < 0) {
+		LOG4CXX_ERROR(logger, "Cannot open pipe: " << strerror(errno));
 		return false;
 	}
-	if (!pipe(pipeerr)) {
-		LOG4CXX_ERROR(logger, "Cannot open pipe");
+	if (pipe(pipeerr) < 0) {
+		LOG4CXX_ERROR(logger, "Cannot open pipe: " << strerror(errno));
 		return false;
 	}
 
 	pid = fork();
 	if (pid < 0) {
-		LOG4CXX_ERROR(logger, "Cannot fork");
+		LOG4CXX_ERROR(logger, "Cannot fork: " << strerror(errno));
 		return false;
 	}
 	if (pid == 0) {
@@ -49,7 +49,7 @@ bool ExternalProcess::Init(const char *path, const char *argv[]) {
 		close(pipeerr[1]);
 
 		if (execvp(path, (char * const*)argv) == -1) {
-			LOG4CXX_ERROR(logger, "Cannot exec");
+			LOG4CXX_ERROR(logger, "Cannot exec: " << strerror(errno));
 		}
 		exit(255);
 	}

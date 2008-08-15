@@ -18,20 +18,18 @@ void ProcessorParallel::runThread() {
 	Resource **inputRequests = new Resource*[maxRequests+1];
 	Resource **outputRequests = new Resource*[maxRequests+1];
 	int activeRequests = 0, finishedRequests = 0;
-	while (running || finishedRequests > 0)  {
-		if (running) {
-			// get up to maxRequests Requests items from the srcQueue, blocked in case we have no running requests
-			int n = srcQueue->getResources(inputRequests, maxRequests-activeRequests, activeRequests == 0);
-			inputRequests[n] = NULL;
-			activeRequests += n;
+	while (finishedRequests > 0)  {
+		// get up to maxRequests Requests items from the srcQueue, blocked in case we have no running requests
+		int n = srcQueue->getResources(inputRequests, maxRequests-activeRequests, activeRequests == 0);
+		inputRequests[n] = NULL;
+		activeRequests += n;
 
-			// process new requests, get finished requests
-			n = module->Process(inputRequests, outputRequests + finishedRequests);
-			finishedRequests += n;
-		}
+		// process new requests, get finished requests
+		n = module->Process(inputRequests, outputRequests + finishedRequests);
+		finishedRequests += n;
 		
 		// put requests into dstQueue, blocked in case we have no running requests
-		int n = dstQueue->putResources(outputRequests, finishedRequests, activeRequests == 0);
+		n = dstQueue->putResources(outputRequests, finishedRequests, activeRequests == 0);
 		// TODO: use cyclic buffer instead of copying?
 		for (int i = 0; i < finishedRequests-n; i++) {
 			outputRequests[i] = outputRequests[n+i];

@@ -12,13 +12,14 @@ ProcessorOutput::~ProcessorOutput() {
 }
 
 void ProcessorOutput::runThread() {
-	// get one item from somewhere, process it and put it into dstQueue
-	while (running)  {
+	// get one item from srcQueue, process it and destroy
+	while (1)  {
 		Resource *resource = srcQueue->getResource(true);
 		vector<ModuleOutput*>::iterator iter;
 		for (iter = modules.begin(); iter != modules.end(); iter++) {
 			(*iter)->Process(resource);
 		}
+		delete resource;
 	}
 }
 

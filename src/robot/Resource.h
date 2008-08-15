@@ -26,6 +26,8 @@ class Resource {
 public:
 	Resource();
 	~Resource();
+	void setURL(const char *url);
+	const char *getURL();
 	string *serialize(bool serializeContent = false);
 	bool deserialize(string *s);
 };

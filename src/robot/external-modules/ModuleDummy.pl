@@ -28,7 +28,7 @@ sub writeBytes() {
 	my $len = length($buffer);
 	my $written_bytes = 0;
 	while ($written_bytes < $len) {
-		my $w = syswrite(STDIN, $buffer, $len-$written_bytes, $written_bytes);
+		my $w = syswrite(STDOUT, $buffer, $len-$written_bytes, $written_bytes);
 		if ($w < 0) {
 			print STDERR "Cannot write to output\n";
 			return 0;
@@ -53,7 +53,7 @@ sub int2bytes() {
 	my ($n) = @_;
 	my $str = "XXXX";
         for (my $i = 0; $i < 4; $i++) {
-		substr($str, $i, 1) = $n & 0xFF;
+		substr($str, $i, 1) = chr($n & 0xFF);
                 $n >>= 8;
         }
 	return $str;
@@ -61,6 +61,8 @@ sub int2bytes() {
 
 sub Process() {
 	my ($resource) = @_;
+	print STDERR "Processing: ".$resource->url()."\n";
+	$resource->set_url($resource->url()."&OK");
 	return $resource;
 }
 
@@ -78,10 +80,7 @@ while (1) {
 	}
 
 	my $r = ProtoBuf::Resource::Resource->new;
-	if (!$r->parse_from_string($sin)) {
-		print STDERR "Cannot parse resource\n";
-		next;
-	}
+	$r->parse_from_string($sin);
 	$r = &Process($r);
 	my $sout = $r->serialize_to_string();
 

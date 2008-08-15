@@ -9,16 +9,19 @@
 		<server-port>1234</server-port>
 		<dir>/tmp/xxx</dir>
 	</Main>
+	<!--	<run>md5server</run>-->
 
 	<Main name="robot">
 		<run>processing-chain</run>
-	<!--	<run>md5server</run>-->
+		<run>website</run>
+		<hashserver-host>localhost</hashserver-host>
+		<hashserver-port>1234</hashserver-port>
 		<server-host>*</server-host>
 		<server-port>8080</server-port>
 	</Main>
 
 	<ProcessingChain name="processing-chain">
-		<queueSize>1000</queueSize>
+		<queueSize>5</queueSize>
 		<item>load-resource</item>
 		<item>external-test</item>
 		<item>save-resource</item>
@@ -44,7 +47,8 @@
 	<ModuleSimple name="external-test-module">
 		<something></something>
 		<lib>libmodule-external-simple.so</lib>
-		<path>/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.pl</path>
+		<!--<lib>libmodule-dummy.so</lib>-->
+		<path>/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh</path>
 	</ModuleSimple>
 
 	<ProcessorOutput name="save-resource">

@@ -15,7 +15,6 @@ class Processor {
 protected:
 	int nThreads;
 	pthread_t *threads;
-	bool running;
 
 	static log4cxx::LoggerPtr logger;
 public:

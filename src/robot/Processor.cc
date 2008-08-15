@@ -3,13 +3,14 @@
  */
 
 #include <ltdl.h>
+//#include <dlfcn.h>
 #include <pthread.h>
+#include <signal.h>
 #include "Processor.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("robot.Processor"));
 
 Processor::Processor() {
-	this->running = false;
 }
 
 Processor::~Processor() {
@@ -24,7 +25,6 @@ void *run_processor_thread(void *ptr) {
 
 void Processor::Start() {
 	threads = new pthread_t[nThreads];
-	running = true;
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)this);
@@ -32,7 +32,9 @@ void Processor::Start() {
 }
 
 void Processor::Stop() {
-	this->running = false;
+	for (int i = 0; i < nThreads; i++) {
+		pthread_kill(threads[i], 9);
+	}
 }
 
 void *Processor::loadLibrary(const char *lib, const char *sym) {
@@ -45,5 +47,13 @@ void *Processor::loadLibrary(const char *lib, const char *sym) {
 	}
 	void *p = lt_dlsym(handle, sym);
 	return p;
+//	void *handle = dlopen(lib, RTLD_NOW);
+//	if (handle == NULL) {
+//		fprintf(stderr, "... %s\n", dlerror());
+//		LOG4CXX_ERROR(logger, "Cannot load library");
+//		return NULL;
+//	}
+//	void *p = dlsym(handle, sym);
+//	return p;
 }
 

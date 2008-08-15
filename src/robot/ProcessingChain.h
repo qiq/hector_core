@@ -17,8 +17,6 @@ class ProcessingChain {
 	vector<ResourceQueue*> queues;
 	int queueSize;
 
-	bool running;
-
 	static log4cxx::LoggerPtr logger;
 public:
 	ProcessingChain();

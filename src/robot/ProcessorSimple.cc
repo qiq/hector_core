@@ -14,7 +14,7 @@ ProcessorSimple::~ProcessorSimple() {
 
 void ProcessorSimple::runThread() {
 	// get one item from srcQueue, process it and put it into dstQueue
-	while (running)  {
+	while (1)  {
 		Resource *resource = srcQueue->getResource(true);
 		vector<ModuleSimple*>::iterator iter;
 		for (iter = modules.begin(); iter != modules.end(); iter++) {

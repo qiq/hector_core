@@ -22,13 +22,17 @@ bool parseConfig(const char *fileName) {
 	for (int i = 0; i < run; i++) {
 		const char *processName = config->getValue("robot", "run", i);
 		const char *pType = config->getType(processName);
-		if (!strcmp(pType, "ProcessingChain")) {
+		if (pType && !strcmp(pType, "ProcessingChain")) {
 			ProcessingChain *pc = new ProcessingChain();
 			if (!pc->Init(config, processName))
 				return false;
 			processingChains.push_back(pc);
 		} else {
-			LOG4CXX_ERROR(logger, "Unknown process type: " << pType);
+			if (pType) {
+				LOG4CXX_ERROR(logger, "Unknown process type: " << pType);
+			} else {
+				LOG4CXX_ERROR(logger, "Missing process: " << processName);
+			}
 		}
 	}
 	return true;
@@ -45,10 +49,26 @@ int main(int argc, char *argv[]) {
 	// create HTTP server
 	RobotHTTPServer *server = new RobotHTTPServer(NULL, 1234);
 	server->RestrictAccess("127.0.0.1");
-	server->Start(2);
+
+	// start everything
+	server->Start(1);
+	//TODO: start website (load them from disk)
+	for (unsigned i = 0; i < processingChains.size(); i++) {
+		processingChains[i]->Start();
+	}
 
 	printf("Server running\n");
 	char s[10];
 	fgets(s, sizeof(s), stdin);
+
+	// stop everything
+	for (unsigned i = 0; i < processingChains.size(); i++) {
+		processingChains[i]->Stop();
+	}
+	server->Stop();
+
+	printf("Finishing\n");
+	fgets(s, sizeof(s), stdin);
+
 	exit(0);
 }

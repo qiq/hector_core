@@ -13,7 +13,7 @@ ProcessorInput::~ProcessorInput() {
 
 void ProcessorInput::runThread() {
 	// get one item from somewhere, process it and put it into dstQueue
-	while (running)  {
+	while (1)  {
 		Resource *resource = new Resource();
 		module->Process(resource);
 		dstQueue->putResource(resource, true);
