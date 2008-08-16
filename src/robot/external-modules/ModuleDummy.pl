@@ -70,13 +70,13 @@ while (1) {
 	my $a = &readBytes(4);
 	if (length($a) != 4) {
 		print STDERR "Cannot read 4 bytes\n";
-		next;
+		exit;
 	}
 	my $len = &bytes2int($a);
 	my $sin = &readBytes($len);
 	if (length($sin) != $len) {
 		print STDERR "Cannot read message\n";
-		next;
+		exit;
 	}
 
 	my $r = ProtoBuf::Resource::Resource->new;
@@ -89,11 +89,11 @@ while (1) {
 	my $w = &writeBytes($b);
 	if ($w != 4) {
 		print STDERR "Cannot write 4 bytes\n";
-		next;
+		exit;
 	}
 	my $w = &writeBytes($sout);
 	if ($w != $len) {
 		print STDERR "Cannot write message\n";
-		next;
+		exit;
 	}
 }

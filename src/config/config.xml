@@ -39,7 +39,7 @@
 	</ModuleInput>
 
 	<ProcessorSimple name="external-test">
-		<threads>2</threads>
+		<threads>1</threads>
 		<module>external-test-module</module>
 		<maxRequests>100</maxRequests>
 	</ProcessorSimple>

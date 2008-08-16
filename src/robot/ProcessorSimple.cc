@@ -10,17 +10,36 @@ ProcessorSimple::ProcessorSimple(ResourceQueue *srcQueue, ResourceQueue *dstQueu
 }
 
 ProcessorSimple::~ProcessorSimple() {
+	vector<ModuleSimple*>::iterator iter;
+	for (iter = modules.begin(); iter != modules.end(); iter++) {
+		delete (*iter);
+	}
+}
+
+static void delete_resource(void *ptr) {
+	Resource *resource = (Resource *)ptr;
+	delete resource;
 }
 
 void ProcessorSimple::runThread() {
 	// get one item from srcQueue, process it and put it into dstQueue
 	while (1)  {
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 		Resource *resource = srcQueue->getResource(true);
+		pthread_cleanup_push(delete_resource, resource);
+		pthread_testcancel();
+		pthread_cleanup_pop(0);
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 		vector<ModuleSimple*>::iterator iter;
 		for (iter = modules.begin(); iter != modules.end(); iter++) {
 			(*iter)->Process(resource);
 		}
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_cleanup_push(delete_resource, resource);
 		dstQueue->putResource(resource, true);
+		pthread_cleanup_pop(0);
+		pthread_testcancel();
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	}
 }
 

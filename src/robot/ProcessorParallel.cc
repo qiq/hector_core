@@ -9,33 +9,70 @@ ProcessorParallel::ProcessorParallel(ResourceQueue *srcQueue, ResourceQueue *dst
 	this->dstQueue = dstQueue;
 	module = NULL;
 	maxRequests = 0;
+
+	inputResources = NULL;
+	outputResources = NULL;
 }
 
 ProcessorParallel::~ProcessorParallel() {
+	delete module;
+	delete inputResources;
+	delete outputResources;
+}
+
+static void delete_resource(void *ptr) {
+	ProcessorParallel *pp = (ProcessorParallel *)ptr;
+	pp->deleteResources();
+}
+
+void ProcessorParallel::deleteResources() {
+	if (inputResources) {
+		for (int i = 0; inputResources[i] != NULL; i++) {
+			delete inputResources[i];
+		}
+	}
+	if (outputResources) {
+		for (int i = 0; i < finishedResources; i++) {
+			delete outputResources[i];
+		}
+	}
 }
 
 void ProcessorParallel::runThread() {
-	Resource **inputRequests = new Resource*[maxRequests+1];
-	Resource **outputRequests = new Resource*[maxRequests+1];
-	int activeRequests = 0, finishedRequests = 0;
-	while (finishedRequests > 0)  {
-		// get up to maxRequests Requests items from the srcQueue, blocked in case we have no running requests
-		int n = srcQueue->getResources(inputRequests, maxRequests-activeRequests, activeRequests == 0);
-		inputRequests[n] = NULL;
-		activeRequests += n;
+	inputResources = new Resource*[maxRequests+1];
+	outputResources = new Resource*[maxRequests+1];
+	activeResources = 0;
+	finishedResources = 0;
+	inputResources[0] = NULL;
+	while (1)  {
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_cleanup_push(delete_resource, (void*)this);
+		// get up to maxRequests Resources items from the srcQueue, blocked in case we have no running requests
+		int n = srcQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0);
+		inputResources[activeResources+n] = NULL;
+		activeResources += n;
+		pthread_testcancel();
+		pthread_cleanup_pop(0);
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
 		// process new requests, get finished requests
-		n = module->Process(inputRequests, outputRequests + finishedRequests);
-		finishedRequests += n;
+		int n = module->Process(inputResources, outputResources + finishedResources);
+		finishedResources += n;
+		inputResources[0] = NULL;
 		
 		// put requests into dstQueue, blocked in case we have no running requests
-		n = dstQueue->putResources(outputRequests, finishedRequests, activeRequests == 0);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_cleanup_push(delete_resource, (void*)this);
+		int n = dstQueue->putResources(outputResources, finishedResources, activeResources == 0);
 		// TODO: use cyclic buffer instead of copying?
-		for (int i = 0; i < finishedRequests-n; i++) {
-			outputRequests[i] = outputRequests[n+i];
+		for (int i = 0; i < finishedResources-n; i++) {
+			outputResources[i] = outputResources[n+i];
 		}
-		finishedRequests -= n;
-		activeRequests -= n;
+		finishedResources -= n;
+		activeResources -= n;
+		pthread_testcancel();
+		pthread_cleanup_pop(0);
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	}
 }
 

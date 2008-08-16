@@ -17,7 +17,7 @@ Processor::~Processor() {
 }
 
 void *run_processor_thread(void *ptr) {
-	pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	Processor *module = (Processor *)ptr;
 	module->runThread();
 	return NULL;
@@ -33,7 +33,15 @@ void Processor::Start() {
 
 void Processor::Stop() {
 	for (int i = 0; i < nThreads; i++) {
-		pthread_kill(threads[i], 9);
+//fprintf(stderr, "cancelling (%lx)\n", threads[i]);
+		pthread_cancel(threads[i]);
+//fprintf(stderr, "canceled (%lx)\n", threads[i]);
+	}
+	void *status = NULL;
+	for (int i = 0; i < nThreads; i++) {
+//fprintf(stderr, "joining (%lx)\n", threads[i]);
+		pthread_join(threads[i], &status);
+//fprintf(stderr, "joined (%lx)\n", threads[i]);
 	}
 }
 

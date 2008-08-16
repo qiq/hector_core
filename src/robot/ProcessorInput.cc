@@ -6,9 +6,16 @@ log4cxx::LoggerPtr ProcessorInput::logger(log4cxx::Logger::getLogger("robot.Proc
 
 ProcessorInput::ProcessorInput(ResourceQueue *dstQueue) {
 	this->dstQueue = dstQueue;
+	this->module = NULL;
 }
 
 ProcessorInput::~ProcessorInput() {
+	delete module;
+}
+
+static void delete_resource(void *ptr) {
+	Resource *resource = (Resource *)ptr;
+	delete resource;
 }
 
 void ProcessorInput::runThread() {
@@ -16,7 +23,12 @@ void ProcessorInput::runThread() {
 	while (1)  {
 		Resource *resource = new Resource();
 		module->Process(resource);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_cleanup_push(delete_resource, resource);
+		pthread_testcancel();
 		dstQueue->putResource(resource, true);
+		pthread_cleanup_pop(0);
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	}
 }
 

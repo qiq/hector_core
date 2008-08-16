@@ -5,13 +5,33 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 
 log4cxx::LoggerPtr ExternalProcess::logger(log4cxx::Logger::getLogger("robot.ExternalProcess"));
 
 ExternalProcess::ExternalProcess() {
 	stderr_buffer_len = 0;
+	pid = 0;
+	fdin = -1;
+	fdout = -1;
+	fderr = -1;
 }
+
+ExternalProcess::~ExternalProcess() {
+	if (fdin != -1)
+		close(fdin);
+	if (fdout != -1)
+		close(fdout);
+	if (fderr != -1)
+		close(fderr);
+	if (pid) {
+		readWrite(NULL, 0, NULL, 0, false);
+		kill(pid, 9);
+fprintf(stderr, "killing pid: %d\n", pid);
+	}
+}
+
 
 bool ExternalProcess::Init(const char *path, const char *argv[]) {
 	int pipein[2];
@@ -93,7 +113,7 @@ int ExternalProcess::readWrite(const char *writeBuffer, int writeBufferLen, char
 		struct timeval select_timeout = { 0, 0 };
 		int ready = select(fdmax+1, &read_fd, write_done ? NULL : &write_fd, NULL, read_done && write_done ? &select_timeout : NULL);
 		if (ready < 0) {
-			LOG4CXX_ERROR(logger, "Error selecting");
+			LOG4CXX_ERROR(logger, "Error selecting: " << strerror(errno));
 			return -1;
 		}
 		// timeout
