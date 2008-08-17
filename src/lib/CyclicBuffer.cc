@@ -14,7 +14,7 @@ CyclicBuffer<T>::CyclicBuffer(int size) {
 
 template <class T>
 CyclicBuffer<T>::~CyclicBuffer() {
-	delete buffer;
+	delete[] buffer;
 }
 
 template <class T>

@@ -11,10 +11,12 @@
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("robot.Processor"));
 
 Processor::Processor() {
+	threads = NULL;
 	running = false;
 }
 
 Processor::~Processor() {
+	delete[] threads;
 }
 
 bool Processor::Running() {

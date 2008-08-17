@@ -9,7 +9,7 @@ bool ModuleDummy::Init(Config *config, const char *name) {
 }
 
 void ModuleDummy::Process(Resource *resource) {
-//	fprintf(stderr, "Dummy: processing resource %s\n", resource->getURL());
+	fprintf(stderr, "Dummy: processing resource %s\n", resource->getURL());
 	return;
 }
 

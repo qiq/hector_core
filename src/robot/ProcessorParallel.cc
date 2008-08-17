@@ -9,40 +9,17 @@ ProcessorParallel::ProcessorParallel(SyncQueue<Resource> *srcQueue, SyncQueue<Re
 	this->dstQueue = dstQueue;
 	module = NULL;
 	maxRequests = 0;
-
-	inputResources = NULL;
-	outputResources = NULL;
 }
 
 ProcessorParallel::~ProcessorParallel() {
 	delete module;
-	delete inputResources;
-	delete outputResources;
-}
-
-static void delete_resource(void *ptr) {
-	ProcessorParallel *pp = (ProcessorParallel *)ptr;
-	pp->deleteResources();
-}
-
-void ProcessorParallel::deleteResources() {
-	if (inputResources) {
-		for (int i = 0; inputResources[i] != NULL; i++) {
-			delete inputResources[i];
-		}
-	}
-	if (outputResources) {
-		for (int i = 0; i < finishedResources; i++) {
-			delete outputResources[i];
-		}
-	}
 }
 
 void ProcessorParallel::runThread() {
-	inputResources = new Resource*[maxRequests+1];
-	outputResources = new Resource*[maxRequests+1];
-	activeResources = 0;
-	finishedResources = 0;
+	Resource **inputResources = new Resource*[maxRequests+1];
+	Resource **outputResources = new Resource*[maxRequests+1];
+	int activeResources = 0;
+	int finishedResources = 0;
 	inputResources[0] = NULL;
 	while (Running())  {
 		// get up to maxRequests Resources items from the srcQueue, blocked in case we have no running requests
@@ -64,6 +41,14 @@ void ProcessorParallel::runThread() {
 		finishedResources -= n;
 		activeResources -= n;
 	}
+	for (int i = 0; inputResources[i] != NULL; i++) {
+		delete inputResources[i];
+	}
+	delete[] inputResources;
+	for (int i = 0; i < finishedResources; i++) {
+		delete outputResources[i];
+	}
+	delete[] outputResources;
 }
 
 bool ProcessorParallel::Init(Config *config, const char *name) {

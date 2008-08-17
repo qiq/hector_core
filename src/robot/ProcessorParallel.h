@@ -18,18 +18,12 @@ class ProcessorParallel : public Processor {
 	int requests;
 	int maxRequests;
 
-	Resource **inputResources;
-	Resource **outputResources;
-	int activeResources;
-	int finishedResources;
-
 	static log4cxx::LoggerPtr logger;
 public:
 	ProcessorParallel(SyncQueue<Resource> *srcQueue, SyncQueue<Resource> *dstQueue);
 	virtual ~ProcessorParallel();
 	void runThread();
 	bool Init(Config *config, const char *name);
-	void deleteResources();
 };
 
 #endif

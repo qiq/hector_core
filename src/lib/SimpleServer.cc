@@ -26,7 +26,7 @@ SimpleServer::SimpleServer(const char *addr, int port) {
 }
 
 SimpleServer::~SimpleServer() {
-	delete threads;
+	delete[] threads;
 }
 
 bool SimpleServer::Running() {
