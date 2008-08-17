@@ -4,7 +4,7 @@
 
 log4cxx::LoggerPtr ProcessorOutput::logger(log4cxx::Logger::getLogger("robot.ProcessorOutput"));
 
-ProcessorOutput::ProcessorOutput(ResourceQueue *srcQueue) {
+ProcessorOutput::ProcessorOutput(SyncQueue<Resource> *srcQueue) {
 	this->srcQueue = srcQueue;
 }
 
@@ -16,19 +16,13 @@ ProcessorOutput::~ProcessorOutput() {
 }
 
 static void delete_resource(void *ptr) {
-	Resource *resource = (Resource *)ptr;
-	delete resource;
+	delete (Resource*)ptr;
 }
 
 void ProcessorOutput::runThread() {
 	// get one item from srcQueue, process it and destroy
-	while (1)  {
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		Resource *resource = srcQueue->getResource(true);
-		pthread_cleanup_push(delete_resource, resource);
-		pthread_testcancel();
-		pthread_cleanup_pop(0);
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	while (Running())  {
+		Resource *resource = srcQueue->getItem(true);
 		vector<ModuleOutput*>::iterator iter;
 		for (iter = modules.begin(); iter != modules.end(); iter++) {
 			(*iter)->Process(resource);

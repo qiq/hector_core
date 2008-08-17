@@ -4,7 +4,7 @@
 
 log4cxx::LoggerPtr ProcessorSimple::logger(log4cxx::Logger::getLogger("robot.ProcessorSimple"));
 
-ProcessorSimple::ProcessorSimple(ResourceQueue *srcQueue, ResourceQueue *dstQueue) {
+ProcessorSimple::ProcessorSimple(SyncQueue<Resource> *srcQueue, SyncQueue<Resource> *dstQueue) {
 	this->srcQueue = srcQueue;
 	this->dstQueue = dstQueue;
 }
@@ -17,29 +17,18 @@ ProcessorSimple::~ProcessorSimple() {
 }
 
 static void delete_resource(void *ptr) {
-	Resource *resource = (Resource *)ptr;
-	delete resource;
+	delete (Resource *)ptr;
 }
 
 void ProcessorSimple::runThread() {
 	// get one item from srcQueue, process it and put it into dstQueue
-	while (1)  {
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		Resource *resource = srcQueue->getResource(true);
-		pthread_cleanup_push(delete_resource, resource);
-		pthread_testcancel();
-		pthread_cleanup_pop(0);
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+	while (Running())  {
+		Resource *resource = srcQueue->getItem(true);
 		vector<ModuleSimple*>::iterator iter;
 		for (iter = modules.begin(); iter != modules.end(); iter++) {
 			(*iter)->Process(resource);
 		}
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		pthread_cleanup_push(delete_resource, resource);
-		dstQueue->putResource(resource, true);
-		pthread_cleanup_pop(0);
-		pthread_testcancel();
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+		dstQueue->putItem(resource, true);
 	}
 }
 

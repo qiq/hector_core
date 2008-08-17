@@ -8,18 +8,21 @@
 #include <log4cxx/logger.h>
 #include <pthread.h>
 #include "Config.h"
-#include "Resource.h"
-#include "ResourceQueue.h"
+#include "Lock.h"
 
 class Processor {
 protected:
 	int nThreads;
 	pthread_t *threads;
 
+	Lock running_lock;
+	bool running;
+
 	static log4cxx::LoggerPtr logger;
 public:
 	Processor();
 	virtual ~Processor();
+	virtual bool Running();
 	virtual void runThread() = 0;
 	virtual bool Init(Config *config, const char *name) = 0;
 	virtual void Start();

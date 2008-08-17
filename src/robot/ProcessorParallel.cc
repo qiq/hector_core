@@ -4,7 +4,7 @@
 
 log4cxx::LoggerPtr ProcessorParallel::logger(log4cxx::Logger::getLogger("robot.ProcessorParallel"));
 
-ProcessorParallel::ProcessorParallel(ResourceQueue *srcQueue, ResourceQueue *dstQueue) {
+ProcessorParallel::ProcessorParallel(SyncQueue<Resource> *srcQueue, SyncQueue<Resource> *dstQueue) {
 	this->srcQueue = srcQueue;
 	this->dstQueue = dstQueue;
 	module = NULL;
@@ -44,35 +44,25 @@ void ProcessorParallel::runThread() {
 	activeResources = 0;
 	finishedResources = 0;
 	inputResources[0] = NULL;
-	while (1)  {
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		pthread_cleanup_push(delete_resource, (void*)this);
+	while (Running())  {
 		// get up to maxRequests Resources items from the srcQueue, blocked in case we have no running requests
-		int n = srcQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0);
+		int n = srcQueue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
 		inputResources[activeResources+n] = NULL;
 		activeResources += n;
-		pthread_testcancel();
-		pthread_cleanup_pop(0);
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
 		// process new requests, get finished requests
-		int n = module->Process(inputResources, outputResources + finishedResources);
+		n = module->Process(inputResources, outputResources + finishedResources);
 		finishedResources += n;
 		inputResources[0] = NULL;
 		
 		// put requests into dstQueue, blocked in case we have no running requests
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		pthread_cleanup_push(delete_resource, (void*)this);
-		int n = dstQueue->putResources(outputResources, finishedResources, activeResources == 0);
+		n = dstQueue->putItems(outputResources, finishedResources, activeResources == 0);
 		// TODO: use cyclic buffer instead of copying?
 		for (int i = 0; i < finishedResources-n; i++) {
 			outputResources[i] = outputResources[n+i];
 		}
 		finishedResources -= n;
 		activeResources -= n;
-		pthread_testcancel();
-		pthread_cleanup_pop(0);
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	}
 }
 

@@ -10,11 +10,11 @@
 #include "common.h"
 #include "Processor.h"
 #include "Resource.h"
-#include "ResourceQueue.h"
+#include "SyncQueue.h"
 
 class ProcessingChain {
 	vector<Processor*> processors;
-	vector<ResourceQueue*> queues;
+	vector<SyncQueue<Resource>*> queues;
 	int queueSize;
 
 	static log4cxx::LoggerPtr logger;

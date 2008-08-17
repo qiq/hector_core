@@ -27,8 +27,7 @@ ExternalProcess::~ExternalProcess() {
 		close(fderr);
 	if (pid) {
 		readWrite(NULL, 0, NULL, 0, false);
-		kill(pid, 9);
-fprintf(stderr, "killing pid: %d\n", pid);
+		kill(-pid, 9);
 	}
 }
 
@@ -68,6 +67,7 @@ bool ExternalProcess::Init(const char *path, const char *argv[]) {
 		close(pipeerr[0]);
 		close(pipeerr[1]);
 
+		setsid();
 		if (execvp(path, (char * const*)argv) == -1) {
 			LOG4CXX_ERROR(logger, "Cannot exec: " << strerror(errno));
 		}

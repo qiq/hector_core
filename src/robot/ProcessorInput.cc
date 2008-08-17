@@ -4,7 +4,7 @@
 
 log4cxx::LoggerPtr ProcessorInput::logger(log4cxx::Logger::getLogger("robot.ProcessorInput"));
 
-ProcessorInput::ProcessorInput(ResourceQueue *dstQueue) {
+ProcessorInput::ProcessorInput(SyncQueue<Resource> *dstQueue) {
 	this->dstQueue = dstQueue;
 	this->module = NULL;
 }
@@ -14,21 +14,15 @@ ProcessorInput::~ProcessorInput() {
 }
 
 static void delete_resource(void *ptr) {
-	Resource *resource = (Resource *)ptr;
-	delete resource;
+	delete (Resource*)ptr;
 }
 
 void ProcessorInput::runThread() {
 	// get one item from somewhere, process it and put it into dstQueue
-	while (1)  {
+	while (Running())  {
 		Resource *resource = new Resource();
 		module->Process(resource);
-		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-		pthread_cleanup_push(delete_resource, resource);
-		pthread_testcancel();
-		dstQueue->putResource(resource, true);
-		pthread_cleanup_pop(0);
-		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+		dstQueue->putItem(resource, true);
 	}
 }
 

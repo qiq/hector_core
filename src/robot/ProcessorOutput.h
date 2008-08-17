@@ -6,16 +6,18 @@
 #define _PROCESSOR_OUTPUT_H_
 
 #include <log4cxx/logger.h>
+#include "SyncQueue.h"
+#include "Resource.h"
 #include "Processor.h"
 #include "ModuleOutput.h"
 
 class ProcessorOutput : public Processor {
-	ResourceQueue *srcQueue;
+	SyncQueue<Resource> *srcQueue;
 	vector<ModuleOutput*> modules;
 
 	static log4cxx::LoggerPtr logger;
 public:
-	ProcessorOutput(ResourceQueue *srcQueue);
+	ProcessorOutput(SyncQueue<Resource> *srcQueue);
 	~ProcessorOutput();
 	void runThread();
 	bool Init(Config *config, const char *name);

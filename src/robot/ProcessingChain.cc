@@ -51,7 +51,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorInput must be first)");
 				return false;
 			}
-			ResourceQueue *rqDst = new ResourceQueue(queueSize);
+			SyncQueue<Resource> *rqDst = new SyncQueue<Resource>(queueSize);
 			queues.push_back(rqDst);
 			Processor *p = new ProcessorInput(rqDst);
 			if (!p->Init(config, item))
@@ -62,8 +62,8 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorSimple cannot be first or last in a chain)");
 				return false;
 			}
-			ResourceQueue *rqSrc = queues.back();
-			ResourceQueue *rqDst = new ResourceQueue(queueSize);
+			SyncQueue<Resource> *rqSrc = queues.back();
+			SyncQueue<Resource> *rqDst = new SyncQueue<Resource>(queueSize);
 			queues.push_back(rqDst);
 			Processor *p = new ProcessorSimple(rqSrc, rqDst);
 			if (!p->Init(config, item))
@@ -74,8 +74,8 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorParallel cannot be first or last in a chain)");
 				return false;
 			}
-			ResourceQueue *rqSrc = queues.back();
-			ResourceQueue *rqDst = new ResourceQueue(queueSize);
+			SyncQueue<Resource> *rqSrc = queues.back();
+			SyncQueue<Resource> *rqDst = new SyncQueue<Resource>(queueSize);
 			queues.push_back(rqDst);
 			Processor *p = new ProcessorParallel(rqSrc, rqDst);
 			if (!p->Init(config, item))
@@ -86,7 +86,7 @@ bool ProcessingChain::Init(Config *config, const char *name) {
 				LOG_CONFIG_ERROR0(logger, config->getXMLline(name, "item"), config->getXMLcolumn(name, "item"), "Invalid module (ProcessorOutput must be last)");
 				return false;
 			}
-			ResourceQueue *rqSrc = queues.back();
+			SyncQueue<Resource> *rqSrc = queues.back();
 			Processor *p = new ProcessorOutput(rqSrc);
 			if (!p->Init(config, item))
 				return false;
@@ -107,6 +107,11 @@ void ProcessingChain::Start() {
 }
 
 void ProcessingChain::Stop() {
+	// cancel waiting threads
+	for (unsigned i = 0; i < queues.size(); i++) {
+		queues[i]->cancelAll();
+	}
+	// cancel running threads and join all threads
 	for (unsigned i = 0; i < processors.size(); i++) {
 		processors[i]->Stop();
 	}

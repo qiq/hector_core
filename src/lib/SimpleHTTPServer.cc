@@ -2,15 +2,14 @@
  * Simple multi-threaded server
  */
 
-#include <pthread.h>
 #include "SimpleHTTPServer.h"
 #include "SimpleHTTPConn.h"
 
-void SimpleHTTPServer::ServiceThread(int fd) {
-	pthread_detach(pthread_self());
+void SimpleHTTPServer::Request(int fd) {
 	SimpleHTTPConn *conn = new SimpleHTTPConn(fd);
 	while (1) {
-		bool result = conn->readRequest();
+		bool result;
+		result = conn->readRequest();
 		// timeout or error
 		if (!result)
 			break;
@@ -19,12 +18,11 @@ void SimpleHTTPServer::ServiceThread(int fd) {
 			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
 			conn->errorResponse(501, "Not implemented", s);
 		}
+
 		conn->sendResponse();
 		if (!conn->isKeepAlive())
 			break; 
 		conn->clear();
 	}
 	delete conn;
-	decreaseThreadCount();
-	pthread_exit(0);
 }

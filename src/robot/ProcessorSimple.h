@@ -7,17 +7,19 @@
 
 #include <log4cxx/logger.h>
 #include <vector>
+#include "SyncQueue.h"
+#include "Resource.h"
 #include "Processor.h"
 #include "ModuleSimple.h"
 
 class ProcessorSimple : public Processor {
-	ResourceQueue *srcQueue;
-	ResourceQueue *dstQueue;
+	SyncQueue<Resource> *srcQueue;
+	SyncQueue<Resource> *dstQueue;
 	vector<ModuleSimple*> modules;
 
 	static log4cxx::LoggerPtr logger;
 public:
-	ProcessorSimple(ResourceQueue *srcQueue, ResourceQueue *dstQueue);
+	ProcessorSimple(SyncQueue<Resource> *srcQueue, SyncQueue<Resource> *dstQueue);
 	virtual ~ProcessorSimple();
 	void runThread();
 	bool Init(Config *config, const char *name);

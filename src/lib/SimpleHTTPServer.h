@@ -15,7 +15,7 @@ public:
 
 	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
 
-	void ServiceThread(int fd);
+	void Request(int fd);
 };
 
 #endif

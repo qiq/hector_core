@@ -6,12 +6,14 @@
 #define _PROCESSOR_PARALLEL_H_
 
 #include <log4cxx/logger.h>
+#include "SyncQueue.h"
+#include "Resource.h"
 #include "Processor.h"
 #include "ModuleParallel.h"
 
 class ProcessorParallel : public Processor {
-	ResourceQueue *srcQueue;
-	ResourceQueue *dstQueue;
+	SyncQueue<Resource> *srcQueue;
+	SyncQueue<Resource> *dstQueue;
 	ModuleParallel *module;
 	int requests;
 	int maxRequests;
@@ -23,7 +25,7 @@ class ProcessorParallel : public Processor {
 
 	static log4cxx::LoggerPtr logger;
 public:
-	ProcessorParallel(ResourceQueue *srcQueue, ResourceQueue *dstQueue);
+	ProcessorParallel(SyncQueue<Resource> *srcQueue, SyncQueue<Resource> *dstQueue);
 	virtual ~ProcessorParallel();
 	void runThread();
 	bool Init(Config *config, const char *name);

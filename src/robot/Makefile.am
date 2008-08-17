@@ -13,7 +13,6 @@ robot_SOURCES = \
 	Robot.cc \
 	Resource.h Resource.cc \
 	Resource.pb.h Resource.pb.cc Resource.proto \
-	ResourceQueue.h ResourceQueue.cc \
 	RobotHTTPServer.h RobotHTTPServer.cc \
 	ProcessingChain.h ProcessingChain.cc \
 	Processor.h Processor.cc \
@@ -29,7 +28,7 @@ robot_SOURCES = \
 	ExternalProcess.h ExternalProcess.cc
 
 robot_CXXFLAGS = -I ../lib -I /usr/local/lib
-robot_LDFLAGS = -Wl,-export-dynamic
+robot_LDFLAGS = -Wl,-export-dynamic -ggdb
 robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf -llog4cxx
 
 Resource.pb.cc Resource.pb.h: Resource.proto

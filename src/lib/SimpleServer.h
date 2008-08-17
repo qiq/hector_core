@@ -8,11 +8,12 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <log4cxx/logger.h>
 #include <string>
 #include <ext/hash_set>
 #include "common.h"
-#include "Lock.h"
+#include "SyncQueue.h"
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;
@@ -21,27 +22,32 @@ class SimpleServer {
 	struct in_addr server_addr;
 	int server_port;
 
-	int max_threads;
-	CondLock *lock;		// guarding thread_count
-	int thread_count;
-	pthread_t tid;
+	pthread_t main_thread;
+	int main_socket;
 
-	stdext::hash_set<string, string_hash> *allowed_client;
-	int running;
+	int nThreads;
+	SyncQueue<int> queue;
+	pthread_t *threads;
+
+	Lock running_lock;
+	bool running;
+
+	stdext::hash_set<string, string_hash> allowed_client;
 
 	static log4cxx::LoggerPtr logger;
 public:
 	SimpleServer(const char *addr, int port);
 	~SimpleServer();
+	bool Running();
 	void RestrictAccess(const char *addr);
 	void Start(int maxThreads);
 	void Stop();
 
-	void increaseThreadCount();
-	void decreaseThreadCount();
+	void ServiceThread();
+	void MainCleanup();
 	void MainThread();
 
-	virtual void ServiceThread(int fd) = 0;
+	virtual void Request(int fd) = 0;
 };
 
 #endif

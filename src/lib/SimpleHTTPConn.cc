@@ -8,6 +8,8 @@
 
 #include <sys/select.h>
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
 #include "common.h"
 #include "SimpleHTTPConn.h"
 
@@ -20,7 +22,7 @@ SimpleHTTPConn::SimpleHTTPConn(int fd) {
 }
 
 SimpleHTTPConn::~SimpleHTTPConn() {
-	close(socket);
+	//close(socket);
 	delete header_fields;
 }
 
@@ -153,7 +155,7 @@ bool SimpleHTTPConn::readRequest() {
 		struct timeval timeout = { TIMEOUT, 0 };
 		int ready = select(socket+1, &recv_fd, NULL, NULL, &timeout);
 		if (ready < 0) {
-			LOG4CXX_ERROR(logger, "Error selecting");
+			LOG4CXX_ERROR(logger, "Error selecting: " << strerror(errno));
 			break;
 		}
 		if (ready == 0) {
@@ -164,7 +166,7 @@ bool SimpleHTTPConn::readRequest() {
 		char buffer[65537];
 		int r = read(socket, buffer, sizeof(buffer)-1);
 		if (r < 0) {
-			LOG4CXX_ERROR(logger, "Error reading from socket");
+			LOG4CXX_ERROR(logger, "Error reading from socket: " << strerror(errno));
 			break;
 		}
 		buffer[r] = '\0';

@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 	server->RestrictAccess("127.0.0.1");
 
 	// start everything
-	server->Start(1);
+	server->Start(5);
 	//TODO: start website (load them from disk)
 	for (unsigned i = 0; i < processingChains.size(); i++) {
 		processingChains[i]->Start();
@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
 	// stop everything
 	for (unsigned i = 0; i < processingChains.size(); i++) {
 		processingChains[i]->Stop();
+		delete processingChains[i];
 	}
 	server->Stop();
 

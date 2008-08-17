@@ -11,7 +11,7 @@ sub readBytes() {
 	while ($read_bytes < $len) {
 		my $s;
 		my $r = sysread(STDIN, $s, $len-$read_bytes);
-		if ($r < 0) {
+		if ($r <= 0) {
 			print STDERR "Cannot read from input\n";
 			return "";
 		}
@@ -29,7 +29,7 @@ sub writeBytes() {
 	my $written_bytes = 0;
 	while ($written_bytes < $len) {
 		my $w = syswrite(STDOUT, $buffer, $len-$written_bytes, $written_bytes);
-		if ($w < 0) {
+		if ($w <= 0) {
 			print STDERR "Cannot write to output\n";
 			return 0;
 		}
