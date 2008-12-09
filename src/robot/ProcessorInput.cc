@@ -13,10 +13,6 @@ ProcessorInput::~ProcessorInput() {
 	delete module;
 }
 
-static void delete_resource(void *ptr) {
-	delete (Resource*)ptr;
-}
-
 void ProcessorInput::runThread() {
 	// get one item from somewhere, process it and put it into dstQueue
 	while (Running())  {
@@ -65,4 +61,9 @@ bool ProcessorInput::Init(Config *config, const char *name) {
 		return false;
 
 	return true;
+}
+
+void ProcessorInput::createCheckpoint() {
+	if (module)
+		module->createCheckpoint();
 }

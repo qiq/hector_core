@@ -13,6 +13,8 @@ public:
 	virtual ~ModuleDummy() {}
 	virtual bool Init(Config *config, const char *name);
 	virtual void Process(Resource *resource);
+	virtual void createCheckpoint();
+	virtual string *getStatistics();
 };
 
 #endif

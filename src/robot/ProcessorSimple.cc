@@ -16,10 +16,6 @@ ProcessorSimple::~ProcessorSimple() {
 	}
 }
 
-static void delete_resource(void *ptr) {
-	delete (Resource *)ptr;
-}
-
 void ProcessorSimple::runThread() {
 	// get one item from srcQueue, process it and put it into dstQueue
 	while (Running())  {
@@ -71,4 +67,11 @@ bool ProcessorSimple::Init(Config *config, const char *name) {
 	}
 
 	return true;
+}
+
+void ProcessorSimple::createCheckpoint() {
+	vector<ModuleSimple*>::iterator iter;
+	for (iter = modules.begin(); iter != modules.end(); iter++) {
+		(*iter)->createCheckpoint();
+	}
 }

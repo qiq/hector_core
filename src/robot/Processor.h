@@ -27,6 +27,7 @@ public:
 	virtual bool Init(Config *config, const char *name) = 0;
 	virtual void Start();
 	virtual void Stop();
+	virtual void createCheckpoint() = 0;
 
 	void *loadLibrary(const char *lib, const char *sym);
 };

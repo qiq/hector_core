@@ -15,10 +15,6 @@ ProcessorOutput::~ProcessorOutput() {
 	}
 }
 
-static void delete_resource(void *ptr) {
-	delete (Resource*)ptr;
-}
-
 void ProcessorOutput::runThread() {
 	// get one item from srcQueue, process it and destroy
 	while (Running())  {
@@ -70,4 +66,11 @@ bool ProcessorOutput::Init(Config *config, const char *name) {
 	}
 
 	return true;
+}
+
+void ProcessorOutput::createCheckpoint() {
+	vector<ModuleOutput*>::iterator iter;
+	for (iter = modules.begin(); iter != modules.end(); iter++) {
+		(*iter)->createCheckpoint();
+	}
 }

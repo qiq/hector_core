@@ -18,6 +18,13 @@ void ModuleLoadResource::Process(Resource *resource) {
 	return;
 }
 
+void ModuleLoadResource::createCheckpoint() {
+}
+
+string *ModuleLoadResource::getStatistics() {
+	return new string();
+}
+
 // the class factories
 
 extern "C" ModuleInput* create() {

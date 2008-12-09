@@ -104,6 +104,13 @@ void ModuleExternalSimple::Process(Resource *resource) {
 	return;
 }
 
+void ModuleExternalSimple::createCheckpoint() {
+}
+
+string *ModuleExternalSimple::getStatistics() {
+	return new string();
+}
+
 // the class factories
 
 extern "C" ModuleSimple* create() {

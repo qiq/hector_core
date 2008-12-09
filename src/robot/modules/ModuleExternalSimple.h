@@ -25,6 +25,8 @@ public:
 	~ModuleExternalSimple();
 	bool Init(Config *config, const char *name);
 	void Process(Resource *resource);
+	virtual void createCheckpoint();
+	virtual string *getStatistics();
 };
 
 #endif

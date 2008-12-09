@@ -13,6 +13,8 @@ public:
 	Module() {};
 	virtual ~Module() {};
 	virtual bool Init(Config *config, const char *name) = 0;
+	virtual void createCheckpoint() = 0;
+	virtual string *getStatistics() = 0;
 };
 
 #endif

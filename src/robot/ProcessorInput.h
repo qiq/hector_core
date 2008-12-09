@@ -21,6 +21,7 @@ public:
 	~ProcessorInput();
 	void runThread();
 	bool Init(Config *config, const char *name);
+	virtual void createCheckpoint();
 };
 
 #endif

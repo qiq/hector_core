@@ -13,6 +13,13 @@ void ModuleSaveResource::Process(Resource *resource) {
 	return;
 }
 
+void ModuleSaveResource::createCheckpoint() {
+}
+
+string *ModuleSaveResource::getStatistics() {
+	return new string();
+}
+
 // the class factories
 
 extern "C" ModuleOutput* create() {

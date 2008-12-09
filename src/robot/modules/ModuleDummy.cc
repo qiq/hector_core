@@ -13,6 +13,13 @@ void ModuleDummy::Process(Resource *resource) {
 	return;
 }
 
+void ModuleDummy::createCheckpoint() {
+}
+
+string *ModuleDummy::getStatistics() {
+	return new string();
+}
+
 // factory functions
 
 extern "C" ModuleSimple* create() {

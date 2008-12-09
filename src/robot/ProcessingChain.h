@@ -24,6 +24,7 @@ public:
 	bool Init(Config *config, const char *name);
 	void Start();
 	void Stop();
+	void createCheckpoint();
 };
 
 #endif

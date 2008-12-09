@@ -102,3 +102,8 @@ bool ProcessorParallel::Init(Config *config, const char *name) {
 
 	return true;
 }
+
+void ProcessorParallel::createCheckpoint() {
+	if (module)
+		module->createCheckpoint();
+}
