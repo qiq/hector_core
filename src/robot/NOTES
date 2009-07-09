@@ -1,3 +1,20 @@
+- jaky je rozdil mezi parallel-module a select-module
+- select modul predelat tak, ze bude pouzivat umelou pipe pro testovani, jestli
+  ve vstupni fronte/frontach jsou nova data
+
+- ProcessorSimple: sekvence modulu, ModuleInput muze byt jen na nacatku,
+  ModuleOutput jen na konci, pocet vlaken = pocet paralelne provadenych sekvenci bloku
+- ProcessorSelect: jeden module, viz nize SelectModule
+- soucasti processoru jsou i vstupni fronty (trivialni v pripade, ze prvni
+  modul je ModuleInput)
+<Processor id="a">
+	<threads>10</threads>
+	<item>module1</item>
+	<item>module2</item>
+	<input ref="b" priority="0" tag="RESOURCE_DNS_TIMEOUT"/>
+</Processor>
+
+---
 
 START (start crawling), specifikuje frontu
 STOP

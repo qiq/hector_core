@@ -36,18 +36,14 @@ int readBytes(int fd, char *s, int length) {
 }
 
 uint32_t bytes2int(char (*bytes)[4]) {
-        uint32_t result = 0;
-        for (int i = 0; i < 4; i++) {
-                result = (result << 8) | (*bytes)[3-i];
-        }
-	return result;
+	return (*bytes)[3] << 24 | (*bytes[2]) << 16 | (*bytes[1]) << 8 | (*bytes[0]);
 }
 
 void int2bytes(uint32_t n, char (*bytes)[4]) {
-	for (int i = 0; i < 4; i++) {
-		(*bytes)[i] = (char)(n & 0xFF);
-		n >>= 8;
-	}
+	(*bytes)[0] = (char)(n & 0xFF);
+	(*bytes)[1] = (char)(n >> 8 & 0xFF);
+	(*bytes)[2] = (char)(n >> 16 & 0xFF);
+	(*bytes)[3] = (char)(n >> 24 & 0xFF);
 }
 
 /*void log_config_error(log4cxx::LoggerPtr logger, int line, int column, const char *msg, ...) {

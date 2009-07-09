@@ -164,7 +164,7 @@ Config::Config() {
 }
 
 Config::~Config() {
-	free(itemName);
+	xmlFree(itemName);
 }
 
 #ifndef LIBXML_READER_ENABLED

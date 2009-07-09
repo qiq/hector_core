@@ -1,6 +1,8 @@
 /**
- * Class representing a queue of items. Queue is synchronized, when full,
- * writers would block, if empty, readers would block.
+ * Class representing a queue of items.
+ *
+ * Queue is synchronized, when full, writers would block, if empty, readers
+ * would block.
  */
 
 #ifndef _SYNCQUEUE_H_
