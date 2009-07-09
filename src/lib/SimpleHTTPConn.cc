@@ -127,11 +127,11 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 }
 
 request_ready_t SimpleHTTPConn::requestReady() {
-	request_ready_t r = PARSED;
-	if (header_fields == NULL)
+	if (header_fields == NULL) {
 		r = parseRequestHeader();
-	if (r != PARSED)
-		return r;
+		if (r != PARSED)
+			return r;
+		}
 	// check there is enough data (for keep-alive)
 	if (keep_alive) {
 		if ((int)request_buffer.length()-request_body_offset < request_body_length)
@@ -262,7 +262,7 @@ void SimpleHTTPConn::sendResponse() {
 		}
 		int w = write(socket, (void *)result.data(), result.length()-send);
 		if (w < 0) {
-			LOG4CXX_ERROR(logger, "Error reading from socket");
+			LOG4CXX_ERROR(logger, "Error writing to socket");
 			break;
 		}
 		send += w;
