@@ -1,7 +1,7 @@
 SUBDIRS = . modules external-modules
 
-#AM_LDADD = -Wall
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 
 bin_PROGRAMS = robot
 
@@ -10,26 +10,26 @@ bin_PROGRAMS = robot
 #	ResourceQueue.h
 
 robot_SOURCES = \
-	Robot.cc \
-	Resource.h Resource.cc \
-	Resource.pb.h Resource.pb.cc Resource.proto \
-	RobotHTTPServer.h RobotHTTPServer.cc \
-	ProcessingChain.h ProcessingChain.cc \
-	Processor.h Processor.cc \
-	ProcessorInput.h ProcessorInput.cc \
-	ProcessorSimple.h ProcessorSimple.cc \
-	ProcessorParallel.h ProcessorParallel.cc \
-	ProcessorOutput.h ProcessorOutput.cc \
-	Module.h \
-	ModuleInput.h \
-	ModuleSimple.h \
-	ModuleParallel.h \
-	ModuleOutput.h \
-	ExternalProcess.h ExternalProcess.cc
+	Robot.cc  \
+	RobotHTTPServer.h RobotHTTPServer.cc
+#	Resource.h Resource.cc \
+#	Resource.pb.h Resource.pb.cc Resource.proto \
+#	ProcessingChain.h ProcessingChain.cc \
+#	Processor.h Processor.cc \
+#	ProcessorInput.h ProcessorInput.cc \
+#	ProcessorSimple.h ProcessorSimple.cc \
+#	ProcessorParallel.h ProcessorParallel.cc \
+#	ProcessorOutput.h ProcessorOutput.cc \
+#	Module.h \
+#	ModuleInput.h \
+#	ModuleSimple.h \
+#	ModuleParallel.h \
+#	ModuleOutput.h \
+#	ExternalProcess.h ExternalProcess.cc
 
-robot_CXXFLAGS = -I ../lib -I /usr/local/lib
+robot_CXXFLAGS = -I ../lib -I /usr/local/lib $(AM_CXXFLAGS)
 robot_LDFLAGS = -Wl,-export-dynamic -ggdb
-robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf -llog4cxx
+robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf $(AM_LDFLAGS)
 
 Resource.pb.cc Resource.pb.h: Resource.proto
 	/usr/local/bin/protoc Resource.proto --cpp_out=.

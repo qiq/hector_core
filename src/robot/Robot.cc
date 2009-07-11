@@ -18,23 +18,23 @@ bool parseConfig(const char *fileName) {
 	config->parseFile(fileName);
 
 	// find which programs we should run
-	int run = config->getSize("robot", "run");
-	for (int i = 0; i < run; i++) {
-		const char *processName = config->getValue("robot", "run", i);
-		const char *pType = config->getType(processName);
-		if (pType && !strcmp(pType, "ProcessingChain")) {
-			ProcessingChain *pc = new ProcessingChain();
-			if (!pc->Init(config, processName))
-				return false;
-			processingChains.push_back(pc);
-		} else {
-			if (pType) {
-				LOG4CXX_ERROR(logger, "Unknown process type: " << pType);
-			} else {
-				LOG4CXX_ERROR(logger, "Missing process: " << processName);
-			}
-		}
-	}
+//	int run = config->getSize("robot", "run");
+//	for (int i = 0; i < run; i++) {
+//		const char *processName = config->getValue("robot", "run", i);
+//		const char *pType = config->getType(processName);
+//		if (pType && !strcmp(pType, "ProcessingChain")) {
+//			ProcessingChain *pc = new ProcessingChain();
+//			if (!pc->Init(config, processName))
+//				return false;
+//			processingChains.push_back(pc);
+//		} else {
+//			if (pType) {
+//				LOG4CXX_ERROR(logger, "Unknown process type: " << pType);
+//			} else {
+//				LOG4CXX_ERROR(logger, "Missing process: " << processName);
+//			}
+//		}
+//	}
 	return true;
 }
 

@@ -1,8 +1,15 @@
+TODO:
+	- do kazdeho header souboru vlozit include <config.h>
+	- preorganizovat header soubory a la featurama v *.{cc,h}
+	- pridat @LOG4CXX_*@ a @LIBXML2_*@ do globalniho CXXFLAGS a LDFLAGS
+
 Obecne
 
 - C++ (+ nejake bindingy?)
 	- predevsim kvuli velikosti retezcu, dostupnosti knihoven
-- konfigurace v XML (libxml2 pro cteni)
+- konfigurace v XML (libxml2 pro cteni), ted se pouziva Reader, ale neni
+  idealni, protoze neumi rict, na kterem radku a sloupci se stala chyba ->
+  predelat na SAX2; pripadne cist po radcich (pomoci xmlReaderForIO -- vyzkouset).
 - knihovny:
 	- c-ares: async DNS
 	- libcurl: download
@@ -10,14 +17,16 @@ Obecne
 	- libtidy (HTML -> XHTML)
 - programy:
 	- djbcache: name server
+	- pdns_recursor, nebo si cachovat sam(?)
 - celkove: max. 8-16 GB RAM
 
 Struktura
 
 	- master, ktery zna vsechny domeny (ma v pameti)
 		- muze jich byt vic, propojenych one-to-one
-	- roboti, kteri znaji vsechny URL, co obsluhuji
-		- maji je v pameti (asi nejake trie?)
+		- staci hashe domen (hash domain->robotid)
+	- roboti, kteri znaji vsechna URL, co obsluhuji
+		- maji je v pameti (teda staci jejich hashe, predpokladame, ze jsou jednoznacne)
 		- + robots.txt
 
 MASTER

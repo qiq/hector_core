@@ -12,5 +12,5 @@ public:
 	CyclicBuffer(int size);
 	~CyclicBuffer();
 	bool push(const T &e);
-	bool pop(T &e);
+	bool shift(T &e);
 };

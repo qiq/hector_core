@@ -128,7 +128,7 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 
 request_ready_t SimpleHTTPConn::requestReady() {
 	if (header_fields == NULL) {
-		r = parseRequestHeader();
+		request_ready_t r = parseRequestHeader();
 		if (r != PARSED)
 			return r;
 		}

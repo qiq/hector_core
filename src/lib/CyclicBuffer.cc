@@ -27,7 +27,7 @@ inline bool CyclicBuffer<T>::push(const T &e) {
 }
 
 template <class T>
-inline bool CyclicBuffer<T>::pop(T &e) {
+inline bool CyclicBuffer<T>::shift(T &e) {
 	if (size == 0)
 		return false;
 	e = buffer[start];

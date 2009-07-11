@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <deque>
 #include "common.h"
-#include "Lock.h"
+#include "CondLock.h"
 
 using namespace std;
 

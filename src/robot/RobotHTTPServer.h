@@ -6,8 +6,8 @@
 #define _ROBOT_HTTP_SERVER_
 
 #include <pthread.h>
-#include "SimpleHTTPServer.h"
-#include "SimpleHTTPConn.h"
+#include "server/SimpleHTTPServer.h"
+#include "server/SimpleHTTPConn.h"
 
 class RobotHTTPServer : public SimpleHTTPServer {
 public:

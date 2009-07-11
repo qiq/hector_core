@@ -13,6 +13,7 @@
 #include <string>
 #include <ext/hash_set>
 #include "common.h"
+#include "CondLock.h"
 #include "SyncQueue.h"
 
 using namespace std;

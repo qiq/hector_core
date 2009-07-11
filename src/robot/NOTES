@@ -9,9 +9,11 @@
   modul je ModuleInput)
 <Processor id="a">
 	<threads>10</threads>
-	<item>module1</item>
-	<item>module2</item>
-	<input ref="b" priority="0" tag="RESOURCE_DNS_TIMEOUT"/>
+	<modules>
+		<item>module1</item>
+		<item>module2</item>
+	</modules>
+	<inputQueue srcProcessor="b" priority="0" tag="RESOURCE_DNS_TIMEOUT"/>
 </Processor>
 
 ---
