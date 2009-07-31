@@ -5,8 +5,10 @@
 #ifndef _SIMPLE_HTTP_SERVER_
 #define _SIMPLE_HTTP_SERVER_
 
-#include "SimpleServer.h"
+#include <config.h>
+
 #include "SimpleHTTPConn.h"
+#include "SimpleServer.h"
 
 class SimpleHTTPServer : public SimpleServer {
 public:

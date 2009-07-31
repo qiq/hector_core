@@ -5,10 +5,12 @@
 #ifndef _CONFIG_
 #define _CONFIG_
 
-#include <libxml/parser.h>
+#include <config.h>
+
 #include <limits.h>
-#include <vector>
 #include <string>
+#include <vector>
+#include <libxml/parser.h>
 #include "common.h"
 
 using namespace std;

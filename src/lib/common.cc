@@ -2,8 +2,11 @@
  * Common functions, macros, etc
  */
 
-#include "common.h"
+#include <config.h>
+
 #include <unistd.h>
+#include <ltdl.h>
+#include "common.h"
 
 int writeBytes(int fd, const char *s, int length) {
 	int written = 0;
@@ -55,3 +58,15 @@ void int2bytes(uint32_t n, char (*bytes)[4]) {
 	snprintf(s+strlen(s), 30, " [%d, %d]", line, column);
 	LOG4CXX_ERROR(logger, s);
 }*/
+
+void *loadLibrary(const char *lib, const char *sym) {
+	if (lt_dlinit() != 0)
+		return NULL;
+	}
+	lt_dlhandle handle = lt_dlopen(lib);
+	if (handle == NULL)
+		return NULL;
+	void *p = lt_dlsym(handle, sym);
+	return p;
+}
+

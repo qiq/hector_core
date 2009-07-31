@@ -4,11 +4,13 @@
  * we do not support:
  * - multi-line heaer fields
  * - pipelining
- */
+*/
 
+#include <config.h>
+
+#include <errno.h>
 #include <sys/select.h>
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
 #include "common.h"
 #include "SimpleHTTPConn.h"

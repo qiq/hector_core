@@ -5,14 +5,16 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include <config.h>
+
 #include <ctype.h>
 #include <errno.h>
-#include <stdint.h>
-#include <log4cxx/logger.h>
-#include <stdarg.h>
 #include <pthread.h>
-#include <string>
+#include <stdarg.h>
+#include <stdint.h>
 #include <ext/hash_set>
+#include <string>
+#include <log4cxx/logger.h>
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;
@@ -74,3 +76,5 @@ int readBytes(int fd, char *s, int length);
 
 uint32_t bytes2int(char (*bytes)[4]);
 void int2bytes(uint32_t n, char (*bytes)[4]);
+
+void *loadLibrary(const char *lib, const char *sym);

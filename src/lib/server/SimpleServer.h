@@ -5,6 +5,8 @@
 #ifndef _SIMPLE_SERVER_
 #define _SIMPLE_SERVER_
 
+#include <config.h>
+
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/socket.h>

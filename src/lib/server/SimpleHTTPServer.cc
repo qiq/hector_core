@@ -2,8 +2,10 @@
  * Simple multi-threaded server
  */
 
-#include "SimpleHTTPServer.h"
+#include <config.h>
+
 #include "SimpleHTTPConn.h"
+#include "SimpleHTTPServer.h"
 
 void SimpleHTTPServer::Request(int fd) {
 	SimpleHTTPConn *conn = new SimpleHTTPConn(fd);

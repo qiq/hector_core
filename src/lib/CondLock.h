@@ -5,6 +5,8 @@
 #ifndef _COND_LOCK_H_
 #define _COND_LOCK_H_
 
+#include <config.h>
+
 #include <pthread.h>
 #include "Lock.h"
 

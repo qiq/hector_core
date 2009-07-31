@@ -2,10 +2,10 @@
  * Simple parser for configuration files based on XML
  */
 
-#include "common.h"
-#include "Config.h"
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#include "common.h"
+#include "Config.h"
 
 Config::Config() {
 	doc = NULL;

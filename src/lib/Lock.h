@@ -5,6 +5,8 @@
 #ifndef _LOCK_H_
 #define _LOCK_H_
 
+#include <config.h>
+
 #include <pthread.h>
 
 class Lock {

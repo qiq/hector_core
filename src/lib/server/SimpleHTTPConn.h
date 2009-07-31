@@ -5,9 +5,11 @@
 #ifndef _SIMPLE_HTTP_CONN_
 #define _SIMPLE_HTTP_CONN_
 
-#include <log4cxx/logger.h>
+#include <config.h>
+
 #include <ext/hash_map>
 #include <string>
+#include <log4cxx/logger.h>
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;
