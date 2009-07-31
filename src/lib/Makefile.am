@@ -1,4 +1,4 @@
-SUBDIRS = server
+SUBDIRS = server processing_chain
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
@@ -17,5 +17,5 @@ libhector_la_LIBADD = server/libhector_server.la
 libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS)
 
 robot_SOURCES = \
-	Robot.cc
+	Robot.cc RobotHTTPServer.cc RobotHTTPServer.h
 robot_LDFLAGS = -lhector

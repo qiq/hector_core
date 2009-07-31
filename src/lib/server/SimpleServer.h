@@ -23,15 +23,14 @@ class SimpleServer {
 	struct in_addr server_addr;
 	int server_port;
 
-	pthread_t main_thread;
-	int main_socket;
+	Lock main_lock;
+	pthread_t main_thread;		// guarded by main_lock
+	bool main_running;		// guarded by main_lock
+	int main_socket;		// guarded by main_lock
 
 	int nThreads;
 	SyncQueue<int> queue;
 	pthread_t *threads;
-
-	Lock running_lock;
-	bool running;
 
 	stdext::hash_set<string, string_hash> allowed_client;
 
@@ -39,14 +38,16 @@ class SimpleServer {
 public:
 	SimpleServer(const char *addr, int port);
 	~SimpleServer();
-	bool Running();
+	bool getRunning();
+	void setRunning(bool running);
 	void RestrictAccess(const char *addr);
 	void Start(int maxThreads);
+	void ProcessRequests();
 	void Stop();
 
 	void ServiceThread();
-	void MainCleanup();
-	void MainThread();
+//	void MainCleanup();
+//	void MainThread();
 
 	virtual void Request(int fd) = 0;
 };

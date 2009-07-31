@@ -4,59 +4,94 @@
 
 <config>
 
-	<Main name="master">
-		<server-host>*</server-host>
-		<server-port>1234</server-port>
-		<dir>/tmp/xxx</dir>
-	</Main>
-	<!--	<run>md5server</run>-->
+	<Server id="webserver">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>8080</serverPort>
+		<lib name="libserver-web.so"/>
+		<param name="test" value="test"/>
+	</Server>
 
-	<Main name="robot">
-		<run>processing-chain</run>
-		<run>website</run>
-		<hashserver-host>localhost</hashserver-host>
-		<hashserver-port>1234</hashserver-port>
-		<server-host>*</server-host>
-		<server-port>8080</server-port>
-	</Main>
+	<Server id="md5server">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1235</serverPort>
+		<lib name="libserver-md5.so"/>
+	</Server>
 
-	<ProcessingChain name="processing-chain">
-		<queueSize>5</queueSize>
-		<item>load-resource</item>
-		<item>external-test</item>
-		<item>save-resource</item>
+	<Server id="master">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1235</serverPort>
+		<lib name="libserver-master.so"/>
+	</Server>
+
+	<Server id="robot">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1234</serverPort>
+		<processingChain ref="robot-processing-chain"/>
+		<lib name="libserver-robot.so"/>
+	</Server>
+
+	<ProcessingChain id="robot-processing-chain">
+		<processor ref="load-resource"/>
+		<queue ref="q1"/>
+		<processor ref="external-test"/>
+		<queue ref="q2"/>
+		<processor ref="save-resource"/>
 	</ProcessingChain>
 
-	<ProcessorInput name="load-resource">
+	<Processor id="load-resource">
+		<type>simple</type>
 		<threads>1</threads>
-		<module>load-resource-module</module>
-	</ProcessorInput>
+		<module ref="load-resource-module"/>
+		<module ref="preprocess-resource-module"/>
+	</Processor>
 
-	<ModuleInput name="load-resource-module">
-		<inputDir>/tmp/input</inputDir>
-		<lib>libmodule-load-resource.so</lib>
-		<!--<lib>libmodule-dummy.so</lib>-->
-	</ModuleInput>
+	<Module id="load-resource-module">
+		<lib name="libmodule-load-resource.so"/>
+		<param name="inputDir" value="/tmp/input"/>
+	</Module>
 
-	<ProcessorSimple name="external-test">
+	<Module id="preprocess-resource-module">
+		<lib name="libmodule-dummy.so"/>
+	</Module>
+
+	<Queue id="q1">
+		<maxMemory>0</maxMemory>
+		<maxItems>0</maxItems>
+		<srcProcessor ref="load-resource" filter="..."/>
+		<dstProcessor ref="external-test" priority="..."/>
+	</Queue>
+
+	<Processor id="external-test">
+		<type>simple</type>
 		<threads>1</threads>
-		<module>external-test-module</module>
-		<maxRequests>100</maxRequests>
-	</ProcessorSimple>
+		<module ref="external-test-module"/>
+	</Processor>
 
-	<ModuleSimple name="external-test-module">
-		<something></something>
-		<lib>libmodule-external-simple.so</lib>
-		<!--<lib>libmodule-dummy.so</lib>-->
-		<path>/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh</path>
-	</ModuleSimple>
+	<Module id="external-test-module">
+		<lib name="libmodule-external-simple.so"/>
+		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
+	</Module>
 
-	<ProcessorOutput name="save-resource">
+	<Queue id="q2">
+		<maxMemory>0</maxMemory>
+		<maxItems>0</maxItems>
+		<srcProcessor ref="external-test" filter="..."/>
+		<dstProcessor ref="save-resource" priority="..."/>
+	</Queue>
+
+	<Processor id="save-resource">
+		<type>simple</type>
 		<threads>1</threads>
-		<module>save-resource-module</module>
-	</ProcessorOutput>
+		<module ref="save-resource-module"/>
+	</Processor>
 
-	<ModuleOutput name="save-resource-module">
-		<lib>libmodule-save-resource.so</lib>
-	</ModuleOutput>
+	<Module id="save-resource-module">
+		<lib name="libmodule-save-resource.so"/>
+		<param name="outputDir" value="/tmp/output"/>
+	</Module>
+
 </config>

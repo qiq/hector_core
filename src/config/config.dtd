@@ -1,34 +1,79 @@
 <!-- robot config definition -->
 
-<!ELEMENT config	(Main|ProcessingChain|ProcessorInput|ProcessorOutput|ProcessorSimple|ProcessorParallel)* >
+<!ELEMENT config	(Main|ProcessingChain|Processor|Module|Queue)* >
 
-<!ELEMENT Main		(run|server-host|server-port)* >
+<!-- common elements -->
+
+<!ELEMENT param		EMPTY >
+<!ATTLIST param
+	name		CDATA		""
+	value		CDATA		"" >
+
+<!-- Main -->
+
+<!ELEMENT Main		(processingChain|serverHost|serverPort|param)* >
 <!ATTLIST Main
-	name		CDATA		"" >
+	id		ID		#REQUIRED >
 
-<!ELEMENT ProcessingChain	(item*) >
+<!ELEMENT processingChain	EMPTY >
+<!ATTLIST processingChain
+	ref		IDREF 		#REQUIRED >
+
+<!ELEMENT serverHost	(#PCDATA) >
+<!ELEMENT serverPort	(#PCDATA) >
+
+<!-- ProcessingChain -->
+
+<!ELEMENT ProcessingChain	(processor|queue)* >
 <!ATTLIST ProcessingChain
-	name		CDATA		"" >
+	id		ID		#REQUIRED >
 
-<!ELEMENT ProcessorInput	(threads?,lib*) >
-<!ATTLIST ProcessorInput
-	name		CDATA		"" >
+<!ELEMENT processor	EMPTY >
+<!ATTLIST processor
+	ref		IDREF 		#REQUIRED >
 
-<!ELEMENT ProcessorOutput	(threads?,lib*) >
-<!ATTLIST ProcessorOutput
-	name		CDATA		"" >
+<!ELEMENT queue	EMPTY >
+<!ATTLIST queue
+	ref		IDREF 		#REQUIRED >
 
-<!ELEMENT ProcessorParallel	(threads?,lib*) >
-<!ATTLIST ProcessorParallel
-	name		CDATA		"" >
+<!-- Processor -->
 
-<!ELEMENT ProcessorSimple	(threads?,lib*) >
-<!ATTLIST ProcessorSimple
-	name		CDATA		"" >
+<!ELEMENT Processor	(type,threads,module+) >
+<!ATTLIST Processor
+	id		ID		#REQUIRED >
 
-<!ELEMENT run		(#PCDATA) >
-<!ELEMENT server-host	(#PCDATA) >
-<!ELEMENT server-port	(#PCDATA) >
-<!ELEMENT item 		(#PCDATA) >
+<!ELEMENT type		(#PCDATA) >
 <!ELEMENT threads	(#PCDATA) >
-<!ELEMENT lib		(#PCDATA) >
+
+<!ELEMENT module	EMPTY >
+<!ATTLIST module
+	ref		IDREF 		#REQUIRED >
+
+<!-- Queue -->
+
+<!ELEMENT Queue	(maxMemory,maxItems,srcProcessor,dstProcessor) >
+<!ATTLIST Queue
+	id		ID		#REQUIRED >
+
+<!ELEMENT maxMemory	(#PCDATA) >
+<!ELEMENT maxItems	(#PCDATA) >
+
+<!ELEMENT srcProcessor	EMPTY >
+<!ATTLIST srcProcessor
+	ref		IDREF 		#REQUIRED
+	filter		CDATA		"" >
+
+<!ELEMENT dstProcessor	EMPTY >
+<!ATTLIST dstProcessor
+	ref		IDREF 		#REQUIRED
+	priority	CDATA		"" >
+
+<!-- Module -->
+
+<!ELEMENT Module	(lib,param*) >
+<!ATTLIST Module
+	id		ID		#REQUIRED >
+
+<!ELEMENT lib		EMPTY >
+<!ATTLIST lib
+	name		CDATA		"" >

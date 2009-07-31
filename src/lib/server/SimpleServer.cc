@@ -17,24 +17,30 @@ SimpleServer::SimpleServer(const char *addr, int port) {
 	server_port = port;
 
 	main_thread = -1;
+	main_running = false;
 	main_socket = -1;
 
 	nThreads = 10;
 	threads = NULL;
 
-	running = true;
 }
 
 SimpleServer::~SimpleServer() {
 	delete[] threads;
 }
 
-bool SimpleServer::Running() {
+bool SimpleServer::getRunning() {
 	bool result;
-	running_lock.lock();
+	main_lock.lock();
 	result = running;
-	running_lock.unlock();
+	main_lock.unlock();
 	return result;
+}
+
+void SimpleServer::setRunning(bool running) {
+	main_lock.lock();
+	this.running = running;
+	main_lock.unlock();
 }
 
 void SimpleServer::RestrictAccess(const char *addr) {
@@ -49,7 +55,7 @@ void *http_service_thread(void *ptr) {
 }
 
 void SimpleServer::ServiceThread() {
-	while (Running()) {
+	while (getRunning()) {
 		int *fd = queue.getItem(true);
 		Request(*fd);
 		close(*fd);
@@ -94,18 +100,18 @@ void SimpleServer::MainThread() {
 		return;
 	}
 
-	while (Running()) {
+	while (getRunning()) {
 		sockaddr_in client_addr;
 		socklen_t client_addrlen = sizeof(client_addr);
 
 		int fd;		// must declare it now because of cleanup_push/cleanup_pop
 		fd = accept(main_socket, (sockaddr*)&client_addr, &client_addrlen);
+		if (!getRunning())
+			break;
 		if (fd == -1) {
-			LOG4CXX_ERROR(logger, "Cannot accept connection" << strerror(errno));
-			return;
+			LOG4CXX_ERROR(logger, "Cannot accept connection: " << strerror(errno));
+			break;
 		}
-		if (!Running())
-			return;
 		char *client_ip = inet_ntoa((in_addr)client_addr.sin_addr);
 		// check whether IP address is allowed
 		if (allowed_client.size() > 0) {
@@ -122,25 +128,33 @@ void SimpleServer::MainThread() {
 		int *pfd = new int(fd);
 		queue.putItem(pfd, true);
 	}
+	shutdown(main_socket, SHUT_RDWR);
+	close(main_socket);
+	main_socket = -1;
 }
 
-void SimpleServer::Start(int max_threads) {
+void SimpleServer::Start(int max_threads, bool wait) {
 	this->nThreads = max_threads;
+	main_lock->lock();
 	pthread_create(&main_thread, NULL, http_main_thread, (void *)this);
+	main_running = true;
+	main_lock->unlock();
+
+	if (wait)
+		thread_join(main_thread, NULL);
 }
 
 void SimpleServer::Stop() {
-	running_lock.lock();
-	running = false;
-	running_lock.unlock();
-
-	queue.cancelAll();
-	
-	if (main_socket != -1) {
+	main_lock->lock();
+	if (main_running) {
+		main_running = false;
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);
 		main_socket = -1;
 	}
+	main_lock->unlock();
+
+	queue.cancelAll();
 	
 	pthread_join(main_thread, NULL);
 

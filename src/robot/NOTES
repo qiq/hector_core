@@ -4,6 +4,7 @@
 
 - ProcessorSimple: sekvence modulu, ModuleInput muze byt jen na nacatku,
   ModuleOutput jen na konci, pocet vlaken = pocet paralelne provadenych sekvenci bloku
+- ProcessorMulti: bere vic resources na vstupu a pise jich vic na vystup (soucasne se zpracovava vice resources)
 - ProcessorSelect: jeden module, viz nize SelectModule
 - soucasti processoru jsou i vstupni fronty (trivialni v pripade, ze prvni
   modul je ModuleInput)
