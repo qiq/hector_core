@@ -5,13 +5,13 @@
 #ifndef _SIMPLE_SERVER_
 #define _SIMPLE_SERVER_
 
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include <log4cxx/logger.h>
-#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <ext/hash_set>
+#include <string>
+#include <log4cxx/logger.h>
 #include "common.h"
 #include "CondLock.h"
 #include "SyncQueue.h"
@@ -41,13 +41,12 @@ public:
 	bool getRunning();
 	void setRunning(bool running);
 	void RestrictAccess(const char *addr);
-	void Start(int maxThreads);
+	void Start(int maxThreads, bool wait);
 	void ProcessRequests();
 	void Stop();
 
 	void ServiceThread();
-//	void MainCleanup();
-//	void MainThread();
+	void MainThread();
 
 	virtual void Request(int fd) = 0;
 };

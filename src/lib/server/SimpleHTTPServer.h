@@ -1,5 +1,5 @@
 /**
- * Simple multi-threaded server
+ * Simple multi-threaded HTTP server. Descendant must define HandleRequest method.
  */
 
 #ifndef _SIMPLE_HTTP_SERVER_

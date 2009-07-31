@@ -29,17 +29,19 @@ SimpleServer::~SimpleServer() {
 	delete[] threads;
 }
 
+// thread safe
 bool SimpleServer::getRunning() {
 	bool result;
 	main_lock.lock();
-	result = running;
+	result = main_running;
 	main_lock.unlock();
 	return result;
 }
 
+// thread safe
 void SimpleServer::setRunning(bool running) {
 	main_lock.lock();
-	this.running = running;
+	main_running = running;
 	main_lock.unlock();
 }
 
@@ -112,6 +114,7 @@ void SimpleServer::MainThread() {
 			LOG4CXX_ERROR(logger, "Cannot accept connection: " << strerror(errno));
 			break;
 		}
+		// FIXME: inet_ntoa is not thread safe, use to inet_ntop instead
 		char *client_ip = inet_ntoa((in_addr)client_addr.sin_addr);
 		// check whether IP address is allowed
 		if (allowed_client.size() > 0) {
@@ -128,31 +131,41 @@ void SimpleServer::MainThread() {
 		int *pfd = new int(fd);
 		queue.putItem(pfd, true);
 	}
-	shutdown(main_socket, SHUT_RDWR);
-	close(main_socket);
-	main_socket = -1;
-}
-
-void SimpleServer::Start(int max_threads, bool wait) {
-	this->nThreads = max_threads;
-	main_lock->lock();
-	pthread_create(&main_thread, NULL, http_main_thread, (void *)this);
-	main_running = true;
-	main_lock->unlock();
-
-	if (wait)
-		thread_join(main_thread, NULL);
-}
-
-void SimpleServer::Stop() {
-	main_lock->lock();
-	if (main_running) {
-		main_running = false;
+	main_lock.lock();
+	if (main_socket != -1) {
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);
 		main_socket = -1;
 	}
-	main_lock->unlock();
+	main_lock.unlock();
+}
+
+void SimpleServer::Start(int max_threads, bool wait) {
+	this->nThreads = max_threads;
+	main_lock.lock();
+	pthread_create(&main_thread, NULL, http_main_thread, (void *)this);
+	main_running = true;
+	main_lock.unlock();
+
+	if (wait) {
+		pthread_join(main_thread, NULL);
+        	for (int i = 0; i < nThreads; i++) {
+			pthread_join(threads[i], NULL);
+		}
+	}
+}
+
+void SimpleServer::Stop() {
+	main_lock.lock();
+	if (main_running) {
+		main_running = false;
+		if (main_socket != -1) {
+			shutdown(main_socket, SHUT_RDWR);
+			close(main_socket);
+			main_socket = -1;
+		}
+	}
+	main_lock.unlock();
 
 	queue.cancelAll();
 	

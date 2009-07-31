@@ -22,7 +22,7 @@ SimpleHTTPConn::SimpleHTTPConn(int fd) {
 }
 
 SimpleHTTPConn::~SimpleHTTPConn() {
-	//close(socket);
+	// socket is closed in caller
 	delete header_fields;
 }
 
