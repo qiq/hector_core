@@ -140,6 +140,11 @@ void SimpleServer::MainThread() {
 		main_socket = -1;
 	}
 	main_lock.unlock();
+
+	queue.cancelAll();
+        for (int i = 0; i < nThreads; i++) {
+		pthread_join(threads[i], NULL);
+	}
 }
 
 void SimpleServer::Start(int max_threads, bool wait) {
@@ -149,12 +154,8 @@ void SimpleServer::Start(int max_threads, bool wait) {
 	main_running = true;
 	main_lock.unlock();
 
-	if (wait) {
+	if (wait)
 		pthread_join(main_thread, NULL);
-        	for (int i = 0; i < nThreads; i++) {
-			pthread_join(threads[i], NULL);
-		}
-	}
 }
 
 void SimpleServer::Stop() {
@@ -168,12 +169,6 @@ void SimpleServer::Stop() {
 		}
 	}
 	main_lock.unlock();
-
-	queue.cancelAll();
 	
 	pthread_join(main_thread, NULL);
-
-        for (int i = 0; i < nThreads; i++) {
-		pthread_join(threads[i], NULL);
-	}
 }

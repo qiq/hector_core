@@ -10,6 +10,7 @@
 #include <ext/hash_map>
 #include <string>
 #include <log4cxx/logger.h>
+#include "../common.h"
 
 using namespace std;
 namespace stdext = ::__gnu_cxx;

@@ -62,7 +62,6 @@ void int2bytes(uint32_t n, char (*bytes)[4]) {
 void *loadLibrary(const char *lib, const char *sym) {
 	if (lt_dlinit() != 0)
 		return NULL;
-	}
 	lt_dlhandle handle = lt_dlopen(lib);
 	if (handle == NULL)
 		return NULL;

@@ -1,6 +1,8 @@
 <!-- robot config definition -->
 
-<!ELEMENT config	(Main|ProcessingChain|Processor|Module|Queue)* >
+<!ELEMENT Config	(Server|ProcessingChain|Processor|Module|Queue)* >
+<!ATTLIST Config
+	baseDir		CDATA		"" >
 
 <!-- common elements -->
 
@@ -9,10 +11,16 @@
 	name		CDATA		""
 	value		CDATA		"" >
 
+<!ELEMENT lib		EMPTY >
+<!ATTLIST lib
+	name		CDATA		"" >
+
+<!ELEMENT threads	(#PCDATA) >
+
 <!-- Main -->
 
-<!ELEMENT Main		(processingChain|serverHost|serverPort|param)* >
-<!ATTLIST Main
+<!ELEMENT Server	(threads|serverHost|serverPort|processingChain|lib|param)* >
+<!ATTLIST Server
 	id		ID		#REQUIRED >
 
 <!ELEMENT processingChain	EMPTY >
@@ -43,7 +51,6 @@
 	id		ID		#REQUIRED >
 
 <!ELEMENT type		(#PCDATA) >
-<!ELEMENT threads	(#PCDATA) >
 
 <!ELEMENT module	EMPTY >
 <!ATTLIST module
@@ -73,7 +80,3 @@
 <!ELEMENT Module	(lib,param*) >
 <!ATTLIST Module
 	id		ID		#REQUIRED >
-
-<!ELEMENT lib		EMPTY >
-<!ATTLIST lib
-	name		CDATA		"" >

@@ -1,0 +1,9 @@
+- univerzalni spoustec
+- spusti server na danem portu a adrese
+- nahraje obsluhu serveru, spusti server (+ processing_chain + vsechno ostatni)
+
+- nejakej textovej klient, aby clovek nemusel rucne psat HTTP pozadavky
+	- nastavovat a zjistovat nastaveni aby to umelo
+	- readline by to melo pouzivat
+	- nejak univerzalni by to melo byt
+	- napsane v Perlu?

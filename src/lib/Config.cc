@@ -2,6 +2,8 @@
  * Simple parser for configuration files based on XML
  */
 
+#include <config.h>
+
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include "common.h"
@@ -66,8 +68,8 @@ vector<string> *Config::getValues(const char *xpath) {
 		result->push_back((char*)item);
 	        xmlFree(item);
 	}
-	xmlXPathFreeContext(context);
 	xmlXPathFreeObject(nodes);
+	xmlXPathFreeContext(context);
 
 	return result;
 }
@@ -88,9 +90,21 @@ char *Config::getFirstValue(const char *xpath) {
 
 	// at least one result found
 	xmlChar *item = xmlNodeListGetString(doc, nodes->nodesetval->nodeTab[0]->xmlChildrenNode, 1);
-	char *result = strdup((char*)item);
+	char *result = item ? strdup((char*)item) : NULL;
 	xmlFree(item);
 
+	xmlXPathFreeObject(nodes);
+	xmlXPathFreeContext(context);
+
+	return result;
+}
+
+bool Config::evaluateXPath(const char *xpath) {
+	xmlXPathContextPtr context;
+
+	context = xmlXPathNewContext(doc);
+	bool result = (xmlXPathEvalExpression((const xmlChar*)xpath, context) != 0);
+	xmlXPathFreeContext(context);
 	return result;
 }
 

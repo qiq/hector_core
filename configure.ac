@@ -63,9 +63,10 @@ AC_CONFIG_FILES([Makefile
                 src/Makefile
 		src/lib/Makefile
 		src/lib/server/Makefile
+		src/lib/processing_chain/Makefile
 		src/robot/Makefile
 		src/robot/modules/Makefile
 		src/robot/external-modules/Makefile
-		src/master/Makefile
+		src/bin/Makefile
 ])
 AC_OUTPUT

@@ -1,37 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Example config file -->
-<!DOCTYPE config SYSTEM "config.dtd">
+<!DOCTYPE Config SYSTEM "config.dtd">
 
-<config>
+<Config baseDir="/home/qiq/work/hector/src">
 
 	<Server id="webserver">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>8080</serverPort>
-		<lib name="libserver-web.so"/>
+		<lib name="servers/web/libserver-web.so"/>
 		<param name="test" value="test"/>
 	</Server>
 
 	<Server id="md5server">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1235</serverPort>
-		<lib name="libserver-md5.so"/>
+		<serverPort>1200</serverPort>
+		<lib name="servers/hashserver/libserver-md5.so"/>
 	</Server>
 
 	<Server id="master">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1235</serverPort>
-		<lib name="libserver-master.so"/>
+		<serverPort>1000</serverPort>
+		<lib name="servers/master/libserver-master.so"/>
 	</Server>
 
 	<Server id="robot">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1234</serverPort>
+		<serverPort>1100</serverPort>
 		<processingChain ref="robot-processing-chain"/>
-		<lib name="libserver-robot.so"/>
+		<processingChain ref="robot-processing-chain2"/>
+		<logConfig>config/robot.log.props</logConfig>
+		<lib name="servers/robot/libserver-robot.so"/>
+		<param name="remotePort" value="2000"/>
+		<param name="remoteHost" value="2001"/>
 	</Server>
 
 	<ProcessingChain id="robot-processing-chain">
@@ -50,19 +54,19 @@
 	</Processor>
 
 	<Module id="load-resource-module">
-		<lib name="libmodule-load-resource.so"/>
+		<lib name="modules/libmodule-load-resource.so"/>
 		<param name="inputDir" value="/tmp/input"/>
 	</Module>
 
 	<Module id="preprocess-resource-module">
-		<lib name="libmodule-dummy.so"/>
+		<lib name="modules/libmodule-dummy.so"/>
 	</Module>
 
 	<Queue id="q1">
 		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
-		<srcProcessor ref="load-resource" filter="..."/>
-		<dstProcessor ref="external-test" priority="..."/>
+		<srcProcessor ref="load-resource" filter="*"/>
+		<dstProcessor ref="external-test" priority="0"/>
 	</Queue>
 
 	<Processor id="external-test">
@@ -72,15 +76,15 @@
 	</Processor>
 
 	<Module id="external-test-module">
-		<lib name="libmodule-external-simple.so"/>
+		<lib name="modules/libmodule-external-simple.so"/>
 		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
 	</Module>
 
 	<Queue id="q2">
 		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
-		<srcProcessor ref="external-test" filter="..."/>
-		<dstProcessor ref="save-resource" priority="..."/>
+		<srcProcessor ref="external-test" filter="*"/>
+		<dstProcessor ref="save-resource" priority="0"/>
 	</Queue>
 
 	<Processor id="save-resource">
@@ -90,8 +94,8 @@
 	</Processor>
 
 	<Module id="save-resource-module">
-		<lib name="libmodule-save-resource.so"/>
+		<lib name="modules/libmodule-save-resource.so"/>
 		<param name="outputDir" value="/tmp/output"/>
 	</Module>
 
-</config>
+</Config>

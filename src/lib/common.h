@@ -24,7 +24,7 @@ inline void die(const char *msg, ...) {
 	va_start(args, msg);
 	vfprintf(stderr, msg, args);
 	va_end(args);
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 /*void to_lowercase(string &s) {
