@@ -88,6 +88,8 @@ void Server::Start(bool wait) {
 	// start server
 	LOG4CXX_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
 	simpleHTTPServer->Start(serverHost, serverPort, threads, true);
+	if (wait)
+		LOG4CXX_INFO(logger, "Stopping server");
 }
 
 void Server::Stop() {

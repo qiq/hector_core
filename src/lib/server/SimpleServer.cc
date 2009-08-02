@@ -39,6 +39,10 @@ bool SimpleServer::getRunning() {
 void SimpleServer::setRunning(bool running) {
 	main_lock.lock();
 	main_running = running;
+	if (!running) {
+		shutdown(main_socket, SHUT_RDWR);
+		close(main_socket);
+	}
 	main_lock.unlock();
 }
 
