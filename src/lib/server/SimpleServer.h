@@ -38,12 +38,12 @@ class SimpleServer {
 
 	static log4cxx::LoggerPtr logger;
 public:
-	SimpleServer(const char *addr, int port);
+	SimpleServer();
 	~SimpleServer();
 	bool getRunning();
 	void setRunning(bool running);
 	void RestrictAccess(const char *addr);
-	void Start(int maxThreads, bool wait);
+	void Start(const char *addr, int port, int maxThreads, bool wait);
 	void ProcessRequests();
 	void Stop();
 

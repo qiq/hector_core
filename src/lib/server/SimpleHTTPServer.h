@@ -12,8 +12,8 @@
 
 class SimpleHTTPServer : public SimpleServer {
 public:
-	SimpleHTTPServer(const char *addr, int port) : SimpleServer(addr, port) {};
-	~SimpleHTTPServer();
+	SimpleHTTPServer() {};
+	~SimpleHTTPServer() {};
 
 	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
 

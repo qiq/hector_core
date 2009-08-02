@@ -13,18 +13,13 @@
 
 log4cxx::LoggerPtr SimpleServer::logger(log4cxx::Logger::getLogger("lib.SimpleServer"));
 
-SimpleServer::SimpleServer(const char *addr, int port) {
-	if (addr == NULL || !inet_aton(addr, &server_addr))
-		server_addr.s_addr = INADDR_ANY;
-	server_port = port;
-
+SimpleServer::SimpleServer() {
 	main_thread = -1;
 	main_running = false;
 	main_socket = -1;
 
 	nThreads = 10;
 	threads = NULL;
-
 }
 
 SimpleServer::~SimpleServer() {
@@ -147,7 +142,10 @@ void SimpleServer::MainThread() {
 	}
 }
 
-void SimpleServer::Start(int max_threads, bool wait) {
+void SimpleServer::Start(const char *addr, int port, int max_threads, bool wait) {
+	if (addr == NULL || !inet_aton(addr, &server_addr))
+		server_addr.s_addr = INADDR_ANY;
+	server_port = port;
 	this->nThreads = max_threads;
 	main_lock.lock();
 	pthread_create(&main_thread, NULL, http_main_thread, (void *)this);
