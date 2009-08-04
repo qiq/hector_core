@@ -3,6 +3,8 @@
  *
  * Queue is synchronized, when full, writers would block, if empty, readers
  * would block.
+ * TODO: maxItems + maxSize
+ * TODO: kvuli selectu implementovat pipe pro zapis
  */
 
 #ifndef _SYNCQUEUE_H_
@@ -24,7 +26,7 @@ using namespace std;
 template<class T>
 class SyncQueue {
 private:
-	// queue object, guarded by queue_lock
+	// queue object, all attributes are guarded by queue_lock
 	CondLock queue_lock;
 	int queue_size;
 	deque<T*> *queue;

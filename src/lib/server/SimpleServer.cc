@@ -60,6 +60,8 @@ void *http_service_thread(void *ptr) {
 void SimpleServer::ServiceThread() {
 	while (getRunning()) {
 		int *fd = queue.getItem(true);
+		if (!fd)
+			break; // cancelled
 		Request(*fd);
 		close(*fd);
 		delete fd;
@@ -130,7 +132,8 @@ void SimpleServer::MainThread() {
 		// put request into the queue, it will be serviced as soon as
 		// there is a free thread available
 		int *pfd = new int(fd);
-		queue.putItem(pfd, true);
+		if (!queue.putItem(pfd, true))
+			break;	// canceled
 	}
 	main_lock.lock();
 	if (main_socket != -1) {

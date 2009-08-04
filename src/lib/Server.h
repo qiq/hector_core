@@ -10,18 +10,25 @@
 
 #include <config.h>
 
+#include <ext/hash_map>
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Config.h"
-//#include "processing_chain/ProcessingChain.h"
+#include "Object.h"
+#include "processing_chain/ProcessingChain.h"
 #include "server/SimpleHTTPServer.h"
 
-class Server {
+using namespace std;
+namespace stdext = ::__gnu_cxx;
+
+class Server : Object {
 	char *serverHost;
 	int serverPort;
 	int threads;
-//	vector<ProcessingChain*> processingChains;
+	vector<ProcessingChain*> processingChains;
 	SimpleHTTPServer *simpleHTTPServer;
+
+	stdext::hash_map<const char*, Object*> objects;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -31,8 +38,11 @@ public:
 	void Start(bool wait);
 	void Stop();
 	void createCheckpoint();
-	const char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
+
+	void registerObject(Object *obj);
+	bool unregisterObject(const char *id);
+	const char *getObjectValue(const char *id, const char *name);
+	bool setObjectValue(const char *id, const char *name, const char *value);
 };
 
 #endif

@@ -19,7 +19,7 @@
 
 <!-- Main -->
 
-<!ELEMENT Server	(threads|serverHost|serverPort|processingChain|lib|param)* >
+<!ELEMENT Server	(threads|serverHost|serverPort|processingChain|lib|param|logConfig)* >
 <!ATTLIST Server
 	id		ID		#REQUIRED >
 
@@ -29,6 +29,7 @@
 
 <!ELEMENT serverHost	(#PCDATA) >
 <!ELEMENT serverPort	(#PCDATA) >
+<!ELEMENT logConfig	(#PCDATA) >
 
 <!-- ProcessingChain -->
 
@@ -46,7 +47,7 @@
 
 <!-- Processor -->
 
-<!ELEMENT Processor	(type,threads,module+) >
+<!ELEMENT Processor	(type,threads,module+,inputQueue?,outputQueue?) >
 <!ATTLIST Processor
 	id		ID		#REQUIRED >
 
@@ -56,24 +57,25 @@
 <!ATTLIST module
 	ref		IDREF 		#REQUIRED >
 
+<!ELEMENT inputQueue	EMPTY >
+<!ATTLIST inputQueue
+	ref		IDREF 		#REQUIRED
+	priority	CDATA		"" >
+
+<!ELEMENT outputQueue	EMPTY >
+<!ATTLIST outputQueue
+	ref		IDREF 		#REQUIRED
+	filter		CDATA		"" >
+
+
 <!-- Queue -->
 
-<!ELEMENT Queue	(maxMemory,maxItems,srcProcessor,dstProcessor) >
+<!ELEMENT Queue	(maxMemory,maxItems) >
 <!ATTLIST Queue
 	id		ID		#REQUIRED >
 
 <!ELEMENT maxMemory	(#PCDATA) >
 <!ELEMENT maxItems	(#PCDATA) >
-
-<!ELEMENT srcProcessor	EMPTY >
-<!ATTLIST srcProcessor
-	ref		IDREF 		#REQUIRED
-	filter		CDATA		"" >
-
-<!ELEMENT dstProcessor	EMPTY >
-<!ATTLIST dstProcessor
-	ref		IDREF 		#REQUIRED
-	priority	CDATA		"" >
 
 <!-- Module -->
 

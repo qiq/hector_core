@@ -31,7 +31,7 @@
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingChain ref="robot-processing-chain"/>
-		<processingChain ref="robot-processing-chain2"/>
+		<!--processingChain ref="robot-processing-chain2"/-->
 		<logConfig>config/robot.log.props</logConfig>
 		<lib name="server/robot/libserver-robot.la"/>
 		<param name="remotePort" value="2000"/>
@@ -51,6 +51,7 @@
 		<threads>1</threads>
 		<module ref="load-resource-module"/>
 		<module ref="preprocess-resource-module"/>
+		<outputQueue ref="q1"/>
 	</Processor>
 
 	<Module id="load-resource-module">
@@ -65,14 +66,14 @@
 	<Queue id="q1">
 		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
-		<srcProcessor ref="load-resource" filter="*"/>
-		<dstProcessor ref="external-test" priority="0"/>
 	</Queue>
 
 	<Processor id="external-test">
 		<type>simple</type>
 		<threads>1</threads>
 		<module ref="external-test-module"/>
+		<inputQueue ref="q1" priority="0"/>
+		<outputQueue ref="q2" filter="*"/>
 	</Processor>
 
 	<Module id="external-test-module">
@@ -83,14 +84,13 @@
 	<Queue id="q2">
 		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
-		<srcProcessor ref="external-test" filter="*"/>
-		<dstProcessor ref="save-resource" priority="0"/>
 	</Queue>
 
 	<Processor id="save-resource">
 		<type>simple</type>
 		<threads>1</threads>
 		<module ref="save-resource-module"/>
+		<inputQueue ref="q2"/>
 	</Processor>
 
 	<Module id="save-resource-module">
