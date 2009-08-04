@@ -98,8 +98,7 @@ bool SyncQueue<T>::putItem(T *r, bool sleep) {
 	queue_lock.lock();
 	if (cancel) {
 		queue_lock.unlock();
-		delete r;
-		pthread_exit(NULL);
+		return false;
 	}
 	while ((int)queue->size() == queue_size) {
 		if (!sleep) {
@@ -111,8 +110,7 @@ bool SyncQueue<T>::putItem(T *r, bool sleep) {
 		waitingWriters--;
 		if (cancel) {
 			queue_lock.unlock();
-			delete r;
-			pthread_exit(NULL);
+			return false;
 		}
 	}
 	queue->push_back(r);
@@ -126,8 +124,7 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep) {
 	queue_lock.lock();
 	if (cancel) {
 		queue_lock.unlock();
-		delete r;
-		pthread_exit(NULL);
+		return 0;
 	}
 	while ((int)queue->size() == queue_size) {
 		if (!sleep) {
@@ -139,8 +136,7 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep) {
 		waitingWriters--;
 		if (cancel) {
 			queue_lock.unlock();
-			delete r;
-			pthread_exit(NULL);
+			return 0;
 		}
 	}
 	int i;
@@ -156,7 +152,7 @@ template <class T>
 bool SyncQueue<T>::isReady() {
 	bool result = false;
 	queue_lock.lock();
-	while (queue->size() > 0)
+	if (queue->size() > 0)
 		result = true;
 	queue_lock.unlock();
 	return result;
@@ -167,7 +163,7 @@ T *SyncQueue<T>::getItem(bool sleep) {
 	queue_lock.lock();
 	if (cancel) {
 		queue_lock.unlock();
-		pthread_exit(NULL);
+		return NULL;
 	}
 	while (queue->size() == 0) {
 		if (!sleep) {
@@ -179,7 +175,7 @@ T *SyncQueue<T>::getItem(bool sleep) {
 		waitingReaders--;
 		if (cancel) {
 			queue_lock.unlock();
-			pthread_exit(NULL);
+			return NULL;
 		}
 	}
 	T *r = (*queue)[0];
@@ -195,7 +191,7 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 	queue_lock.lock();
 	if (cancel) {
 		queue_lock.unlock();
-		pthread_exit(NULL);
+		return 0;
 	}
 	while (queue->size() == 0) {
 		if (!sleep) {
@@ -207,7 +203,7 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 		waitingReaders--;
 		if (cancel) {
 			queue_lock.unlock();
-			pthread_exit(NULL);
+			return 0;
 		}
 	}
 	int i = 0;
