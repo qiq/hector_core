@@ -22,7 +22,7 @@ libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
 #robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf $(AM_LDFLAGS)
 
 WebResource.pb.cc WebResource.pb.h: WebResource.proto
-	protoc WebResource.proto --cpp_out=.
+	$(PROTOC) WebResource.proto --cpp_out=.
 
 clean-local:
 	rm -f WebResource.pb.cc WebResource.pb.h

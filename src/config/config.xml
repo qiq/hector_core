@@ -54,7 +54,7 @@
 	</Processor>
 
 	<Module id="load-resource-module">
-		<lib name="modules/libmodule-load-resource.so"/>
+		<lib name="modules/libmodule-load-resource.la"/>
 		<param name="inputDir" value="/tmp/input"/>
 	</Module>
 

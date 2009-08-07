@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 	// create and initialize the Server object
 	Server *server = new Server();
 	if (!server->Init(config, serverId))
-		die("Cannot initialize server");
+		die("Cannot initialize server\n");
 
 	// run server
 	server->Start(true);
