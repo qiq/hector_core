@@ -70,7 +70,7 @@
 
 <!-- Queue -->
 
-<!ELEMENT Queue	(maxMemory,maxItems) >
+<!ELEMENT Queue	(maxItems, maxMemory) >
 <!ATTLIST Queue
 	id		ID		#REQUIRED >
 

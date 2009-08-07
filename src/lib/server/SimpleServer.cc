@@ -20,10 +20,12 @@ SimpleServer::SimpleServer() {
 
 	nThreads = 10;
 	threads = NULL;
+	queue = new SyncQueue<FileDescriptor>(0, 0);
 }
 
 SimpleServer::~SimpleServer() {
 	delete[] threads;
+	delete queue;
 }
 
 // thread safe
@@ -59,11 +61,11 @@ void *http_service_thread(void *ptr) {
 
 void SimpleServer::ServiceThread() {
 	while (getRunning()) {
-		int *fd = queue.getItem(true);
+		FileDescriptor *fd = queue->getItem(true);
 		if (!fd)
 			break; // cancelled
-		Request(*fd);
-		close(*fd);
+		Request(fd->fd);
+		close(fd->fd);
 		delete fd;
 	}
 }
@@ -131,9 +133,11 @@ void SimpleServer::MainThread() {
 		}
 		// put request into the queue, it will be serviced as soon as
 		// there is a free thread available
-		int *pfd = new int(fd);
-		if (!queue.putItem(pfd, true))
+		FileDescriptor *pfd = new FileDescriptor(fd);
+		if (!queue->putItem(pfd, true)) {
+			delete pfd;
 			break;	// canceled
+		}
 	}
 	main_lock.lock();
 	if (main_socket != -1) {
@@ -143,7 +147,7 @@ void SimpleServer::MainThread() {
 	}
 	main_lock.unlock();
 
-	queue.cancelAll();
+	queue->cancelAll();
         for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}

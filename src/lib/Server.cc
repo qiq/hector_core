@@ -7,13 +7,12 @@ log4cxx::LoggerPtr Server::logger(log4cxx::Logger::getLogger("lib.Server"));
 
 Server::Server() {
 	serverHost = NULL;
-	processingChains = NULL;
 	simpleHTTPServer = NULL;
 }
 
 Server::~Server() {
 	free(serverHost);
-	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChain.end(); iter++) {
+	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); iter++) {
 		delete *iter;
 	}
 	delete simpleHTTPServer;
@@ -117,10 +116,18 @@ bool Server::unregisterObject(const char *id) {
 	return false;
 }
 
+Object *Server::getObject(const char *id) {
+	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
+	if (iter != objects.end()) {
+		return iter->second;
+	}
+	return NULL;
+}
+
 const char *Server::getObjectValue(const char *id, const char *name) {
 	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		Object *obj = iter->second;;
+		Object *obj = iter->second;
 		return obj->getValue(name);
 	}
 	return NULL;
@@ -129,8 +136,16 @@ const char *Server::getObjectValue(const char *id, const char *name) {
 bool Server::setObjectValue(const char *id, const char *name, const char *value) {
 	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		Object *obj = iter->second;;
+		Object *obj = iter->second;
 		return obj->setValue(name, value);
 	}
+	return false;
+}
+
+const char *ProcessingChain::getValue(const char *name) {
+	return NULL;
+}
+
+bool ProcessingChain::setValue(const char *name, const char *value) {
 	return false;
 }

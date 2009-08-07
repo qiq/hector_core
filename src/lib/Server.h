@@ -21,7 +21,7 @@
 using namespace std;
 namespace stdext = ::__gnu_cxx;
 
-class Server : Object {
+class Server : public Object {
 	char *serverHost;
 	int serverPort;
 	int threads;
@@ -41,8 +41,13 @@ public:
 
 	void registerObject(Object *obj);
 	bool unregisterObject(const char *id);
+	Object *getObject(const char *id);
 	const char *getObjectValue(const char *id, const char *name);
 	bool setObjectValue(const char *id, const char *name, const char *value);
+
+	const char *getValue(const char *name);
+	bool setValue(const char *name, const char *value);
+
 };
 
 #endif

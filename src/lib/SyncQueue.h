@@ -26,15 +26,17 @@ using namespace std;
 template<class T>
 class SyncQueue {
 private:
-	// queue object, all attributes are guarded by queue_lock
-	CondLock queue_lock;
-	int queue_size;
+	// queue object, all attributes are guarded by queueLock
+	CondLock queueLock;
+	int maxItems;
+	int maxSize;
+	int queueSize;
 	deque<T*> *queue;
 	int waitingReaders;
 	int waitingWriters;
 	bool cancel;
 public:
-	SyncQueue(int size = 1000);
+	SyncQueue(int maxItems, int maxSize);
 	~SyncQueue();
 	void cancelAll();
 
@@ -47,9 +49,11 @@ public:
 };
 
 template <class T>
-SyncQueue<T>::SyncQueue(int size) {
+SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
 
-	this->queue_size = size;
+	this->maxItems = maxItems;
+	this->maxSize = maxSize;
+	queueSize = 0;
 	queue = new deque<T*>();
 	waitingReaders = 0;
 	waitingWriters = 0;
@@ -65,146 +69,156 @@ SyncQueue<T>::~SyncQueue() {
 
 template <class T>
 void SyncQueue<T>::cancelAll() {
-	queue_lock.lock();
+	queueLock.lock();
 	cancel = true;
 	while (waitingReaders > 0) {
-		queue_lock.signalRecv();
-		queue_lock.unlock();
+		queueLock.signalRecv();
+		queueLock.unlock();
 		sched_yield();
-		queue_lock.lock();
+		queueLock.lock();
 	}
 	while (waitingWriters > 0) {
-		queue_lock.signalSend();
-		queue_lock.unlock();
+		queueLock.signalSend();
+		queueLock.unlock();
 		sched_yield();
-		queue_lock.lock();
+		queueLock.lock();
 	}
 	for (unsigned i = 0; i < queue->size(); i++)
 		delete (*queue)[i];
 	queue->clear();
-	queue_lock.unlock();
+	queueLock.unlock();
 }
 
 template <class T>
 bool SyncQueue<T>::isSpace() {
 	bool result = false;
-	queue_lock.lock();
-	if ((int)queue->size() < queue_size)
+	queueLock.lock();
+	if ((int)queue->size() < maxItems)
 		result = true;
-	queue_lock.unlock();
+	queueLock.unlock();
 	return result;
 }
 
 template <class T>
 bool SyncQueue<T>::putItem(T *r, bool sleep) {
-	queue_lock.lock();
+	queueLock.lock();
 	if (cancel) {
-		queue_lock.unlock();
+		queueLock.unlock();
 		return false;
 	}
-	while ((int)queue->size() == queue_size) {
+	int itemSize = r->getSize();
+	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize)) {
 		if (!sleep) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return false;
 		}
 		waitingWriters++;
-		queue_lock.waitSend();
+		queueLock.waitSend();
 		waitingWriters--;
 		if (cancel) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return false;
 		}
 	}
 	queue->push_back(r);
-	queue_lock.signalRecv();
-	queue_lock.unlock();
+	queueSize += r->getSize();
+	queueLock.signalRecv();
+	queueLock.unlock();
 	return true;
 }
 
 template <class T>
 int SyncQueue<T>::putItems(T **r, int size, bool sleep) {
-	queue_lock.lock();
+	queueLock.lock();
 	if (cancel) {
-		queue_lock.unlock();
+		queueLock.unlock();
 		return 0;
 	}
-	while ((int)queue->size() == queue_size) {
+	int itemSize = r[0]->getSize();
+	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize))  {
 		if (!sleep) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return 0;
 		}
 		waitingWriters++;
-		queue_lock.waitSend();
+		queueLock.waitSend();
 		waitingWriters--;
 		if (cancel) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return 0;
 		}
 	}
-	int i;
-	for (i = 0; i < size && i < (queue_size - (int)queue->size()); i++) {
+	int max = maxItems > 0 ? (maxItems - (int)queue->size()) : 0;
+	if (max == 0 || max > size)
+		max = size;
+
+	int i;	
+	for (i = 0; i < max && queueSize + itemSize <= maxSize; i++) {
 		queue->push_back(r[i]);
+		queueSize += itemSize;
+		itemSize = r[i]->getSize();
 	}
-	queue_lock.signalRecv();
-	queue_lock.unlock();
+	queueLock.signalRecv();
+	queueLock.unlock();
 	return i;
 }
 
 template <class T>
 bool SyncQueue<T>::isReady() {
 	bool result = false;
-	queue_lock.lock();
+	queueLock.lock();
 	if (queue->size() > 0)
 		result = true;
-	queue_lock.unlock();
+	queueLock.unlock();
 	return result;
 }
 
 template <class T>
 T *SyncQueue<T>::getItem(bool sleep) {
-	queue_lock.lock();
+	queueLock.lock();
 	if (cancel) {
-		queue_lock.unlock();
+		queueLock.unlock();
 		return NULL;
 	}
 	while (queue->size() == 0) {
 		if (!sleep) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return NULL;
 		}
 		waitingReaders++;
-		queue_lock.waitRecv();
+		queueLock.waitRecv();
 		waitingReaders--;
 		if (cancel) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return NULL;
 		}
 	}
 	T *r = (*queue)[0];
 	queue->pop_front();
-	queue_lock.signalSend();
-	queue_lock.unlock();
+	queueSize -= r->getSize();
+	queueLock.signalSend();
+	queueLock.unlock();
 
 	return r;
 }
 
 template <class T>
 int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
-	queue_lock.lock();
+	queueLock.lock();
 	if (cancel) {
-		queue_lock.unlock();
+		queueLock.unlock();
 		return 0;
 	}
 	while (queue->size() == 0) {
 		if (!sleep) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return 0;
 		}
 		waitingReaders++;
-		queue_lock.waitRecv();
+		queueLock.waitRecv();
 		waitingReaders--;
 		if (cancel) {
-			queue_lock.unlock();
+			queueLock.unlock();
 			return 0;
 		}
 	}
@@ -212,9 +226,10 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 	for (i = 0; i < size && (int)queue->size() > 0; i++) {
 		r[i] = (*queue)[0];
 		queue->pop_front();
+		queueSize -= r->getSize();
 	}
-	queue_lock.signalSend();
-	queue_lock.unlock();
+	queueLock.signalSend();
+	queueLock.unlock();
 
 	return i;
 }

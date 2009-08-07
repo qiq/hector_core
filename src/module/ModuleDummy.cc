@@ -3,21 +3,24 @@
  */
 
 #include "ModuleDummy.h"
+#include "Server.h"
+#include "WebResource.h"
 
-bool ModuleDummy::Init(Config *config, const char *name) {
+bool ModuleDummy::Init(Server *server, Config *config, const char *name) {
+	this->server = server;
+
 	return true;
 }
 
 void ModuleDummy::Process(Resource *resource) {
-	fprintf(stderr, "Dummy: processing resource %s\n", resource->getURL());
+	WebResource *wr = dynamic_cast<WebResource*>(Resource);
+	if (wr) {
+		LOG_DEBUG("Dummy: processing resource " << wr->getURL());
+	}
 	return;
 }
 
 void ModuleDummy::createCheckpoint() {
-}
-
-string *ModuleDummy::getStatistics() {
-	return new string();
 }
 
 // factory functions

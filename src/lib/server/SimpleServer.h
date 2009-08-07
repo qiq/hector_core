@@ -21,6 +21,23 @@
 using namespace std;
 namespace stdext = ::__gnu_cxx;
 
+class FileDescriptor {
+public:
+	int fd;
+
+	FileDescriptor(int fd);
+	~FileDescriptor() {};
+	int getSize();
+};
+
+inline FileDescriptor::FileDescriptor(int fd) {
+	this->fd = fd;
+}
+
+inline int FileDescriptor::getSize() {
+	return sizeof(fd);
+}
+
 class SimpleServer {
 	struct in_addr server_addr;
 	int server_port;
@@ -31,8 +48,8 @@ class SimpleServer {
 	int main_socket;		// guarded by main_lock
 
 	int nThreads;
-	SyncQueue<int> queue;
 	pthread_t *threads;
+	SyncQueue<FileDescriptor> *queue;
 
 	stdext::hash_set<string, string_hash> allowed_client;
 

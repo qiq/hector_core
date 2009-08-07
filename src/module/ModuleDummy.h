@@ -5,16 +5,28 @@
 #ifndef _MODULE_DUMMY_H_
 #define _MODULE_DUMMY_H_
 
-#include "ModuleSimple.h"
+#include <config.h>
 
-class ModuleDummy : public ModuleSimple {
+#include "Module.h"
+
+class Server;
+
+class ModuleDummy : public Module {
 public:
 	ModuleDummy() {}
-	virtual ~ModuleDummy() {}
-	virtual bool Init(Config *config, const char *name);
-	virtual void Process(Resource *resource);
-	virtual void createCheckpoint();
-	virtual string *getStatistics();
+	~ModuleDummy() {}
+	bool Init(Server *server, Config *config, const char *name);
+	module_t getType();
+	void Process(Resource *resource);
+	int Process(Resource **in, Resource **out);
+	void createCheckpoint();
+
+	const char *getValue(const char *name);
+	bool setValue(const char *name, const char *value);
 };
+
+inline module_t ModuleDummy::getType() {
+	return MODULE_SIMPLE;
+}
 
 #endif

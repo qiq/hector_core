@@ -33,7 +33,7 @@ inline void Object::setId(const char *id) {
 }
 
 inline const char *Object::getId() {
-	return id;
+	return this->id;
 }
 
 #endif
