@@ -6,9 +6,10 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 libhector_processing_chain_la_SOURCES = \
 	ProcessingChain.h ProcessingChain.cc \
 	Processor.h Processor.cc \
+	Queue.h Queue.cc \
 	Module.h Module.cc \
-	Resource.h
-
+	Resource.h \
+	WebResource.h WebResource.cc WebResource.pb.h WebResource.pb.cc
 libhector_processing_chain_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
 libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
 
@@ -20,8 +21,8 @@ libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
 #robot_LDFLAGS = -Wl,-export-dynamic -ggdb
 #robot_LDADD = -lpthread -L../lib -lhector -lltdl -lprotobuf $(AM_LDFLAGS)
 
-#Resource.pb.cc Resource.pb.h: Resource.proto
-#	/usr/local/bin/protoc Resource.proto --cpp_out=.
+WebResource.pb.cc WebResource.pb.h: WebResource.proto
+	protoc WebResource.proto --cpp_out=.
 
-#clean-local:
-#	rm -f Resource.pb.cc Resource.pb.h
+clean-local:
+	rm -f WebResource.pb.cc WebResource.pb.h

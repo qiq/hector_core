@@ -80,6 +80,10 @@ bool Processor::Init(Server *server, Config *config, const char *id) {
 		}
 		snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
 		Module *(*create)() = (Module*(*)())loadLibrary(buffer, "create");
+		if (!create) {
+			LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
+			return false;
+		}
 		Module *m = (*create)();
 		if (!m->Init(server, config, mid))
 			return false;
@@ -160,9 +164,18 @@ bool Processor::Running() {
 }
 
 void *run_processor_thread(void *ptr) {
-	Processor *module = (Processor *)ptr;
-	module->runThread();
+	Processor *p = (Processor *)ptr;
+	p->runThread();
 	return NULL;
+}
+
+void Processor::runThread() {
+	// get one item from somewhere, process it and put it into dstQueue
+//	while (Running())  {
+//		Resource *resource = new Resource();
+//		module->Process(resource);
+//		dstQueue->putItem(resource, true);
+//	}
 }
 
 void Processor::Start() {
@@ -181,4 +194,16 @@ void Processor::Stop() {
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}
+}
+
+void Processor::createCheckpoint() {
+	//TODO
+}
+
+const char *Processor::getValue(const char *name) {
+	return NULL;
+}
+
+bool Processor::setValue(const char *name, const char *value) {
+	return false;
 }

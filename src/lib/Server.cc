@@ -142,10 +142,10 @@ bool Server::setObjectValue(const char *id, const char *name, const char *value)
 	return false;
 }
 
-const char *ProcessingChain::getValue(const char *name) {
+const char *Server::getValue(const char *name) {
 	return NULL;
 }
 
-bool ProcessingChain::setValue(const char *name, const char *value) {
+bool Server::setValue(const char *name, const char *value) {
 	return false;
 }

@@ -1,0 +1,16 @@
+package hector.lib.processing_chain;
+
+//option java_package = "com.example.tutorial";
+//option java_outer_classname = "AddressBookProtos";
+option optimize_for = SPEED; 
+
+message WebResource {
+	required string url = 1;		// URL
+	optional uint32 time = 2;	 	// last check
+	optional string mime_type = 3;		// resource MIME type
+	optional string content = 4;		// content of a resource
+
+	repeated string header_field = 10;	// response header fields
+	repeated string extracted_url = 11;	// URLs extracted from the resource
+	optional uint32 ip_addr = 12;		// IPv4 address (result of DNS query)
+}

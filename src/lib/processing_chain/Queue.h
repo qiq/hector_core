@@ -9,6 +9,7 @@
 
 #include <log4cxx/logger.h>
 #include "Config.h"
+#include "Object.h"
 #include "Resource.h"
 #include "SyncQueue.h"
 
@@ -16,16 +17,14 @@ class Server;
 
 class Queue : public Object {
 private:
-	int maxMemory;
-	int maxItems;
-	SyncQueue<Resource> queue;
+	SyncQueue<Resource> *queue;
 
 	Server *server;
 
 	static log4cxx::LoggerPtr logger;
 public:
 	Queue();
-	~Queue() {};
+	~Queue();
 	bool Init(Server *server, Config *config, const char *id);
 	void Start();
 	void Stop();

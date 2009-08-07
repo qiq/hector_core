@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <log4cxx/logger.h>
 #include "Module.h"
 
 class Server;
@@ -15,10 +16,9 @@ class ModuleDummy : public Module {
 public:
 	ModuleDummy() {}
 	~ModuleDummy() {}
-	bool Init(Server *server, Config *config, const char *name);
+	bool Init(Server *server, Config *config, const char *id);
 	module_t getType();
 	void Process(Resource *resource);
-	int Process(Resource **in, Resource **out);
 	void createCheckpoint();
 
 	const char *getValue(const char *name);

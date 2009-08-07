@@ -7,8 +7,15 @@ AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE(subdir-objects)
+AC_LANG([C++])
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
+AC_ARG_WITH(protobuf,
+	[AC_HELP_STRING([--with-protobuf=PATH], [path to Google Protocol Buffers])],
+	[with_protobuf=$withval],
+	[with_protobuf=no]
+)
+
 
 # Checks for programs.
 AC_PROG_CXX
@@ -58,6 +65,19 @@ if test "x$GXX" = "xyes"; then
   *) CXXFLAGS="$CXXFLAGS -Wall" ;;
   esac
 fi
+
+# borrowed from Moses
+SAVE_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -I${with_protobuf}/include"
+AC_CHECK_HEADER(google/protobuf/message.h,
+	[AC_DEFINE([HAVE_PROTOBUF], [], [flag for protobuf])],
+	[AC_MSG_ERROR([Cannot find protobuf!])])
+LIB_PROTOBUF="-lprotobuf"
+LDFLAGS="$LDFLAGS -L${with_protobuf}/lib"
+LIBS="$LIBS $LIB_PROTOBUF"
+AC_PATH_PROG(PROTOC,protoc,,"${PATH}:${with_protobuf}/bin")
+FMTLIBS="$FMTLIBS libprotobuf.a"
+AM_CONDITIONAL([PROTOBUF], true)
 
 AC_CONFIG_FILES([Makefile
                 src/Makefile

@@ -47,11 +47,9 @@
 
 <!-- Processor -->
 
-<!ELEMENT Processor	(type,threads,module+,inputQueue?,outputQueue?) >
+<!ELEMENT Processor	(threads,module+,inputQueue?,outputQueue?) >
 <!ATTLIST Processor
 	id		ID		#REQUIRED >
-
-<!ELEMENT type		(#PCDATA) >
 
 <!ELEMENT module	EMPTY >
 <!ATTLIST module

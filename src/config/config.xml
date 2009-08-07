@@ -47,7 +47,6 @@
 	</ProcessingChain>
 
 	<Processor id="load-resource">
-		<type>simple</type>
 		<threads>1</threads>
 		<module ref="load-resource-module"/>
 		<module ref="preprocess-resource-module"/>
@@ -64,12 +63,11 @@
 	</Module>
 
 	<Queue id="q1">
-		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
+		<maxMemory>0</maxMemory>
 	</Queue>
 
 	<Processor id="external-test">
-		<type>simple</type>
 		<threads>1</threads>
 		<module ref="external-test-module"/>
 		<inputQueue ref="q1" priority="0"/>
@@ -82,12 +80,11 @@
 	</Module>
 
 	<Queue id="q2">
-		<maxMemory>0</maxMemory>
 		<maxItems>0</maxItems>
+		<maxMemory>0</maxMemory>
 	</Queue>
 
 	<Processor id="save-resource">
-		<type>simple</type>
 		<threads>1</threads>
 		<module ref="save-resource-module"/>
 		<inputQueue ref="q2"/>

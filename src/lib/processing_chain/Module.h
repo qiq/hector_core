@@ -23,6 +23,8 @@ typedef enum {
 } module_t;
 
 class Module : public Object {
+protected:
+	Server *server;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -30,6 +32,7 @@ public:
 	virtual ~Module() {};
 	virtual bool Init(Server *server, Config *config, const char *id) = 0;
 	virtual module_t getType() = 0;
+	virtual Resource *Process();
 	virtual void Process(Resource *resource);
 	virtual int Process(Resource **in, Resource **out);
 	virtual void createCheckpoint() = 0;

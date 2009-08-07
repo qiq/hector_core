@@ -33,7 +33,7 @@ inline int Resource::getStatus() {
 	return status;
 }
 
-void Resource::setStatus(int status) {
+inline void Resource::setStatus(int status) {
 	this->status = status;
 }
 

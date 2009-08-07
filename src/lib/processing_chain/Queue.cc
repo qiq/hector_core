@@ -5,23 +5,26 @@
 #include <config.h>
 
 #include "Queue.h"
+#include "Server.h"
 
 log4cxx::LoggerPtr Queue::logger(log4cxx::Logger::getLogger("lib.processing_chain.Queue"));
 
 Queue::Queue() {
-	int maxItems = 0;
-	int maxSize = 0;
+	queue = NULL;
 }
 
 Queue::~Queue() {
+	delete queue;
 }
 
 bool Queue::Init(Server *server, Config *config, const char *id) {
 	char buffer[1024];
 	char *s;
-	vector<string> *v;
 
 	this->server = server;
+
+	int maxItems = 0;
+	int maxMemory = 0;
 
 	// maxItems
 	snprintf(buffer, sizeof(buffer), "/Config/Queue[@id='%s']/maxItems", id);
@@ -41,6 +44,8 @@ bool Queue::Init(Server *server, Config *config, const char *id) {
 	}
 	free(s);
 
+	queue = new SyncQueue<Resource>(maxItems, maxMemory);
+
 	return true;
 }
 
@@ -48,7 +53,7 @@ void Queue::Start() {
 }
 
 void Queue::Stop() {
-	queue.cancelAll();
+	queue->cancelAll();
 }
 
 bool Queue::putResource(Resource *resource) {
