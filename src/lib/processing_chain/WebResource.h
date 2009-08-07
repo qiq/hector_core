@@ -14,7 +14,7 @@
 
 using namespace std;
 
-class WebResource : Resource {
+class WebResource : public Resource {
 	string url;
 	uint32_t time;
 	char mime_type[50];
@@ -27,6 +27,7 @@ class WebResource : Resource {
 public:
 	WebResource();
 	~WebResource();
+	int getSize();
 	void setURL(const char *url);
 	const char *getURL();
 	string *serialize(bool serializeContent);

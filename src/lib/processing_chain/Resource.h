@@ -16,6 +16,7 @@
 using namespace std;
 
 class Resource {
+protected:
 	uint32_t status;
 
 	static log4cxx::LoggerPtr logger;

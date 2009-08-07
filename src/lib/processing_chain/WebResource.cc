@@ -25,6 +25,10 @@ WebResource::~WebResource() {
 	}
 }
 
+int WebResource::getSize() {
+	return 1; //FIXME
+}
+
 void WebResource::setURL(const char *url) {
 	this->url = url;
 }

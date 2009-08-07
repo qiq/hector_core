@@ -9,7 +9,7 @@
 
 log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("module.DummyModule"));
 
-bool ModuleDummy::Init(Server *server, Config *config, const char *name) {
+bool ModuleDummy::Init(Server *server, Config *config, const char *id) {
 	this->server = server;
 
 	return true;
