@@ -8,55 +8,54 @@
 #include <stdlib.h>
 #include "ProcessingChain.h"
 #include "Processor.h"
-#include "Server.h"
 
 log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingChain"));
 
-ProcessingChain::ProcessingChain() {
+ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Object(objects, id) {
 }
 
 ProcessingChain::~ProcessingChain() {
 	for (unsigned i = 0; i < processors.size(); i++) {
-		server->unregisterObject(processors[i]->getId());
 		delete processors[i];
 	}
 	for (unsigned i = 0; i < queues.size(); i++) {
-		server->unregisterObject(queues[i]->getId());
 		delete queues[i];
 	}
 }
 
-bool ProcessingChain::Init(Server *server, Config *config, const char *id) {
+bool ProcessingChain::Init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
 
-	this->server = server;
+	// crate children: queues
+	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/queue/@ref", getId());
+	v = config->getValues(buffer);
+	if (v) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+			const char *qid = iter->c_str();
+			Queue *q = new Queue(objects, qid);
+			if (!q->Init(config))
+				return false;
+			queues.push_back(q);
+		}
+		delete v;
+	}
 
 	// create children: processors
-	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/processor/@ref", id);
+	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/processor/@ref", getId());
 	v = config->getValues(buffer);
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
-		const char *pid = iter->c_str();
-		Processor *p = new Processor();
-		if (!p->Init(server, config, pid))
-			return false;
-		processors.push_back(p);
-		server->registerObject(p);
+	if (v) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+			const char *pid = iter->c_str();
+			Processor *p = new Processor(objects, pid);
+			if (!p->Init(config))
+				return false;
+			processors.push_back(p);
+		}
+		delete v;
+	} else {
+		LOG4CXX_INFO(logger, "No Processors for ProcessingChain: " << getId());
 	}
-	delete v;
-
-	// crate children: queues
-	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/queue/@ref", id);
-	v = config->getValues(buffer);
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
-		const char *pid = iter->c_str();
-		Queue *q = new Queue();
-		if (!q->Init(server, config, pid))
-			return false;
-		queues.push_back(q);
-		server->registerObject(q);
-	}
-	delete v;
 
 	return true;
 }

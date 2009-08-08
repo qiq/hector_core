@@ -8,7 +8,7 @@
 		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>8080</serverPort>
-		<lib name="server/web/libserver-web.la"/>
+		<lib name="servers/web/libserver-web.la"/>
 		<param name="test" value="test"/>
 	</Server>
 
@@ -16,14 +16,14 @@
 		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1200</serverPort>
-		<lib name="server/hashserver/libserver-md5.la"/>
+		<lib name="servers/hashserver/libserver-md5.la"/>
 	</Server>
 
 	<Server id="master">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1000</serverPort>
-		<lib name="server/master/libserver-master.la"/>
+		<lib name="servers/master/libserver-master.la"/>
 	</Server>
 
 	<Server id="robot">
@@ -33,7 +33,7 @@
 		<processingChain ref="robot-processing-chain"/>
 		<!--processingChain ref="robot-processing-chain2"/-->
 		<logConfig>config/robot.log.props</logConfig>
-		<lib name="server/robot/libserver-robot.la"/>
+		<lib name="servers/robot/libserver-robot.la"/>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>
@@ -75,7 +75,8 @@
 	</Processor>
 
 	<Module id="external-test-module">
-		<lib name="modules/libmodule-external-simple.so"/>
+		<!--lib name="modules/libmodule-external-simple.so"/-->
+		<lib name="modules/libmodule-dummy.so"/>
 		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
 	</Module>
 

@@ -10,22 +10,21 @@
 #include <log4cxx/logger.h>
 #include "Config.h"
 #include "Object.h"
+#include "ObjectRegistry.h"
 #include "Resource.h"
 #include "SyncQueue.h"
-
-class Server;
 
 class Queue : public Object {
 private:
 	SyncQueue<Resource> *queue;
 
-	Server *server;
+	ObjectRegistry *objects;
 
 	static log4cxx::LoggerPtr logger;
 public:
-	Queue();
+	Queue(ObjectRegistry *objects, const char *id);
 	~Queue();
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	void Start();
 	void Stop();
 	void createCheckpoint();

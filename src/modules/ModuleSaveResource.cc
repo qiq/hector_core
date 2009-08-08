@@ -4,30 +4,36 @@
 #include <config.h>
 
 #include "ModuleSaveResource.h"
-#include "Server.h"
 #include "WebResource.h"
 
-bool ModuleSaveResource::Init(Server *server, Config *config, const char *id) {
-	this->server = server;
-
+bool ModuleSaveResource::Init(Config *config) {
 	return true;
 }
 
 void ModuleSaveResource::Process(Resource *resource) {
-	WebResource *wb = dynamic_cast<WebResouce*>(resource);
-	if (wb) {
-		fprintf(stderr, "Saving resource (URL: %s)\n", resource->getURL());
-	}
+// FIXME: WTF?
+//	WebResource *wb = dynamic_cast<WebResouce*>(resource);
+//	if (wb) {
+//		fprintf(stderr, "Saving resource (URL: %s)\n", resource->getURL());
+//	}
 	return;
 }
 
 void ModuleSaveResource::createCheckpoint() {
 }
 
+const char *ModuleSaveResource::getValue(const char *name) {
+	return "abc";
+}
+
+bool ModuleSaveResource::setValue(const char *name, const char *value) {
+	return false;
+}
+
 // the class factories
 
-extern "C" Module* create() {
-	return (Module*)new ModuleSaveResource();
+extern "C" Module* create(ObjectRegistry *objects, const char *id) {
+	return (Module*)new ModuleSaveResource(objects, id);
 }
 
 extern "C" void destroy(Module* p) {

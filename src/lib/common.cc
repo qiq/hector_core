@@ -59,13 +59,18 @@ void int2bytes(uint32_t n, char (*bytes)[4]) {
 	LOG4CXX_ERROR(logger, s);
 }*/
 
+// TODO: fix memory leaks
 void *loadLibrary(const char *lib, const char *sym) {
 	if (lt_dlinit() != 0)
 		return NULL;
 	lt_dlhandle handle = lt_dlopen(lib);
-	if (handle == NULL)
+	if (handle == NULL) {
+fprintf(stderr, lt_dlerror());
 		return NULL;
+}
 	void *p = lt_dlsym(handle, sym);
+if (!p)
+fprintf(stderr, lt_dlerror());
 	return p;
 }
 

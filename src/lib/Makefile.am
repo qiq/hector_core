@@ -12,6 +12,7 @@ libhector_la_SOURCES = \
 		Config.h Config.cc \
 		CyclicBuffer.h CyclicBuffer.cc \
 		SyncQueue.h \
+		Object.h ObjectRegistry.h ObjectRegistry.cc \
 		Server.h Server.cc
 libhector_la_CXXFLAGS = $(AM_CXXFLAGS)
 libhector_la_LIBADD = server/libhector_server.la processing_chain/libhector_processing_chain.la

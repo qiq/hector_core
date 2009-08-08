@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
 	log4cxx::PropertyConfigurator::configure(buffer);
 
 	// create and initialize the Server object
-	Server *server = new Server();
-	if (!server->Init(config, serverId))
+	Server *server = new Server(serverId);
+	if (!server->Init(config))
 		die("Cannot initialize server\n");
 
 	// run server

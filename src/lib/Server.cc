@@ -5,9 +5,12 @@
 
 log4cxx::LoggerPtr Server::logger(log4cxx::Logger::getLogger("lib.Server"));
 
-Server::Server() {
+Server::Server(const char *id) : Object(NULL, id) {
 	serverHost = NULL;
 	simpleHTTPServer = NULL;
+	// not done in constructor
+	objects = new ObjectRegistry();
+	objects->registerObject(this);
 }
 
 Server::~Server() {
@@ -16,9 +19,10 @@ Server::~Server() {
 		delete *iter;
 	}
 	delete simpleHTTPServer;
+	delete objects;
 }
 
-bool Server::Init(Config *config, const char *id) {
+bool Server::Init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -30,7 +34,7 @@ bool Server::Init(Config *config, const char *id) {
 	}
 
 	// threads
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/threads", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &threads) != 1) {
 		LOG4CXX_ERROR(logger, "Invalid number of threads, using 1 thread");
@@ -39,7 +43,7 @@ bool Server::Init(Config *config, const char *id) {
 	free(s);
 
 	// serverHost
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverHost", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverHost", getId());
 	serverHost = config->getFirstValue(buffer);
 	if (!serverHost) {
 		LOG4CXX_ERROR(logger, "Server/serverHost not found");
@@ -47,7 +51,7 @@ bool Server::Init(Config *config, const char *id) {
 	}
 
 	// serverPort
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverPort", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverPort", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &serverPort) != 1) {
 		LOG4CXX_ERROR(logger, "Server/serverPort not found");
@@ -56,19 +60,21 @@ bool Server::Init(Config *config, const char *id) {
 	free(s);
 
 	// create processing chain(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingChain/@ref", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingChain/@ref", getId());
 	v = config->getValues(buffer);
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
-		const char *pid = iter->c_str();
-		ProcessingChain *p = new ProcessingChain();
-		if (!p->Init(this, config, pid))
-			return false;
-		processingChains.push_back(p);
+	if (v) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+			const char *pid = iter->c_str();
+			ProcessingChain *p = new ProcessingChain(objects, pid);
+			if (!p->Init(config))
+				return false;
+			processingChains.push_back(p);
+		}
+		delete v;
 	}
-	delete v;
 
 	// library
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/lib/@name", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/lib/@name", getId());
 	s = config->getFirstValue(buffer);
 	if (!s) {
 		LOG4CXX_ERROR(logger, "Server/lib not found");
@@ -77,12 +83,12 @@ bool Server::Init(Config *config, const char *id) {
 	
 	// load library
 	snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-	SimpleHTTPServer *(*create)(Server*) = (SimpleHTTPServer*(*)(Server*))loadLibrary(buffer, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))loadLibrary(buffer, "create");
 	if (!create) {
 		LOG4CXX_ERROR(logger, "Invalid library: " << buffer);
 		return false;
 	}
-	simpleHTTPServer = (*create)(this);
+	simpleHTTPServer = (*create)(objects);
 	free(s);
 
 	free(baseDir);
@@ -100,46 +106,6 @@ void Server::Start(bool wait) {
 void Server::Stop() {
 	LOG4CXX_INFO(logger, "Stopping server");
 	simpleHTTPServer->Stop();
-}
-
-void Server::registerObject(Object *obj) {
-	objects[obj->getId()] = obj;
-}
-
-
-bool Server::unregisterObject(const char *id) {
-	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
-	if (iter != objects.end()) {
-		objects.erase(id);
-		return true;
-	}
-	return false;
-}
-
-Object *Server::getObject(const char *id) {
-	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
-	if (iter != objects.end()) {
-		return iter->second;
-	}
-	return NULL;
-}
-
-const char *Server::getObjectValue(const char *id, const char *name) {
-	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
-	if (iter != objects.end()) {
-		Object *obj = iter->second;
-		return obj->getValue(name);
-	}
-	return NULL;
-}
-
-bool Server::setObjectValue(const char *id, const char *name, const char *value) {
-	stdext::hash_map<const char*, Object*>::iterator iter = objects.find(id);
-	if (iter != objects.end()) {
-		Object *obj = iter->second;
-		return obj->setValue(name, value);
-	}
-	return false;
 }
 
 const char *Server::getValue(const char *name) {

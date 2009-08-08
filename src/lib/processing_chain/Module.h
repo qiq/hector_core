@@ -12,8 +12,6 @@
 #include "Object.h"
 #include "Resource.h"
 
-class Server;
-
 typedef enum {
 	MODULE_INPUT =  0,
 	MODULE_OUTPUT = 1,
@@ -24,13 +22,11 @@ typedef enum {
 
 class Module : public Object {
 protected:
-	Server *server;
-
 	static log4cxx::LoggerPtr logger;
 public:
-	Module() {};
+	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
 	virtual ~Module() {};
-	virtual bool Init(Server *server, Config *config, const char *id) = 0;
+	virtual bool Init(Config *config) = 0;
 	virtual module_t getType() = 0;
 	virtual Resource *Process();
 	virtual void Process(Resource *resource);

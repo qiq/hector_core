@@ -3,9 +3,10 @@
  */
 
 #include "RobotHTTPServer.h"
+#include "Object.h"
 
-RobotHTTPServer::RobotHTTPServer(Server *server) {
-	this->server = server;
+RobotHTTPServer::RobotHTTPServer(ObjectRegistry *objects) {
+	this->objects = objects;
 }
 
 bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
@@ -13,6 +14,8 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 	if (method == "SHUTDOWN") {
 		conn->setResponseCode(200, "OK");
 		conn->appendResponseBody("Shutting down\r\n");
+conn->appendResponseBody(objects->getObjectValue("save-resource-module", ""));
+conn->appendResponseBody("\r\n");
 		conn->appendResponseBody(conn->getRequestArgs().c_str());
 		conn->appendResponseBody("\r\n");
 
@@ -24,8 +27,8 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 
 // factory functions
 
-extern "C" SimpleHTTPServer* create(Server *server) {
-	return new RobotHTTPServer(server);
+extern "C" SimpleHTTPServer* create(ObjectRegistry *objects) {
+	return new RobotHTTPServer(objects);
 }
 
 extern "C" void destroy(SimpleHTTPServer* p) {

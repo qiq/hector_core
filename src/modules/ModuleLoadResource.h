@@ -11,9 +11,9 @@
 
 class ModuleLoadResource : public Module {
 public:
-	ModuleLoadResource() {};
+	ModuleLoadResource(ObjectRegistry *objects, const char *id): Module(objects, id) {};
 	~ModuleLoadResource() {};
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	module_t getType();
 	Resource *Process();
 	void createCheckpoint();

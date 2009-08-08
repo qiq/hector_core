@@ -11,15 +11,18 @@
 
 class ModuleSaveResource : public Module {
 public:
-	ModuleSaveResource() {};
+	ModuleSaveResource(ObjectRegistry *objects, const char *id): Module(objects, id) {};
 	~ModuleSaveResource() {};
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	module_t getType();
 	void Process(Resource *resource);
 	void createCheckpoint();
+
+	const char *getValue(const char *name);
+	bool setValue(const char *name, const char *value);
 };
 
-inline module_t ModuleLoadResource::getType() {
+inline module_t ModuleSaveResource::getType() {
 	return MODULE_OUTPUT;
 }
 

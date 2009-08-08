@@ -5,11 +5,10 @@
 #include <config.h>
 
 #include "Queue.h"
-#include "Server.h"
 
 log4cxx::LoggerPtr Queue::logger(log4cxx::Logger::getLogger("lib.processing_chain.Queue"));
 
-Queue::Queue() {
+Queue::Queue(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	queue = NULL;
 }
 
@@ -17,17 +16,15 @@ Queue::~Queue() {
 	delete queue;
 }
 
-bool Queue::Init(Server *server, Config *config, const char *id) {
+bool Queue::Init(Config *config) {
 	char buffer[1024];
 	char *s;
-
-	this->server = server;
 
 	int maxItems = 0;
 	int maxMemory = 0;
 
 	// maxItems
-	snprintf(buffer, sizeof(buffer), "/Config/Queue[@id='%s']/maxItems", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Queue[@id='%s']/maxItems", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &maxItems) != 1) {
 		LOG4CXX_ERROR(logger, "Invalid maxItems value");
@@ -36,7 +33,7 @@ bool Queue::Init(Server *server, Config *config, const char *id) {
 	free(s);
 
 	// maxMemory
-	snprintf(buffer, sizeof(buffer), "/Config/Queue[@id='%s']/maxMemory", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Queue[@id='%s']/maxMemory", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &maxMemory) != 1) {
 		LOG4CXX_ERROR(logger, "Invalid maxMemory value");

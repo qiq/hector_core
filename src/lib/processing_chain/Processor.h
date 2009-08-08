@@ -11,11 +11,10 @@
 #include <log4cxx/logger.h>
 #include "Config.h"
 #include "Object.h"
+#include "ObjectRegistry.h"
 #include "Lock.h"
 #include "Module.h"
 #include "Queue.h"
-
-class Server;
 
 class InputQueue {
 	int priority;
@@ -66,15 +65,13 @@ class Processor : public Object {
 	Lock runningLock;
 	bool running;
 
-	Server *server;
-
 	static log4cxx::LoggerPtr logger;
 public:
-	Processor();
+	Processor(ObjectRegistry *objects, const char *id);
 	~Processor();
 	bool Running();
 	void runThread();
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	void Start();
 	void Stop();
 	void createCheckpoint();

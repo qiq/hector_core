@@ -9,9 +9,7 @@
 
 log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("module.DummyModule"));
 
-bool ModuleDummy::Init(Server *server, Config *config, const char *id) {
-	this->server = server;
-
+bool ModuleDummy::Init(Config *config) {
 	return true;
 }
 
@@ -27,10 +25,18 @@ void ModuleDummy::createCheckpoint() {
 	// TODO
 }
 
+const char *ModuleDummy::getValue(const char *name) {
+	return NULL;
+}
+
+bool ModuleDummy::setValue(const char *name, const char *value) {
+	return false;
+}
+
 // factory functions
 
-extern "C" Module* create() {
-	return new ModuleDummy();
+extern "C" Module* create(ObjectRegistry *objects, const char *id) {
+	return new ModuleDummy(objects, id);
 }
 
 extern "C" void destroy(Module* p) {

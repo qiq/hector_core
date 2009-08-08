@@ -9,13 +9,11 @@
 
 #include "Module.h"
 
-class Server;
-
 class ModuleDummy : public Module {
 public:
-	ModuleDummy() {}
+	ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {}
 	~ModuleDummy() {}
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	module_t getType();
 	void Process(Resource *resource);
 	void createCheckpoint();

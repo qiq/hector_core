@@ -11,22 +11,19 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Object.h"
+#include "ObjectRegistry.h"
 #include "Processor.h"
 #include "Queue.h"
-
-class Server;
 
 class ProcessingChain : public Object {
 	vector<Processor*> processors;
 	vector<Queue*> queues;
 
-	Server *server;
-
 	static log4cxx::LoggerPtr logger;
 public:
-	ProcessingChain();
+	ProcessingChain(ObjectRegistry *objects, const char *id);
 	~ProcessingChain();
-	bool Init(Server *server, Config *config, const char *id);
+	bool Init(Config *config);
 	void Start();
 	void Stop();
 	void createCheckpoint();

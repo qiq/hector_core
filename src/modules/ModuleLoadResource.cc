@@ -5,12 +5,9 @@
 
 #include <stdlib.h>
 #include "ModuleLoadResource.h"
-#include "Server.h"
 #include "WebResource.h"
 
-bool ModuleLoadResource::Init(Server *server, Config *config, const char *id) {
-	this->server = server;
-
+bool ModuleLoadResource::Init(Config *config) {
 	return true;
 }
 
@@ -26,10 +23,18 @@ Resource *ModuleLoadResource::Process() {
 void ModuleLoadResource::createCheckpoint() {
 }
 
+const char *ModuleLoadResource::getValue(const char *name) {
+	return NULL;
+}
+
+bool ModuleLoadResource::setValue(const char *name, const char *value) {
+	return false;
+}
+
 // the class factories
 
-extern "C" Module* create() {
-	return (Module*)new ModuleLoadResource();
+extern "C" Module* create(ObjectRegistry *objects, const char *id) {
+	return (Module*)new ModuleLoadResource(objects, id);
 }
 
 extern "C" void destroy(Module* p) {

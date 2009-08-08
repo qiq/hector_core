@@ -9,11 +9,10 @@
 #include <ltdl.h>
 #include "common.h"
 #include "Processor.h"
-#include "Server.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_chain.Processor"));
 
-Processor::Processor() {
+Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	threads = NULL;
 	running = false;
 }
@@ -22,20 +21,10 @@ Processor::~Processor() {
 	delete[] threads;
 }
 
-//	<Processor id="load-resource">
-//		<type>simple</type>
-//		<threads>1</threads>
-//		<module ref="load-resource-module"/>
-//		<module ref="preprocess-resource-module"/>
-//		<outputQueue ref="q1"/>
-//	</Processor>
-
-bool Processor::Init(Server *server, Config *config, const char *id) {
+bool Processor::Init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
-
-	this->server = server;
 
 	char *baseDir = config->getFirstValue("/Config/@baseDir");
 	if (!baseDir) {
@@ -59,7 +48,7 @@ bool Processor::Init(Server *server, Config *config, const char *id) {
 	//free(s);
 
 	// threads
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/threads", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1) {
 		LOG4CXX_ERROR(logger, "Invalid number of threads: " << s);
@@ -68,27 +57,29 @@ bool Processor::Init(Server *server, Config *config, const char *id) {
 	free(s);
 
 	// module(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/module/@ref", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/module/@ref", getId());
 	v = config->getValues(buffer);
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
-		const char *mid = iter->c_str();
-		snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/lib/@name", mid);
-		s = config->getFirstValue(buffer);
-		if (!s) {
-			LOG4CXX_ERROR(logger, "Module/lib not found: " << mid);
-			return false;
+	if (v) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+			const char *mid = iter->c_str();
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/lib/@name", mid);
+			s = config->getFirstValue(buffer);
+			if (!s) {
+				LOG4CXX_ERROR(logger, "Module/lib not found: " << mid);
+				return false;
+			}
+			snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
+			Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))loadLibrary(buffer, "create");
+			if (!create) {
+				LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
+				return false;
+			}
+			Module *m = (*create)(objects, mid);
+			if (!m->Init(config))
+				return false;
+			modules.push_back(m);
 		}
-		snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-		Module *(*create)() = (Module*(*)())loadLibrary(buffer, "create");
-		if (!create) {
-			LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
-			return false;
-		}
-		Module *m = (*create)();
-		if (!m->Init(server, config, mid))
-			return false;
-		modules.push_back(m);
-		server->registerObject(m);
+		delete v;
 	}
 
 	// check modules
@@ -123,32 +114,34 @@ bool Processor::Init(Server *server, Config *config, const char *id) {
 	}
 
 	// input queue(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue/@ref", id);
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue/@ref", getId());
 	v = config->getValues(buffer);
 	i = 1;
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
-		const char *qid = iter->c_str();
-		snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue[%d]/@priority", qid, i);
-		char *s = config->getFirstValue(buffer);
-		int priority = 0;
-		if (s) {
-			if (sscanf(s, "%d", &priority) != 1) {
-				LOG4CXX_ERROR(logger, "Invalid inputQueue priority: " << s);
+	if (v) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+			const char *qid = iter->c_str();
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue[%d]/@priority", qid, i);
+			char *s = config->getFirstValue(buffer);
+			int priority = 0;
+			if (s) {
+				if (sscanf(s, "%d", &priority) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid inputQueue priority: " << s);
+					return false;
+				}
+			}
+			free(s);
+			Queue *queue = dynamic_cast<Queue*>(objects->getObject(qid));
+			if (!queue) {
+				LOG4CXX_ERROR(logger, "Queue not found: " << qid);
 				return false;
 			}
-		}
-		free(s);
-		Queue *queue = dynamic_cast<Queue*>(server->getObject(qid));
-		if (!queue) {
-			LOG4CXX_ERROR(logger, "Queue not found: " << qid);
-			return false;
-		}
 
-		InputQueue *iq = new InputQueue(queue, priority);
-		inputQueues.push_back(iq);
-		i++;
+			InputQueue *iq = new InputQueue(queue, priority);
+			inputQueues.push_back(iq);
+			i++;
+		}
+		delete v;
 	}
-
 
 	free(baseDir);
 
