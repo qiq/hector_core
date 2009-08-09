@@ -95,3 +95,7 @@ const char *ProcessingChain::getValue(const char *name) {
 bool ProcessingChain::setValue(const char *name, const char *value) {
 	return false;
 }
+
+vector<string> *ProcessingChain::listNames() {
+	return new vector<string>();
+}

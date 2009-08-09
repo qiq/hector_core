@@ -200,3 +200,7 @@ const char *Processor::getValue(const char *name) {
 bool Processor::setValue(const char *name, const char *value) {
 	return false;
 }
+
+vector<string> *Processor::listNames() {
+	return new vector<string>();
+}

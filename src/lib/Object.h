@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <string>
+#include <vector>
 #include "ObjectRegistry.h"
 
 class Object {
@@ -21,6 +23,7 @@ public:
 	const char *getId();
 	virtual const char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
+	virtual vector<string> *listNames() = 0;
 };
 
 inline Object::Object(ObjectRegistry *objects, const char *id) {

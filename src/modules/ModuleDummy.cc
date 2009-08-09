@@ -56,13 +56,20 @@ const char *ModuleDummy::getValue(const char *name) {
 }
 
 bool ModuleDummy::setValue(const char *name, const char *value) {
-	bool result = false;
 	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		lock.lock();
 		(this->*(iter->second))(value);
-		result = true;
 		lock.unlock();
+		return true;
+	}
+	return false;
+}
+
+vector<string> *ModuleDummy::listNames() {
+	vector<string> *result = new vector<string>();
+	for (stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); iter++) {
+		result->push_back(iter->first);
 	}
 	return result;
 }

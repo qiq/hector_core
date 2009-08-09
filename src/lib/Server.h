@@ -13,6 +13,7 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Config.h"
+#include "Lock.h"
 #include "Object.h"
 #include "processing_chain/ProcessingChain.h"
 #include "server/SimpleHTTPServer.h"
@@ -27,6 +28,10 @@ class Server : public Object {
 	vector<ProcessingChain*> processingChains;
 	SimpleHTTPServer *simpleHTTPServer;
 
+	Lock propertiesLock;
+	bool waitForFinish;
+	bool isRunning;
+
 	static log4cxx::LoggerPtr logger;
 public:
 	Server(const char *id);
@@ -38,6 +43,7 @@ public:
 
 	const char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
+	vector<string> *listNames();
 };
 
 #endif

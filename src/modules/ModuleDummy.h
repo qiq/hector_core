@@ -32,6 +32,7 @@ public:
 
 	const char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
+	vector<string> *listNames();
 };
 
 inline module_t ModuleDummy::getType() {

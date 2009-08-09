@@ -7,6 +7,7 @@
 #include <config.h>
 
 #include <string>
+#include <vector>
 #include <ext/hash_map>
 #include <log4cxx/logger.h>
 #include "common.h"
@@ -27,6 +28,7 @@ public:
 	void registerObject(Object *obj);
 	bool unregisterObject(const char *id);
 	Object *getObject(const char *id);
+	vector<string> *getIds();
 
 	const char *getObjectValue(const char *id, const char *name);
 	bool setObjectValue(const char *id, const char *name, const char *value);

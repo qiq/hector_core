@@ -68,3 +68,7 @@ const char *Queue::getValue(const char *name) {
 bool Queue::setValue(const char *name, const char *value) {
 	return false;
 }
+
+vector<string> *Queue::listNames() {
+	return new vector<string>();
+}

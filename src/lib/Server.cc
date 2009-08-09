@@ -116,3 +116,7 @@ const char *Server::getValue(const char *name) {
 bool Server::setValue(const char *name, const char *value) {
 	return false;
 }
+
+vector<string> *Server::listNames() {
+	return new vector<string>();
+}

@@ -28,6 +28,14 @@ Object *ObjectRegistry::getObject(const char *id) {
 	return NULL;
 }
 
+vector<string> *ObjectRegistry::getIds() {
+	vector<string> *result = new vector<string>();
+	for (stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+		result->push_back(iter->first);
+	}
+	return result;
+}
+
 const char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
 	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {

@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <string>
 #include <log4cxx/logger.h>
 #include "Config.h"
 #include "Object.h"
@@ -35,6 +36,7 @@ public:
 
 	virtual const char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
+	virtual vector<string> *listNames() = 0;
 };
 
 #endif

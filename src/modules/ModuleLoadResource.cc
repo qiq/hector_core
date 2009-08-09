@@ -31,6 +31,10 @@ bool ModuleLoadResource::setValue(const char *name, const char *value) {
 	return false;
 }
 
+vector<string> *ModuleLoadResource::listNames() {
+	return new vector<string>();
+}
+
 // the class factories
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id) {
