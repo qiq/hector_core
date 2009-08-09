@@ -7,12 +7,24 @@
 
 #include <config.h>
 
+#include <string>
+#include <ext/hash_map>
+#include "common.h"
+#include "Lock.h"
 #include "Module.h"
 
 class ModuleDummy : public Module {
+	Lock lock;
+	char *dummy;
+
+	stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash> getters;
+	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash> setters;
+
+	const char *getDummy();
+	void setDummy(const char *value);
 public:
-	ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {}
-	~ModuleDummy() {}
+	ModuleDummy(ObjectRegistry *objects, const char *id);
+	~ModuleDummy();
 	bool Init(Config *config);
 	module_t getType();
 	void Process(Resource *resource);

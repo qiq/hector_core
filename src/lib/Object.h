@@ -18,7 +18,6 @@ protected:
 public:
 	Object(ObjectRegistry *objects, const char *id);
 	~Object();
-	void setId(const char *id);
 	const char *getId();
 	virtual const char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
@@ -35,13 +34,6 @@ inline Object::~Object() {
 	if (objects)
 		objects->unregisterObject(id);
 	free(id);
-}
-
-inline void Object::setId(const char *id) {
-	objects->unregisterObject(this->id);
-	free(this->id);
-	this->id = strdup(id);
-	objects->registerObject(this);
 }
 
 inline const char *Object::getId() {

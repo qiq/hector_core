@@ -3,11 +3,30 @@
  */
 #include <config.h>
 
+#include <string.h>
 #include "ModuleDummy.h"
 #include "Server.h"
 #include "WebResource.h"
 
-log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("module.DummyModule"));
+const char *ModuleDummy::getDummy() {
+	return dummy;
+}
+
+void ModuleDummy::setDummy(const char *value) {
+	free(dummy);
+	dummy = strdup(value);
+}
+
+ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {
+	dummy = NULL;
+
+	getters["dummy"] = &ModuleDummy::getDummy;
+	setters["dummy"] = &ModuleDummy::setDummy;
+}
+
+ModuleDummy::~ModuleDummy() {
+	free(dummy);
+}
 
 bool ModuleDummy::Init(Config *config) {
 	return true;
@@ -26,11 +45,26 @@ void ModuleDummy::createCheckpoint() {
 }
 
 const char *ModuleDummy::getValue(const char *name) {
-	return NULL;
+	const char *result = NULL;
+	stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.find(name);
+	if (iter != getters.end()) {
+		lock.lock();
+		result = (this->*(iter->second))();
+		lock.unlock();
+	}
+	return result;
 }
 
 bool ModuleDummy::setValue(const char *name, const char *value) {
-	return false;
+	bool result = false;
+	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash>::iterator iter = setters.find(name);
+	if (iter != setters.end()) {
+		lock.lock();
+		(this->*(iter->second))(value);
+		result = true;
+		lock.unlock();
+	}
+	return result;
 }
 
 // factory functions

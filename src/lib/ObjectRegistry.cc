@@ -40,8 +40,7 @@ const char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
 bool ObjectRegistry::setObjectValue(const char *id, const char *name, const char *value) {
 	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		Object *obj = iter->second;
-		return obj->setValue(name, value);
+		return iter->second->setValue(name, value);
 	}
 	return false;
 }
