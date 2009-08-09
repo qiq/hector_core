@@ -32,7 +32,8 @@ inline Object::Object(ObjectRegistry *objects, const char *id) {
 }
 
 inline Object::~Object() {
-	objects->unregisterObject(id);
+	if (objects)
+		objects->unregisterObject(id);
 	free(id);
 }
 

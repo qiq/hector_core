@@ -20,6 +20,7 @@ Server::~Server() {
 	}
 	delete simpleHTTPServer;
 	delete objects;
+	objects = NULL;
 }
 
 bool Server::Init(Config *config) {
