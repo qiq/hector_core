@@ -19,8 +19,13 @@ log4cxx::LoggerPtr SimpleHTTPConn::logger(log4cxx::Logger::getLogger("lib.Simple
 
 SimpleHTTPConn::SimpleHTTPConn(int fd) {
 	this->socket = fd;
+	keep_alive = false;
+	request_body_length = -1;
+	request_header_offset = -1;
+	request_body_offset = -1;
 	header_fields = NULL;
-	clear();
+	response_code = 200;
+	response_str = "OK";
 }
 
 SimpleHTTPConn::~SimpleHTTPConn() {
@@ -29,11 +34,16 @@ SimpleHTTPConn::~SimpleHTTPConn() {
 }
 
 void SimpleHTTPConn::clear() {
+	int preserve = request_body_length >= 0 ? (int)request_buffer.length()-request_body_offset - request_body_length : 0;
+
 	keep_alive = false;
 	request_body_length = -1;
 	request_method.clear();
 	request_args.clear();
-	request_buffer.clear();
+	if (preserve > 0)
+		request_buffer = request_buffer.substr(preserve);
+	else
+		request_buffer.clear();
 	request_header_offset = -1;
 	request_body_offset = -1;
 	delete header_fields;
@@ -111,17 +121,20 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 		(*header_fields)[var] = val;
 	}
 
-	// disable Connection: keep-alive when there is no Content-Length
-	stdext::hash_map<string, string, string_hash>::iterator iter = header_fields->find("Connection");
+	// get length of the request body
+	stdext::hash_map<string, string, string_hash>::iterator iter = header_fields->find("Content-Length");
 	if (iter != header_fields->end()) {
-		if (!strcasecmp(iter->second.c_str(), "keep-alive")) {
-			stdext::hash_map<string, string, string_hash>::iterator iter2 = header_fields->find("Content-Length");
-			if (iter2 == header_fields->end()) {
-				header_fields->erase("Connection");
-				keep_alive = false;
-			} else {
-				request_body_length = atol(iter2->second.c_str());
+		request_body_length = atol(iter->second.c_str());
+	}
+
+	// disable Connection: keep-alive when there is no Content-Length
+	stdext::hash_map<string, string, string_hash>::iterator iter2 = header_fields->find("Connection");
+	if (iter2 != header_fields->end()) {
+		if (!strcasecmp(iter2->second.c_str(), "keep-alive")) {
+			if (request_body_length >=  0) {
 				keep_alive = true;
+			} else {
+				header_fields->erase("Connection");
 			}
 		}
 	}
@@ -133,9 +146,9 @@ request_ready_t SimpleHTTPConn::requestReady() {
 		request_ready_t r = parseRequestHeader();
 		if (r != PARSED)
 			return r;
-		}
+	}
 	// check there is enough data (for keep-alive)
-	if (keep_alive) {
+	if (keep_alive || request_body_length >= 0) {
 		if ((int)request_buffer.length()-request_body_offset < request_body_length)
 			return INCOMPLETE;
 	}
@@ -205,7 +218,7 @@ string SimpleHTTPConn::getRequestHeaderField(string &field) {
 string SimpleHTTPConn::getRequestBody() {
 	if (request_body_offset < 0)
 		return NULL;
-	return request_buffer.substr(request_body_offset);
+	return request_body_length >= 0 ? request_buffer.substr(request_body_offset, request_body_length) : request_buffer.substr(request_body_offset);
 }
 
 void SimpleHTTPConn::errorResponse(int code, const char *description, const char *message) {
