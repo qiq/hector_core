@@ -31,6 +31,7 @@ class SimpleHTTPConn {
 	// request
 	string request_method;
 	string request_args;
+	string request_protocol;
 	string request_buffer;		// entire request
 	int request_body_offset;	// offset of data
 	int request_header_offset;	// offset of second line (header)

@@ -40,6 +40,7 @@ void SimpleHTTPConn::clear() {
 	request_body_length = -1;
 	request_method.clear();
 	request_args.clear();
+	request_protocol.clear();
 	if (preserve > 0)
 		request_buffer = request_buffer.substr(preserve);
 	else
@@ -87,7 +88,15 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 			request_method = request_buffer.substr(0, eol);
 		} else {
 			request_method = request_buffer.substr(0, sp1);
-			request_args = request_buffer.substr(sp1+1, eol-(sp1+1));
+			size_t sp2 = request_buffer.find(" ", sp1+1);
+			if ((int)sp2 >= request_header_offset)
+				sp2 = string::npos;
+			if (sp2 == string::npos) {
+				request_args = request_buffer.substr(sp1+1, eol-(sp1+1));
+			} else {
+				request_args = request_buffer.substr(sp1+1, sp2-(sp1+1));
+				request_protocol = request_buffer.substr(sp2+1, eol-(sp1+1));
+			}
 		}
 	}
 

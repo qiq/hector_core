@@ -27,8 +27,8 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
-PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 > 2.5.0])
-PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx > 0.9.0])
+PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
+PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
 
 # Checks for header files.
 AC_HEADER_STDC

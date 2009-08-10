@@ -13,8 +13,10 @@ RobotHTTPServer::RobotHTTPServer(ObjectRegistry *objects) {
 
 bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 	string method = conn->getRequestMethod();
+	string args = conn->getRequestArgs();
+	if (args.substr(0, 1) == "/")
+		args = args.substr(1);
 	if (method == "GET") {
-		string args = conn->getRequestArgs();
 		LOG4CXX_INFO(logger, "GET " << args);
 		if (!args.empty()) {
 			size_t dot = args.find_first_of('.');
@@ -56,7 +58,6 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 		}
 		return true;
 	} else if (method == "SET") {
-		string args = conn->getRequestArgs();
 		LOG4CXX_INFO(logger, "SET " << args);
 		if (!args.empty()) {
 			size_t dot = args.find_first_of('.');

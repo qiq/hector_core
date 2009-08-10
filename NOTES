@@ -41,3 +41,11 @@ ROBOT
 	- cilova rychlost stahovani: 1000 stranek/s
 	- cilovy pocet URL: 10 M na masinu (idealne vic)
 		- priklady URL: vytahnout od Galambose seznam URL, zkusit zahashovat
+
+
+Requirements:
+- C++ compiler (gcc 4.2.4)
+- autotools (autoconf 2.61, automake 1.10.1, libtool 1.5.26)
+- Google Protocol Buffers (2.1.0)
+- libxml2 (2.6.31)
+- log4cxx (0.10.0)

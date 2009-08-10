@@ -1,0 +1,129 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use utf8;
+
+use LWP::UserAgent;
+use Term::ReadLine;
+use Getopt::Long;
+Getopt::Long::Configure('no_ignore_case');
+use Data::Dumper;
+
+my $server = "localhost";
+my $port = "1100";
+my $term;
+my $ua;
+my %propertyNames;
+
+my $verbose = 0;
+my $help = 0;
+my $version = 0;
+
+sub printHelp() {
+	print <<END
+usage: client.pl [options] [server[:port]]
+options:
+  --verbose, -v                 Be verbose
+  --help, -h                    This help
+  --version, -V                 Version information
+
+Default server:port is localhost:1100
+END
+}
+
+sub printVersion() {
+	print "client.pl (", $term->ReadLine, ")\n";
+	exit(0);
+}
+
+sub getProperty {
+	my ($objectId, $property) = @_;
+	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId.$property");
+	my $res = $ua->request($req);
+	return $res->is_success ? $res->content : undef;
+}
+
+sub getPropertyList {
+	my ($objectId) = @_;
+	$objectId = "" if (not defined $objectId);
+	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId");
+	my $res = $ua->request($req);
+	if ($res->is_success) {
+		my @result = split(/[\r\n]+/, $res->content);
+		return \@result;
+	} else {
+		return undef;
+	}
+}
+
+sub setProperty {
+	my ($objectId, $property, $value) = @_;
+	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId.$property");
+	$req->content($value);
+	my $res = $ua->request($req);
+	return $res->is_success ? 1 : 0;
+}
+
+# initialize
+$term = new Term::ReadLine "Hector client";
+$term->Attribs->{completion_function} = \&doComplete;
+$ua = LWP::UserAgent->new();
+$ua->agent("HectorClient");
+
+# parse command line
+GetOptions(
+	"verbose|v" => \$verbose,
+	"help|h" => \$help,
+	"version|V" => \$version
+) or die;
+&printHelp() if ($help);
+&printVersion() if ($version);
+if (@ARGV > 0) {
+	my @sh = split(/:/);
+	if (@sh == 1) {
+		$server = $sh[0];
+	} else {
+		($server, $port) = @sh;
+	}
+}
+
+# get property names for autocomplete
+
+my $objects = getPropertyList(undef);
+foreach my $o (@{$objects}) {
+	my $prop = getPropertyList($o);
+	foreach my $p (@{$prop}) {
+		$propertyNames{$o}->{$p} = 1;
+	}
+}
+
+sub doComplete {
+	my ($text, $line, $start) = @_;
+	if ($line =~ /^\s*\w*$/) {
+		# property name
+	}
+#	foreach my (
+	print ">>>>> $text $line $start\n";
+	return qw(a list of candidates to complete);
+};
+
+# main-loop
+
+# commands:
+# get object.property
+# set object.property = xxx
+# shutdown
+# quit
+
+# TODO: load history
+while (defined($_ = $term->readline("$server> "))) {
+	chomp;
+	s/^\s*//;
+	if (/\S/) {
+		$term->addhistory($_);
+	}
+}
+print "\nBye\n";
+
+# TODO: save history
+
