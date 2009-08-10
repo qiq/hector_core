@@ -28,7 +28,6 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 				if (value) {
 					conn->setResponseCode(200, "OK");
 					conn->appendResponseBody(value);
-					conn->appendResponseBody("\r\n");
 				} else {
 					conn->errorResponse(400, "Object/property not found", "");
 				}
