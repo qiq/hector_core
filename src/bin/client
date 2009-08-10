@@ -14,6 +14,12 @@ my $port = "1100";
 my $term;
 my $ua;
 my %propertyNames;
+my %commands = (
+	"get" => 1,
+	"set" => 1,
+	"shutdown" => 1,
+	"quit" => 1
+);
 
 my $verbose = 0;
 my $help = 0;
@@ -40,6 +46,7 @@ sub getProperty {
 	my ($objectId, $property) = @_;
 	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId.$property");
 	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
 	return $res->is_success ? $res->content : undef;
 }
 
@@ -48,6 +55,7 @@ sub getPropertyList {
 	$objectId = "" if (not defined $objectId);
 	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId");
 	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
 	if ($res->is_success) {
 		my @result = split(/[\r\n]+/, $res->content);
 		return \@result;
@@ -58,14 +66,91 @@ sub getPropertyList {
 
 sub setProperty {
 	my ($objectId, $property, $value) = @_;
-	my $req = HTTP::Request->new(GET => "http://$server:$port/$objectId.$property");
+	my $req = HTTP::Request->new(SET => "http://$server:$port/$objectId.$property");
 	$req->content($value);
+	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
+	return $res->is_success ? 1 : 0;
+}
+
+sub saveHistory {
+	my ($file) = @_;
+
+	my $f;
+	my $prev = '';
+	open($f, ">$file") or return;
+	foreach my $h ($term->GetHistory()) {
+		next if ($h eq $prev);
+		print $f $h."\n";
+		$prev = $h;
+	}
+	close($f);
+}
+
+sub loadHistory {
+	my ($file) = @_;
+
+	my $f;
+	open($f, "<$file") or return;
+	while (<$f>) {
+		chomp;
+		$term->addhistory($_);
+	}
+	close($f);
+}
+
+sub shutdown {
+	my $req = HTTP::Request->new(SHUTDOWN => "http://$server:$port/");
 	my $res = $ua->request($req);
 	return $res->is_success ? 1 : 0;
 }
 
+sub doComplete {
+	my ($text, $line, $start) = @_;
+	my @result;
+
+	my $l = $line;
+
+	# command
+	my $cmd;
+	if ($l =~ /^\s*(\w*)/) {
+		my $c = lc($1);
+		if (defined $commands{$c}) {
+			$cmd = $c;
+			$l =~ s/^\s*\w*//;
+			if ($l eq '') {
+				push(@result, $cmd);
+				return @result;
+			}
+		} else {
+			foreach my $x (keys %commands) {
+				if ($c eq '' or (length($c) <= length($x) and substr($x, 0, length($c)) eq $c)) {
+					push(@result, $x);
+				}
+			}
+			return @result;
+		}
+	}
+
+	# property
+	if (($cmd eq 'get' or $cmd eq 'set') and $l =~ /^\s*(\S*)$/) {
+		my $property = $1;
+		foreach my $p (keys %propertyNames) {
+			if ($property eq '' or (length($property) <= length($p) and substr($p, 0, length($property)) eq $property)) {
+				push(@result, $p);
+			}
+		}
+	} elsif ($cmd eq 'set' and $l !~ /=/) {
+		# set object.property = xxx
+		push(@result, "=");
+	}
+	
+	return @result;
+};
+
+
 # initialize
-$term = new Term::ReadLine "Hector client";
+$term = new Term::ReadLine "HectorClient";
 $term->Attribs->{completion_function} = \&doComplete;
 $ua = LWP::UserAgent->new();
 $ua->agent("HectorClient");
@@ -79,7 +164,7 @@ GetOptions(
 &printHelp() if ($help);
 &printVersion() if ($version);
 if (@ARGV > 0) {
-	my @sh = split(/:/);
+	my @sh = split(/:/, shift(@ARGV));
 	if (@sh == 1) {
 		$server = $sh[0];
 	} else {
@@ -90,22 +175,13 @@ if (@ARGV > 0) {
 # get property names for autocomplete
 
 my $objects = getPropertyList(undef);
+die("Cannot connect to server ($server:$port): cannot list objects") if (not defined $objects);
 foreach my $o (@{$objects}) {
 	my $prop = getPropertyList($o);
 	foreach my $p (@{$prop}) {
-		$propertyNames{$o}->{$p} = 1;
+		$propertyNames{$o.".".$p} = 1;
 	}
 }
-
-sub doComplete {
-	my ($text, $line, $start) = @_;
-	if ($line =~ /^\s*\w*$/) {
-		# property name
-	}
-#	foreach my (
-	print ">>>>> $text $line $start\n";
-	return qw(a list of candidates to complete);
-};
 
 # main-loop
 
@@ -115,15 +191,99 @@ sub doComplete {
 # shutdown
 # quit
 
-# TODO: load history
+# load history
+my $homeDir = $ENV{HOME} || (getpwuid($<))[7];
+my $file = "$homeDir/.hector_history";
+&loadHistory($file);
+
 while (defined($_ = $term->readline("$server> "))) {
 	chomp;
 	s/^\s*//;
 	if (/\S/) {
-		$term->addhistory($_);
+		my $l = $_;
+
+		# command
+		my $cmd;
+		if ($_ =~ /^(\w*)/) {
+			my $c = lc($1);
+			if (defined $commands{$c}) {
+				$cmd = $c;
+				$l =~ s/^\w*\s*//;
+			} else {
+				print "Unknown command: $c\n";
+				next;
+			}
+		}
+
+		if ($cmd eq 'get') {
+			if ($l =~ /\S/) {
+				if ($l =~ /^([^\.]*)\.(\S*)\s*/) {
+					my ($object, $property) = ($1, $2);
+					if ($object ne '*' and $property ne '*') {
+						my $result = getProperty($object, $property);
+						if (defined $result) {
+							print "$object.$property = $result\n";
+							$term->addhistory($_);
+						} else {
+							print "Unknown object/property: $l\n";
+						}
+					} else {
+						# wildcards
+						$term->addhistory($_);
+						my $pattern;
+						if ($property eq '*') {
+							$pattern = $object eq '*' ?  '' : $object.".";
+						}
+						foreach my $p (sort keys %propertyNames) {
+							if ($pattern eq '' or (length($pattern) <= length($p) and substr($p, 0, length($pattern)) eq $pattern)) {
+								$p =~ /([^\.]*)\.(.*)/;
+								my ($object, $property) = ($1, $2);
+								my $result = getProperty($object, $property);
+								if (defined $result) {
+									print "$object.$property = $result\n";
+								}
+							}
+						}
+					}
+				} else {
+					print "Unknown object/property: $l\n";
+				}
+			} else {
+				print "No object.property given\n";
+			}
+		} elsif ($cmd eq 'set') {
+			if ($l =~ /\S/) {
+				if ($l =~ /^([^\.]*)\.(\S*)\s*=\s*(.*)/) {
+					my $result = setProperty($1, $2, $3);
+					if ($result != 0) {
+						$term->addhistory($_);
+					} else {
+						print "Unknown object/property: $l\n";
+					}
+				} else {
+					if ($l =~ /=\s*\S/) {
+						print "Unknown object/property: $l\n";
+					} else {
+						print "Missing value: $l\n"
+					}
+				}
+			} else {
+				print "No object.property given\n";
+			}
+		} elsif ($cmd eq 'shutdown') {
+			if (&shutdown()) {
+				$term->addhistory($_);
+				last;
+			} else {
+				print "Error shutting down\n";
+			}
+		} elsif ($cmd eq 'quit') {
+			$term->addhistory($_);
+			last;
+		}
 	}
 }
 print "\nBye\n";
 
-# TODO: save history
-
+# save history
+&saveHistory($file);
