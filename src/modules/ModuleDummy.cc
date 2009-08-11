@@ -17,11 +17,24 @@ void ModuleDummy::setDummy(const char *value) {
 	dummy = strdup(value);
 }
 
+const char *ModuleDummy::getFoo() {
+	return foo;
+}
+
+void ModuleDummy::setFoo(const char *value) {
+	free(foo);
+	foo = strdup(value);
+}
+
 ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {
 	dummy = NULL;
 
 	getters["dummy"] = &ModuleDummy::getDummy;
 	setters["dummy"] = &ModuleDummy::setDummy;
+	getters["foo"] = &ModuleDummy::getFoo;
+	setters["foo"] = &ModuleDummy::setFoo;
+	getters["alias"] = &ModuleDummy::getDummy;
+	setters["alias"] = &ModuleDummy::setDummy;
 }
 
 ModuleDummy::~ModuleDummy() {

@@ -16,12 +16,15 @@
 class ModuleDummy : public Module {
 	Lock lock;
 	char *dummy;
+	char *foo;
 
 	stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash> getters;
 	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash> setters;
 
 	const char *getDummy();
 	void setDummy(const char *value);
+	const char *getFoo();
+	void setFoo(const char *value);
 public:
 	ModuleDummy(ObjectRegistry *objects, const char *id);
 	~ModuleDummy();
