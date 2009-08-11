@@ -4,11 +4,13 @@
 
 #include <config.h>
 
+#include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include "SimpleServer.h"
 
 log4cxx::LoggerPtr SimpleServer::logger(log4cxx::Logger::getLogger("lib.SimpleServer"));
@@ -78,6 +80,7 @@ void *http_main_thread(void *ptr) {
 
 void SimpleServer::MainThread() {
 	struct sockaddr_in addr;
+	char client_ip[INET6_ADDRSTRLEN];
 
 	// create threads
 	threads = new pthread_t[nThreads];
@@ -119,8 +122,10 @@ void SimpleServer::MainThread() {
 			LOG4CXX_ERROR(logger, "Cannot accept connection: " << strerror(errno));
 			break;
 		}
-		// FIXME: inet_ntoa is not thread safe, use to inet_ntop instead
-		char *client_ip = inet_ntoa((in_addr)client_addr.sin_addr);
+		if (!inet_ntop(AF_INET, (void*)&client_addr.sin_addr, client_ip, sizeof(client_ip))) {
+			LOG4CXX_ERROR(logger, "Cannot get IP address");
+			continue;
+		}
 		// check whether IP address is allowed
 		if (allowed_client.size() > 0) {
 			stdext::hash_set<string, string_hash>::iterator iter = allowed_client.find(client_ip);
