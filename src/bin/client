@@ -21,6 +21,7 @@ my %commands = (
 	"quit" => 1
 );
 
+my $interactive = 0;
 my $verbose = 0;
 my $help = 0;
 my $version = 0;
@@ -29,6 +30,7 @@ sub printHelp() {
 	print <<END
 usage: client.pl [options] [server[:port]]
 options:
+  --interactive, -i		Run interactive "shell"
   --verbose, -v                 Be verbose
   --help, -h                    This help
   --version, -V                 Version information
@@ -157,6 +159,7 @@ $ua->agent("HectorClient");
 
 # parse command line
 GetOptions(
+	"interactive|i" => \$interactive,
 	"verbose|v" => \$verbose,
 	"help|h" => \$help,
 	"version|V" => \$version
@@ -172,7 +175,7 @@ if (@ARGV > 0) {
 	}
 }
 
-# get property names for autocomplete
+# get property names for autocomplete and wildcards
 
 my $objects = getPropertyList(undef);
 die("Cannot connect to server ($server:$port): cannot list objects") if (not defined $objects);
@@ -194,9 +197,9 @@ foreach my $o (@{$objects}) {
 # load history
 my $homeDir = $ENV{HOME} || (getpwuid($<))[7];
 my $file = "$homeDir/.hector_history";
-&loadHistory($file);
+&loadHistory($file) if ($interactive);
 
-while (defined($_ = $term->readline("$server> "))) {
+while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 	chomp;
 	s/^\s*//;
 	if (/\S/) {
@@ -210,7 +213,7 @@ while (defined($_ = $term->readline("$server> "))) {
 				$cmd = $c;
 				$l =~ s/^\w*\s*//;
 			} else {
-				print "Unknown command: $c\n";
+				print STDERR "Unknown command: $c\n";
 				next;
 			}
 		}
@@ -223,13 +226,13 @@ while (defined($_ = $term->readline("$server> "))) {
 						my $result = getProperty($object, $property);
 						if (defined $result) {
 							print "$object.$property = $result\n";
-							$term->addhistory($_);
+							$term->addhistory($_) if ($interactive);
 						} else {
-							print "Unknown object/property: $l\n";
+							print STDERR "Unknown object/property: $l\n";
 						}
 					} else {
 						# wildcards
-						$term->addhistory($_);
+						$term->addhistory($_) if ($interactive);
 						my $pattern;
 						if ($property eq '*') {
 							$pattern = $object eq '*' ?  '' : $object.".";
@@ -246,44 +249,44 @@ while (defined($_ = $term->readline("$server> "))) {
 						}
 					}
 				} else {
-					print "Unknown object/property: $l\n";
+					print STDERR "Unknown object/property: $l\n";
 				}
 			} else {
-				print "No object.property given\n";
+				print STDERR "No object.property given\n";
 			}
 		} elsif ($cmd eq 'set') {
 			if ($l =~ /\S/) {
 				if ($l =~ /^([^\.]*)\.(\S*)\s*=\s*(.*)/) {
 					my $result = setProperty($1, $2, $3);
 					if ($result != 0) {
-						$term->addhistory($_);
+						$term->addhistory($_) if ($interactive);
 					} else {
-						print "Unknown object/property: $l\n";
+						print STDERR "Unknown object/property: $l\n";
 					}
 				} else {
 					if ($l =~ /=\s*\S/) {
-						print "Unknown object/property: $l\n";
+						print STDERR "Unknown object/property: $l\n";
 					} else {
-						print "Missing value: $l\n"
+						print STDERR "Missing value: $l\n"
 					}
 				}
 			} else {
-				print "No object.property given\n";
+				print STDERR "No object.property given\n";
 			}
 		} elsif ($cmd eq 'shutdown') {
 			if (&shutdown()) {
-				$term->addhistory($_);
+				$term->addhistory($_) if ($interactive);
 				last;
 			} else {
-				print "Error shutting down\n";
+				print STDERR "Error shutting down\n";
 			}
 		} elsif ($cmd eq 'quit') {
-			$term->addhistory($_);
+			$term->addhistory($_) if ($interactive);
 			last;
 		}
 	}
 }
-print "\nBye\n";
+print "\nBye\n" if ($interactive);
 
 # save history
-&saveHistory($file);
+&saveHistory($file) if ($interactive);
