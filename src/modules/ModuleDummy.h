@@ -18,12 +18,12 @@ class ModuleDummy : public Module {
 	char *dummy;
 	char *foo;
 
-	stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash> getters;
+	stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash> getters;
 	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash> setters;
 
-	const char *getDummy();
+	char *getDummy();
 	void setDummy(const char *value);
-	const char *getFoo();
+	char *getFoo();
 	void setFoo(const char *value);
 public:
 	ModuleDummy(ObjectRegistry *objects, const char *id);
@@ -33,7 +33,7 @@ public:
 	void Process(Resource *resource);
 	void createCheckpoint();
 
-	const char *getValue(const char *name);
+	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
 	vector<string> *listNames();
 };

@@ -30,7 +30,7 @@ public:
 	Object *getObject(const char *id);
 	vector<string> *getIds();
 
-	const char *getObjectValue(const char *id, const char *name);
+	char *getObjectValue(const char *id, const char *name);
 	bool setObjectValue(const char *id, const char *name, const char *value);
 };
 

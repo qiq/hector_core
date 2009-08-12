@@ -2,6 +2,7 @@
 #include <config.h>
 
 #include "Server.h"
+#include "LibraryLoader.h"
 
 log4cxx::LoggerPtr Server::logger(log4cxx::Logger::getLogger("lib.Server"));
 
@@ -84,7 +85,7 @@ bool Server::Init(Config *config) {
 	
 	// load library
 	snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))loadLibrary(buffer, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))LibraryLoader::loadLibrary(buffer, "create");
 	if (!create) {
 		LOG4CXX_ERROR(logger, "Invalid library: " << buffer);
 		return false;
@@ -109,7 +110,7 @@ void Server::Stop() {
 	simpleHTTPServer->Stop();
 }
 
-const char *Server::getValue(const char *name) {
+char *Server::getValue(const char *name) {
 	return NULL;
 }
 

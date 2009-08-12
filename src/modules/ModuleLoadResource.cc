@@ -23,7 +23,7 @@ Resource *ModuleLoadResource::Process() {
 void ModuleLoadResource::createCheckpoint() {
 }
 
-const char *ModuleLoadResource::getValue(const char *name) {
+char *ModuleLoadResource::getValue(const char *name) {
 	return NULL;
 }
 

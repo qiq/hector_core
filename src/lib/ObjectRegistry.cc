@@ -36,7 +36,7 @@ vector<string> *ObjectRegistry::getIds() {
 	return result;
 }
 
-const char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
+char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
 	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		Object *obj = iter->second;

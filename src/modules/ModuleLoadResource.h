@@ -18,7 +18,7 @@ public:
 	Resource *Process();
 	void createCheckpoint();
 
-	const char *getValue(const char *name);
+	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
 	vector<string> *listNames();
 };

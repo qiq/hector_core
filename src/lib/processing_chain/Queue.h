@@ -19,8 +19,6 @@ class Queue : public Object {
 private:
 	SyncQueue<Resource> *queue;
 
-	ObjectRegistry *objects;
-
 	static log4cxx::LoggerPtr logger;
 public:
 	Queue(ObjectRegistry *objects, const char *id);
@@ -33,7 +31,7 @@ public:
 	bool putResource(Resource *resource);
 	Resource *getResource();
 
-	const char *getValue(const char *name);
+	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
 	vector<string> *listNames();
 };

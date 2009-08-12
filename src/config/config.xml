@@ -59,7 +59,7 @@
 	</Module>
 
 	<Module id="preprocess-resource-module">
-		<lib name="modules/libmodule-dummy.so"/>
+		<lib name="modules/libmodule-dummy.la"/>
 	</Module>
 
 	<Queue id="q1">
@@ -75,8 +75,8 @@
 	</Processor>
 
 	<Module id="external-test-module">
-		<!--lib name="modules/libmodule-external-simple.so"/-->
-		<lib name="modules/libmodule-dummy.so"/>
+		<!--lib name="modules/libmodule-external-simple.la"/-->
+		<lib name="modules/libmodule-dummy.la"/>
 		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
 	</Module>
 
@@ -92,7 +92,7 @@
 	</Processor>
 
 	<Module id="save-resource-module">
-		<lib name="modules/libmodule-save-resource.so"/>
+		<lib name="modules/libmodule-save-resource.la"/>
 		<param name="outputDir" value="/tmp/output"/>
 	</Module>
 

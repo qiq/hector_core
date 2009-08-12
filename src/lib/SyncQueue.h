@@ -3,7 +3,6 @@
  *
  * Queue is synchronized, when full, writers would block, if empty, readers
  * would block.
- * TODO: maxItems + maxSize
  * TODO: kvuli selectu implementovat pipe pro zapis
  */
 
@@ -46,6 +45,11 @@ public:
 	bool isReady();
 	T *getItem(bool sleep);
 	int getItems(T **r, int size, bool sleep);
+
+	int getCurrentSize();
+	int getCurrentItems();
+	int getMaxSize();
+	int getMaxItems();
 };
 
 template <class T>
@@ -232,6 +236,42 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 	queueLock.unlock();
 
 	return i;
+}
+
+template <class T>
+int SyncQueue<T>::getCurrentSize() {
+	int result;
+	queueLock.lock();
+	result = queueSize;
+	queueLock.unlock();
+	return result;
+}
+
+template <class T>
+int SyncQueue<T>::getCurrentItems() {
+	int result;
+	queueLock.lock();
+	result = queue->size();
+	queueLock.unlock();
+	return result;
+}
+
+template <class T>
+int SyncQueue<T>::getMaxSize() {
+	int result;
+	queueLock.lock();
+	result = maxSize;
+	queueLock.unlock();
+	return result;
+}
+
+template <class T>
+int SyncQueue<T>::getMaxItems() {
+	int result;
+	queueLock.lock();
+	result = maxItems;
+	queueLock.unlock();
+	return result;
 }
 
 #endif

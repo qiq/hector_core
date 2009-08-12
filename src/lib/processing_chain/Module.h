@@ -34,7 +34,7 @@ public:
 	virtual int Process(Resource **in, Resource **out);
 	virtual void createCheckpoint() = 0;
 
-	virtual const char *getValue(const char *name) = 0;
+	virtual char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
 	virtual vector<string> *listNames() = 0;
 };

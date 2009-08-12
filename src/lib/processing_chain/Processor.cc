@@ -9,6 +9,7 @@
 #include <ltdl.h>
 #include "common.h"
 #include "Processor.h"
+#include "LibraryLoader.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_chain.Processor"));
 
@@ -19,6 +20,16 @@ Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, i
 
 Processor::~Processor() {
 	delete[] threads;
+
+	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); iter++) {
+		delete *iter;
+	}
+	for (vector<InputQueue*>::iterator iter = inputQueues.begin(); iter != inputQueues.end(); iter++) {
+		delete *iter;
+	}
+	for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); iter++) {
+		delete *iter;
+	}
 }
 
 bool Processor::Init(Config *config) {
@@ -69,7 +80,8 @@ bool Processor::Init(Config *config) {
 				return false;
 			}
 			snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-			Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))loadLibrary(buffer, "create");
+			free(s);
+			Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))LibraryLoader::loadLibrary(buffer, "create");
 			if (!create) {
 				LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
 				return false;
@@ -193,7 +205,7 @@ void Processor::createCheckpoint() {
 	//TODO
 }
 
-const char *Processor::getValue(const char *name) {
+char *Processor::getValue(const char *name) {
 	return NULL;
 }
 

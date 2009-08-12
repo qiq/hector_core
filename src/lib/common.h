@@ -76,5 +76,3 @@ int readBytes(int fd, char *s, int length);
 
 uint32_t bytes2int(char (*bytes)[4]);
 void int2bytes(uint32_t n, char (*bytes)[4]);
-
-void *loadLibrary(const char *lib, const char *sym);

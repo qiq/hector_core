@@ -22,7 +22,7 @@ void ModuleSaveResource::Process(Resource *resource) {
 void ModuleSaveResource::createCheckpoint() {
 }
 
-const char *ModuleSaveResource::getValue(const char *name) {
+char *ModuleSaveResource::getValue(const char *name) {
 	return "abc";
 }
 

@@ -8,8 +8,8 @@
 #include "Server.h"
 #include "WebResource.h"
 
-const char *ModuleDummy::getDummy() {
-	return dummy;
+char *ModuleDummy::getDummy() {
+	return dummy ? strdup(dummy) : NULL;
 }
 
 void ModuleDummy::setDummy(const char *value) {
@@ -17,8 +17,8 @@ void ModuleDummy::setDummy(const char *value) {
 	dummy = strdup(value);
 }
 
-const char *ModuleDummy::getFoo() {
-	return foo;
+char *ModuleDummy::getFoo() {
+	return foo ? strdup(foo) : NULL;
 }
 
 void ModuleDummy::setFoo(const char *value) {
@@ -28,6 +28,7 @@ void ModuleDummy::setFoo(const char *value) {
 
 ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {
 	dummy = NULL;
+	foo = NULL;
 
 	getters["dummy"] = &ModuleDummy::getDummy;
 	setters["dummy"] = &ModuleDummy::setDummy;
@@ -39,6 +40,7 @@ ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(object
 
 ModuleDummy::~ModuleDummy() {
 	free(dummy);
+	free(foo);
 }
 
 bool ModuleDummy::Init(Config *config) {
@@ -57,9 +59,9 @@ void ModuleDummy::createCheckpoint() {
 	// TODO
 }
 
-const char *ModuleDummy::getValue(const char *name) {
-	const char *result = NULL;
-	stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.find(name);
+char *ModuleDummy::getValue(const char *name) {
+	char *result = NULL;
+	stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.find(name);
 	if (iter != getters.end()) {
 		lock.lock();
 		result = (this->*(iter->second))();
@@ -81,7 +83,7 @@ bool ModuleDummy::setValue(const char *name, const char *value) {
 
 vector<string> *ModuleDummy::listNames() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, const char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); iter++) {
+	for (stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); iter++) {
 		result->push_back(iter->first);
 	}
 	return result;

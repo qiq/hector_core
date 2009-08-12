@@ -61,7 +61,7 @@ Resource *Queue::getResource() {
 	return queue->getItem(true);
 }
 
-const char *Queue::getValue(const char *name) {
+char *Queue::getValue(const char *name) {
 	return NULL;
 }
 

@@ -24,13 +24,14 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 				// get value
 				string object = args.substr(0, dot);
 				string property = args.substr(dot+1);
-				const char *value = objects->getObjectValue(object.c_str(), property.c_str());
+				char *value = objects->getObjectValue(object.c_str(), property.c_str());
 				if (value) {
 					conn->setResponseCode(200, "OK");
 					conn->appendResponseBody(value);
 				} else {
 					conn->errorResponse(400, "Object/property not found", "");
 				}
+				free(value);
 			} else {
 				// list object properties
 				Object *object = objects->getObject(args.c_str());
@@ -40,6 +41,7 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 						conn->appendResponseBody(iter->c_str());
 						conn->appendResponseBody("\r\n");
 					}
+					delete names;
 				} else {
 					// object not found
 					conn->errorResponse(400, "Object not found", "");

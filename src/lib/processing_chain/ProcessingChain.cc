@@ -88,7 +88,7 @@ void ProcessingChain::createCheckpoint() {
 	}
 }
 
-const char *ProcessingChain::getValue(const char *name) {
+char *ProcessingChain::getValue(const char *name) {
 	return NULL;
 }
 

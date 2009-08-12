@@ -21,7 +21,7 @@ public:
 	Object(ObjectRegistry *objects, const char *id);
 	~Object();
 	const char *getId();
-	virtual const char *getValue(const char *name) = 0;
+	virtual char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
 	virtual vector<string> *listNames() = 0;
 };

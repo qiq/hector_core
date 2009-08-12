@@ -48,29 +48,3 @@ void int2bytes(uint32_t n, char (*bytes)[4]) {
 	(*bytes)[2] = (char)(n >> 16 & 0xFF);
 	(*bytes)[3] = (char)(n >> 24 & 0xFF);
 }
-
-/*void log_config_error(log4cxx::LoggerPtr logger, int line, int column, const char *msg, ...) {
-	char s[1024];
-	va_list args;
-	va_start(args, msg);
-	vsnprintf(s, sizeof(s)-30, msg, args);
-	va_end(args);
-	snprintf(s+strlen(s), 30, " [%d, %d]", line, column);
-	LOG4CXX_ERROR(logger, s);
-}*/
-
-// TODO: fix memory leaks
-void *loadLibrary(const char *lib, const char *sym) {
-	if (lt_dlinit() != 0)
-		return NULL;
-	lt_dlhandle handle = lt_dlopen(lib);
-	if (handle == NULL) {
-fprintf(stderr, lt_dlerror());
-		return NULL;
-}
-	void *p = lt_dlsym(handle, sym);
-if (!p)
-fprintf(stderr, lt_dlerror());
-	return p;
-}
-

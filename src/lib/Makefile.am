@@ -12,6 +12,7 @@ libhector_la_SOURCES = \
 		Config.h Config.cc \
 		CyclicBuffer.h CyclicBuffer.cc \
 		SyncQueue.h \
+		LibraryLoader.h LibraryLoader.cc \
 		Object.h ObjectRegistry.h ObjectRegistry.cc \
 		Server.h Server.cc
 libhector_la_CXXFLAGS = $(AM_CXXFLAGS)
