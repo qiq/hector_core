@@ -63,9 +63,9 @@ char *ModuleDummy::getValue(const char *name) {
 	char *result = NULL;
 	stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.find(name);
 	if (iter != getters.end()) {
-		lock.lock();
+		propertyLock.lock();
 		result = (this->*(iter->second))();
-		lock.unlock();
+		propertyLock.unlock();
 	}
 	return result;
 }
@@ -73,9 +73,9 @@ char *ModuleDummy::getValue(const char *name) {
 bool ModuleDummy::setValue(const char *name, const char *value) {
 	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
-		lock.lock();
+		propertyLock.lock();
 		(this->*(iter->second))(value);
-		lock.unlock();
+		propertyLock.unlock();
 		return true;
 	}
 	return false;
@@ -83,7 +83,7 @@ bool ModuleDummy::setValue(const char *name, const char *value) {
 
 vector<string> *ModuleDummy::listNames() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); iter++) {
+	for (stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;

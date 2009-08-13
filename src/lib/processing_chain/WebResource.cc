@@ -17,10 +17,10 @@ WebResource::WebResource() {
 
 WebResource::~WebResource() {
 	vector<string*>::iterator iter;
-	for (iter = header_field.begin(); iter != header_field.end(); iter++) {
+	for (iter = header_field.begin(); iter != header_field.end(); ++iter) {
 		delete *iter;
 	}
-	for (iter = extracted_url.begin(); iter != extracted_url.end(); iter++) {
+	for (iter = extracted_url.begin(); iter != extracted_url.end(); ++iter) {
 		delete *iter;
 	}
 }
@@ -50,10 +50,10 @@ string *WebResource::serialize(bool serializeContent) {
 	if (serializeContent && content != "")
 		r.set_content(content);
 	vector<string*>::iterator iter;
-	for (iter = header_field.begin(); iter != header_field.end(); iter++) {
+	for (iter = header_field.begin(); iter != header_field.end(); ++iter) {
 		r.add_header_field(**iter);
 	}
-	for (iter = extracted_url.begin(); iter != extracted_url.end(); iter++) {
+	for (iter = extracted_url.begin(); iter != extracted_url.end(); ++iter) {
 		r.add_extracted_url(**iter);
 	}
 	if (ip_addr != 0)
@@ -81,7 +81,7 @@ bool WebResource::deserialize(string *s) {
 		content = r.content();
 	if (r.header_field_size() > 0) {
 		vector<string*>::iterator iter;
-		for (iter = header_field.begin(); iter != header_field.end(); iter++) {
+		for (iter = header_field.begin(); iter != header_field.end(); ++iter) {
 			delete *iter;
 		}
 		header_field.clear();
@@ -91,7 +91,7 @@ bool WebResource::deserialize(string *s) {
 	}
 	if (r.extracted_url_size() > 0) {
 		vector<string*>::iterator iter;
-		for (iter = extracted_url.begin(); iter != extracted_url.end(); iter++) {
+		for (iter = extracted_url.begin(); iter != extracted_url.end(); ++iter) {
 			delete *iter;
 		}
 		extracted_url.clear();

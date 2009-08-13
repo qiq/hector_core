@@ -16,7 +16,7 @@ Server::Server(const char *id) : Object(NULL, id) {
 
 Server::~Server() {
 	free(serverHost);
-	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); iter++) {
+	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
 		delete *iter;
 	}
 	delete simpleHTTPServer;
@@ -65,7 +65,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingChain/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			ProcessingChain *p = new ProcessingChain(objects, pid);
 			if (!p->Init(config))

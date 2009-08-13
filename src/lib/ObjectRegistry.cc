@@ -30,7 +30,7 @@ Object *ObjectRegistry::getObject(const char *id) {
 
 vector<string> *ObjectRegistry::getIds() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+	for (stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;

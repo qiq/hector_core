@@ -37,7 +37,7 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 				Object *object = objects->getObject(args.c_str());
 				if (object) {
 					vector<string> *names = object->listNames();
-					for (vector<string>::iterator iter = names->begin(); iter != names->end(); iter++) {
+					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
 						conn->appendResponseBody(iter->c_str());
 						conn->appendResponseBody("\r\n");
 					}
@@ -51,7 +51,7 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 			// list objects
 			vector<string> *all = objects->getIds();
 			conn->setResponseCode(200, "OK");
-			for (vector<string>::iterator iter = all->begin(); iter != all->end(); iter++) {
+			for (vector<string>::iterator iter = all->begin(); iter != all->end(); ++iter) {
 				conn->appendResponseBody(iter->c_str());
 				conn->appendResponseBody("\r\n");
 			}

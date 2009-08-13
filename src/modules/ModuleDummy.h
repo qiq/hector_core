@@ -14,7 +14,7 @@
 #include "Module.h"
 
 class ModuleDummy : public Module {
-	Lock lock;
+	Lock propertyLock;
 	char *dummy;
 	char *foo;
 

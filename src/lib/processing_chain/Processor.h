@@ -16,25 +16,7 @@
 #include "Lock.h"
 #include "Module.h"
 #include "Queue.h"
-
-class InputQueue {
-	int priority;
-	Queue *queue;
-public:
-	InputQueue(Queue *queue, int priority): priority(priority),  queue(queue) {};
-	~InputQueue() {};
-
-	int getPriority();
-	Queue *getQueue();
-};
-
-inline int InputQueue::getPriority() {
-	return priority;
-}
-
-inline Queue *InputQueue::getQueue() {
-	return queue;
-}
+#include "PrioritySyncQueue.h"
 
 class OutputQueue {
 	int filter;
@@ -60,7 +42,8 @@ class Processor : public Object {
 	pthread_t *threads;
 
 	vector<Module*> modules;
-	vector<InputQueue*> inputQueues;
+	Queue *inputQueue;
+	PrioritySyncQueue<Resource> *priorityInputQueue;
 	vector<OutputQueue*> outputQueues;
 
 	Lock runningLock;

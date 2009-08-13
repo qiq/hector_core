@@ -31,7 +31,7 @@ bool ProcessingChain::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/queue/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *qid = iter->c_str();
 			Queue *q = new Queue(objects, qid);
 			if (!q->Init(config))
@@ -45,7 +45,7 @@ bool ProcessingChain::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/processor/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); iter++) {
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			Processor *p = new Processor(objects, pid);
 			if (!p->Init(config))

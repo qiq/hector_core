@@ -20,7 +20,7 @@ LibraryLoader::LibraryLoader() {
 
 LibraryLoader::~LibraryLoader() {
 	lock.lock();
-	for (stdext::hash_map<string, lt_dlhandle*, string_hash>::iterator iter = handles.begin(); iter != handles.end(); iter++) {
+	for (stdext::hash_map<string, lt_dlhandle*, string_hash>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
 		lt_dlclose(*iter->second);
 		delete iter->second;
 	}

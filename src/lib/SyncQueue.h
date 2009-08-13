@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <deque>
 #include "common.h"
 #include "CondLock.h"
@@ -24,7 +25,6 @@ using namespace std;
 
 template<class T>
 class SyncQueue {
-private:
 	// queue object, all attributes are guarded by queueLock
 	CondLock queueLock;
 	int maxItems;
@@ -34,12 +34,14 @@ private:
 	int waitingReaders;
 	int waitingWriters;
 	bool cancel;
+
+	bool processed;	// for PriorityQueue
 public:
 	SyncQueue(int maxItems, int maxSize);
 	~SyncQueue();
 	void cancelAll();
 
-	bool isSpace();
+	bool isSpace(T *r);
 	bool putItem(T *r, bool sleep);
 	int putItems(T **r, int size, bool sleep);
 	bool isReady();
@@ -50,11 +52,19 @@ public:
 	int getCurrentItems();
 	int getMaxSize();
 	int getMaxItems();
+
+	// dirty methods needed for PriorityQueue, they are called with lock held
+	CondLock *getLock();
+	bool isReadyRaw();
+	T *getItemRaw(bool signal);
+	int getCurrentSizeRaw();
+	int getCurrentItemsRaw();
+	void setProcessed();
+	bool getProcessed();
 };
 
 template <class T>
 SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
-
 	this->maxItems = maxItems;
 	this->maxSize = maxSize;
 	queueSize = 0;
@@ -62,13 +72,14 @@ SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
 	waitingReaders = 0;
 	waitingWriters = 0;
 	cancel = false;
+
+	processed = false;
 }
 
 template <class T>
 SyncQueue<T>::~SyncQueue() {
 	cancelAll();
 	delete queue;
-	queue = NULL;
 }
 
 template <class T>
@@ -94,10 +105,10 @@ void SyncQueue<T>::cancelAll() {
 }
 
 template <class T>
-bool SyncQueue<T>::isSpace() {
+bool SyncQueue<T>::isSpace(T *r) {
 	bool result = false;
 	queueLock.lock();
-	if ((int)queue->size() < maxItems)
+	if ((int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize)
 		result = true;
 	queueLock.unlock();
 	return result;
@@ -230,7 +241,7 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 	for (i = 0; i < size && (int)queue->size() > 0; i++) {
 		r[i] = (*queue)[0];
 		queue->pop_front();
-		queueSize -= r->getSize();
+		queueSize -= r[i]->getSize();
 	}
 	queueLock.signalSend();
 	queueLock.unlock();
@@ -272,6 +283,49 @@ int SyncQueue<T>::getMaxItems() {
 	result = maxItems;
 	queueLock.unlock();
 	return result;
+}
+
+template <class T>
+CondLock *SyncQueue<T>::getLock() {
+	return &queueLock;
+}
+
+
+template <class T>
+bool SyncQueue<T>::isReadyRaw() {
+	return queue->size() > 0 ? true : false;
+}
+
+template <class T>
+T *SyncQueue<T>::getItemRaw(bool signal) {
+	assert(queue->size() > 0);
+	T *r = (*queue)[0];
+	queue->pop_front();
+	queueSize -= r->getSize();
+	if (signal)
+		queueLock.signalSend();
+
+	return r;
+}
+
+template <class T>
+int SyncQueue<T>::getCurrentSizeRaw() {
+	return queueSize;
+}
+
+template <class T>
+int SyncQueue<T>::getCurrentItemsRaw() {
+	return queue->size();
+}
+
+template <class T>
+void SyncQueue<T>::setProcessed() {
+	processed = true;
+}
+
+template <class T>
+bool SyncQueue<T>::getProcessed() {
+	return processed;
 }
 
 #endif

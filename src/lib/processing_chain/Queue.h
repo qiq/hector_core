@@ -16,7 +16,6 @@
 #include "SyncQueue.h"
 
 class Queue : public Object {
-private:
 	SyncQueue<Resource> *queue;
 
 	static log4cxx::LoggerPtr logger;
@@ -28,8 +27,11 @@ public:
 	void Stop();
 	void createCheckpoint();
 
-	bool putResource(Resource *resource);
-	Resource *getResource();
+	bool putResource(Resource *resource, bool wait);
+	int putResources(Resource **r, int size, bool wait);
+	Resource *getResource(bool wait);
+	int getResources(Resource **r, int size, bool wait);
+	SyncQueue<Resource> *getQueue();
 
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
