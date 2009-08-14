@@ -28,6 +28,7 @@
 
 using namespace std;
 
+// used for sorting of SyncQueues according to priority
 template<class T>
 class Priority {
 	SyncQueue<T> *queue;

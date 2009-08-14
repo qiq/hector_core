@@ -8,8 +8,14 @@
 
 log4cxx::LoggerPtr Queue::logger(log4cxx::Logger::getLogger("lib.processing_chain.Queue"));
 
+Lock Queue::queueIdLock;
+int Queue::nextQueueId = 1;
+
 Queue::Queue(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	queue = NULL;
+	queueIdLock.lock();
+	queueId = nextQueueId++;
+	queueIdLock.unlock();
 }
 
 Queue::~Queue() {
@@ -67,10 +73,6 @@ Resource *Queue::getResource(bool wait) {
 
 int Queue::getResources(Resource **r, int size, bool wait) {
 	return queue->getItems(r, size, wait);
-}
-
-SyncQueue<Resource> *Queue::getQueue() {
-	return queue;
 }
 
 char *Queue::getValue(const char *name) {

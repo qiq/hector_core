@@ -18,6 +18,11 @@
 class Queue : public Object {
 	SyncQueue<Resource> *queue;
 
+	// id of a queue: used to avoid deadlocks
+	static Lock queueIdLock;
+	static int nextQueueId;
+	int queueId;
+
 	static log4cxx::LoggerPtr logger;
 public:
 	Queue(ObjectRegistry *objects, const char *id);
@@ -26,6 +31,8 @@ public:
 	void Start();
 	void Stop();
 	void createCheckpoint();
+
+	int getQueueId();
 
 	bool putResource(Resource *resource, bool wait);
 	int putResources(Resource **r, int size, bool wait);
@@ -37,5 +44,13 @@ public:
 	bool setValue(const char *name, const char *value);
 	vector<string> *listNames();
 };
+
+inline int Queue::getQueueId() {
+	return queueId;
+}
+
+inline SyncQueue<Resource> *Queue::getQueue() {
+	return queue;
+}
 
 #endif

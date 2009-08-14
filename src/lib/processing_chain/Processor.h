@@ -15,36 +15,16 @@
 #include "ObjectRegistry.h"
 #include "Lock.h"
 #include "Module.h"
-#include "Queue.h"
-#include "PrioritySyncQueue.h"
-
-class OutputQueue {
-	int filter;
-	Queue *queue;
-public:
-	OutputQueue(Queue *queue, int filter): filter(filter), queue(queue) {};
-	~OutputQueue() {};
-
-	int getFilter();
-	Queue *getQueue();
-};
-
-inline int OutputQueue::getFilter() {
-	return filter;
-}
-
-inline Queue *OutputQueue::getQueue() {
-	return queue;
-}
+#include "FilterQueue.h"
+#include "PriorityQueue.h"
 
 class Processor : public Object {
 	int nThreads;
 	pthread_t *threads;
 
 	vector<Module*> modules;
-	Queue *inputQueue;
-	PrioritySyncQueue<Resource> *priorityInputQueue;
-	vector<OutputQueue*> outputQueues;
+	PriorityQueue *inputQueue;
+	FilerQueue *outputQueue;
 
 	Lock runningLock;
 	bool running;

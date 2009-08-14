@@ -16,9 +16,6 @@ log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_
 Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	threads = NULL;
 	running = false;
-
-	inputQueue = NULL;
-	priorityInputQueue = NULL;
 }
 
 Processor::~Processor() {
@@ -27,9 +24,8 @@ Processor::~Processor() {
 	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 		delete *iter;
 	}
-	for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); ++iter) {
-		delete *iter;
-	}
+	delete inputQueue;
+	delete outputQueue;
 }
 
 bool Processor::Init(Config *config) {
@@ -80,85 +76,14 @@ bool Processor::Init(Config *config) {
 	}
 
 	// input queue(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue/@ref", getId());
-	v = config->getValues(buffer);
-	int i = 1;
-	if (v) {
-		if (v->size() > 1) {
-			// one queue, no priority
-			const char *qid = (*v)[0].c_str();
-			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue[%d]/@priority", qid, i);
-			char *s = config->getFirstValue(buffer);
-			if (s) {
-				LOG4CXX_INFO(logger, "InputQueue priority ignored: " << qid);
-				return false;
-			}
-			free(s);
-
-			inputQueue = dynamic_cast<Queue*>(objects->getObject(qid));
-			if (!inputQueue) {
-				LOG4CXX_ERROR(logger, "Queue not found: " << qid);
-				return false;
-			}
-		} else {
-			// more sub-queues, should have distinct priority
-			priorityInputQueue = new PrioritySyncQueue<Resource>();
-			int n = v->size();
-			int i = 1;
-			for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-				const char *qid = iter->c_str();
-				snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue[%d]/@priority", qid, i);
-				char *s = config->getFirstValue(buffer);
-				int priority = 0;
-				if (s) {
-					if (sscanf(s, "%d", &priority) != 1) {
-						LOG4CXX_ERROR(logger, "Invalid inputQueue priority: " << s);
-						return false;
-					}
-				}
-				free(s);
-				Queue *queue = dynamic_cast<Queue*>(objects->getObject(qid));
-				if (!queue) {
-					LOG4CXX_ERROR(logger, "Queue not found: " << qid);
-					return false;
-				}
-
-				priorityInputQueue->addQueue(queue->getQueue(), priority, i == n);
-				++i;
-			}
-		}
-		delete v;
-	}
+	inputQueue = new PriorityQueue(objects);
+	if (!inputQueue->Init(config, getId()))
+		return false;
 
 	// output queue(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/outputQueue/@ref", getId());
-	v = config->getValues(buffer);
-	i = 1;
-	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			const char *qid = iter->c_str();
-			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/outputQueue[%d]/@filter", qid, i);
-			char *s = config->getFirstValue(buffer);
-			int filter = 0;
-			if (s) {
-				if (sscanf(s, "%d", &filter) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid inputQueue priority: " << s);
-					return false;
-				}
-			}
-			free(s);
-			Queue *queue = dynamic_cast<Queue*>(objects->getObject(qid));
-			if (!queue) {
-				LOG4CXX_ERROR(logger, "Queue not found: " << qid);
-				return false;
-			}
-
-			OutputQueue *oq = new OutputQueue(queue, filter);
-			outputQueues.push_back(oq);
-			i++;
-		}
-		delete v;
-	}
+	outputQueue = new FilterQueue(objects);
+	if (!outputQueue->Init(config, getId()))
+		return false;
 
 	// check modules
 	int n = modules.size();
@@ -170,7 +95,7 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << (*iter)->getId());
 				return false;
 			}
-			if (inputQueue || priorityInputQueue) {
+			if (inputQueue) {
 				LOG4CXX_ERROR(logger, "InputQueue and input module must not be used together: " << (*iter)->getId());
 				return false;
 			}
@@ -191,13 +116,13 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Multi/Select module must be the only in a Processor: " << (*iter)->getId());
 				return false;
 			}
-			if ((!inputQueue && !priorityInputQueue) || outputQueues.size() == 0) {
+			if (!inputQueue || outputQueues.size() == 0) {
 				LOG4CXX_ERROR(logger, "No input or output queue defined: " << (*iter)->getId());
 				return false;
 			}
 			break;
 		case MODULE_SIMPLE:
-			if (i == 0 && !inputQueue && !priorityInputQueue) {
+			if (i == 0 && !inputQueue) {
 				LOG4CXX_ERROR(logger, "No input queue defined: " << (*iter)->getId());
 				return false;
 			} else if (i == n-1 && outputQueues.size() == 0) {
@@ -210,7 +135,6 @@ bool Processor::Init(Config *config) {
 		}
 		i++;
 	}
-
 
 	free(baseDir);
 
@@ -244,7 +168,7 @@ void Processor::runThread() {
 
 		while (Running()) {
 			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
-			int n = inputQueue ? inputQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0) : priorityInputQueue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
+			int n = inputQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0);
 			inputResources[activeResources+n] = NULL;
 			activeResources += n;
 
@@ -254,8 +178,20 @@ void Processor::runThread() {
 			inputResources[0] = NULL;
 		
 			// put requests into dstQueue, blocked in case we have no running requests
-			// FIXME: upravit (rozdelit podle stavu a filtru do jednotilvych front
-			//n = dstQueue->putItems(outputResources, finishedResources, activeResources == 0);
+			n = 0;
+			bool stop = false;
+			for (int i = 0; !stop && i < finishedResources; i++) {
+				int status = outputResources[i]->getStatus();
+				for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); ++iter) {
+					if ((*iter)->getFilter() == status) {
+						if (!(*iter)->getQueue()->putResource(outputResources[i], n == 0)) {
+							stop = true;
+							break;
+						}
+						n++;
+					}
+				}
+			}
 			// TODO: use cyclic buffer instead of copying
 			for (int i = 0; i < finishedResources-n; i++) {
 				outputResources[i] = outputResources[n+i];
@@ -273,11 +209,12 @@ void Processor::runThread() {
 		}
 		delete[] outputResources;
 	} else {
+		// simple processing (no parallel or select)
 		Resource *resource;
 
 		while (Running()) {
 			if (firstModuleType != MODULE_INPUT)
-				resource = inputQueue ? inputQueue->getResource(true) : priorityInputQueue->getItem(true);
+				resource = inputQueue->getResource(true);
 			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
@@ -295,10 +232,17 @@ void Processor::runThread() {
 					break;
 				}
 			}
-			module_t lastModuleType = modules.front()->getType();
-			if (lastModuleType != MODULE_OUTPUT)
-				;
-				//TODO dstQueue->putItem(resource, true);
+			module_t lastModuleType = modules.back()->getType();
+			if (lastModuleType != MODULE_OUTPUT) {
+				int status = resource->getStatus();
+				for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); ++iter) {
+					if ((*iter)->getFilter() == status) {
+						if (!(*iter)->getQueue()->putResource(resource, true)) {
+							LOG4CXX_ERROR(logger, "Cannot put resource into a queue: " << (*iter)->getQueue()->getId());
+						}
+					}
+				}
+			}
 		}
 	}
 }
