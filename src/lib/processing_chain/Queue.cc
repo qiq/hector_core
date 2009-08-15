@@ -59,20 +59,20 @@ void Queue::Stop() {
 	queue->cancelAll();
 }
 
-bool Queue::putResource(Resource *resource, bool wait) {
-	return queue->putItem(resource, wait);
+bool Queue::putResource(Resource *resource, bool sleep) {
+	return queue->putItem(resource, sleep);
 }
 
-int Queue::putResources(Resource **r, int size, bool wait) {
-	return queue->putItems(r, size, wait);
+int Queue::putResources(Resource **r, int size, bool sleep) {
+	return queue->putItems(r, size, sleep);
 }
 
-Resource *Queue::getResource(bool wait) {
-	return queue->getItem(wait);
+Resource *Queue::getResource(bool sleep) {
+	return queue->getItem(sleep);
 }
 
-int Queue::getResources(Resource **r, int size, bool wait) {
-	return queue->getItems(r, size, wait);
+int Queue::getResources(Resource **r, int size, bool sleep) {
+	return queue->getItems(r, size, sleep);
 }
 
 char *Queue::getValue(const char *name) {

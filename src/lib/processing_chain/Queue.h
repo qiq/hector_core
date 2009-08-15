@@ -34,11 +34,11 @@ public:
 
 	int getQueueId();
 
-	bool putResource(Resource *resource, bool wait);
-	int putResources(Resource **r, int size, bool wait);
-	Resource *getResource(bool wait);
-	int getResources(Resource **r, int size, bool wait);
-	SyncQueue<Resource> *getQueue();
+	bool putResource(Resource *resource, bool sleep);
+	int putResources(Resource **r, int size, bool sleep);
+	Resource *getResource(bool sleep);
+	int getResources(Resource **r, int size, bool sleep);
+	SyncQueue<Resource> *getSyncQueue();
 
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
@@ -49,7 +49,7 @@ inline int Queue::getQueueId() {
 	return queueId;
 }
 
-inline SyncQueue<Resource> *Queue::getQueue() {
+inline SyncQueue<Resource> *Queue::getSyncQueue() {
 	return queue;
 }
 

@@ -13,6 +13,7 @@ PriorityQueue::PriorityQueue(ObjectRegistry *objects) {
 
 	simpleInputQueue = NULL;
 	priorityInputQueue = NULL;
+	queueCount = 0;
 }
 
 PriorityQueue::~PriorityQueue() {
@@ -21,7 +22,7 @@ PriorityQueue::~PriorityQueue() {
 
 bool PriorityQueue::Init(Config *config, const char *id) {
 	char buffer[1024];
-	char *s;
+	vector<string> *v;
 
 	// input queue(s)
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/inputQueue/@ref", id);
@@ -40,10 +41,11 @@ bool PriorityQueue::Init(Config *config, const char *id) {
 			free(s);
 
 			simpleInputQueue = dynamic_cast<Queue*>(objects->getObject(qid));
-			if (!inputQueue) {
+			if (!simpleInputQueue) {
 				LOG4CXX_ERROR(logger, "Queue not found: " << qid);
 				return false;
 			}
+			queueCount = 1;
 		} else {
 			// more sub-queues, should have distinct priority
 			priorityInputQueue = new PrioritySyncQueue<Resource>();
@@ -67,9 +69,10 @@ bool PriorityQueue::Init(Config *config, const char *id) {
 					return false;
 				}
 
-				priorityInputQueue->addQueue(queue->getQueue(), priority, i == n);
+				priorityInputQueue->addQueue(queue->getSyncQueue(), priority, i == n);
 				++i;
 			}
+			queueCount = i-1;
 		}
 		delete v;
 	}
@@ -81,13 +84,18 @@ void PriorityQueue::Start() {
 }
 
 void PriorityQueue::Stop() {
-	queue->cancelAll();
+	if (priorityInputQueue)
+		priorityInputQueue->cancelAll();
 }
 
-Resource *PriorityQueue::getResource(bool wait) {
-	return simpleInputQueue ? simpleInputQueue->getResource(wait) : priorityInputQueue->getItem(wait);
+int PriorityQueue::getQueueCount() {
+	return queueCount;
 }
 
-int PriorityQueue::getResources(Resource **r, int size, bool wait) {
-	return simpleInputQueue ? simpleInputQueue->getResources(r, size, wait) : priorityInputQueue->getItems(r, size, wait);
+Resource *PriorityQueue::getResource(bool sleep) {
+	return simpleInputQueue ? simpleInputQueue->getResource(sleep) : priorityInputQueue->getItem(sleep);
+}
+
+int PriorityQueue::getResources(Resource **r, int size, bool sleep) {
+	return simpleInputQueue ? simpleInputQueue->getResources(r, size, sleep) : priorityInputQueue->getItems(r, size, sleep);
 }

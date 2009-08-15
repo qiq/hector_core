@@ -4,21 +4,32 @@
 #ifndef _FILTERQUEUE_H_
 #define _FILTERQUEUE_H_
 
+#include "Lock.h"
 #include "ObjectRegistry.h"
 #include "Queue.h"
 #include "SyncQueue.h"
 #include "PrioritySyncQueue.h"
 
 class OutputQueue {
+	Queue *queue;
+	SyncQueue<Resource> *syncQueue;
 	int filter;
-	SyncQueue<Resource> *queue;
+	Lock *lock;
 public:
-	OutputQueue(Queue *queue, int filter): filter(filter), queue(queue) {};
+	OutputQueue(Queue *queue, int filter);
 	~OutputQueue() {};
+	bool operator<(OutputQueue other);
 
 	int getFilter();
 	Queue *getQueue();
+	SyncQueue<Resource> *getSyncQueue();
+	Lock *getLock();
 };
+
+inline OutputQueue::OutputQueue(Queue *queue, int filter): queue(queue), filter(filter) {
+	syncQueue = queue->getSyncQueue();
+	lock = syncQueue->getLock();
+}
 
 inline int OutputQueue::getFilter() {
 	return filter;
@@ -28,10 +39,24 @@ inline Queue *OutputQueue::getQueue() {
 	return queue;
 }
 
+inline SyncQueue<Resource> *OutputQueue::getSyncQueue() {
+	return syncQueue;
+}
+
+inline Lock *OutputQueue::getLock() {
+	return lock;
+}
+
+inline bool OutputQueue::operator<(OutputQueue other) {
+	return queue->getQueueId() < other.getQueue()->getQueueId();
+}
+
 class FilterQueue {
 	ObjectRegistry *objects;
 
-	vector<OutputQueue*> outputQueues;
+	vector<OutputQueue*> *filterOutputQueue;
+	SyncQueue<Resource> *simpleOutputQueue;
+	int simpleFilter;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -41,7 +66,10 @@ public:
 	bool Init(Config *config, const char *id);
 	void Start();
 	void Stop();
-	Resource *getResource(bool wait);
-	int getResources(Resource **r, int size, bool wait);
+	int getQueueCount();
+
+	bool putResource(Resource *r, bool sleep);
+	int putResources(Resource **r, int size, bool sleep);
 };
+
 #endif

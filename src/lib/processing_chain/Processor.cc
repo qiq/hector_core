@@ -87,7 +87,7 @@ bool Processor::Init(Config *config) {
 
 	// check modules
 	int n = modules.size();
-	i = 0;
+	int i = 0;
 	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 		switch ((*iter)->getType()) {
 		case MODULE_INPUT:
@@ -105,7 +105,7 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << (*iter)->getId());
 				return false;
 			}
-			if (outputQueues.size() > 0) {
+			if (outputQueue->getQueueCount() > 0) {
 				LOG4CXX_ERROR(logger, "OutputQueue and output module must not be used together: " << (*iter)->getId());
 				return false;
 			}
@@ -116,16 +116,16 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Multi/Select module must be the only in a Processor: " << (*iter)->getId());
 				return false;
 			}
-			if (!inputQueue || outputQueues.size() == 0) {
+			if (inputQueue->getQueueCount() == 0 || outputQueue->getQueueCount() == 0) {
 				LOG4CXX_ERROR(logger, "No input or output queue defined: " << (*iter)->getId());
 				return false;
 			}
 			break;
 		case MODULE_SIMPLE:
-			if (i == 0 && !inputQueue) {
+			if (i == 0 && inputQueue->getQueueCount() == 0) {
 				LOG4CXX_ERROR(logger, "No input queue defined: " << (*iter)->getId());
 				return false;
-			} else if (i == n-1 && outputQueues.size() == 0) {
+			} else if (i == n-1 && outputQueue->getQueueCount() == 0) {
 				LOG4CXX_ERROR(logger, "No output queue defined: " << (*iter)->getId());
 				return false;
 			}
@@ -178,20 +178,7 @@ void Processor::runThread() {
 			inputResources[0] = NULL;
 		
 			// put requests into dstQueue, blocked in case we have no running requests
-			n = 0;
-			bool stop = false;
-			for (int i = 0; !stop && i < finishedResources; i++) {
-				int status = outputResources[i]->getStatus();
-				for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); ++iter) {
-					if ((*iter)->getFilter() == status) {
-						if (!(*iter)->getQueue()->putResource(outputResources[i], n == 0)) {
-							stop = true;
-							break;
-						}
-						n++;
-					}
-				}
-			}
+			n = outputQueue->putResources(outputResources, finishedResources, activeResources == 0);
 			// TODO: use cyclic buffer instead of copying
 			for (int i = 0; i < finishedResources-n; i++) {
 				outputResources[i] = outputResources[n+i];
@@ -233,16 +220,8 @@ void Processor::runThread() {
 				}
 			}
 			module_t lastModuleType = modules.back()->getType();
-			if (lastModuleType != MODULE_OUTPUT) {
-				int status = resource->getStatus();
-				for (vector<OutputQueue*>::iterator iter = outputQueues.begin(); iter != outputQueues.end(); ++iter) {
-					if ((*iter)->getFilter() == status) {
-						if (!(*iter)->getQueue()->putResource(resource, true)) {
-							LOG4CXX_ERROR(logger, "Cannot put resource into a queue: " << (*iter)->getQueue()->getId());
-						}
-					}
-				}
-			}
+			if (lastModuleType != MODULE_OUTPUT)
+				outputQueue->putResource(resource, true);
 		}
 	}
 }

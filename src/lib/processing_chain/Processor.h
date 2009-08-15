@@ -24,7 +24,7 @@ class Processor : public Object {
 
 	vector<Module*> modules;
 	PriorityQueue *inputQueue;
-	FilerQueue *outputQueue;
+	FilterQueue *outputQueue;
 
 	Lock runningLock;
 	bool running;

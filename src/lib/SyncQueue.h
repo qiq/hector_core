@@ -53,10 +53,13 @@ public:
 	int getMaxSize();
 	int getMaxItems();
 
-	// dirty methods needed for PriorityQueue, they are called with lock held
+	// dirty methods needed by PriorityQueue and FilterQueue, they are
+	// called with lock held
 	CondLock *getLock();
 	bool isReadyRaw();
+	bool isSpaceRaw(T *r);
 	T *getItemRaw(bool signal);
+	bool putItemRaw(T* r, bool signal);
 	int getCurrentSizeRaw();
 	int getCurrentItemsRaw();
 	void setProcessed();
@@ -297,6 +300,11 @@ bool SyncQueue<T>::isReadyRaw() {
 }
 
 template <class T>
+bool SyncQueue<T>::isSpaceRaw(T *r) {
+	return (int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize ? true : false;
+}
+
+template <class T>
 T *SyncQueue<T>::getItemRaw(bool signal) {
 	assert(queue->size() > 0);
 	T *r = (*queue)[0];
@@ -306,6 +314,17 @@ T *SyncQueue<T>::getItemRaw(bool signal) {
 		queueLock.signalSend();
 
 	return r;
+}
+
+template <class T>
+bool SyncQueue<T>::putItemRaw(T *r, bool signal) {
+	int itemSize = r->getSize();
+	assert((maxItems == 0 || (int)queue->size() < maxItems) && (maxSize == 0 || queueSize+itemSize <= maxSize));
+	queue->push_back(r);
+	queueSize += r->getSize();
+	if (signal)
+		queueLock.signalRecv();
+	return true;
 }
 
 template <class T>

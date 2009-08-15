@@ -16,6 +16,7 @@ class PriorityQueue {
 	// either inputQueue (simple case) or priorityInputQueue (priorities case) is used
 	Queue *simpleInputQueue;
 	PrioritySyncQueue<Resource> *priorityInputQueue;
+	int queueCount;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -25,8 +26,10 @@ public:
 	bool Init(Config *config, const char *id);
 	void Start();
 	void Stop();
-	Resource *getResource(bool wait);
-	int getResources(Resource **r, int size, bool wait);
+	int getQueueCount();
+
+	Resource *getResource(bool sleep);
+	int getResources(Resource **r, int size, bool sleep);
 };
 
 #endif
