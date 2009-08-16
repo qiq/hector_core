@@ -171,24 +171,27 @@ int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 		return item;
 	}
 
+	// much more complicated: several queues
 	bool loop;
-	int lockedIndex = -1;	// this queue was already locked, so do not lock it again
 	int minIndex;		// index of queue with least free space
 	int minItems;		// number of items that may be inserted in the queue
 	do {
 		loop = false;
 		minIndex = std::numeric_limits<int>::max();
 		minItems = std::numeric_limits<int>::max();
-		// lock everything + check how many resources we are able to put into every queue
+		// lock queues in sequence + check how many resources we are able to put into every queue
 		int index = 0;
-		for (vector<OutputQueue*>::iterator iter = filterOutputQueue->begin(); iter != filterOutputQueue->end(); ++iter) {
-			OutputQueue *q = *iter;
+		int n = filterOutputQueue->size();
+		for (index = 0; index < n; ++index) {
+			OutputQueue *q = (*filterOutputQueue)[index];
+			SyncQueue<Resource> *syncQueue = q->getSyncQueue();
 
-			if (index != lockedIndex)	
-				q->getLock()->lock();
-			int availItems = q->getSyncQueue()->getMaxItemsRaw() - q->getSyncQueue()->getCurrentItemsRaw();
-			int availSize = q->getSyncQueue()->getMaxSizeRaw() - q->getSyncQueue()->getCurrentSizeRaw();
-			int item = 0;
+			// lock all queues
+			syncQueue->getLock()->lock();
+
+			int availItems = syncQueue->getMaxItemsRaw() - syncQueue->getCurrentItemsRaw();
+			int availSize = syncQueue->getMaxSizeRaw() - syncQueue->getCurrentSizeRaw();
+			int item;
 			for (item = 0; item < size; ++item) {
 				// optimization
 				if (item >= minItems)
@@ -211,8 +214,6 @@ int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 			// no need to check more queues, this one is full
 			if (minItems == 0)
 				break;
-	
-			index++;
 		}
 
 		if (minItems == 0) {
@@ -231,14 +232,17 @@ int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 			if (!sleep)
 				return 0;	// all queues are unlocked
 
-			// wait for queue to become ready
+			// wait for minIndex queue to become ready (it is still locked)
 			if (!(*filterOutputQueue)[minIndex]->getSyncQueue()->waitForSpaceRaw(r[minItems])) {
 				(*filterOutputQueue)[minIndex]->getLock()->unlock();
 				return 0;
 			}
 
+			// we must unlock minIndex queue anyway (to prevent deadlock)
+			// some other thread may overtake us
+			(*filterOutputQueue)[minIndex]->getLock()->unlock();
+
 			// check again
-			lockedIndex = minIndex;
 			loop = true;
 		}
 	} while (loop);
