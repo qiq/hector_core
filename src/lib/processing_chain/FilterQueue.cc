@@ -141,21 +141,94 @@ bool FilterQueue::putResource(Resource *r, bool sleep) {
 }
 
 int FilterQueue::putResources(Resource **r, int size, bool sleep) {
-//TODO
-// - lock everything + count minItems + minSize, co se vejde do vsech front (zapamatuj si i index fronty s nejmensim)
-// - zjisti, kolika prvnim n resources to odpovida
-// - uspi se na nejvetsi fronte, pokud mas spat (jinak vrat 0) a nevejde se tam ani jeden resource
-// - ^^ v cyklu
-// - projdi zase vsechny fronty a pridej prvnich n resources
-//
-//	if (simpleOutputQueue) {
-//		for (int i = 0; i < size; i++) {
-//			int status = r->getStatus();
-//			if (simpleFilter > 0 && status != simpleFilter)
-//				continue;
-//			return simpleOutputQueue->putItem(r, sleep);
-//		return true;
-//	}
-//	if (simpleOutputQueue)
-//		return simpleOutputQueue->putItems(r, size, sleep);
+	assert(size > 0);
+
+	bool loop;
+	int lockedIndex = -1;	// this queue was already locked, so do not lock it again
+	int minIndex;		// index of queue with least free space
+	int minItems;		// number of items that may be inserted in the queue
+	do {
+		loop = false;
+		minIndex = std::numeric_limits<int>::max();
+		minItems = std::numeric_limits<int>::max();
+		// lock everything + check how many resources we are able to put into every queue
+		int index = 0;
+		for (vector<OutputQueue*>::iterator iter = filterOutputQueue->begin(); iter != filterOutputQueue->end(); ++iter) {
+			OutputQueue *q = *iter;
+
+			if (index != lockedIndex)	
+				q->getLock()->lock();
+			int availItems = q->getSyncQueue()->getMaxItemsRaw() - q->getSyncQueue()->getCurrentItemsRaw();
+			int availSize = q->getSyncQueue()->getMaxSizeRaw() - q->getSyncQueue()->getCurrentSizeRaw();
+			int item = 0;
+			for (item = 0; item < size; ++item) {
+				// optimization
+				if (item >= minItems)
+					break;
+	
+				int rstatus = r[item]->getStatus();
+				if (q->getFilter() > 0 && rstatus != q->getFilter())
+					continue;
+	
+				availItems--;
+				availSize -= r[item]->getSize();
+				if (availItems < 0 || availSize < 0)
+					break;
+			}
+			// record which queue is the most full
+			if (item < minItems) {
+				minItems = item;
+				minIndex = index;
+			}
+			// no need to check more queues, this one is full
+			if (minItems == 0)
+				break;
+	
+			index++;
+		}
+
+		if (minItems == 0) {
+			// unlock everything (except the queue we are waiting for)
+			// N.B. test: we may keep all previous locks locked, to prevent unfair outruns from foreign queues
+			if (!sleep)
+				minIndex = -1;
+			index = 0;
+			for (vector<OutputQueue*>::iterator iter = filterOutputQueue->begin(); iter != filterOutputQueue->end(); ++iter) {
+				OutputQueue *q = *iter;
+
+				if (index != minIndex)
+					q->getLock()->unlock();
+				index++;
+			} 
+			if (!sleep)
+				return 0;
+
+			// wait for queue to become ready
+			if (!(*filterOutputQueue)[minIndex]->getSyncQueue()->waitForSpaceRaw(r[minItems])) {
+				(*filterOutputQueue)[minIndex]->getLock()->unlock();
+				return 0;
+			}
+
+			// check again
+			lockedIndex = minIndex;
+			loop = true;
+		}
+	} while (loop);
+
+	// all queues are locked and we can insert minItems elements into each of them
+	for (vector<OutputQueue*>::iterator iter = filterOutputQueue->begin(); iter != filterOutputQueue->end(); ++iter) {
+		OutputQueue *q = *iter;
+
+		for (int i = 0; i < minItems; ++i) {
+			int rstatus = r[i]->getStatus();
+			if (q->getFilter() > 0 && rstatus != q->getFilter())
+				continue;
+
+			q->getSyncQueue()->putItemRaw(r[i], true);
+		}
+		q->getLock()->unlock();
+
+	}
+
+	return minItems;
 }

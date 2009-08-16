@@ -3,7 +3,6 @@
  *
  * Queue is synchronized, when full, writers would block, if empty, readers
  * would block.
- * TODO: kvuli selectu implementovat pipe pro zapis
  */
 
 #ifndef _SYNCQUEUE_H_
@@ -60,8 +59,11 @@ public:
 	bool isSpaceRaw(T *r);
 	T *getItemRaw(bool signal);
 	bool putItemRaw(T* r, bool signal);
+	bool waitForSpaceRaw(T *r);
 	int getCurrentSizeRaw();
 	int getCurrentItemsRaw();
+	int getMaxSizeRaw();
+	int getMaxItemsRaw();
 	void setProcessed();
 	bool getProcessed();
 };
@@ -328,6 +330,19 @@ bool SyncQueue<T>::putItemRaw(T *r, bool signal) {
 }
 
 template <class T>
+bool SyncQueue<T>::waitForSpaceRaw(T *r) {
+	int itemSize = r->getSize();
+	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize)) {
+		waitingWriters++;
+		queueLock.waitSend();
+		waitingWriters--;
+		if (cancel)
+			return false;
+	}
+	return true;
+}
+
+template <class T>
 int SyncQueue<T>::getCurrentSizeRaw() {
 	return queueSize;
 }
@@ -335,6 +350,16 @@ int SyncQueue<T>::getCurrentSizeRaw() {
 template <class T>
 int SyncQueue<T>::getCurrentItemsRaw() {
 	return queue->size();
+}
+
+template <class T>
+int SyncQueue<T>::getMaxSizeRaw() {
+	return maxSize;
+}
+
+template <class T>
+int SyncQueue<T>::getMaxItemsRaw() {
+	return maxSize;
 }
 
 template <class T>
