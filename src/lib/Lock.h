@@ -20,7 +20,7 @@ public:
 	void unlock();
 
 	pthread_mutex_t *getMutex();
-	void setMutex(pthread_mutex_t *mutex);
+	void setMutex(pthread_mutex_t *mutex, bool free);
 };
 
 inline Lock::Lock() {
@@ -45,10 +45,12 @@ inline pthread_mutex_t *Lock::getMutex() {
 	return mutex;
 }
 
-inline void Lock::setMutex(pthread_mutex_t *mutex) {
+inline void Lock::setMutex(pthread_mutex_t *mutex, bool free) {
 	if (this->mutex != mutex) {
-		pthread_mutex_destroy(mutex);
-		delete mutex;
+		if (free) {
+			pthread_mutex_destroy(this->mutex);
+			delete this->mutex;
+		}
 		this->mutex = mutex;
 	}
 }

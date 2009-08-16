@@ -24,8 +24,8 @@ public:
 
 	pthread_cond_t *getCondSend();
 	pthread_cond_t *getCondRecv();
-	void setCondSend(pthread_cond_t *condSend);
-	void setCondRecv(pthread_cond_t *condRecv);
+	void setCondSend(pthread_cond_t *condSend, bool free);
+	void setCondRecv(pthread_cond_t *condRecv, bool free);
 };
 
 inline CondLock::CondLock() {
@@ -50,16 +50,18 @@ inline pthread_cond_t *CondLock::getCondRecv() {
 	return condRecv;
 }
 
-inline void CondLock::setCondSend(pthread_cond_t *condSend) {
+inline void CondLock::setCondSend(pthread_cond_t *condSend, bool free) {
 	if (this->condSend != condSend) {
-		delete this->condSend;
+		if (free)
+			delete this->condSend;
 		this->condSend = condSend;
 	}
 }
 
-inline void CondLock::setCondRecv(pthread_cond_t *condRecv) {
+inline void CondLock::setCondRecv(pthread_cond_t *condRecv, bool free) {
 	if (this->condRecv != condRecv) {
-		delete this->condRecv;
+		if (free)
+			delete this->condRecv;
 		this->condRecv = condRecv;
 	}
 }

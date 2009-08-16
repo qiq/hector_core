@@ -29,7 +29,7 @@ bool FilterQueue::Init(Config *config, const char *id) {
 	int i = 1;
 	if (v) {
 		if (v->size() == 1) {
-			// simple case
+			// simple case: one queue
 			const char *qid = (*v)[0].c_str();
 			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/outputQueue[%d]/@filter", qid, i);
 			char *s = config->getFirstValue(buffer);
@@ -42,7 +42,7 @@ bool FilterQueue::Init(Config *config, const char *id) {
 			}
 			free(s);
 			Queue *queue = dynamic_cast<Queue*>(objects->getObject(qid));
-			if (!simpleOutputQueue) {
+			if (!queue) {
 				LOG4CXX_ERROR(logger, "Queue not found: " << qid);
 				return false;
 			}
@@ -89,7 +89,7 @@ void FilterQueue::Stop() {
 int FilterQueue::getQueueCount() {
 	if (simpleOutputQueue)
 		return 1;
-	return filterOutputQueue->size();
+	return filterOutputQueue ? filterOutputQueue->size() : 0;
 }
 
 bool FilterQueue::putResource(Resource *r, bool sleep) {

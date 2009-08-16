@@ -15,6 +15,7 @@ ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Objec
 }
 
 ProcessingChain::~ProcessingChain() {
+	// order of destruction is important: processors use queues
 	for (unsigned i = 0; i < processors.size(); i++) {
 		delete processors[i];
 	}

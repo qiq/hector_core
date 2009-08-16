@@ -95,7 +95,7 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << (*iter)->getId());
 				return false;
 			}
-			if (inputQueue) {
+			if (inputQueue->getQueueCount() > 0) {
 				LOG4CXX_ERROR(logger, "InputQueue and input module must not be used together: " << (*iter)->getId());
 				return false;
 			}
@@ -129,6 +129,7 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "No output queue defined: " << (*iter)->getId());
 				return false;
 			}
+			break;
 		default:
 			LOG4CXX_ERROR(logger, "Should not happen");
 			break;
@@ -158,7 +159,6 @@ void *run_processor_thread(void *ptr) {
 void Processor::runThread() {
 	module_t firstModuleType = modules.front()->getType();
 	if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
-		// FIXME: use pipe to signal there are available 
 		const int maxRequests = 100;	// FIXME: make it configurable
 		Resource **inputResources = new Resource*[maxRequests+1];
 		Resource **outputResources = new Resource*[maxRequests+1];
@@ -230,6 +230,9 @@ void Processor::Start() {
 	running = true;
 	threads = new pthread_t[nThreads];
 
+	inputQueue->Start();
+	outputQueue->Start();
+
 	for (int i = 0; i < nThreads; i++) {
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)this);
 	}
@@ -239,6 +242,10 @@ void Processor::Stop() {
 	runningLock.lock();
 	running = false;
 	runningLock.unlock();
+
+	inputQueue->Stop();
+	outputQueue->Stop();
+
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}

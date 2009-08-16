@@ -107,6 +107,18 @@ PrioritySyncQueue<T>::~PrioritySyncQueue() {
 	for (typename vector<Priority<T>*>::iterator iter = priorities.begin(); iter != priorities.end(); ++iter) {
 		delete *iter;
 	}
+
+	// replace deleted mutexes/Recv CVs with new ones
+	for (typename vector<SyncQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
+		CondLock *lock = (*iter)->getLock();
+		pthread_mutex_t *mutex = new pthread_mutex_t;
+		pthread_mutex_init(mutex, NULL);
+
+		pthread_cond_t *cond = new pthread_cond_t;
+		pthread_cond_init(cond, NULL);
+		lock->setMutex(mutex, false);
+		lock->setCondRecv(cond, false);
+	}
 }
 
 template <class T>
@@ -128,8 +140,8 @@ void PrioritySyncQueue<T>::addQueue(SyncQueue<T> *queue, int priority, bool last
 		pthread_cond_t *condRecv = queueLock.getCondRecv();
 
 		for (typename vector<SyncQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
-			(*iter)->getLock()->setMutex(mutex);
-			(*iter)->getLock()->setCondRecv(condRecv);
+			(*iter)->getLock()->setMutex(mutex, true);
+			(*iter)->getLock()->setCondRecv(condRecv, true);
 		}
 	}
 }
