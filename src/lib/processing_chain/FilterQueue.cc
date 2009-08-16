@@ -143,6 +143,34 @@ bool FilterQueue::putResource(Resource *r, bool sleep) {
 int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 	assert(size > 0);
 
+	// simpler case
+	if (simpleOutputQueue) {
+		// we must lock queue and insert as many items as possible
+		simpleOutputQueue->getLock()->lock();
+
+		int item;
+		for (item = 0; item < size; ++item) {
+			int rstatus = r[item]->getStatus();
+			if (simpleFilter > 0 && rstatus != simpleFilter)
+				continue;
+
+			while (!(simpleOutputQueue->isSpaceRaw(r[item]))) {
+				if (!sleep) {
+					simpleOutputQueue->getLock()->unlock();
+					return item;
+				} else {
+					if (!(simpleOutputQueue->waitForSpaceRaw(r[item]))) {
+						simpleOutputQueue->getLock()->unlock();
+						return item;
+					}
+				}
+			}
+			simpleOutputQueue->putItemRaw(r[item], true);
+		}
+		simpleOutputQueue->getLock()->unlock();
+		return item;
+	}
+
 	bool loop;
 	int lockedIndex = -1;	// this queue was already locked, so do not lock it again
 	int minIndex;		// index of queue with least free space
@@ -201,7 +229,7 @@ int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 				index++;
 			} 
 			if (!sleep)
-				return 0;
+				return 0;	// all queues are unlocked
 
 			// wait for queue to become ready
 			if (!(*filterOutputQueue)[minIndex]->getSyncQueue()->waitForSpaceRaw(r[minItems])) {
