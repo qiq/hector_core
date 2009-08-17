@@ -7,7 +7,7 @@
 #include "SimpleHTTPConn.h"
 #include "SimpleHTTPServer.h"
 
-void SimpleHTTPServer::Request(int fd) {
+void SimpleHTTPServer::request(int fd) {
 	SimpleHTTPConn *conn = new SimpleHTTPConn(fd);
 	while (1) {
 		bool result;
@@ -15,7 +15,7 @@ void SimpleHTTPServer::Request(int fd) {
 		// timeout or error
 		if (!result)
 			break;
-		if (!HandleRequest(conn)) {
+		if (!handleRequest(conn)) {
 			char s[1000];
 			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
 			conn->errorResponse(501, "Not implemented", s);

@@ -11,7 +11,7 @@ RobotHTTPServer::RobotHTTPServer(ObjectRegistry *objects) {
 	this->objects = objects;
 }
 
-bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
+bool RobotHTTPServer::handleRequest(SimpleHTTPConn *conn) {
 	string method = conn->getRequestMethod();
 	string args = conn->getRequestArgs();
 	if (args.substr(0, 1) == "/")

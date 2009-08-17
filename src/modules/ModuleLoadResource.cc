@@ -7,11 +7,11 @@
 #include "ModuleLoadResource.h"
 #include "WebResource.h"
 
-bool ModuleLoadResource::Init(Config *config) {
+bool ModuleLoadResource::init(Config *config) {
 	return true;
 }
 
-Resource *ModuleLoadResource::Process() {
+Resource *ModuleLoadResource::process() {
 	WebResource *wr = new WebResource();
 	char s[1024];
 	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());

@@ -28,9 +28,9 @@ class ModuleDummy : public Module {
 public:
 	ModuleDummy(ObjectRegistry *objects, const char *id);
 	~ModuleDummy();
-	bool Init(Config *config);
+	bool init(Config *config);
 	module_t getType();
-	void Process(Resource *resource);
+	void process(Resource *resource);
 	void createCheckpoint();
 
 	char *getValue(const char *name);

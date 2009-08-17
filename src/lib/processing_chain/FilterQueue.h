@@ -63,9 +63,9 @@ public:
 	FilterQueue(ObjectRegistry *objects);
 	~FilterQueue();
 
-	bool Init(Config *config, const char *id);
-	void Start();
-	void Stop();
+	bool init(Config *config, const char *id);
+	void start();
+	void stop();
 	int getQueueCount();
 
 	bool putResource(Resource *r, bool sleep);

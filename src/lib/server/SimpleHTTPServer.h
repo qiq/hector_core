@@ -15,9 +15,9 @@ public:
 	SimpleHTTPServer() {};
 	~SimpleHTTPServer() {};
 
-	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
+	virtual bool handleRequest(SimpleHTTPConn *conn) = 0;
 
-	void Request(int fd);
+	void request(int fd);
 };
 
 #endif

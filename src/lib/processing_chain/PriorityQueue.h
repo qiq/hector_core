@@ -23,9 +23,9 @@ public:
 	PriorityQueue(ObjectRegistry *objects);
 	~PriorityQueue();
 
-	bool Init(Config *config, const char *id);
-	void Start();
-	void Stop();
+	bool init(Config *config, const char *id);
+	void start();
+	void stop();
 	int getQueueCount();
 
 	Resource *getResource(bool sleep);

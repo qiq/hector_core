@@ -40,6 +40,8 @@ public:
 	~SyncQueue();
 	void cancelAll();
 	void clearCancel();
+	void pause();
+	void resume();
 
 	bool isSpace(T *r);
 	bool putItem(T *r, bool sleep);
@@ -85,6 +87,9 @@ SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
 template <class T>
 SyncQueue<T>::~SyncQueue() {
 	cancelAll();
+	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
+		delete (*iter);
+	}
 	delete queue;
 }
 
@@ -115,6 +120,16 @@ void SyncQueue<T>::clearCancel() {
 	queueLock.lock();
 	cancel = false;
 	queueLock.unlock();
+}
+
+template <class T>
+void SyncQueue<T>::pause() {
+	queueLock.lock();
+}
+
+template <class T>
+void SyncQueue<T>::resume() {
+	queueLock.lock();
 }
 
 template <class T>

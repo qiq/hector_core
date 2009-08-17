@@ -13,9 +13,9 @@ class ModuleSaveResource : public Module {
 public:
 	ModuleSaveResource(ObjectRegistry *objects, const char *id): Module(objects, id) {};
 	~ModuleSaveResource() {};
-	bool Init(Config *config);
+	bool init(Config *config);
 	module_t getType();
-	void Process(Resource *resource);
+	void process(Resource *resource);
 	void createCheckpoint();
 
 	char *getValue(const char *name);

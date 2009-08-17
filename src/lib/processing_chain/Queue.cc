@@ -22,7 +22,7 @@ Queue::~Queue() {
 	delete queue;
 }
 
-bool Queue::Init(Config *config) {
+bool Queue::init(Config *config) {
 	char buffer[1024];
 	char *s;
 
@@ -52,11 +52,11 @@ bool Queue::Init(Config *config) {
 	return true;
 }
 
-void Queue::Start() {
+void Queue::start() {
 	queue->clearCancel();
 }
 
-void Queue::Stop() {
+void Queue::stop() {
 	queue->cancelAll();
 }
 

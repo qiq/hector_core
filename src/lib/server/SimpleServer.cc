@@ -50,23 +50,23 @@ void SimpleServer::setRunning(bool running) {
 	main_lock.unlock();
 }
 
-void SimpleServer::RestrictAccess(const char *addr) {
+void SimpleServer::restrictAccess(const char *addr) {
 	string s(addr);
 	allowed_client.insert(addr);
 }
 
 void *http_service_thread(void *ptr) {
 	SimpleServer *server = (SimpleServer*)ptr;
-	server->ServiceThread();
+	server->serviceThread();
 	return NULL;
 }
 
-void SimpleServer::ServiceThread() {
+void SimpleServer::serviceThread() {
 	while (getRunning()) {
 		FileDescriptor *fd = queue->getItem(true);
 		if (!fd)
 			break; // cancelled
-		Request(fd->fd);
+		request(fd->fd);
 		close(fd->fd);
 		delete fd;
 	}
@@ -74,11 +74,11 @@ void SimpleServer::ServiceThread() {
 
 void *http_main_thread(void *ptr) {
 	SimpleServer *server = (SimpleServer *)ptr;
-	server->MainThread();
+	server->mainThread();
 	return NULL;
 }
 
-void SimpleServer::MainThread() {
+void SimpleServer::mainThread() {
 	struct sockaddr_in addr;
 	char client_ip[INET6_ADDRSTRLEN];
 
@@ -158,7 +158,7 @@ void SimpleServer::MainThread() {
 	}
 }
 
-void SimpleServer::Start(const char *addr, int port, int max_threads, bool wait) {
+void SimpleServer::start(const char *addr, int port, int max_threads, bool wait) {
 	if (addr == NULL || !inet_aton(addr, &server_addr))
 		server_addr.s_addr = INADDR_ANY;
 	server_port = port;
@@ -172,7 +172,7 @@ void SimpleServer::Start(const char *addr, int port, int max_threads, bool wait)
 		pthread_join(main_thread, NULL);
 }
 
-void SimpleServer::Stop() {
+void SimpleServer::stop() {
 	main_lock.lock();
 	if (main_running) {
 		main_running = false;

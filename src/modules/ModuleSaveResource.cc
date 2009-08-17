@@ -6,11 +6,11 @@
 #include "ModuleSaveResource.h"
 #include "WebResource.h"
 
-bool ModuleSaveResource::Init(Config *config) {
+bool ModuleSaveResource::init(Config *config) {
 	return true;
 }
 
-void ModuleSaveResource::Process(Resource *resource) {
+void ModuleSaveResource::process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG4CXX_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");

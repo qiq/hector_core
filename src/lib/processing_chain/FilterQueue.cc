@@ -19,7 +19,7 @@ FilterQueue::~FilterQueue() {
 	delete filterOutputQueue;
 }
 
-bool FilterQueue::Init(Config *config, const char *id) {
+bool FilterQueue::init(Config *config, const char *id) {
 	char buffer[1024];
 	vector<string> *v;
 
@@ -81,10 +81,10 @@ bool FilterQueue::Init(Config *config, const char *id) {
 	return true;
 }
 
-void FilterQueue::Start() {
+void FilterQueue::start() {
 }
 
-void FilterQueue::Stop() {
+void FilterQueue::stop() {
 }
 
 int FilterQueue::getQueueCount() {

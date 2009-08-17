@@ -35,9 +35,9 @@ public:
 	~Processor();
 	bool Running();
 	void runThread();
-	bool Init(Config *config);
-	void Start();
-	void Stop();
+	bool init(Config *config);
+	void start();
+	void stop();
 	void createCheckpoint();
 
 	char *getValue(const char *name);

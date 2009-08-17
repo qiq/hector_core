@@ -33,9 +33,9 @@ class ProcessingChain : public Object {
 public:
 	ProcessingChain(ObjectRegistry *objects, const char *id);
 	~ProcessingChain();
-	bool Init(Config *config);
-	void Start();
-	void Stop();
+	bool init(Config *config);
+	void start();
+	void stop();
 	void createCheckpoint();
 
 	char *getValue(const char *name);

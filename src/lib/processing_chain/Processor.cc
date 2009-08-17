@@ -28,7 +28,7 @@ Processor::~Processor() {
 	delete outputQueue;
 }
 
-bool Processor::Init(Config *config) {
+bool Processor::init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -68,7 +68,7 @@ bool Processor::Init(Config *config) {
 				return false;
 			}
 			Module *m = (*create)(objects, mid);
-			if (!m->Init(config))
+			if (!m->init(config))
 				return false;
 			modules.push_back(m);
 		}
@@ -77,12 +77,12 @@ bool Processor::Init(Config *config) {
 
 	// input queue(s)
 	inputQueue = new PriorityQueue(objects);
-	if (!inputQueue->Init(config, getId()))
+	if (!inputQueue->init(config, getId()))
 		return false;
 
 	// output queue(s)
 	outputQueue = new FilterQueue(objects);
-	if (!outputQueue->Init(config, getId()))
+	if (!outputQueue->init(config, getId()))
 		return false;
 
 	// check modules
@@ -175,7 +175,7 @@ void Processor::runThread() {
 			activeResources += n;
 
 			// process new requests, get finished requests
-			n = modules[0]->Process(inputResources, outputResources + finishedResources);
+			n = modules[0]->process(inputResources, outputResources + finishedResources);
 			finishedResources += n;
 			inputResources[0] = NULL;
 		
@@ -212,12 +212,12 @@ void Processor::runThread() {
 			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
-					resource = (*iter)->Process();
+					resource = (*iter)->process();
 					assert(resource != NULL);
 					break;
 				case MODULE_OUTPUT:
 				case MODULE_SIMPLE:
-					(*iter)->Process(resource);
+					(*iter)->process(resource);
 					break;
 				case MODULE_MULTI:
 				case MODULE_SELECT:
@@ -235,25 +235,25 @@ void Processor::runThread() {
 	}
 }
 
-void Processor::Start() {
+void Processor::start() {
 	running = true;
 	threads = new pthread_t[nThreads];
 
-	inputQueue->Start();
-	outputQueue->Start();
+	inputQueue->start();
+	outputQueue->start();
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)this);
 	}
 }
 
-void Processor::Stop() {
+void Processor::stop() {
 	runningLock.lock();
 	running = false;
 	runningLock.unlock();
 
-	inputQueue->Stop();
-	outputQueue->Stop();
+	inputQueue->stop();
+	outputQueue->stop();
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);

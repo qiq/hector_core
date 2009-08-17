@@ -27,9 +27,9 @@ class Queue : public Object {
 public:
 	Queue(ObjectRegistry *objects, const char *id);
 	~Queue();
-	bool Init(Config *config);
-	void Start();
-	void Stop();
+	bool init(Config *config);
+	void start();
+	void stop();
 	void createCheckpoint();
 
 	int getQueueId();

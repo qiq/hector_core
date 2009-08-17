@@ -27,11 +27,11 @@ protected:
 public:
 	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
 	virtual ~Module() {};
-	virtual bool Init(Config *config) = 0;
+	virtual bool init(Config *config) = 0;
 	virtual module_t getType() = 0;
-	virtual Resource *Process();
-	virtual void Process(Resource *resource);
-	virtual int Process(Resource **in, Resource **out);
+	virtual Resource *process();
+	virtual void process(Resource *resource);
+	virtual int process(Resource **in, Resource **out);
 	virtual void createCheckpoint() = 0;
 
 	virtual char *getValue(const char *name) = 0;

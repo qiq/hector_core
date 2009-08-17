@@ -113,11 +113,11 @@ int main(int argc, char *argv[]) {
 
 	// create and initialize the Server object
 	Server *server = new Server(serverId);
-	if (!server->Init(config))
+	if (!server->init(config))
 		die("Cannot initialize server, sorry.\n");
 
 	// run server
-	server->Start(true);
+	server->start(true);
 
 	// TODO: daemon mode: http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
 

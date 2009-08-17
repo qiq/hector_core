@@ -18,7 +18,7 @@ class RobotHTTPServer : public SimpleHTTPServer {
 public:
 	RobotHTTPServer(ObjectRegistry *objects);
 	~RobotHTTPServer();
-	bool HandleRequest(SimpleHTTPConn *conn);
+	bool handleRequest(SimpleHTTPConn *conn);
 };
 
 #endif

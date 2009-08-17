@@ -36,9 +36,11 @@ class Server : public Object {
 public:
 	Server(const char *id);
 	~Server();
-	bool Init(Config *config);
-	void Start(bool wait);
-	void Stop();
+	bool init(Config *config);
+	void start(bool wait);
+	void stop();
+	void pause();
+	void resume();
 	void createCheckpoint();
 
 	char *getValue(const char *name);

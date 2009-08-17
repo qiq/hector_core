@@ -20,7 +20,7 @@ PriorityQueue::~PriorityQueue() {
 	delete priorityInputQueue;
 }
 
-bool PriorityQueue::Init(Config *config, const char *id) {
+bool PriorityQueue::init(Config *config, const char *id) {
 	char buffer[1024];
 	vector<string> *v;
 
@@ -80,12 +80,12 @@ bool PriorityQueue::Init(Config *config, const char *id) {
 	return true;
 }
 
-void PriorityQueue::Start() {
+void PriorityQueue::start() {
 	if (priorityInputQueue)
 		priorityInputQueue->clearCancel();
 }
 
-void PriorityQueue::Stop() {
+void PriorityQueue::stop() {
 	if (priorityInputQueue)
 		priorityInputQueue->cancelAll();
 }

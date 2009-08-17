@@ -24,7 +24,7 @@ Server::~Server() {
 	objects = NULL;
 }
 
-bool Server::Init(Config *config) {
+bool Server::init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -68,7 +68,7 @@ bool Server::Init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			ProcessingChain *p = new ProcessingChain(objects, pid);
-			if (!p->Init(config))
+			if (!p->init(config))
 				return false;
 			processingChains.push_back(p);
 		}
@@ -97,17 +97,17 @@ bool Server::Init(Config *config) {
 	return true;
 }
 
-void Server::Start(bool wait) {
+void Server::start(bool wait) {
 	// start server
 	LOG4CXX_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
-	simpleHTTPServer->Start(serverHost, serverPort, threads, true);
+	simpleHTTPServer->start(serverHost, serverPort, threads, true);
 	if (wait)
 		LOG4CXX_INFO(logger, "Stopping server");
 }
 
-void Server::Stop() {
+void Server::stop() {
 	LOG4CXX_INFO(logger, "Stopping server");
-	simpleHTTPServer->Stop();
+	simpleHTTPServer->stop();
 }
 
 char *Server::getValue(const char *name) {

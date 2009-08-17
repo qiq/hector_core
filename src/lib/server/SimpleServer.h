@@ -59,15 +59,15 @@ public:
 	~SimpleServer();
 	bool getRunning();
 	void setRunning(bool running);
-	void RestrictAccess(const char *addr);
-	void Start(const char *addr, int port, int maxThreads, bool wait);
-	void ProcessRequests();
-	void Stop();
+	void restrictAccess(const char *addr);
+	void start(const char *addr, int port, int maxThreads, bool wait);
+	void processRequests();
+	void stop();
 
-	void ServiceThread();
-	void MainThread();
+	void serviceThread();
+	void mainThread();
 
-	virtual void Request(int fd) = 0;
+	virtual void request(int fd) = 0;
 };
 
 #endif

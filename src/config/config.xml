@@ -41,13 +41,14 @@
 	<ProcessingChain id="robot-processing-chain">
 		<processor ref="load-resource"/>
 		<queue ref="q1"/>
-		<processor ref="external-test"/>
+		<processor ref="dummy2"/>
+		<!--processor ref="external-test"/-->
 		<queue ref="q2"/>
 		<processor ref="save-resource"/>
 	</ProcessingChain>
 
 	<Processor id="load-resource">
-		<threads>1</threads>
+		<threads>5</threads>
 		<module ref="load-resource-module"/>
 		<module ref="preprocess-resource-module"/>
 		<outputQueue ref="q1"/>
@@ -62,6 +63,17 @@
 		<lib name="modules/libmodule-dummy.la"/>
 	</Module>
 
+	<Processor id="dummy2">
+		<threads>1</threads>
+		<module ref="dummy2-module"/>
+		<inputQueue ref="q1"/>
+		<outputQueue ref="q2"/>
+	</Processor>
+
+	<Module id="dummy2-module">
+		<lib name="modules/libmodule-dummy.la"/>
+	</Module>
+
 	<Queue id="q1">
 		<maxItems>0</maxItems>
 		<maxMemory>0</maxMemory>
@@ -70,8 +82,8 @@
 	<Processor id="external-test">
 		<threads>1</threads>
 		<module ref="external-test-module"/>
-		<inputQueue ref="q1" priority="0"/>
-		<outputQueue ref="q2" filter="*"/>
+		<inputQueue ref="q1"/>
+		<outputQueue ref="q2"/>
 	</Processor>
 
 	<Module id="external-test-module">

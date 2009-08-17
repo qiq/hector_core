@@ -39,12 +39,12 @@ void ProcessingChain::setRunning(const char *value) {
 	propertyLock.lock();
 	if (!strcmp(value, "0")) {
 		if (running) {
-			Stop();
+			stop();
 			running = false;
 		}
 	} else if (!strcmp(value, "1")) {
 		if (!running) {
-			Start();
+			start();
 			running = true;
 		}
 	} else {
@@ -53,7 +53,7 @@ void ProcessingChain::setRunning(const char *value) {
 	propertyLock.unlock();
 }
 
-bool ProcessingChain::Init(Config *config) {
+bool ProcessingChain::init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
 
@@ -64,7 +64,7 @@ bool ProcessingChain::Init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *qid = iter->c_str();
 			Queue *q = new Queue(objects, qid);
-			if (!q->Init(config))
+			if (!q->init(config))
 				return false;
 			queues.push_back(q);
 		}
@@ -78,7 +78,7 @@ bool ProcessingChain::Init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			Processor *p = new Processor(objects, pid);
-			if (!p->Init(config))
+			if (!p->init(config))
 				return false;
 			processors.push_back(p);
 		}
@@ -90,24 +90,24 @@ bool ProcessingChain::Init(Config *config) {
 	return true;
 }
 
-void ProcessingChain::Start() {
+void ProcessingChain::start() {
 	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->Start();
+		queues[i]->start();
 	}
 
 	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->Start();
+		processors[i]->start();
 	}
 }
 
-void ProcessingChain::Stop() {
+void ProcessingChain::stop() {
 	// cancel waiting threads
 	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->Stop();
+		queues[i]->stop();
 	}
 	// cancel running threads and join all threads
 	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->Stop();
+		processors[i]->stop();
 	}
 }
 
