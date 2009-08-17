@@ -8,6 +8,23 @@
 #include "Server.h"
 #include "WebResource.h"
 
+ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {
+	dummy = NULL;
+	foo = NULL;
+
+	getters["dummy"] = &ModuleDummy::getDummy;
+	setters["dummy"] = &ModuleDummy::setDummy;
+	getters["foo"] = &ModuleDummy::getFoo;
+	setters["foo"] = &ModuleDummy::setFoo;
+	getters["alias"] = &ModuleDummy::getDummy;
+	setters["alias"] = &ModuleDummy::setDummy;
+}
+
+ModuleDummy::~ModuleDummy() {
+	free(dummy);
+	free(foo);
+}
+
 char *ModuleDummy::getDummy() {
 	return dummy ? strdup(dummy) : NULL;
 }
@@ -26,22 +43,6 @@ void ModuleDummy::setFoo(const char *value) {
 	foo = strdup(value);
 }
 
-ModuleDummy::ModuleDummy(ObjectRegistry *objects, const char *id): Module(objects, id) {
-	dummy = NULL;
-	foo = NULL;
-
-	getters["dummy"] = &ModuleDummy::getDummy;
-	setters["dummy"] = &ModuleDummy::setDummy;
-	getters["foo"] = &ModuleDummy::getFoo;
-	setters["foo"] = &ModuleDummy::setFoo;
-	getters["alias"] = &ModuleDummy::getDummy;
-	setters["alias"] = &ModuleDummy::setDummy;
-}
-
-ModuleDummy::~ModuleDummy() {
-	free(dummy);
-	free(foo);
-}
 
 bool ModuleDummy::Init(Config *config) {
 	return true;

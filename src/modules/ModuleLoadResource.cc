@@ -16,7 +16,7 @@ Resource *ModuleLoadResource::Process() {
 	char s[1024];
 	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());
 	wr->setURL(s);
-	fprintf(stderr, "Loading resource (URL: %s)\n", wr->getURL());
+	LOG4CXX_INFO(logger, "Loading resource (URL: " << wr->getURL() << ")");
 	return wr;
 }
 

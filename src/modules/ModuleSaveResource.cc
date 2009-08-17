@@ -11,11 +11,11 @@ bool ModuleSaveResource::Init(Config *config) {
 }
 
 void ModuleSaveResource::Process(Resource *resource) {
-// FIXME: WTF?
-//	WebResource *wb = dynamic_cast<WebResouce*>(resource);
-//	if (wb) {
-//		fprintf(stderr, "Saving resource (URL: %s)\n", resource->getURL());
-//	}
+	WebResource *wr = dynamic_cast<WebResource*>(resource);
+	if (wr) {
+		LOG4CXX_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
+		delete wr;
+	}
 	return;
 }
 
@@ -23,7 +23,7 @@ void ModuleSaveResource::createCheckpoint() {
 }
 
 char *ModuleSaveResource::getValue(const char *name) {
-	return "abc";
+	return NULL;
 }
 
 bool ModuleSaveResource::setValue(const char *name, const char *value) {
