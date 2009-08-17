@@ -49,6 +49,7 @@ bool FilterQueue::Init(Config *config, const char *id) {
 			simpleOutputQueue = queue->getSyncQueue();
 		} else {
 			// more queues
+			filterOutputQueue = new vector<OutputQueue*>;
 			for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 				const char *qid = iter->c_str();
 				snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/outputQueue[%d]/@filter", qid, i);
@@ -187,7 +188,7 @@ int FilterQueue::putResources(Resource **r, int size, bool sleep) {
 			SyncQueue<Resource> *syncQueue = q->getSyncQueue();
 
 			// lock all queues
-			syncQueue->getLock()->lock();
+			q->getLock()->lock();
 
 			int availItems = syncQueue->getMaxItemsRaw() - syncQueue->getCurrentItemsRaw();
 			int availSize = syncQueue->getMaxSizeRaw() - syncQueue->getCurrentSizeRaw();

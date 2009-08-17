@@ -169,6 +169,8 @@ void Processor::runThread() {
 		while (Running()) {
 			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
 			int n = inputQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0);
+			if (n == 0 && activeResources == 0)
+				break;	// cancelled
 			inputResources[activeResources+n] = NULL;
 			activeResources += n;
 
@@ -179,6 +181,8 @@ void Processor::runThread() {
 		
 			// put requests into dstQueue, blocked in case we have no running requests
 			n = outputQueue->putResources(outputResources, finishedResources, activeResources == 0);
+			if (n == 0 && activeResources == 0)
+				break;	// cancelled
 			// TODO: use cyclic buffer instead of copying
 			for (int i = 0; i < finishedResources-n; i++) {
 				outputResources[i] = outputResources[n+i];
@@ -200,8 +204,11 @@ void Processor::runThread() {
 		Resource *resource;
 
 		while (Running()) {
-			if (firstModuleType != MODULE_INPUT)
-				resource = inputQueue->getResource(true);
+			if (firstModuleType != MODULE_INPUT) {
+				if (!(resource = inputQueue->getResource(true)))
+					break;	// cancelled
+			}
+
 			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
@@ -220,8 +227,10 @@ void Processor::runThread() {
 				}
 			}
 			module_t lastModuleType = modules.back()->getType();
-			if (lastModuleType != MODULE_OUTPUT)
-				outputQueue->putResource(resource, true);
+			if (lastModuleType != MODULE_OUTPUT) {
+				if (!outputQueue->putResource(resource, true))
+					break;	// cancelled
+			}
 		}
 	}
 }

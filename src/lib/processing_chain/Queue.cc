@@ -53,6 +53,7 @@ bool Queue::Init(Config *config) {
 }
 
 void Queue::Start() {
+	queue->clearCancel();
 }
 
 void Queue::Stop() {

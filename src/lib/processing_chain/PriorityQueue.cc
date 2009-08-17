@@ -81,6 +81,8 @@ bool PriorityQueue::Init(Config *config, const char *id) {
 }
 
 void PriorityQueue::Start() {
+	if (priorityInputQueue)
+		priorityInputQueue->clearCancel();
 }
 
 void PriorityQueue::Stop() {

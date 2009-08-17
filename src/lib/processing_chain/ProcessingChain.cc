@@ -12,6 +12,10 @@
 log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingChain"));
 
 ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Object(objects, id) {
+	running = false;
+
+	getters["running"] = &ProcessingChain::getRunning;
+	setters["running"] = &ProcessingChain::setRunning;
 }
 
 ProcessingChain::~ProcessingChain() {
@@ -22,6 +26,31 @@ ProcessingChain::~ProcessingChain() {
 	for (unsigned i = 0; i < queues.size(); i++) {
 		delete queues[i];
 	}
+}
+
+char *ProcessingChain::getRunning() {
+	propertyLock.lock();
+	bool r = running;
+	propertyLock.unlock();
+	return r ? strdup("1") : strdup("0");
+}
+
+void ProcessingChain::setRunning(const char *value) {
+	propertyLock.lock();
+	if (!strcmp(value, "0")) {
+		if (running) {
+			Stop();
+			running = false;
+		}
+	} else if (!strcmp(value, "1")) {
+		if (!running) {
+			Start();
+			running = true;
+		}
+	} else {
+		LOG4CXX_ERROR(logger, "Invalid 'running' value: " << value);
+	}
+	propertyLock.unlock();
 }
 
 bool ProcessingChain::Init(Config *config) {
@@ -90,13 +119,26 @@ void ProcessingChain::createCheckpoint() {
 }
 
 char *ProcessingChain::getValue(const char *name) {
-	return NULL;
+	char *result = NULL;
+	stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash>::iterator iter = getters.find(name);
+	if (iter != getters.end())
+		result = (this->*(iter->second))();
+	return result;
 }
 
 bool ProcessingChain::setValue(const char *name, const char *value) {
+	stdext::hash_map<string, void(ProcessingChain::*)(const char*), string_hash>::iterator iter = setters.find(name);
+	if (iter != setters.end()) {
+		(this->*(iter->second))(value);
+		return true;
+	}
 	return false;
 }
 
 vector<string> *ProcessingChain::listNames() {
-	return new vector<string>();
+	vector<string> *result = new vector<string>();
+	for (stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+		result->push_back(iter->first);
+	}
+	return result;
 }

@@ -20,6 +20,15 @@ class ProcessingChain : public Object {
 	vector<Processor*> processors;
 	vector<Queue*> queues;
 
+	Lock propertyLock;
+	bool running;
+
+	stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash> getters;
+	stdext::hash_map<string, void(ProcessingChain::*)(const char*), string_hash> setters;
+
+	char *getRunning();
+	void setRunning(const char *value);
+
 	static log4cxx::LoggerPtr logger;
 public:
 	ProcessingChain(ObjectRegistry *objects, const char *id);

@@ -74,8 +74,9 @@ public:
 	~PrioritySyncQueue();
 
 	void addQueue(SyncQueue<T> *queue, int priority, bool last);
-
 	void cancelAll();
+	void clearCancel();
+
 	bool isReady();
 	T *getItem(bool sleep);
 	int getItems(T **r, int size, bool sleep);
@@ -156,6 +157,13 @@ void PrioritySyncQueue<T>::cancelAll() {
 		sched_yield();
 		queueLock.lock();
 	}
+	queueLock.unlock();
+}
+
+template <class T>
+void PrioritySyncQueue<T>::clearCancel() {
+	queueLock.lock();
+	cancel = false;
 	queueLock.unlock();
 }
 

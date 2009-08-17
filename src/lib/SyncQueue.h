@@ -39,6 +39,7 @@ public:
 	SyncQueue(int maxItems, int maxSize);
 	~SyncQueue();
 	void cancelAll();
+	void clearCancel();
 
 	bool isSpace(T *r);
 	bool putItem(T *r, bool sleep);
@@ -106,6 +107,13 @@ void SyncQueue<T>::cancelAll() {
 	for (unsigned i = 0; i < queue->size(); i++)
 		delete (*queue)[i];
 	queue->clear();
+	queueLock.unlock();
+}
+
+template <class T>
+void SyncQueue<T>::clearCancel() {
+	queueLock.lock();
+	cancel = false;
 	queueLock.unlock();
 }
 
