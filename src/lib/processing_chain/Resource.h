@@ -22,7 +22,7 @@ protected:
 	static log4cxx::LoggerPtr logger;
 public:
 	Resource() {};
-	~Resource() {};
+	virtual ~Resource() {};
 	int getStatus();
 	void setStatus(int status);
 	virtual int getSize() = 0;

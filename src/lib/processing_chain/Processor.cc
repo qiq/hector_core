@@ -201,7 +201,7 @@ void Processor::runThread() {
 		delete[] outputResources;
 	} else {
 		// simple processing (no parallel or select)
-		Resource *resource;
+		Resource *resource = NULL;
 
 		while (Running()) {
 			if (firstModuleType != MODULE_INPUT) {
@@ -230,8 +230,10 @@ void Processor::runThread() {
 			if (lastModuleType != MODULE_OUTPUT) {
 				if (!outputQueue->putResource(resource, true))
 					break;	// cancelled
+				resource = NULL;
 			}
 		}
+		delete resource;
 	}
 }
 
@@ -258,6 +260,16 @@ void Processor::stop() {
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}
+}
+
+void Processor::pause() {
+	inputQueue->pause();
+	outputQueue->pause();
+}
+
+void Processor::resume() {
+	inputQueue->resume();
+	outputQueue->resume();
 }
 
 void Processor::createCheckpoint() {

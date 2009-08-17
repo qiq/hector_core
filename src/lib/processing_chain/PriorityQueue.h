@@ -26,6 +26,8 @@ public:
 	bool init(Config *config, const char *id);
 	void start();
 	void stop();
+	void pause();
+	void resume();
 	int getQueueCount();
 
 	Resource *getResource(bool sleep);

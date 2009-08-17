@@ -145,6 +145,7 @@ void SimpleServer::mainThread() {
 		}
 	}
 	main_lock.lock();
+	main_running = false;
 	if (main_socket != -1) {
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);

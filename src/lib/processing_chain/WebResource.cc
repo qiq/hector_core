@@ -30,7 +30,7 @@ int WebResource::getSize() {
 }
 
 void WebResource::setURL(const char *url) {
-	this->url = url;
+	this->url.assign(url);
 }
 
 const char *WebResource::getURL() {

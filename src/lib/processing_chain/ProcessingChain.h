@@ -21,13 +21,19 @@ class ProcessingChain : public Object {
 	vector<Queue*> queues;
 
 	Lock propertyLock;
-	bool running;
+	bool propRun;
+	bool propPause;
 
 	stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash> getters;
 	stdext::hash_map<string, void(ProcessingChain::*)(const char*), string_hash> setters;
 
-	char *getRunning();
-	void setRunning(const char *value);
+	char *getRun();
+	void setRun(const char *value);
+	char *getPause();
+	void setPause(const char *value);
+
+	void doPause();
+	void doResume();
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -36,6 +42,8 @@ public:
 	bool init(Config *config);
 	void start();
 	void stop();
+	void pause();
+	void resume();
 	void createCheckpoint();
 
 	char *getValue(const char *name);

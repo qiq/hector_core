@@ -30,6 +30,8 @@ public:
 	bool init(Config *config);
 	void start();
 	void stop();
+	void pause();
+	void resume();
 	void createCheckpoint();
 
 	int getQueueId();

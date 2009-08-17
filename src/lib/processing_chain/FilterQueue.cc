@@ -87,6 +87,12 @@ void FilterQueue::start() {
 void FilterQueue::stop() {
 }
 
+void FilterQueue::pause() {
+}
+
+void FilterQueue::resume() {
+}
+
 int FilterQueue::getQueueCount() {
 	if (simpleOutputQueue)
 		return 1;

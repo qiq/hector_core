@@ -60,6 +60,14 @@ void Queue::stop() {
 	queue->cancelAll();
 }
 
+void Queue::pause() {
+	queue->pause();
+}
+
+void Queue::resume() {
+	queue->resume();
+}
+
 bool Queue::putResource(Resource *resource, bool sleep) {
 	return queue->putItem(resource, sleep);
 }

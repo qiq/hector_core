@@ -87,6 +87,7 @@ SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
 template <class T>
 SyncQueue<T>::~SyncQueue() {
 	cancelAll();
+	// to be sure, should be deleted in cancelAll()
 	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
 		delete (*iter);
 	}
@@ -109,8 +110,10 @@ void SyncQueue<T>::cancelAll() {
 		sched_yield();
 		queueLock.lock();
 	}
-	for (unsigned i = 0; i < queue->size(); i++)
-		delete (*queue)[i];
+	
+	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
+		delete (*iter);
+	}
 	queue->clear();
 	queueLock.unlock();
 }
@@ -129,7 +132,7 @@ void SyncQueue<T>::pause() {
 
 template <class T>
 void SyncQueue<T>::resume() {
-	queueLock.lock();
+	queueLock.unlock();
 }
 
 template <class T>

@@ -12,46 +12,83 @@
 log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingChain"));
 
 ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Object(objects, id) {
-	running = false;
+	propRun = false;
+	propPause = false;
 
-	getters["running"] = &ProcessingChain::getRunning;
-	setters["running"] = &ProcessingChain::setRunning;
+	getters["run"] = &ProcessingChain::getRun;
+	setters["run"] = &ProcessingChain::setRun;
+	getters["pause"] = &ProcessingChain::getPause;
+	setters["pause"] = &ProcessingChain::setPause;
 }
 
 ProcessingChain::~ProcessingChain() {
 	// order of destruction is important: processors use queues
-	for (unsigned i = 0; i < processors.size(); i++) {
-		delete processors[i];
+	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
+		delete (*iter);
 	}
+	for (vector<Queue*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
+		delete (*iter);
+	}
+}
+
+char *ProcessingChain::getRun() {
+	propertyLock.lock();
+	bool r = propRun;
+	propertyLock.unlock();
+	return bool2str(r);
+}
+
+char *ProcessingChain::getPause() {
+	propertyLock.lock();
+	bool r = propPause;
+	propertyLock.unlock();
+	return bool2str(r);
+}
+
+void ProcessingChain::setRun(const char *value) {
+	switch (str2bool(value)) {
+	case 0:
+		stop();
+		break;
+	case 1:
+		start();
+		break;
+	default:
+		LOG4CXX_ERROR(logger, "Invalid 'run' value: " << value);
+	}
+}
+
+void ProcessingChain::setPause(const char *value) {
+	switch (str2bool(value)) {
+	case 0:
+		resume();
+		break;
+	case 1:
+		pause();
+		break;
+	default:
+		LOG4CXX_ERROR(logger, "Invalid 'pause' value: " << value);
+	}
+}
+
+void ProcessingChain::doPause() {
 	for (unsigned i = 0; i < queues.size(); i++) {
-		delete queues[i];
+		queues[i]->pause();
+	}
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->pause();
 	}
 }
 
-char *ProcessingChain::getRunning() {
-	propertyLock.lock();
-	bool r = running;
-	propertyLock.unlock();
-	return r ? strdup("1") : strdup("0");
+void ProcessingChain::doResume() {
+	for (unsigned i = 0; i < queues.size(); i++) {
+		queues[i]->resume();
+	}
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->resume();
+	}
 }
 
-void ProcessingChain::setRunning(const char *value) {
-	propertyLock.lock();
-	if (!strcmp(value, "0")) {
-		if (running) {
-			stop();
-			running = false;
-		}
-	} else if (!strcmp(value, "1")) {
-		if (!running) {
-			start();
-			running = true;
-		}
-	} else {
-		LOG4CXX_ERROR(logger, "Invalid 'running' value: " << value);
-	}
-	propertyLock.unlock();
-}
 
 bool ProcessingChain::init(Config *config) {
 	char buffer[1024];
@@ -91,24 +128,55 @@ bool ProcessingChain::init(Config *config) {
 }
 
 void ProcessingChain::start() {
-	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->start();
+	propertyLock.lock();
+	if (!propRun) {
+		for (unsigned i = 0; i < queues.size(); i++) {
+			queues[i]->start();
+		}
+		for (unsigned i = 0; i < processors.size(); i++) {
+			processors[i]->start();
+		}
+		propRun = true;
 	}
-
-	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->start();
-	}
+	propertyLock.unlock();
 }
 
 void ProcessingChain::stop() {
-	// cancel waiting threads
-	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->stop();
+	propertyLock.lock();
+	if (propRun) {
+		if (propPause) {
+			doResume();
+			propPause = false;
+		}
+		// cancel waiting threads
+		for (unsigned i = 0; i < queues.size(); i++) {
+			queues[i]->stop();
+		}
+		// cancel running threads and join all threads
+		for (unsigned i = 0; i < processors.size(); i++) {
+			processors[i]->stop();
+		}
+		propRun = false;
 	}
-	// cancel running threads and join all threads
-	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->stop();
+	propertyLock.unlock();
+}
+
+void ProcessingChain::pause() {
+	propertyLock.lock();
+	if (propRun && !propPause) {
+		doPause();
+		propPause = true;
 	}
+	propertyLock.unlock();
+}
+
+void ProcessingChain::resume() {
+	propertyLock.lock();
+	if (propPause) {
+		doResume();
+		propPause = false;
+	}
+	propertyLock.unlock();
 }
 
 void ProcessingChain::createCheckpoint() {

@@ -90,6 +90,12 @@ void PriorityQueue::stop() {
 		priorityInputQueue->cancelAll();
 }
 
+void PriorityQueue::pause() {
+}
+
+void PriorityQueue::resume() {
+}
+
 int PriorityQueue::getQueueCount() {
 	return queueCount;
 }

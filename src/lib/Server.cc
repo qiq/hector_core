@@ -100,14 +100,29 @@ bool Server::init(Config *config) {
 void Server::start(bool wait) {
 	// start server
 	LOG4CXX_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
-	simpleHTTPServer->start(serverHost, serverPort, threads, true);
-	if (wait)
+	simpleHTTPServer->start(serverHost, serverPort, threads, wait);
+	if (wait) {
+		LOG4CXX_INFO(logger, "Stopping processing chains");
+		for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
+			(*iter)->stop();
+		}
 		LOG4CXX_INFO(logger, "Stopping server");
+	}
 }
 
 void Server::stop() {
+	LOG4CXX_INFO(logger, "Stopping processing chains");
+	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
+		(*iter)->stop();
+	}
 	LOG4CXX_INFO(logger, "Stopping server");
 	simpleHTTPServer->stop();
+}
+
+void Server::pause() {
+}
+
+void Server::resume() {
 }
 
 char *Server::getValue(const char *name) {
