@@ -55,32 +55,32 @@
 	</Processor>
 
 	<Module id="load-resource-module">
-		<lib name="modules/libmodule-load-resource.la"/>
+		<lib name="modules/libmodule-dummy-input.la"/>
 		<param name="inputDir" value="/tmp/input"/>
 	</Module>
 
 	<Module id="preprocess-resource-module">
-		<lib name="modules/libmodule-dummy.la"/>
+		<lib name="modules/libmodule-dummy-simple.la"/>
 	</Module>
 
 	<Processor id="dummy2">
-		<threads>1</threads>
+		<threads>10</threads>
 		<module ref="dummy2-module"/>
 		<inputQueue ref="q1"/>
 		<outputQueue ref="q2"/>
 	</Processor>
 
 	<Module id="dummy2-module">
-		<lib name="modules/libmodule-dummy.la"/>
+		<lib name="modules/libmodule-dummy-simple.la"/>
 	</Module>
 
 	<Queue id="q1">
-		<maxItems>0</maxItems>
+		<maxItems>100</maxItems>
 		<maxMemory>0</maxMemory>
 	</Queue>
 
 	<Processor id="external-test">
-		<threads>1</threads>
+		<threads>12</threads>
 		<module ref="external-test-module"/>
 		<inputQueue ref="q1"/>
 		<outputQueue ref="q2"/>
@@ -88,23 +88,23 @@
 
 	<Module id="external-test-module">
 		<!--lib name="modules/libmodule-external-simple.la"/-->
-		<lib name="modules/libmodule-dummy.la"/>
+		<lib name="modules/libmodule-dummy-simple.la"/>
 		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
 	</Module>
 
 	<Queue id="q2">
-		<maxItems>0</maxItems>
+		<maxItems>100</maxItems>
 		<maxMemory>0</maxMemory>
 	</Queue>
 
 	<Processor id="save-resource">
-		<threads>1</threads>
+		<threads>4</threads>
 		<module ref="save-resource-module"/>
 		<inputQueue ref="q2"/>
 	</Processor>
 
 	<Module id="save-resource-module">
-		<lib name="modules/libmodule-save-resource.la"/>
+		<lib name="modules/libmodule-dummy-output.la"/>
 		<param name="outputDir" value="/tmp/output"/>
 	</Module>
 
