@@ -234,11 +234,15 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 						# wildcards
 						$term->addhistory($_) if ($interactive);
 						my $pattern;
-						if ($property eq '*') {
-							$pattern = $object eq '*' ?  '' : $object.".";
+						if ($object eq '*' and $property eq '*') {
+							$pattern = '.*';
+						} elsif ($object eq '*') {
+							$pattern = ".*\.$property\$";
+						} else {
+							$pattern = "^$object\.";
 						}
 						foreach my $p (sort keys %propertyNames) {
-							if ($pattern eq '' or (length($pattern) <= length($p) and substr($p, 0, length($pattern)) eq $pattern)) {
+							if ($p =~ /$pattern/) {
 								$p =~ /([^\.]*)\.(.*)/;
 								my ($object, $property) = ($1, $2);
 								my $result = getProperty($object, $property);
