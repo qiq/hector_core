@@ -216,6 +216,9 @@ void Processor::runThread() {
 					assert(resource != NULL);
 					break;
 				case MODULE_OUTPUT:
+					(*iter)->process(resource);
+					resource = NULL;
+					break;
 				case MODULE_SIMPLE:
 					(*iter)->process(resource);
 					break;
@@ -260,6 +263,9 @@ void Processor::stop() {
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}
+
+	delete[] threads;
+	threads = NULL;
 }
 
 void Processor::pause() {
