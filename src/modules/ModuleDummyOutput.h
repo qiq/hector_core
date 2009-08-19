@@ -2,17 +2,17 @@
  * Dummy module, does nothing.
  */
 
-#ifndef _MODULE_SAVE_RESOURCE_H_
-#define _MODULE_SAVE_RESOURCE_H_
+#ifndef _MODULE_DUMMY_OUTPUT_H_
+#define _MODULE_DUMMY_OUTPUT_H_
 
 #include <config.h>
 
 #include "Module.h"
 
-class ModuleSaveResource : public Module {
+class ModuleDummyOutput : public Module {
 public:
-	ModuleSaveResource(ObjectRegistry *objects, const char *id): Module(objects, id) {};
-	~ModuleSaveResource() {};
+	ModuleDummyOutput(ObjectRegistry *objects, const char *id): Module(objects, id) {};
+	~ModuleDummyOutput() {};
 	bool init(Config *config);
 	module_t getType();
 	void process(Resource *resource);
@@ -23,7 +23,7 @@ public:
 	vector<string> *listNames();
 };
 
-inline module_t ModuleSaveResource::getType() {
+inline module_t ModuleDummyOutput::getType() {
 	return MODULE_OUTPUT;
 }
 

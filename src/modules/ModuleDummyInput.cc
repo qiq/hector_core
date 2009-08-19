@@ -4,14 +4,14 @@
 #include <config.h>
 
 #include <stdlib.h>
-#include "ModuleLoadResource.h"
+#include "ModuleDummyInput.h"
 #include "WebResource.h"
 
-bool ModuleLoadResource::init(Config *config) {
+bool ModuleDummyInput::init(Config *config) {
 	return true;
 }
 
-Resource *ModuleLoadResource::process() {
+Resource *ModuleDummyInput::process() {
 	WebResource *wr = new WebResource();
 	char s[1024];
 	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());
@@ -20,25 +20,25 @@ Resource *ModuleLoadResource::process() {
 	return wr;
 }
 
-void ModuleLoadResource::createCheckpoint() {
+void ModuleDummyInput::createCheckpoint() {
 }
 
-char *ModuleLoadResource::getValue(const char *name) {
+char *ModuleDummyInput::getValue(const char *name) {
 	return NULL;
 }
 
-bool ModuleLoadResource::setValue(const char *name, const char *value) {
+bool ModuleDummyInput::setValue(const char *name, const char *value) {
 	return false;
 }
 
-vector<string> *ModuleLoadResource::listNames() {
+vector<string> *ModuleDummyInput::listNames() {
 	return new vector<string>();
 }
 
 // the class factories
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id) {
-	return (Module*)new ModuleLoadResource(objects, id);
+	return (Module*)new ModuleDummyInput(objects, id);
 }
 
 extern "C" void destroy(Module* p) {

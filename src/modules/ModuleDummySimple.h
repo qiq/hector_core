@@ -2,8 +2,8 @@
  * Dummy module, does nothing.
  */
 
-#ifndef _MODULE_DUMMY_H_
-#define _MODULE_DUMMY_H_
+#ifndef _MODULE_DUMMY_SIMPLE_H_
+#define _MODULE_DUMMY_SIMPLE_H_
 
 #include <config.h>
 
@@ -13,21 +13,21 @@
 #include "Lock.h"
 #include "Module.h"
 
-class ModuleDummy : public Module {
+class ModuleDummySimple : public Module {
 	Lock propertyLock;
 	char *dummy;
 	char *foo;
 
-	stdext::hash_map<string, char*(ModuleDummy::*)(), string_hash> getters;
-	stdext::hash_map<string, void(ModuleDummy::*)(const char*), string_hash> setters;
+	stdext::hash_map<string, char*(ModuleDummySimple::*)(), string_hash> getters;
+	stdext::hash_map<string, void(ModuleDummySimple::*)(const char*), string_hash> setters;
 
 	char *getDummy();
 	void setDummy(const char *value);
 	char *getFoo();
 	void setFoo(const char *value);
 public:
-	ModuleDummy(ObjectRegistry *objects, const char *id);
-	~ModuleDummy();
+	ModuleDummySimple(ObjectRegistry *objects, const char *id);
+	~ModuleDummySimple();
 	bool init(Config *config);
 	module_t getType();
 	void process(Resource *resource);
@@ -38,7 +38,7 @@ public:
 	vector<string> *listNames();
 };
 
-inline module_t ModuleDummy::getType() {
+inline module_t ModuleDummySimple::getType() {
 	return MODULE_SIMPLE;
 }
 
