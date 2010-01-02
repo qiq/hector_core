@@ -1,5 +1,7 @@
 /**
- * - register all objects, so that we can call getValue() and setValue() on them
+ * Register all objects, so that we can call getValue() and setValue() on them
+ * There is no need to lock registry, because values are added only during init
+ * phase (single thread), later we only read the registry.
  */
 #ifndef _OBJECT_REGISTRY_H_
 #define _OBJECT_REGISTRY_H_

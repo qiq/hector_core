@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <ext/hash_set>
 #include <string>
