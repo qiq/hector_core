@@ -11,15 +11,14 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <ext/hash_set>
 #include <string>
+#include <tr1/unordered_set>
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "CondLock.h"
 #include "SyncQueue.h"
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 class FileDescriptor {
 public:
@@ -51,7 +50,7 @@ class SimpleServer {
 	pthread_t *threads;
 	SyncQueue<FileDescriptor> *queue;
 
-	stdext::hash_set<string, string_hash> allowed_client;
+	std::tr1::unordered_set<string> allowed_client;
 
 	static log4cxx::LoggerPtr logger;
 public:

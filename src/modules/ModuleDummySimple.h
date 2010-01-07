@@ -8,7 +8,7 @@
 #include <config.h>
 
 #include <string>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include "common.h"
 #include "Lock.h"
 #include "Module.h"
@@ -18,8 +18,8 @@ class ModuleDummySimple : public Module {
 	char *dummy;
 	char *foo;
 
-	stdext::hash_map<string, char*(ModuleDummySimple::*)(), string_hash> getters;
-	stdext::hash_map<string, void(ModuleDummySimple::*)(const char*), string_hash> setters;
+	std::tr1::unordered_map<string, char*(ModuleDummySimple::*)()> getters;
+	std::tr1::unordered_map<string, void(ModuleDummySimple::*)(const char*)> setters;
 
 	char *getDummy();
 	void setDummy(const char *value);

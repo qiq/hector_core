@@ -3,19 +3,18 @@
 
 #include <config.h>
 
-#include <ext/hash_map>
-#include <log4cxx/logger.h>
 #include <ltdl.h>
+#include <tr1/unordered_map>
+#include <log4cxx/logger.h>
 #include "common.h"
 #include "Lock.h"
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 class LibraryLoader {
 	static Lock lock;
 	static bool initialized;
-	static stdext::hash_map<string, lt_dlhandle*, string_hash> handles;
+	static std::tr1::unordered_map<string, lt_dlhandle*> handles;
 
 	static log4cxx::LoggerPtr logger;
 public:

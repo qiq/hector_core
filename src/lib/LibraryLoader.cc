@@ -1,5 +1,6 @@
 /**
- * Common functions, macros, etc
+ * Loads libraries, keeps track of loaded libraries, so that they are correctly
+ * closed on destruction.
  */
 
 #include <config.h>
@@ -10,7 +11,7 @@ log4cxx::LoggerPtr LibraryLoader::logger(log4cxx::Logger::getLogger("lib.Library
 
 Lock LibraryLoader::lock;
 bool LibraryLoader::initialized;
-stdext::hash_map<string, lt_dlhandle*, string_hash> LibraryLoader::handles;
+std::tr1::unordered_map<string, lt_dlhandle*> LibraryLoader::handles;
 
 LibraryLoader ll;
 
@@ -20,7 +21,7 @@ LibraryLoader::LibraryLoader() {
 
 LibraryLoader::~LibraryLoader() {
 	lock.lock();
-	for (stdext::hash_map<string, lt_dlhandle*, string_hash>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
+	for (std::tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
 		lt_dlclose(*iter->second);
 		delete iter->second;
 	}
@@ -39,7 +40,7 @@ void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
 		}
 		initialized = true;
 	}
-	stdext::hash_map<string, lt_dlhandle*, string_hash>::iterator iter = handles.find(lib);
+	std::tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.find(lib);
 	lt_dlhandle *handle;
 	if (iter != handles.end()) {
 		handle = iter->second;

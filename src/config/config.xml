@@ -2,7 +2,7 @@
 <!-- Example config file -->
 <!DOCTYPE Config SYSTEM "config.dtd">
 
-<Config baseDir="/home/qiq/work/hector/src">
+<Config baseDir="/home/qiq/qiq/work/hector/src">
 
 	<Server id="webserver">
 		<threads>2</threads>
@@ -30,81 +30,104 @@
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
-		<processingChain ref="robot-processing-chain"/>
-		<!--processingChain ref="robot-processing-chain2"/-->
+		<processingChain ref="robot_processing_chain"/>
+		<!--processingChain ref="robot_processing_chain2"/-->
 		<logConfig>config/robot.log.props</logConfig>
-		<lib name="servers/robot/libserver-robot.la"/>
+		<lib name="servers/robot/libserver_robot.la"/>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>
 
-	<ProcessingChain id="robot-processing-chain">
-		<processor ref="load-resource"/>
-		<queue ref="q1"/>
-		<processor ref="dummy2"/>
-		<!--processor ref="external-test"/-->
-		<queue ref="q2"/>
-		<processor ref="save-resource"/>
+	<ProcessingChain id="robot_processing_chain">
+		<processor ref="load_resource1"/>
+		<processor ref="load_resource2"/>
+		<processor ref="dummy"/>
+		<processor ref="save_resource"/>
 	</ProcessingChain>
 
-	<Processor id="load-resource">
+	<Processor id="load_resource1">
 		<threads>5</threads>
-		<module ref="load-resource-module"/>
-		<module ref="preprocess-resource-module"/>
-		<outputQueue ref="q1"/>
+		<modules>
+			<module ref="load_resource_module1"/>
+			<module ref="preprocess_resource_module1"/>
+		</modules>
+		<output>
+			<nextProcessor ref="dummy"/>
+		</output>
 	</Processor>
 
-	<Module id="load-resource-module">
-		<lib name="modules/libmodule-dummy-input.la"/>
+	<Module id="load_resource_module1">
+		<lib name="modules/libmodule_dummy_input.la"/>
 		<param name="inputDir" value="/tmp/input"/>
 	</Module>
 
-	<Module id="preprocess-resource-module">
-		<lib name="modules/libmodule-dummy-simple.la"/>
+	<Module id="preprocess_resource_module1">
+		<lib name="modules/libmodule_dummy_simple.la"/>
 	</Module>
 
-	<Processor id="dummy2">
+	<Processor id="load_resource2">
+		<threads>1</threads>
+		<modules>
+			<module ref="load_resource_module2"/>
+		</modules>
+		<output>
+			<nextProcessor ref="dummy"/>
+		</output>
+	</Processor>
+
+	<Module id="load_resource_module2">
+		<lib name="modules/libmodule_dummy_input.la"/>
+		<param name="inputDir" value="/tmp/input2"/>
+	</Module>
+
+	<Processor id="dummy">
 		<threads>10</threads>
-		<module ref="dummy2-module"/>
-		<inputQueue ref="q1"/>
-		<outputQueue ref="q2"/>
+		<modules>
+			<module ref="dummy_module"/>
+		</modules>
+		<input>
+			<queue priority="100" maxItems="0" maxSize="0"/>
+			<queue priority="0" maxItems="100" maxSize="0"/>
+		</input>
+		<output>
+			<!-- loopback -->
+			<nextProcessor ref="dummy" priority="100" filter="1"/>
+			<!-- copy: do not stop processing in case of match, but
+			create resource copy and continue instead -->
+			<nextProcessor ref="save_resource" copy="1"/>
+			<nextProcessor ref="save_resource"/>
+		</output>
 	</Processor>
 
-	<Module id="dummy2-module">
-		<lib name="modules/libmodule-dummy-simple.la"/>
+	<Module id="dummy_module">
+		<lib name="modules/libmodule_dummy_simple.la"/>
 	</Module>
 
-	<Queue id="q1">
-		<maxItems>100</maxItems>
-		<maxMemory>0</maxMemory>
-	</Queue>
-
-	<Processor id="external-test">
+	<Processor id="external_test">
 		<threads>12</threads>
-		<module ref="external-test-module"/>
-		<inputQueue ref="q1"/>
-		<outputQueue ref="q2"/>
+		<modules>
+			<module ref="external_test_module"/>
+		</modules>
 	</Processor>
 
-	<Module id="external-test-module">
+	<Module id="external_test_module">
 		<!--lib name="modules/libmodule-external-simple.la"/-->
-		<lib name="modules/libmodule-dummy-simple.la"/>
+		<lib name="modules/libmodule_dummy_simple.la"/>
 		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
 	</Module>
 
-	<Queue id="q2">
-		<maxItems>100</maxItems>
-		<maxMemory>0</maxMemory>
-	</Queue>
-
-	<Processor id="save-resource">
+	<Processor id="save_resource">
 		<threads>4</threads>
-		<module ref="save-resource-module"/>
-		<inputQueue ref="q2"/>
+		<modules>
+			<module ref="save_resource_module"/>
+		</modules>
+		<input>
+			<queue maxItems="100" maxSize="200"/>
+		</input>
 	</Processor>
 
-	<Module id="save-resource-module">
-		<lib name="modules/libmodule-dummy-output.la"/>
+	<Module id="save_resource_module">
+		<lib name="modules/libmodule_dummy_output.la"/>
 		<param name="outputDir" value="/tmp/output"/>
 	</Module>
 

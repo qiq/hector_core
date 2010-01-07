@@ -6,16 +6,11 @@ AC_INIT(hector, 0.0.1-dev, qiq@ucw.cz)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(subdir-objects)
 AC_LANG([C++])
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
-AC_ARG_WITH(protobuf,
-	[AC_HELP_STRING([--with-protobuf=PATH], [path to Google Protocol Buffers])],
-	[with_protobuf=$withval],
-	[with_protobuf=no]
-)
-
 
 # Checks for programs.
 AC_PROG_CXX
@@ -26,10 +21,12 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
+AC_CHECK_PROGS([PROTOC], [protoc])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
 PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
+PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 0.22])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -54,7 +51,7 @@ AC_CHECK_FUNCS([dup2 gethostbyname inet_ntoa memset select setlocale socket sqrt
 # Misc
 dnl Check for debug options
 if test "x$use_debug" = "xyes"; then
-	CXXFLAGS="-ggdb -O0"
+	CXXFLAGS="$CXXFLAGS -ggdb -O0"
 else
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
@@ -66,19 +63,6 @@ if test "x$GXX" = "xyes"; then
   *) CXXFLAGS="$CXXFLAGS -Wall" ;;
   esac
 fi
-
-# borrowed from Moses
-SAVE_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS -I${with_protobuf}/include"
-AC_CHECK_HEADER(google/protobuf/message.h,
-	[AC_DEFINE([HAVE_PROTOBUF], [], [flag for protobuf])],
-	[AC_MSG_ERROR([Cannot find protobuf!])])
-LIB_PROTOBUF="-lprotobuf"
-LDFLAGS="$LDFLAGS -L${with_protobuf}/lib"
-LIBS="$LIBS $LIB_PROTOBUF"
-AC_PATH_PROG(PROTOC,protoc,,"${PATH}:${with_protobuf}/bin")
-FMTLIBS="$FMTLIBS libprotobuf.a"
-AM_CONDITIONAL([PROTOBUF], true)
 
 AC_CONFIG_FILES([Makefile
                 src/Makefile

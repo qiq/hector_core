@@ -14,7 +14,6 @@
 #include "common.h"
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 class Config {
 	xmlDocPtr doc;

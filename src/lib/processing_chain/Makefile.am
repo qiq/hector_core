@@ -6,9 +6,6 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 libhector_processing_chain_la_SOURCES = \
 	ProcessingChain.h ProcessingChain.cc \
 	Processor.h Processor.cc \
-	Queue.h Queue.cc \
-	FilterQueue.h FilterQueue.cc \
-	PriorityQueue.h PriorityQueue.cc \
 	Module.h Module.cc \
 	Resource.h \
 	WebResource.h WebResource.cc WebResource.pb.h WebResource.pb.cc

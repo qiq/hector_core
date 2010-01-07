@@ -1,6 +1,6 @@
 <!-- robot config definition -->
 
-<!ELEMENT Config	(Server|ProcessingChain|Processor|Module|Queue)* >
+<!ELEMENT Config	(Server|ProcessingChain|Processor|Module)* >
 <!ATTLIST Config
 	baseDir		CDATA		"" >
 
@@ -33,7 +33,7 @@
 
 <!-- ProcessingChain -->
 
-<!ELEMENT ProcessingChain	(processor|queue)* >
+<!ELEMENT ProcessingChain	(processor)* >
 <!ATTLIST ProcessingChain
 	id		ID		#REQUIRED >
 
@@ -41,39 +41,34 @@
 <!ATTLIST processor
 	ref		IDREF 		#REQUIRED >
 
-<!ELEMENT queue	EMPTY >
-<!ATTLIST queue
-	ref		IDREF 		#REQUIRED >
-
 <!-- Processor -->
 
-<!ELEMENT Processor	(threads,module+,inputQueue?,outputQueue?) >
+<!ELEMENT Processor	(threads,modules,input?,output?) >
 <!ATTLIST Processor
 	id		ID		#REQUIRED >
+
+<!ELEMENT modules	(module+) >
+
+<!ELEMENT input		(queue+) >
+
+<!ELEMENT output	(nextProcessor+) >
 
 <!ELEMENT module	EMPTY >
 <!ATTLIST module
 	ref		IDREF 		#REQUIRED >
 
-<!ELEMENT inputQueue	EMPTY >
-<!ATTLIST inputQueue
+<!ELEMENT queue	EMPTY >
+<!ATTLIST queue
+	priority	CDATA		"0"
+	maxItems	CDATA		"0"
+	maxSize		CDATA		"0" >
+
+<!ELEMENT nextProcessor	EMPTY >
+<!ATTLIST nextProcessor
 	ref		IDREF 		#REQUIRED
-	priority	CDATA		"" >
-
-<!ELEMENT outputQueue	EMPTY >
-<!ATTLIST outputQueue
-	ref		IDREF 		#REQUIRED
-	filter		CDATA		"" >
-
-
-<!-- Queue -->
-
-<!ELEMENT Queue	(maxItems, maxMemory) >
-<!ATTLIST Queue
-	id		ID		#REQUIRED >
-
-<!ELEMENT maxMemory	(#PCDATA) >
-<!ELEMENT maxItems	(#PCDATA) >
+	priority	CDATA		"0"
+	filter		CDATA		""
+	copy		CDATA		"0" >
 
 <!-- Module -->
 

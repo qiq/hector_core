@@ -7,13 +7,12 @@
 
 #include <config.h>
 
-#include <ext/hash_map>
 #include <string>
+#include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 #include "../common.h"
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 typedef enum {
 	INCOMPLETE,
@@ -35,7 +34,7 @@ class SimpleHTTPConn {
 	string request_buffer;		// entire request
 	int request_body_offset;	// offset of data
 	int request_header_offset;	// offset of second line (header)
-	stdext::hash_map<string, string, string_hash> *header_fields;	// parsed header field
+	std::tr1::unordered_map<string, string> *header_fields;	// parsed header field
 
 	// response
 	int response_code;

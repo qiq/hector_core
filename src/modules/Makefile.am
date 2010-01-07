@@ -4,7 +4,7 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ -version-info 0:0:0
 #AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
 #AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 
-lib_LTLIBRARIES = libmodule-dummy-simple.la libmodule-dummy-input.la libmodule-dummy-output.la
+lib_LTLIBRARIES = libmodule_dummy_simple.la libmodule_dummy_input.la libmodule_dummy_output.la
 
 libmodule_dummy_simple_la_SOURCES = \
 		ModuleDummySimple.h ModuleDummySimple.cc

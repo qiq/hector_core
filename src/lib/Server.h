@@ -9,7 +9,6 @@
 
 #include <config.h>
 
-#include <ext/hash_map>
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Config.h"
@@ -19,7 +18,6 @@
 #include "server/SimpleHTTPServer.h"
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 class Server : public Object {
 	char *serverHost;

@@ -22,11 +22,7 @@ ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Objec
 }
 
 ProcessingChain::~ProcessingChain() {
-	// order of destruction is important: processors use queues
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		delete (*iter);
-	}
-	for (vector<Queue*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
 		delete (*iter);
 	}
 }
@@ -72,18 +68,12 @@ void ProcessingChain::setPause(const char *value) {
 }
 
 void ProcessingChain::doPause() {
-	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->pause();
-	}
 	for (unsigned i = 0; i < processors.size(); i++) {
 		processors[i]->pause();
 	}
 }
 
 void ProcessingChain::doResume() {
-	for (unsigned i = 0; i < queues.size(); i++) {
-		queues[i]->resume();
-	}
 	for (unsigned i = 0; i < processors.size(); i++) {
 		processors[i]->resume();
 	}
@@ -94,30 +84,21 @@ bool ProcessingChain::init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
 
-	// crate children: queues
-	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/queue/@ref", getId());
-	v = config->getValues(buffer);
-	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			const char *qid = iter->c_str();
-			Queue *q = new Queue(objects, qid);
-			if (!q->init(config))
-				return false;
-			queues.push_back(q);
-		}
-		delete v;
-	}
-
 	// create children: processors
 	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/processor/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
+		// create and initialize all Processors
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			Processor *p = new Processor(objects, pid);
 			if (!p->init(config))
 				return false;
 			processors.push_back(p);
+		}
+		// connect Processors to other Processors
+		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
+			(*iter)->connect();
 		}
 		delete v;
 	} else {
@@ -130,9 +111,6 @@ bool ProcessingChain::init(Config *config) {
 void ProcessingChain::start() {
 	propertyLock.lock();
 	if (!propRun) {
-		for (unsigned i = 0; i < queues.size(); i++) {
-			queues[i]->start();
-		}
 		for (unsigned i = 0; i < processors.size(); i++) {
 			processors[i]->start();
 		}
@@ -147,10 +125,6 @@ void ProcessingChain::stop() {
 		if (propPause) {
 			doResume();
 			propPause = false;
-		}
-		// cancel waiting threads
-		for (unsigned i = 0; i < queues.size(); i++) {
-			queues[i]->stop();
 		}
 		// cancel running threads and join all threads
 		for (unsigned i = 0; i < processors.size(); i++) {
@@ -188,14 +162,14 @@ void ProcessingChain::createCheckpoint() {
 
 char *ProcessingChain::getValue(const char *name) {
 	char *result = NULL;
-	stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash>::iterator iter = getters.find(name);
+	std::tr1::unordered_map<string, char*(ProcessingChain::*)()>::iterator iter = getters.find(name);
 	if (iter != getters.end())
 		result = (this->*(iter->second))();
 	return result;
 }
 
 bool ProcessingChain::setValue(const char *name, const char *value) {
-	stdext::hash_map<string, void(ProcessingChain::*)(const char*), string_hash>::iterator iter = setters.find(name);
+	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(this->*(iter->second))(value);
 		return true;
@@ -205,7 +179,7 @@ bool ProcessingChain::setValue(const char *name, const char *value) {
 
 vector<string> *ProcessingChain::listNames() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+	for (std::tr1::unordered_map<string, char*(ProcessingChain::*)()>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;

@@ -19,8 +19,8 @@ public:
 	void lock();
 	void unlock();
 
-	pthread_mutex_t *getMutex();
-	void setMutex(pthread_mutex_t *mutex, bool free);
+//	pthread_mutex_t *getMutex();
+//	void setMutex(pthread_mutex_t *mutex, bool free);
 };
 
 inline Lock::Lock() {
@@ -41,7 +41,7 @@ inline void Lock::unlock() {
 	pthread_mutex_unlock(mutex);
 }
 
-inline pthread_mutex_t *Lock::getMutex() {
+/*inline pthread_mutex_t *Lock::getMutex() {
 	return mutex;
 }
 
@@ -53,6 +53,6 @@ inline void Lock::setMutex(pthread_mutex_t *mutex, bool free) {
 		}
 		this->mutex = mutex;
 	}
-}
+}*/
 
 #endif

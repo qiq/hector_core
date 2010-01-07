@@ -18,14 +18,14 @@ public:
 	~CondLock();
 
 	void waitSend() { pthread_cond_wait(condSend, mutex); }
-	void signalSend() { pthread_cond_signal(condSend); }
+	void signalSend() { pthread_cond_broadcast(condSend); }
 	void waitRecv() { pthread_cond_wait(condRecv, mutex); }
-	void signalRecv() { pthread_cond_signal(condRecv); }
+	void signalRecv() { pthread_cond_broadcast(condRecv); }
 
-	pthread_cond_t *getCondSend();
+/*	pthread_cond_t *getCondSend();
 	pthread_cond_t *getCondRecv();
 	void setCondSend(pthread_cond_t *condSend, bool free);
-	void setCondRecv(pthread_cond_t *condRecv, bool free);
+	void setCondRecv(pthread_cond_t *condRecv, bool free);*/
 };
 
 inline CondLock::CondLock() {
@@ -42,7 +42,7 @@ inline CondLock::~CondLock() {
 	delete condRecv;
 }
 
-inline pthread_cond_t *CondLock::getCondSend() {
+/*inline pthread_cond_t *CondLock::getCondSend() {
 	return condSend;
 }
 
@@ -64,6 +64,6 @@ inline void CondLock::setCondRecv(pthread_cond_t *condRecv, bool free) {
 			delete this->condRecv;
 		this->condRecv = condRecv;
 	}
-}
+}*/
 
 #endif

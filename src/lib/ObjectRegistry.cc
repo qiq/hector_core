@@ -10,9 +10,8 @@ void ObjectRegistry::registerObject(Object *obj) {
 	objects[obj->getId()] = obj;
 }
 
-
 bool ObjectRegistry::unregisterObject(const char *id) {
-	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
+	std::tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		objects.erase(id);
 		return true;
@@ -21,7 +20,7 @@ bool ObjectRegistry::unregisterObject(const char *id) {
 }
 
 Object *ObjectRegistry::getObject(const char *id) {
-	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
+	std::tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		return iter->second;
 	}
@@ -30,14 +29,14 @@ Object *ObjectRegistry::getObject(const char *id) {
 
 vector<string> *ObjectRegistry::getIds() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
+	for (std::tr1::unordered_map<string, Object*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;
 }
 
 char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
-	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
+	std::tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		Object *obj = iter->second;
 		return obj->getValue(name);
@@ -46,7 +45,7 @@ char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
 }
 
 bool ObjectRegistry::setObjectValue(const char *id, const char *name, const char *value) {
-	stdext::hash_map<string, Object*, string_hash>::iterator iter = objects.find(id);
+	std::tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		return iter->second->setValue(name, value);
 	}

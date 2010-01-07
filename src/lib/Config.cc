@@ -4,6 +4,7 @@
 
 #include <config.h>
 
+#include <string.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include "common.h"
@@ -65,7 +66,7 @@ vector<string> *Config::getValues(const char *xpath) {
 	vector<string> *result = new vector<string>();
 	for (int i = 0; i < nodes->nodesetval->nodeNr; i++) {
 		xmlChar *item = xmlNodeListGetString(doc, nodes->nodesetval->nodeTab[i]->xmlChildrenNode, 1);
-		result->push_back((char*)item);
+		result->push_back(item ? (char*)item : "");
 	        xmlFree(item);
 	}
 	xmlXPathFreeObject(nodes);

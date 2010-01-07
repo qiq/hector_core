@@ -4,8 +4,10 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <pthread.h>
 #include <signal.h>
+#include <string.h>
 #include <ltdl.h>
 #include "common.h"
 #include "Processor.h"
@@ -24,8 +26,10 @@ Processor::~Processor() {
 	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 		delete *iter;
 	}
-	delete inputQueue;
-	delete outputQueue;
+	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
+		delete *iter;
+	}
+	delete queue;
 }
 
 bool Processor::init(Config *config) {
@@ -49,7 +53,7 @@ bool Processor::init(Config *config) {
 	free(s);
 
 	// module(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/module/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/modules/module/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
@@ -76,14 +80,102 @@ bool Processor::init(Config *config) {
 	}
 
 	// input queue(s)
-	inputQueue = new PriorityQueue(objects);
-	if (!inputQueue->init(config, getId()))
-		return false;
+	queue = new SyncQueue<Resource>();
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue", getId());
+	v = config->getValues(buffer);
+	if (v) {
+		int n = v->size();
+		delete v;
+		for (int i = 0; i < n; i++) {
+			// priority
+			int priority = 0;
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue[%d]/@priority", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				if (sscanf(s, "%d", &priority) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid priority: " << s);
+					return false;
+				}
+				free(s);
+			}
+			// maxItems
+			int maxItems = 0;
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue[%d]/@maxItems", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				if (sscanf(s, "%d", &maxItems) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid maxItems: " << s);
+					return false;
+				}
+				free(s);
+			}
+			// maxSize
+			int maxSize = 0;
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue[%d]/@maxSize", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				if (sscanf(s, "%d", &maxSize) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid maxSize: " << s);
+					return false;
+				}
+				free(s);
+			}
+			queue->addQueue(priority, maxItems, maxSize);
+		}
+	}
 
 	// output queue(s)
-	outputQueue = new FilterQueue(objects);
-	if (!outputQueue->init(config, getId()))
-		return false;
+	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor", getId());
+	v = config->getValues(buffer);
+	if (v) {
+		int n = v->size();
+		delete v;
+		for (int i = 0; i < n; i++) {
+			OutputFilter *f = new OutputFilter();
+			outputFilters.push_back(f);
+			// reference
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor[%d]/@ref", getId(), i+1);
+			char *ref = config->getFirstValue(buffer);
+			if (!ref) {
+				LOG4CXX_ERROR(logger, "Missing reference: " << s);
+				return false;
+			}
+			f->setProcessor(ref);
+			free(ref);
+			// priority
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor[%d]/@priority", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				int priority;
+				if (sscanf(s, "%d", &priority) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid priority: " << s);
+					return false;
+				}
+				f->setPriority(priority);
+				free(s);
+			}
+			// copy
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor[%d]/@copy", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				if (!strcmp(s, "1") || !strcasecmp(s, "true"))
+					f->setCopy(true);
+				free(s);
+			}
+			// filter
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue[%d]/@filter", getId(), i+1);
+			s = config->getFirstValue(buffer);
+			if (s) {
+				int filter;
+				if (sscanf(s, "%d", &filter) != 1) {
+					LOG4CXX_ERROR(logger, "Invalid filter: " << s);
+					return false;
+				}
+				f->setFilter(filter);
+				free(s);
+			}
+		}
+	}
 
 	// check modules
 	int n = modules.size();
@@ -92,41 +184,41 @@ bool Processor::init(Config *config) {
 		switch ((*iter)->getType()) {
 		case MODULE_INPUT:
 			if (i != 0) {
-				LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << (*iter)->getId());
+				LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << getId());
 				return false;
 			}
-			if (inputQueue->getQueueCount() > 0) {
-				LOG4CXX_ERROR(logger, "InputQueue and input module must not be used together: " << (*iter)->getId());
+			if (queue->getQueuesCount() > 0) {
+				LOG4CXX_ERROR(logger, "queue and input module must not be used together: " << getId());
 				return false;
 			}
 			break;
 		case MODULE_OUTPUT:
 			if (i != n-1) {
-				LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << (*iter)->getId());
+				LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << getId());
 				return false;
 			}
-			if (outputQueue->getQueueCount() > 0) {
-				LOG4CXX_ERROR(logger, "OutputQueue and output module must not be used together: " << (*iter)->getId());
+			if (outputFilters.size() > 0) {
+				LOG4CXX_ERROR(logger, "nextProcessor and output module must not be used together: " << getId());
 				return false;
 			}
 			break;
 		case MODULE_MULTI:
 		case MODULE_SELECT:
 			if (i != 0 && n == 1) {
-				LOG4CXX_ERROR(logger, "Multi/Select module must be the only in a Processor: " << (*iter)->getId());
+				LOG4CXX_ERROR(logger, "Multi/Select module must be the only one in a Processor: " << getId());
 				return false;
 			}
-			if (inputQueue->getQueueCount() == 0 || outputQueue->getQueueCount() == 0) {
-				LOG4CXX_ERROR(logger, "No input or output queue defined: " << (*iter)->getId());
+			if (queue->getQueuesCount() == 0 || outputFilters.size() == 0) {
+				LOG4CXX_ERROR(logger, "No input or output queue defined: " << getId());
 				return false;
 			}
 			break;
 		case MODULE_SIMPLE:
-			if (i == 0 && inputQueue->getQueueCount() == 0) {
-				LOG4CXX_ERROR(logger, "No input queue defined: " << (*iter)->getId());
+			if (i == 0 && queue->getQueuesCount() == 0) {
+				LOG4CXX_ERROR(logger, "No input queue defined: " << getId());
 				return false;
-			} else if (i == n-1 && outputQueue->getQueueCount() == 0) {
-				LOG4CXX_ERROR(logger, "No output queue defined: " << (*iter)->getId());
+			} else if (i == n-1 && outputFilters.size() == 0) {
+				LOG4CXX_ERROR(logger, "No output queue defined: " << getId());
 				return false;
 			}
 			break;
@@ -139,6 +231,33 @@ bool Processor::init(Config *config) {
 
 	free(baseDir);
 
+	return true;
+}
+
+// connect processors to other processors
+bool Processor::connect() {
+	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
+		int priority = (*iter)->getPriority();
+		const char *ref = (*iter)->getProcessor();
+		assert(ref != NULL);
+		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
+		if (!p) {
+			LOG4CXX_ERROR(logger, "Processor not found: " << ref);
+			return false;
+		}
+
+		SyncQueue<Resource> *q = p->getQueue();
+		if (!q) {
+			LOG4CXX_ERROR(logger, "No input queue defined for processor: " << ref);
+			return false;
+		}
+
+		if (!q->hasQueue(priority)) {
+			LOG4CXX_ERROR(logger, "No input queue with priority " << priority << " for processor: " << ref);
+			return false;
+		}
+		(*iter)->setQueue(q);
+	}
 	return true;
 }
 
@@ -156,6 +275,29 @@ void *run_processor_thread(void *ptr) {
 	return NULL;
 }
 
+bool Processor::appendResource(Resource *r, bool sleep) {
+	int status = r->getStatus();
+	bool copied = false;
+	bool appended = false;
+	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
+		OutputFilter *f = *iter;
+		if (f->isEmptyFilter() || f->getFilter() == status) {
+			if (!f->processResource(r, sleep || copied))
+				return false;
+			if ((*iter)->getCopy()) {
+				copied = true;
+				continue;
+			}
+			appended = true;
+			break;
+		}
+	}
+	if (!appended)
+		LOG4CXX_WARN(logger, "Lost resource (id: " /* FIXME << r->getId()*/ << ") in processor " << getId());
+
+	return (copied||appended);
+}
+
 void Processor::runThread() {
 	module_t firstModuleType = modules.front()->getType();
 	if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
@@ -168,7 +310,7 @@ void Processor::runThread() {
 
 		while (Running()) {
 			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
-			int n = inputQueue->getResources(inputResources, maxRequests-activeResources, activeResources == 0);
+			int n = queue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
 			if (n == 0 && activeResources == 0)
 				break;	// cancelled
 			inputResources[activeResources+n] = NULL;
@@ -178,10 +320,15 @@ void Processor::runThread() {
 			n = modules[0]->process(inputResources, outputResources + finishedResources);
 			finishedResources += n;
 			inputResources[0] = NULL;
-		
-			// put requests into dstQueue, blocked in case we have no running requests
-			n = outputQueue->putResources(outputResources, finishedResources, activeResources == 0);
-			if (n == 0 && activeResources == 0)
+
+			// pass processed Resources into correct queues
+			n = 0;
+			while (n < finishedResources) {
+				if (!appendResource(outputResources[n], activeResources == maxRequests))
+					break;
+				n++;
+			}
+			if (n == 0 && activeResources == maxRequests)
 				break;	// cancelled
 			// TODO: use cyclic buffer instead of copying
 			for (int i = 0; i < finishedResources-n; i++) {
@@ -205,7 +352,7 @@ void Processor::runThread() {
 
 		while (Running()) {
 			if (firstModuleType != MODULE_INPUT) {
-				if (!(resource = inputQueue->getResource(true)))
+				if (!(resource = queue->getItem(true)))
 					break;	// cancelled
 			}
 
@@ -231,7 +378,7 @@ void Processor::runThread() {
 			}
 			module_t lastModuleType = modules.back()->getType();
 			if (lastModuleType != MODULE_OUTPUT) {
-				if (!outputQueue->putResource(resource, true))
+				if (!appendResource(resource, true))
 					break;	// cancelled
 				resource = NULL;
 			}
@@ -244,8 +391,7 @@ void Processor::start() {
 	running = true;
 	threads = new pthread_t[nThreads];
 
-	inputQueue->start();
-	outputQueue->start();
+	queue->clearCancel();
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)this);
@@ -257,8 +403,7 @@ void Processor::stop() {
 	running = false;
 	runningLock.unlock();
 
-	inputQueue->stop();
-	outputQueue->stop();
+	queue->cancelAll();
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
@@ -269,13 +414,11 @@ void Processor::stop() {
 }
 
 void Processor::pause() {
-	inputQueue->pause();
-	outputQueue->pause();
+	queue->pause();
 }
 
 void Processor::resume() {
-	inputQueue->resume();
-	outputQueue->resume();
+	queue->resume();
 }
 
 void Processor::createCheckpoint() {

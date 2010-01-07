@@ -2,7 +2,10 @@
  * Class representing a queue of items.
  *
  * Queue is synchronized, when full, writers would block, if empty, readers
- * would block.
+ * would block. The global queue may be broken into several different
+ * sub-queues according to priority (int) values, default priority is 0.
+ * Sub-queues are sorted according to priorities, the lock is shared among all
+ * sub-queues.
  */
 
 #ifndef _SYNCQUEUE_H_
@@ -16,82 +19,197 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <algorithm>
 #include <deque>
+#include <vector>
+#include <tr1/unordered_map>
 #include "common.h"
 #include "CondLock.h"
 
 using namespace std;
 
+// one queue (sub-queue of SyncQueue with defined priority), not synchronized
+// (must be done in SyncQueue)
 template<class T>
-class SyncQueue {
-	// queue object, all attributes are guarded by queueLock
-	CondLock queueLock;
+class SimpleQueue {
+	int priority;
 	int maxItems;
 	int maxSize;
 	int queueSize;
 	deque<T*> *queue;
-	int waitingReaders;
-	int waitingWriters;
-	bool cancel;
 
-	bool processed;	// for PriorityQueue
 public:
-	SyncQueue(int maxItems, int maxSize);
-	~SyncQueue();
-	void cancelAll();
-	void clearCancel();
-	void pause();
-	void resume();
+	SimpleQueue(int priority, int maxItems, int maxSize);
+	~SimpleQueue();
+	void deleteAllItems();
+	
+	int getPriority();
+	bool operator<(SimpleQueue<T> other);
 
 	bool isSpace(T *r);
-	bool putItem(T *r, bool sleep);
-	int putItems(T **r, int size, bool sleep);
+	void putItem(T *r);
 	bool isReady();
-	T *getItem(bool sleep);
-	int getItems(T **r, int size, bool sleep);
+	T *getItem();
 
 	int getCurrentSize();
 	int getCurrentItems();
 	int getMaxSize();
 	int getMaxItems();
-
-	// dirty methods needed by PriorityQueue and FilterQueue, they are
-	// called with lock held
-	CondLock *getLock();
-	bool isReadyRaw();
-	bool isSpaceRaw(T *r);
-	T *getItemRaw(bool signal);
-	bool putItemRaw(T* r, bool signal);
-	bool waitForSpaceRaw(T *r);
-	int getCurrentSizeRaw();
-	int getCurrentItemsRaw();
-	int getMaxSizeRaw();
-	int getMaxItemsRaw();
-	void setProcessed();
-	bool getProcessed();
 };
 
 template <class T>
-SyncQueue<T>::SyncQueue(int maxItems, int maxSize) {
+SimpleQueue<T>::SimpleQueue(int priority, int maxItems, int maxSize) {
+	this->priority = priority;
 	this->maxItems = maxItems;
 	this->maxSize = maxSize;
 	queueSize = 0;
 	queue = new deque<T*>();
+}
+
+template <class T>
+SimpleQueue<T>::~SimpleQueue() {
+	// to be sure, should be deleted in SyncQueue::cancelAll()
+	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
+		delete (*iter);
+	}
+	delete queue;
+}
+
+template <class T>
+void SimpleQueue<T>::deleteAllItems() {
+	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
+		delete (*iter);
+	}
+	queue->clear();
+}
+
+template <class T>
+int SimpleQueue<T>::getPriority() {
+	return priority;
+}
+
+template <class T>
+bool SimpleQueue<T>::operator<(SimpleQueue<T> other) {
+	// reversed, so that we have descending numbers (higher priority first)
+	return priority > other.getPriority();
+}
+
+template <class T>
+bool SimpleQueue<T>::isSpace(T *r) {
+	return ((int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize) ? true : false;
+}
+
+template <class T>
+void SimpleQueue<T>::putItem(T *r) {
+	queue->push_back(r);
+	queueSize += r->getSize();
+}
+
+template <class T>
+bool SimpleQueue<T>::isReady() {
+	return (queue->size() > 0) ? true : false;
+}
+
+template <class T>
+T *SimpleQueue<T>::getItem() {
+	if (queue->size() == 0)
+		return NULL;
+	T *r = (*queue)[0];
+	queue->pop_front();
+	queueSize -= r->getSize();
+	return r;
+}
+
+template <class T>
+int SimpleQueue<T>::getCurrentSize() {
+	return queueSize;
+}
+
+template <class T>
+int SimpleQueue<T>::getCurrentItems() {
+	return queue->size();
+}
+
+template <class T>
+int SimpleQueue<T>::getMaxSize() {
+	return maxSize;
+}
+
+template <class T>
+int SimpleQueue<T>::getMaxItems() {
+	return maxItems;
+}
+
+// By default, only one sub-queue with priority == 0 is created, more
+// sub-queues may be added using addQueue()
+
+template<class T>
+class SyncQueue {
+	// queue object, following attributes (+queues) are guarded by queueLock
+	CondLock queueLock;
+	int waitingReaders;
+	int waitingWriters;
+	bool cancel;
+
+	vector<SimpleQueue<T>*> queues;
+	std::tr1::unordered_map<int, SimpleQueue<T>*> priority2queue;
+public:
+	SyncQueue();
+	~SyncQueue();
+	void addQueue(int priority, int maxItems, int maxSize);
+	bool hasQueue(int priority);
+	int getQueuesCount();
+	void cancelAll();
+	void clearCancel();
+	void pause();
+	void resume();
+
+	bool isSpace(T *r, int priority = 0);
+	bool putItem(T *r, bool sleep, int priority = 0);
+	int putItems(T **r, int size, bool sleep, int priority = 0);
+	bool isReady();
+	T *getItem(bool sleep);
+	int getItems(T **r, int size, bool sleep);
+
+	int firstNonEmptyQueueIndex();
+};
+
+template <class T>
+SyncQueue<T>::SyncQueue() {
 	waitingReaders = 0;
 	waitingWriters = 0;
 	cancel = false;
-
-	processed = false;
 }
 
 template <class T>
 SyncQueue<T>::~SyncQueue() {
 	cancelAll();
 	// to be sure, should be deleted in cancelAll()
-	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
-		delete (*iter);
+	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
+		delete *iter;
 	}
-	delete queue;
+}
+
+template <class T>
+void SyncQueue<T>::addQueue(int priority, int maxItems, int maxSize) {
+	SimpleQueue<T> *q = new SimpleQueue<T>(priority, maxItems, maxSize);
+
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	assert(iter == priority2queue.end());
+	priority2queue[priority] = q;
+	queues.push_back(q);
+	std::sort(queues.begin(), queues.end());
+}
+
+template <class T>
+bool SyncQueue<T>::hasQueue(int priority) {
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	return iter != priority2queue.end();
+}
+
+template <class T>
+int SyncQueue<T>::getQueuesCount() {
+	return queues.size();
 }
 
 template <class T>
@@ -110,11 +228,10 @@ void SyncQueue<T>::cancelAll() {
 		sched_yield();
 		queueLock.lock();
 	}
-	
-	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
-		delete (*iter);
+
+	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
+		(*iter)->deleteAllItems();
 	}
-	queue->clear();
 	queueLock.unlock();
 }
 
@@ -136,24 +253,30 @@ void SyncQueue<T>::resume() {
 }
 
 template <class T>
-bool SyncQueue<T>::isSpace(T *r) {
+bool SyncQueue<T>::isSpace(T *r, int priority) {
 	bool result = false;
 	queueLock.lock();
-	if ((int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize)
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	assert(iter != priority2queue.end());
+	SimpleQueue<T> *q = *iter;
+	if (q->getCurrentItems() < q->getMaxItems() && q->getCurrentSize()+r->getSize() <= q->getMaxSize())
 		result = true;
 	queueLock.unlock();
 	return result;
 }
 
 template <class T>
-bool SyncQueue<T>::putItem(T *r, bool sleep) {
+bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();
 		return false;
 	}
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	assert(iter != priority2queue.end());
+	SimpleQueue<T> *q = iter->second;
 	int itemSize = r->getSize();
-	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize)) {
+	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize())) {
 		if (!sleep) {
 			queueLock.unlock();
 			return false;
@@ -166,22 +289,26 @@ bool SyncQueue<T>::putItem(T *r, bool sleep) {
 			return false;
 		}
 	}
-	queue->push_back(r);
-	queueSize += r->getSize();
+
+	q->putItem(r);
+
 	queueLock.signalRecv();
 	queueLock.unlock();
 	return true;
 }
 
 template <class T>
-int SyncQueue<T>::putItems(T **r, int size, bool sleep) {
+int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();
 		return 0;
 	}
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	assert(iter != priority2queue.end());
+	SimpleQueue<T> *q = *iter;
 	int itemSize = r[0]->getSize();
-	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize))  {
+	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize()))  {
 		if (!sleep) {
 			queueLock.unlock();
 			return 0;
@@ -194,16 +321,16 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep) {
 			return 0;
 		}
 	}
-	int max = maxItems > 0 ? (maxItems - (int)queue->size()) : 0;
+
+	int max = q->getMaxItems() > 0 ? (q->getMaxItems() - q->getCurrentItems()) : 0;
 	if (max == 0 || max > size)
 		max = size;
 
 	int i;	
-	for (i = 0; i < max && queueSize + itemSize <= maxSize; i++) {
-		queue->push_back(r[i]);
-		queueSize += itemSize;
-		itemSize = r[i]->getSize();
+	for (i = 0; i < max && q->getCurrentSize() + r[i]->getSize() <= q->getMaxSize(); i++) {
+		q->putItem(r[i]);
 	}
+
 	queueLock.signalRecv();
 	queueLock.unlock();
 	return i;
@@ -213,7 +340,7 @@ template <class T>
 bool SyncQueue<T>::isReady() {
 	bool result = false;
 	queueLock.lock();
-	if (queue->size() > 0)
+	if (firstNonEmptyQueueIndex() >= 0)
 		result = true;
 	queueLock.unlock();
 	return result;
@@ -226,7 +353,8 @@ T *SyncQueue<T>::getItem(bool sleep) {
 		queueLock.unlock();
 		return NULL;
 	}
-	while (queue->size() == 0) {
+
+	while (firstNonEmptyQueueIndex() < 0) {
 		if (!sleep) {
 			queueLock.unlock();
 			return NULL;
@@ -239,9 +367,9 @@ T *SyncQueue<T>::getItem(bool sleep) {
 			return NULL;
 		}
 	}
-	T *r = (*queue)[0];
-	queue->pop_front();
-	queueSize -= r->getSize();
+
+	T *r = queues[firstNonEmptyQueueIndex()]->getItem();
+
 	queueLock.signalSend();
 	queueLock.unlock();
 
@@ -255,7 +383,7 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 		queueLock.unlock();
 		return 0;
 	}
-	while (queue->size() == 0) {
+	while (firstNonEmptyQueueIndex() < 0) {
 		if (!sleep) {
 			queueLock.unlock();
 			return 0;
@@ -269,11 +397,13 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 		}
 	}
 	int i = 0;
-	for (i = 0; i < size && (int)queue->size() > 0; i++) {
-		r[i] = (*queue)[0];
-		queue->pop_front();
-		queueSize -= r[i]->getSize();
+	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end() && i < size; ++iter) {
+		while ((*iter)->getCurrentItems() > 0 && i < size) {
+			r[i] = (*iter)->getItem();
+			i++;
+		}
 	}
+
 	queueLock.signalSend();
 	queueLock.unlock();
 
@@ -281,121 +411,14 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 }
 
 template <class T>
-int SyncQueue<T>::getCurrentSize() {
-	int result;
-	queueLock.lock();
-	result = queueSize;
-	queueLock.unlock();
-	return result;
-}
-
-template <class T>
-int SyncQueue<T>::getCurrentItems() {
-	int result;
-	queueLock.lock();
-	result = queue->size();
-	queueLock.unlock();
-	return result;
-}
-
-template <class T>
-int SyncQueue<T>::getMaxSize() {
-	int result;
-	queueLock.lock();
-	result = maxSize;
-	queueLock.unlock();
-	return result;
-}
-
-template <class T>
-int SyncQueue<T>::getMaxItems() {
-	int result;
-	queueLock.lock();
-	result = maxItems;
-	queueLock.unlock();
-	return result;
-}
-
-template <class T>
-CondLock *SyncQueue<T>::getLock() {
-	return &queueLock;
-}
-
-
-template <class T>
-bool SyncQueue<T>::isReadyRaw() {
-	return queue->size() > 0 ? true : false;
-}
-
-template <class T>
-bool SyncQueue<T>::isSpaceRaw(T *r) {
-	return (int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize ? true : false;
-}
-
-template <class T>
-T *SyncQueue<T>::getItemRaw(bool signal) {
-	assert(queue->size() > 0);
-	T *r = (*queue)[0];
-	queue->pop_front();
-	queueSize -= r->getSize();
-	if (signal)
-		queueLock.signalSend();
-
-	return r;
-}
-
-template <class T>
-bool SyncQueue<T>::putItemRaw(T *r, bool signal) {
-	int itemSize = r->getSize();
-	assert((maxItems == 0 || (int)queue->size() < maxItems) && (maxSize == 0 || queueSize+itemSize <= maxSize));
-	queue->push_back(r);
-	queueSize += r->getSize();
-	if (signal)
-		queueLock.signalRecv();
-	return true;
-}
-
-template <class T>
-bool SyncQueue<T>::waitForSpaceRaw(T *r) {
-	int itemSize = r->getSize();
-	while ((maxItems > 0 && (int)queue->size() == maxItems) || (maxSize > 0 && queueSize+itemSize > maxSize)) {
-		waitingWriters++;
-		queueLock.waitSend();
-		waitingWriters--;
-		if (cancel)
-			return false;
+int SyncQueue<T>::firstNonEmptyQueueIndex() {
+	int i = 0;
+	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
+		if ((*iter)->getCurrentItems() > 0)
+			return i;
+		i++;
 	}
-	return true;
-}
-
-template <class T>
-int SyncQueue<T>::getCurrentSizeRaw() {
-	return queueSize;
-}
-
-template <class T>
-int SyncQueue<T>::getCurrentItemsRaw() {
-	return queue->size();
-}
-
-template <class T>
-int SyncQueue<T>::getMaxSizeRaw() {
-	return maxSize;
-}
-
-template <class T>
-int SyncQueue<T>::getMaxItemsRaw() {
-	return maxSize;
-}
-
-template <class T>
-void SyncQueue<T>::setProcessed() {
-	processed = true;
-}
-
-template <class T>
-bool SyncQueue<T>::getProcessed() {
-	return processed;
+	return -1;
 }
 
 #endif

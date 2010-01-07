@@ -10,22 +10,21 @@
 #include <string>
 #include <vector>
 #include <log4cxx/logger.h>
+#include <tr1/unordered_map>
 #include "common.h"
 #include "Object.h"
 #include "ObjectRegistry.h"
 #include "Processor.h"
-#include "Queue.h"
 
 class ProcessingChain : public Object {
 	vector<Processor*> processors;
-	vector<Queue*> queues;
 
 	Lock propertyLock;
 	bool propRun;
 	bool propPause;
 
-	stdext::hash_map<string, char*(ProcessingChain::*)(), string_hash> getters;
-	stdext::hash_map<string, void(ProcessingChain::*)(const char*), string_hash> setters;
+	std::tr1::unordered_map<string, char*(ProcessingChain::*)()> getters;
+	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*)> setters;
 
 	char *getRun();
 	void setRun(const char *value);

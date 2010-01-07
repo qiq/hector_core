@@ -22,7 +22,8 @@ SimpleServer::SimpleServer() {
 
 	nThreads = 10;
 	threads = NULL;
-	queue = new SyncQueue<FileDescriptor>(0, 0);
+	queue = new SyncQueue<FileDescriptor>();
+	queue->addQueue(0, 0, 0);
 }
 
 SimpleServer::~SimpleServer() {
@@ -128,7 +129,7 @@ void SimpleServer::mainThread() {
 		}
 		// check whether IP address is allowed
 		if (allowed_client.size() > 0) {
-			stdext::hash_set<string, string_hash>::iterator iter = allowed_client.find(client_ip);
+			std::tr1::unordered_set<string>::iterator iter = allowed_client.find(client_ip);
 			// not found -> not allowed
 			if (iter == allowed_client.end()) {
 				close(fd);

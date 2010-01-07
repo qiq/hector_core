@@ -109,7 +109,7 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 	request_body_offset = body_offset_a < body_offset_b ? body_offset_a + 4 : body_offset_b + 2;
 
 	// parse header fields, we do not support multi-line fields
-	header_fields = new stdext::hash_map<string, string, string_hash>();
+	header_fields = new std::tr1::unordered_map<string, string>();
 	int offset = request_header_offset;
 	while (offset < request_body_offset) {
 		size_t nl_a = request_buffer.find("\r\n", offset);
@@ -131,13 +131,13 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 	}
 
 	// get length of the request body
-	stdext::hash_map<string, string, string_hash>::iterator iter = header_fields->find("Content-Length");
+	std::tr1::unordered_map<string, string>::iterator iter = header_fields->find("Content-Length");
 	if (iter != header_fields->end()) {
 		request_body_length = atol(iter->second.c_str());
 	}
 
 	// disable Connection: keep-alive when there is no Content-Length
-	stdext::hash_map<string, string, string_hash>::iterator iter2 = header_fields->find("Connection");
+	std::tr1::unordered_map<string, string>::iterator iter2 = header_fields->find("Connection");
 	if (iter2 != header_fields->end()) {
 		if (!strcasecmp(iter2->second.c_str(), "keep-alive")) {
 			if (request_body_length >=  0) {
@@ -218,7 +218,7 @@ string SimpleHTTPConn::getRequestHeaderField(string &field) {
 	if (header_fields == NULL)
 		return NULL;
 	
-	stdext::hash_map<string, string, string_hash>::iterator iter = header_fields->find(field);
+	std::tr1::unordered_map<string, string>::iterator iter = header_fields->find(field);
 	if (iter != header_fields->end())
 		return iter->second;
 	return NULL;

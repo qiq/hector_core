@@ -10,17 +10,16 @@
 
 #include <string>
 #include <vector>
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 #include "common.h"
 
 class Object;
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 class ObjectRegistry {
-	stdext::hash_map<string, Object*, string_hash> objects;
+	std::tr1::unordered_map<string, Object*> objects;
 
 	static log4cxx::LoggerPtr logger;
 public:

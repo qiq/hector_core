@@ -13,12 +13,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <ext/hash_set>
+#include <stdlib.h>
 #include <string>
+#include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 
 using namespace std;
-namespace stdext = ::__gnu_cxx;
 
 inline void die(const char *msg, ...) {
 	va_list args;
@@ -33,11 +33,11 @@ inline void die(const char *msg, ...) {
 		*i = tolower(*i);
 }*/
 
-struct string_hash : public unary_function<string, size_t> {
+/*struct string_hash : public unary_function<string, size_t> {
 	size_t operator() (const string &v) const {
-		return stdext::hash<char*>()(v.c_str());
+		return std::tr1::hash<const char*>()(v.c_str());
 	}
-};
+};*/
 
 int writeBytes(int fd, const char *s, int length);
 int readBytes(int fd, char *s, int length);

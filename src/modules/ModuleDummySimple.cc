@@ -62,7 +62,7 @@ void ModuleDummySimple::createCheckpoint() {
 
 char *ModuleDummySimple::getValue(const char *name) {
 	char *result = NULL;
-	stdext::hash_map<string, char*(ModuleDummySimple::*)(), string_hash>::iterator iter = getters.find(name);
+	std::tr1::unordered_map<string, char*(ModuleDummySimple::*)()>::iterator iter = getters.find(name);
 	if (iter != getters.end()) {
 		propertyLock.lock();
 		result = (this->*(iter->second))();
@@ -72,7 +72,7 @@ char *ModuleDummySimple::getValue(const char *name) {
 }
 
 bool ModuleDummySimple::setValue(const char *name, const char *value) {
-	stdext::hash_map<string, void(ModuleDummySimple::*)(const char*), string_hash>::iterator iter = setters.find(name);
+	std::tr1::unordered_map<string, void(ModuleDummySimple::*)(const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		propertyLock.lock();
 		(this->*(iter->second))(value);
@@ -84,7 +84,7 @@ bool ModuleDummySimple::setValue(const char *name, const char *value) {
 
 vector<string> *ModuleDummySimple::listNames() {
 	vector<string> *result = new vector<string>();
-	for (stdext::hash_map<string, char*(ModuleDummySimple::*)(), string_hash>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+	for (std::tr1::unordered_map<string, char*(ModuleDummySimple::*)()>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;
