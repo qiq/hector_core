@@ -170,6 +170,7 @@ public:
 	bool isReady();
 	T *getItem(bool sleep);
 	int getItems(T **r, int size, bool sleep);
+	int queueItems(int priority = 0);
 
 	int firstNonEmptyQueueIndex();
 };
@@ -408,6 +409,13 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 	queueLock.unlock();
 
 	return i;
+}
+
+template <class T>
+int SyncQueue<T>::queueItems(int priority) {
+	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
+	assert(iter != priority2queue.end());
+	return iter->second->getCurrentItems();
 }
 
 template <class T>

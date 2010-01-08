@@ -48,12 +48,12 @@ bool ModuleDummySimple::init(Config *config) {
 	return true;
 }
 
-void ModuleDummySimple::process(Resource *resource) {
+Resource *ModuleDummySimple::process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG4CXX_INFO(logger, "Dummy: processing resource " << wr->getURL());
 	}
-	return;
+	return resource;
 }
 
 void ModuleDummySimple::createCheckpoint() {

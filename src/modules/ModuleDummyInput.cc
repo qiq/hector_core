@@ -3,6 +3,7 @@
  */
 #include <config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include "ModuleDummyInput.h"
 #include "WebResource.h"
@@ -11,7 +12,8 @@ bool ModuleDummyInput::init(Config *config) {
 	return true;
 }
 
-Resource *ModuleDummyInput::process() {
+Resource *ModuleDummyInput::process(Resource *resource) {
+	assert(resource == NULL);
 	WebResource *wr = new WebResource();
 	char s[1024];
 	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());

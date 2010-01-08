@@ -29,8 +29,7 @@ public:
 	virtual ~Module() {};
 	virtual bool init(Config *config) = 0;
 	virtual module_t getType() = 0;
-	virtual Resource *process();
-	virtual void process(Resource *resource);
+	virtual Resource *process(Resource *resource);
 	virtual int process(Resource **in, Resource **out);
 	virtual void createCheckpoint() = 0;
 

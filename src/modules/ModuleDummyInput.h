@@ -15,7 +15,7 @@ public:
 	~ModuleDummyInput() {};
 	bool init(Config *config);
 	module_t getType();
-	Resource *process();
+	Resource *process(Resource *resource);
 	void createCheckpoint();
 
 	char *getValue(const char *name);

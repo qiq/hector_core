@@ -27,8 +27,13 @@ class Processor : public Object {
 	SyncQueue<Resource> *queue;		// input queue
 	vector<OutputFilter*> outputFilters;	// filters of output resources
 
-	Lock runningLock;			// guards running variable
+	Lock runningLock;
 	bool running;
+
+	std::tr1::unordered_map<string, char*(Processor::*)(const char*)> getters;
+	std::tr1::unordered_map<string, void(Processor::*)(const char*, const char*)> setters;
+
+	char *getQueueItems(const char *name);
 
 	static log4cxx::LoggerPtr logger;
 public:

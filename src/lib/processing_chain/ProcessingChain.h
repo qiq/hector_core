@@ -23,13 +23,13 @@ class ProcessingChain : public Object {
 	bool propRun;
 	bool propPause;
 
-	std::tr1::unordered_map<string, char*(ProcessingChain::*)()> getters;
-	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*)> setters;
+	std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)> getters;
+	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*, const char*)> setters;
 
-	char *getRun();
-	void setRun(const char *value);
-	char *getPause();
-	void setPause(const char *value);
+	char *getRun(const char *name);
+	void setRun(const char *name, const char *value);
+	char *getPause(const char *name);
+	void setPause(const char *name, const char *value);
 
 	void doPause();
 	void doResume();

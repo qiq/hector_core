@@ -121,6 +121,10 @@ bool Processor::init(Config *config) {
 				free(s);
 			}
 			queue->addQueue(priority, maxItems, maxSize);
+
+			// so that we can get actual size of a queue
+			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
+			getters[buffer] = &Processor::getQueueItems;
 		}
 	}
 
@@ -359,15 +363,16 @@ void Processor::runThread() {
 			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
-					resource = (*iter)->process();
+					resource = (*iter)->process(NULL);
 					assert(resource != NULL);
 					break;
 				case MODULE_OUTPUT:
-					(*iter)->process(resource);
+					(void)(*iter)->process(resource);
 					resource = NULL;
 					break;
 				case MODULE_SIMPLE:
-					(*iter)->process(resource);
+					resource = (*iter)->process(resource);
+					assert(resource != NULL);
 					break;
 				case MODULE_MULTI:
 				case MODULE_SELECT:
@@ -376,8 +381,7 @@ void Processor::runThread() {
 					break;
 				}
 			}
-			module_t lastModuleType = modules.back()->getType();
-			if (lastModuleType != MODULE_OUTPUT) {
+			if (resource != NULL) {
 				if (!appendResource(resource, true))
 					break;	// cancelled
 				resource = NULL;
@@ -426,7 +430,11 @@ void Processor::createCheckpoint() {
 }
 
 char *Processor::getValue(const char *name) {
-	return NULL;
+	char *result = NULL;
+	std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.find(name);
+	if (iter != getters.end())
+		result = (this->*(iter->second))(name);
+	return result;
 }
 
 bool Processor::setValue(const char *name, const char *value) {
@@ -434,5 +442,27 @@ bool Processor::setValue(const char *name, const char *value) {
 }
 
 vector<string> *Processor::listNames() {
-	return new vector<string>();
+	vector<string> *result = new vector<string>();
+	for (std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+		result->push_back(iter->first);
+	}
+	return result;
 }
+
+char *Processor::getQueueItems(const char *name) {
+	// get queue priority first
+	string n(name);
+	size_t dot = n.find_last_of('.');
+	if (dot == string::npos)
+		return NULL;
+	string s = n.substr(dot+1);
+	int priority;
+	if (sscanf(s.c_str(), "%d", &priority) != 1)
+		return NULL;
+	// get size of priority queue
+	int queueItems = queue->queueItems(priority);
+	char s2[1024];
+	snprintf(s2, sizeof(s2), "%d", queueItems);
+	return strdup(s2);
+}
+

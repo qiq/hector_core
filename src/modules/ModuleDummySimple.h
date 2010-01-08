@@ -30,7 +30,7 @@ public:
 	~ModuleDummySimple();
 	bool init(Config *config);
 	module_t getType();
-	void process(Resource *resource);
+	Resource *process(Resource *resource);
 	void createCheckpoint();
 
 	char *getValue(const char *name);

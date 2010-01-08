@@ -10,13 +10,13 @@ bool ModuleDummyOutput::init(Config *config) {
 	return true;
 }
 
-void ModuleDummyOutput::process(Resource *resource) {
+Resource *ModuleDummyOutput::process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG4CXX_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
 		delete wr;
 	}
-	return;
+	return NULL;
 }
 
 void ModuleDummyOutput::createCheckpoint() {

@@ -154,6 +154,7 @@ sub doComplete {
 # initialize
 $term = new Term::ReadLine "HectorClient";
 $term->Attribs->{completion_function} = \&doComplete;
+$term->MinLine(undef);
 $ua = LWP::UserAgent->new();
 $ua->agent("HectorClient");
 
@@ -199,9 +200,11 @@ my $homeDir = $ENV{HOME} || (getpwuid($<))[7];
 my $file = "$homeDir/.hector_history";
 &loadHistory($file) if ($interactive);
 
+my $last_command = '';
 while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 	chomp;
 	s/^\s*//;
+	s/\s*$//;
 	if (/\S/) {
 		my $l = $_;
 
@@ -226,13 +229,13 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 						my $result = getProperty($object, $property);
 						if (defined $result) {
 							print "$object.$property = $result\n";
-							$term->addhistory($_) if ($interactive);
+							$term->addhistory($_) if ($interactive and $_ ne $last_command);
 						} else {
 							print STDERR "Unknown object/property: $l\n";
 						}
 					} else {
 						# wildcards
-						$term->addhistory($_) if ($interactive);
+						$term->addhistory($_) if ($interactive and $_ ne $last_command);
 						my $pattern;
 						if ($object eq '*' and $property eq '*') {
 							$pattern = '.*';
@@ -263,7 +266,7 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 				if ($l =~ /^([^\.]*)\.(\S*)\s*=\s*(.*)/) {
 					my $result = setProperty($1, $2, $3);
 					if ($result != 0) {
-						$term->addhistory($_) if ($interactive);
+						$term->addhistory($_) if ($interactive and $_ ne $last_command);
 					} else {
 						print STDERR "Unknown object/property: $l\n";
 					}
@@ -279,16 +282,17 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 			}
 		} elsif ($cmd eq 'shutdown') {
 			if (&shutdown()) {
-				$term->addhistory($_) if ($interactive);
+				$term->addhistory($_) if ($interactive and $_ ne $last_command);
 				last;
 			} else {
 				print STDERR "Error shutting down\n";
 			}
 		} elsif ($cmd eq 'quit') {
-			$term->addhistory($_) if ($interactive);
+			$term->addhistory($_) if ($interactive and $_ ne $last_command);
 			last;
 		}
 	}
+	$last_command = $_;
 }
 print "\nBye\n" if ($interactive);
 

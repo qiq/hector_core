@@ -27,59 +27,6 @@ ProcessingChain::~ProcessingChain() {
 	}
 }
 
-char *ProcessingChain::getRun() {
-	propertyLock.lock();
-	bool r = propRun;
-	propertyLock.unlock();
-	return bool2str(r);
-}
-
-char *ProcessingChain::getPause() {
-	propertyLock.lock();
-	bool r = propPause;
-	propertyLock.unlock();
-	return bool2str(r);
-}
-
-void ProcessingChain::setRun(const char *value) {
-	switch (str2bool(value)) {
-	case 0:
-		stop();
-		break;
-	case 1:
-		start();
-		break;
-	default:
-		LOG4CXX_ERROR(logger, "Invalid 'run' value: " << value);
-	}
-}
-
-void ProcessingChain::setPause(const char *value) {
-	switch (str2bool(value)) {
-	case 0:
-		resume();
-		break;
-	case 1:
-		pause();
-		break;
-	default:
-		LOG4CXX_ERROR(logger, "Invalid 'pause' value: " << value);
-	}
-}
-
-void ProcessingChain::doPause() {
-	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->pause();
-	}
-}
-
-void ProcessingChain::doResume() {
-	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->resume();
-	}
-}
-
-
 bool ProcessingChain::init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
@@ -162,16 +109,16 @@ void ProcessingChain::createCheckpoint() {
 
 char *ProcessingChain::getValue(const char *name) {
 	char *result = NULL;
-	std::tr1::unordered_map<string, char*(ProcessingChain::*)()>::iterator iter = getters.find(name);
+	std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)>::iterator iter = getters.find(name);
 	if (iter != getters.end())
-		result = (this->*(iter->second))();
+		result = (this->*(iter->second))(name);
 	return result;
 }
 
 bool ProcessingChain::setValue(const char *name, const char *value) {
-	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*)>::iterator iter = setters.find(name);
+	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
-		(this->*(iter->second))(value);
+		(this->*(iter->second))(name, value);
 		return true;
 	}
 	return false;
@@ -179,8 +126,61 @@ bool ProcessingChain::setValue(const char *name, const char *value) {
 
 vector<string> *ProcessingChain::listNames() {
 	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(ProcessingChain::*)()>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+	for (std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;
 }
+
+char *ProcessingChain::getRun(const char *name) {
+	propertyLock.lock();
+	bool r = propRun;
+	propertyLock.unlock();
+	return bool2str(r);
+}
+
+char *ProcessingChain::getPause(const char *name) {
+	propertyLock.lock();
+	bool r = propPause;
+	propertyLock.unlock();
+	return bool2str(r);
+}
+
+void ProcessingChain::setRun(const char *name, const char *value) {
+	switch (str2bool(value)) {
+	case 0:
+		stop();
+		break;
+	case 1:
+		start();
+		break;
+	default:
+		LOG4CXX_ERROR(logger, "Invalid 'run' value: " << value);
+	}
+}
+
+void ProcessingChain::setPause(const char *name, const char *value) {
+	switch (str2bool(value)) {
+	case 0:
+		resume();
+		break;
+	case 1:
+		pause();
+		break;
+	default:
+		LOG4CXX_ERROR(logger, "Invalid 'pause' value: " << value);
+	}
+}
+
+void ProcessingChain::doPause() {
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->pause();
+	}
+}
+
+void ProcessingChain::doResume() {
+	for (unsigned i = 0; i < processors.size(); i++) {
+		processors[i]->resume();
+	}
+}
+
