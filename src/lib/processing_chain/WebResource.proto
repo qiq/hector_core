@@ -5,12 +5,15 @@ package hector.lib.processing_chain;
 option optimize_for = SPEED; 
 
 message WebResource {
-	required string url = 1;		// URL
-	optional uint32 time = 2;	 	// last check
-	optional string mime_type = 3;		// resource MIME type
-	optional string content = 4;		// content of a resource
+	required uint32 id = 1;			// id of a resource
+	required int32 status = 2;		// status to be used by filters
+
+	optional string url = 3;		// URL
+	optional uint32 time = 4;	 	// last check
+	optional string mime_type = 5;		// resource MIME type
+	optional string content = 6;		// content of a resource
 
 	repeated string header_field = 10;	// response header fields
 	repeated string extracted_url = 11;	// URLs extracted from the resource
-	optional uint32 ip_addr = 12;		// IPv4 address (result of DNS query)
+	optional fixed32 ip_addr = 12;		// IPv4 address (result of DNS query)
 }

@@ -1,5 +1,5 @@
 /**
- * Class representing queue of resources (mainly HTML pages) while processing.
+ * Class representing a resource, basic item of processing.
  * It uses Google Protocol Buffers to de/serialize.
  */
 
@@ -8,34 +8,42 @@
 
 #include <config.h>
 
-#include <stdint.h>
 #include <string>
-#include <vector>
 #include <log4cxx/logger.h>
 
 using namespace std;
 
 class Resource {
 protected:
-	uint32_t status;
+	Resource *anotherResource;
 
 	static log4cxx::LoggerPtr logger;
 public:
-	Resource() {};
-	virtual ~Resource() {};
-	int getStatus();
-	void setStatus(int status);
+	Resource();
+	virtual ~Resource();
+	virtual int getId() = 0;
+	virtual void setId(int id) = 0;
+	virtual int getStatus() = 0;
+	virtual void setStatus(int status) = 0;
 	virtual int getSize() = 0;
-	virtual string *serialize(bool serializeContent) = 0;
+
+	Resource *getAnotherResource();
+
+	virtual string *serialize() = 0;
 	virtual bool deserialize(string *s) = 0;
 };
 
-inline int Resource::getStatus() {
-	return status;
+inline Resource::Resource() {
+	anotherResource = NULL;
 }
 
-inline void Resource::setStatus(int status) {
-	this->status = status;
+inline Resource::~Resource() {
+	delete anotherResource;
+	anotherResource = NULL;
+}
+
+inline Resource *Resource::getAnotherResource() {
+	return anotherResource;
 }
 
 #endif

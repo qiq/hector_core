@@ -6,31 +6,33 @@
 #ifndef _WEB_RESOURCE_H_
 #define _WEB_RESOURCE_H_
 
-#include <log4cxx/logger.h>
-#include <stdint.h>
+#include <config.h>
+
 #include <string>
-#include <vector>
+#include <log4cxx/logger.h>
 #include "Resource.h"
+#include "WebResource.pb.h"
 
 using namespace std;
 
 class WebResource : public Resource {
-	string url;
-	uint32_t time;
-	char mime_type[50];
-	string content;
-	vector<string*> header_field;
-	vector<string*> extracted_url;
-	uint32_t ip_addr;
+protected:
+	hector::lib::processing_chain::WebResource r;
 
 	static log4cxx::LoggerPtr logger;
 public:
 	WebResource();
-	~WebResource();
+	~WebResource() {};
+	int getStatus();
+	void setStatus(int status);
+	int getId();
+	void setId(int id);
 	int getSize();
+
 	void setURL(const char *url);
-	const char *getURL();
-	string *serialize(bool serializeContent);
+	string *getURL();
+
+	string *serialize();
 	bool deserialize(string *s);
 };
 
