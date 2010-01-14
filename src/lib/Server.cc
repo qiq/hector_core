@@ -24,7 +24,7 @@ Server::~Server() {
 	objects = NULL;
 }
 
-bool Server::init(Config *config) {
+bool Server::Init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -68,7 +68,7 @@ bool Server::init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			ProcessingChain *p = new ProcessingChain(objects, pid);
-			if (!p->init(config))
+			if (!p->Init(config))
 				return false;
 			processingChains.push_back(p);
 		}

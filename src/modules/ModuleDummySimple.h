@@ -28,10 +28,11 @@ class ModuleDummySimple : public Module {
 public:
 	ModuleDummySimple(ObjectRegistry *objects, const char *id);
 	~ModuleDummySimple();
-	bool init(Config *config);
+	bool Init(Config *config);
 	module_t getType();
-	Resource *process(Resource *resource);
-	void createCheckpoint();
+	Resource *Process(Resource *resource);
+	void SaveCheckpoint(const char *path, const char *id);
+	void RestoreCheckpoint(const char *path, const char *id);
 
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);

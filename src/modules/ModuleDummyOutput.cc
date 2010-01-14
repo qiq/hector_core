@@ -6,11 +6,11 @@
 #include "ModuleDummyOutput.h"
 #include "WebResource.h"
 
-bool ModuleDummyOutput::init(Config *config) {
+bool ModuleDummyOutput::Init(Config *config) {
 	return true;
 }
 
-Resource *ModuleDummyOutput::process(Resource *resource) {
+Resource *ModuleDummyOutput::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG4CXX_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
@@ -19,7 +19,12 @@ Resource *ModuleDummyOutput::process(Resource *resource) {
 	return NULL;
 }
 
-void ModuleDummyOutput::createCheckpoint() {
+void ModuleDummyOutput::SaveCheckpoint(const char *path, const char *id) {
+	// TODO
+}
+
+void ModuleDummyOutput::RestoreCheckpoint(const char *path, const char *id) {
+	// TODO
 }
 
 char *ModuleDummyOutput::getValue(const char *name) {

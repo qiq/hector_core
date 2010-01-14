@@ -1,3 +1,4 @@
+DONE
 - univerzalni spoustec
 - spusti server na danem portu a adrese
 - nahraje obsluhu serveru, spusti server (+ processing_chain + vsechno ostatni)
@@ -7,5 +8,3 @@
 	- readline by to melo pouzivat
 	- nejak univerzalni by to melo byt
 	- napsane v Perlu?
-
-- getinfo pro kresleni grafu

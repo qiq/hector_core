@@ -34,7 +34,7 @@ class Server : public Object {
 public:
 	Server(const char *id);
 	~Server();
-	bool init(Config *config);
+	bool Init(Config *config);
 	void start(bool wait);
 	void stop();
 	void pause();

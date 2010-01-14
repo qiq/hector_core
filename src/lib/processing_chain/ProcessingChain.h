@@ -38,7 +38,7 @@ class ProcessingChain : public Object {
 public:
 	ProcessingChain(ObjectRegistry *objects, const char *id);
 	~ProcessingChain();
-	bool init(Config *config);
+	bool Init(Config *config);
 	void start();
 	void stop();
 	void pause();

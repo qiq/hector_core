@@ -8,6 +8,7 @@
 
 #include <config.h>
 
+#include <vector>
 #include <string>
 #include <log4cxx/logger.h>
 #include "Resource.h"
@@ -34,6 +35,8 @@ public:
 
 	string *serialize();
 	bool deserialize(string *s);
+
+	vector<string> *test();
 };
 
 #endif

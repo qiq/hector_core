@@ -43,12 +43,11 @@ void ModuleDummySimple::setFoo(const char *value) {
 	foo = strdup(value);
 }
 
-
-bool ModuleDummySimple::init(Config *config) {
+bool ModuleDummySimple::Init(Config *config) {
 	return true;
 }
 
-Resource *ModuleDummySimple::process(Resource *resource) {
+Resource *ModuleDummySimple::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG4CXX_INFO(logger, "Dummy: processing resource " << wr->getURL());
@@ -56,7 +55,11 @@ Resource *ModuleDummySimple::process(Resource *resource) {
 	return resource;
 }
 
-void ModuleDummySimple::createCheckpoint() {
+void ModuleDummySimple::SaveCheckpoint(const char *path, const char *id) {
+	// TODO
+}
+
+void ModuleDummySimple::RestoreCheckpoint(const char *path, const char *id) {
 	// TODO
 }
 

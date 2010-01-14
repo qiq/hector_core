@@ -27,7 +27,7 @@ ProcessingChain::~ProcessingChain() {
 	}
 }
 
-bool ProcessingChain::init(Config *config) {
+bool ProcessingChain::Init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
 
@@ -39,13 +39,13 @@ bool ProcessingChain::init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			Processor *p = new Processor(objects, pid);
-			if (!p->init(config))
+			if (!p->Init(config))
 				return false;
 			processors.push_back(p);
 		}
 		// connect Processors to other Processors
 		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-			(*iter)->connect();
+			(*iter)->Connect();
 		}
 		delete v;
 	} else {

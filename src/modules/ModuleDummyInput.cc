@@ -8,11 +8,11 @@
 #include "ModuleDummyInput.h"
 #include "WebResource.h"
 
-bool ModuleDummyInput::init(Config *config) {
+bool ModuleDummyInput::Init(Config *config) {
 	return true;
 }
 
-Resource *ModuleDummyInput::process(Resource *resource) {
+Resource *ModuleDummyInput::Process(Resource *resource) {
 	assert(resource == NULL);
 	WebResource *wr = new WebResource();
 	char s[1024];
@@ -22,7 +22,12 @@ Resource *ModuleDummyInput::process(Resource *resource) {
 	return wr;
 }
 
-void ModuleDummyInput::createCheckpoint() {
+void ModuleDummyInput::SaveCheckpoint(const char *path, const char *id) {
+	// TODO
+}
+
+void ModuleDummyInput::RestoreCheckpoint(const char *path, const char *id) {
+	// TODO
 }
 
 char *ModuleDummyInput::getValue(const char *name) {

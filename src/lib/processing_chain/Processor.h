@@ -39,8 +39,8 @@ class Processor : public Object {
 public:
 	Processor(ObjectRegistry *objects, const char *id);
 	~Processor();
-	bool init(Config *config);
-	bool connect(); // connect processors to other processors
+	bool Init(Config *config);
+	bool Connect(); // connect processors to other processors
 	bool Running();
 	bool appendResource(Resource *r, bool sleep); // process resource and append it to other queues
 	void runThread();

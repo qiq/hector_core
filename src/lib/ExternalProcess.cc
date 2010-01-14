@@ -32,7 +32,7 @@ ExternalProcess::~ExternalProcess() {
 }
 
 
-bool ExternalProcess::init(const char *path, const char *argv[]) {
+bool ExternalProcess::Init(const char *path, const char *argv[]) {
 	int pipein[2];
 	int pipeout[2];
 	int pipeerr[2];

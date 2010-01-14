@@ -32,7 +32,7 @@ Processor::~Processor() {
 	delete queue;
 }
 
-bool Processor::init(Config *config) {
+bool Processor::Init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -72,7 +72,7 @@ bool Processor::init(Config *config) {
 				return false;
 			}
 			Module *m = (*create)(objects, mid);
-			if (!m->init(config))
+			if (!m->Init(config))
 				return false;
 			modules.push_back(m);
 		}
@@ -239,7 +239,7 @@ bool Processor::init(Config *config) {
 }
 
 // connect processors to other processors
-bool Processor::connect() {
+bool Processor::Connect() {
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
 		int priority = (*iter)->getPriority();
 		const char *ref = (*iter)->getProcessor();
@@ -321,7 +321,7 @@ void Processor::runThread() {
 			activeResources += n;
 
 			// process new requests, get finished requests
-			n = modules[0]->process(inputResources, outputResources + finishedResources);
+			n = modules[0]->Process(inputResources, outputResources + finishedResources);
 			finishedResources += n;
 			inputResources[0] = NULL;
 
@@ -363,15 +363,15 @@ void Processor::runThread() {
 			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
-					resource = (*iter)->process(NULL);
+					resource = (*iter)->Process(NULL);
 					assert(resource != NULL);
 					break;
 				case MODULE_OUTPUT:
-					(void)(*iter)->process(resource);
+					(void)(*iter)->Process(resource);
 					resource = NULL;
 					break;
 				case MODULE_SIMPLE:
-					resource = (*iter)->process(resource);
+					resource = (*iter)->Process(resource);
 					assert(resource != NULL);
 					break;
 				case MODULE_MULTI:

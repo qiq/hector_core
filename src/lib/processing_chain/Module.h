@@ -22,20 +22,22 @@ typedef enum {
 } module_t;
 
 class Module : public Object {
-protected:
-	static log4cxx::LoggerPtr logger;
 public:
 	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
 	virtual ~Module() {};
-	virtual bool init(Config *config) = 0;
+	virtual bool Init(Config *config) = 0;
 	virtual module_t getType() = 0;
-	virtual Resource *process(Resource *resource);
-	virtual int process(Resource **in, Resource **out);
-	virtual void createCheckpoint() = 0;
+	virtual Resource *Process(Resource *resource);
+	virtual int Process(Resource **in, Resource **out);
+	virtual void SaveCheckpoint(const char *path, const char *id) = 0;
+	virtual void RestoreCheckpoint(const char *path, const char *id) = 0;
 
 	virtual char *getValue(const char *name) = 0;
 	virtual bool setValue(const char *name, const char *value) = 0;
 	virtual vector<string> *listNames() = 0;
+
+protected:
+	static log4cxx::LoggerPtr logger;
 };
 
 #endif

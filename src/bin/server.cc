@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 
 	// create and initialize the Server object
 	Server *server = new Server(serverId);
-	if (!server->init(config))
+	if (!server->Init(config))
 		die("Cannot initialize server, sorry.\n");
 
 	// run server

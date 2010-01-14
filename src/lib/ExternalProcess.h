@@ -19,7 +19,7 @@ public:
 	ExternalProcess();
 	~ExternalProcess();
 
-	bool init(const char *path, const char *argv[]);
+	bool Init(const char *path, const char *argv[]);
 	int readWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true);
 };
 

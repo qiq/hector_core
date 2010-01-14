@@ -13,10 +13,11 @@ class ModuleDummyOutput : public Module {
 public:
 	ModuleDummyOutput(ObjectRegistry *objects, const char *id): Module(objects, id) {};
 	~ModuleDummyOutput() {};
-	bool init(Config *config);
+	bool Init(Config *config);
 	module_t getType();
-	Resource *process(Resource *resource);
-	void createCheckpoint();
+	Resource *Process(Resource *resource);
+	void SaveCheckpoint(const char *path, const char *id);
+	void RestoreCheckpoint(const char *path, const char *id);
 
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);

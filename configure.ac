@@ -8,7 +8,6 @@ AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(subdir-objects)
-AC_LANG([C++])
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
 
@@ -21,6 +20,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
+AC_PROG_SWIG(1.3.17)
 AC_CHECK_PROGS([PROTOC], [protoc])
 
 # Checks for libraries.
