@@ -8,5 +8,5 @@ libhector_processing_chain_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h
-libhector_processing_chain_la_CXXFLAGS = -I.. -I../resources $(AM_CXXFLAGS)
+libhector_processing_chain_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
 libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)

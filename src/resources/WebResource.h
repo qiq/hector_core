@@ -36,7 +36,7 @@ public:
 	string *serialize();
 	bool deserialize(string *s);
 
-	vector<string> *test();
+//	vector<string> *test();
 };
 
 #endif

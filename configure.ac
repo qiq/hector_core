@@ -7,7 +7,7 @@ AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(subdir-objects)
+AM_INIT_AUTOMAKE(subdir-objects -Wall -Werror)
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
 
@@ -20,8 +20,8 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
-AC_PROG_SWIG(1.3.17)
-AC_CHECK_PROGS([PROTOC], [protoc])
+AC_CHECK_PROG(PROTOC, protoc, protoc)
+AC_CHECK_PROG(PERL, perl, perl)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
@@ -56,25 +56,166 @@ else
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
 
-dnl Use -Wall if we have gcc.
-if test "x$GXX" = "xyes"; then
-  case " $CXXFLAGS " in
-  *[\ \	]-Wall[\ \	]*) ;;
-  *) CXXFLAGS="$CXXFLAGS -Wall" ;;
-  esac
+# SWIG + Java/Python/Perl and other stuff borrowed from libkml
+# Which platform are we building on?
+PLATFORM=
+case "`uname -s`" in
+        Linux)  PLATFORM=linux ;;
+        *)      PLATFORM=unknown ;;
+esac
+AC_SUBST(PLATFORM)
+
+# Java headers and libs
+AC_ARG_WITH(java-include-dir,
+            [  --with-java-include-dir=DIR look in DIR for Java headers],
+            [JAVA_INCLUDE_DIR=$withval],)
+AC_SUBST(JAVA_INCLUDE_DIR)
+AC_ARG_WITH(java-lib-dir,
+            [  --with-java-lib-dir=DIR look in DIR for Java libraries],
+            [JAVA_LIB_DIR=$withval],)
+AC_SUBST(JAVA_LIB_DIR)
+
+# Python headers and libs
+AC_ARG_WITH(python-include-dir,
+            [  --with-python-include-dir=DIR look in DIR for Python headers],
+            [PYTHON_INCLUDE_DIR=$withval],)
+AC_SUBST(PYTHON_INCLUDE_DIR)
+AC_ARG_WITH(python-lib-dir,
+            [  --with-python-lib-dir=DIR look in DIR for Python libraries],
+            [PYTHON_LIB_DIR=$withval],)
+AC_SUBST(PYTHON_LIB_DIR)
+
+# If SWIG is available we will try to generate bindings.
+AC_ARG_ENABLE(swig,
+	[AS_HELP_STRING([--disable-swig],
+			[do not generate any SWIG language bindings])])
+if test "x$enable_swig" != xno; then
+	AC_CHECK_PROG(SWIG, swig, swig)
+	if test "x$SWIG_PATH" != x; then
+		SWIG_VERSION=`$SWIG -version 2>&1|grep Version|cut -d" " -f3`
+		if test ${SWIG_VERSION:4} -lt 35; then
+			AC_MSG_WARN([You have SWIG $SWIG_VERSION installed, but hector requires at least SWIG 1.3.35. Non-C++ modules will not be built.])
+			SWIG=
+		fi
+	fi
 fi
+AM_CONDITIONAL(WITH_SWIG, [test "x$SWIG" != x])
+
+# Shall we build the Perl SWIG bindings?
+if test "x$SWIG" != x; then
+	AC_ARG_ENABLE(perl,
+		      [AS_HELP_STRING([--disable-perl],
+				      [do not generate Perl SWIG bindings])])
+	if test "x$enable_perl" != xno; then
+		PERLB="x"
+		AX_PROG_PERL_VERSION([5.8.0])
+		current_CPPFLAGS="$CPPFLAGS"
+		PERL_INCLUDE_DIR=`$PERL -MConfig -e 'print $Config{archlib}."/CORE";'`
+		AC_SUBST(PERL_INCLUDE_DIR)
+		CPPFLAGS="-I$PERL_INCLUDE_DIR"
+		AC_CHECK_HEADERS([EXTERN.h perl.h],,
+			[AC_MSG_WARN([could not find perl.h. The Perl bindings will not be built.])
+			PERLB=
+			],
+			[[#include <EXTERN.h>]])
+		LIBS=''
+		CPPFLAGS="$current_CPPFLAGS"
+	fi
+fi
+AM_CONDITIONAL(WITH_PERL, [test "x$PERLB" != x])
+
+# Shall we build the Java SWIG bindings?
+if test "x$SWIG" != x; then
+	AC_ARG_ENABLE(java,
+		      [AS_HELP_STRING([--disable-java],
+				      [do not generate Java SWIG bindings])])
+	if test "x$enable_java" != xno; then
+		AC_CHECK_PROG(JAVA, java, java, nojava)
+		if test "$JAVA" = "nojava"; then
+		  AC_MSG_ERROR([no java binary in PATH])
+		fi
+		AC_CHECK_PROG(JAVAC, javac, javac, nojavac)
+		if test "$JAVAC" = "nojavac"; then
+		  AC_MSG_ERROR([no javac binary in PATH, bindings will not be built])
+		fi
+		AC_CHECK_PROG(JAR, jar, jar, nojar)
+		if test "$JAR" = "nojar"; then
+		  AC_MSG_ERROR([no jar binary in PATH, bindings will not be built])
+		fi
+		if test "x$JAVA" != x; then
+			current_CPPFLAGS="$CPPFLAGS"
+			if test "$CPPFLAGS" != ""; then
+				CPPFLAGS="-I$current_CPPFLAGS -I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
+			else
+				CPPFLAGS="-I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
+			fi
+			AC_CHECK_HEADER(jni.h,,
+					[AC_MSG_WARN([could not find jni.h. The Java bindings will not be built.])
+			JAVA=
+			])
+			CPPFLAGS="$current_CPPFLAGS"
+		fi
+	fi
+fi
+AM_CONDITIONAL(WITH_JAVA, [test "x$JAVA" != x])
+
+# Shall we build the Python SWIG bindings?
+if test "x$SWIG" != x; then
+	AC_ARG_ENABLE(python,
+		      [AS_HELP_STRING([--disable-python],
+				      [do not generate Python SWIG bindings])])
+	if test "x$enable_python" != xno; then
+		AC_CHECK_PROG(PYTHON, python, python)
+		if test "x$PYTHON" != x; then
+			PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[[:3]]"`
+			if test "$USE_DEFAULT_PYTHON_LIBDIR" = true; then
+				PYTHON_SITE_PACKAGES_DIR=`$PYTHON -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_lib(1,0)'`
+			else
+				PYTHON_SITE_PACKAGES_DIR=`$PYTHON -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_lib(1,0,"${exec_prefix}")'`
+			fi
+			AC_SUBST(PYTHON_SITE_PACKAGES_DIR)
+			if test "$PYTHON_INCLUDE_DIR" = ""; then
+				PYTHON_INCLUDE_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()"`
+			fi
+			if test "$PYTHON_LIB_DIR" = ""; then
+				PYTHON_LIB_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBPL')"`
+			fi
+			current_CPPFLAGS="$CPPFLAGS"
+			CPPFLAGS="-I$PYTHON_INCLUDE_DIR"
+			AC_CHECK_HEADER(Python.h,,
+					[AC_MSG_WARN([could not find Python.h. The Python bindings will not be built.])
+			PYTHON=
+			])
+			PYTHON_LIBNAME="python"
+			if test "$PLATFORM" = "linux"; then
+				PYTHON_LIBNAME="python$PYTHON_VERSION"
+			fi
+			AC_CHECK_LIB($PYTHON_LIBNAME, Py_Initialize,,
+					[AC_MSG_WARN([could not find the Python library. The Python bindings will not be built.])
+			PYTHON=
+			])
+			LIBS=''  # don't append -lpython here.
+			CPPFLAGS="$current_CPPFLAGS"
+		fi
+	fi
+fi
+AM_CONDITIONAL(WITH_PYTHON, [test "x$PYTHON" != x])
 
 AC_CONFIG_FILES([Makefile
                 src/Makefile
+		src/resources/Makefile
+		src/resources/perl/Makefile
+		src/resources/java/Makefile
+		src/resources/python/Makefile
+		src/modules/Makefile
+		src/modules/perl/Makefile
+		src/modules/java/Makefile
+		src/modules/python/Makefile
 		src/lib/Makefile
 		src/lib/server/Makefile
 		src/lib/processing_chain/Makefile
 		src/servers/Makefile
 		src/servers/robot/Makefile
-		src/modules/Makefile
 		src/bin/Makefile
-		src/robot/Makefile
-		src/robot/modules/Makefile
-		src/robot/external-modules/Makefile
 ])
 AC_OUTPUT

@@ -4,6 +4,19 @@
 
 <Config baseDir="/home/qiq/qiq/work/hector/src">
 
+	<Binary id="perl">
+		<path>/usr/bin/perl</path>
+		<arg>modules/perl/perl_stub.pl</arg>
+		<env>PERL5LIB=...</env>
+	</Binary>
+
+	<Binary id="java">
+		<path>/usr/bin/java</path>
+		<arg>-jar</arg>
+		<arg>xxxx</arg>
+		<env>CLASSPATH=...</env>
+	</Binary>
+
 	<Server id="webserver">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
@@ -62,7 +75,10 @@
 	</Module>
 
 	<Module id="preprocess_resource_module1">
-		<lib name="modules/libmodule_dummy_simple.la"/>
+		<lib name="module_dummy_simple" type="c++"/>
+		<lib name="ModuleDummy" type="perl"/>
+		<param name="xxx" value="yyy"/>
+		<!--lib name="modules/libmodule_dummy_simple.la"/-->
 	</Module>
 
 	<Processor id="load_resource2">

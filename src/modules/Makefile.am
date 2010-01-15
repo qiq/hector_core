@@ -1,4 +1,4 @@
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I../lib -I../lib/processing_chain
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I../lib -I../lib/processing_chain -I../resources
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ -version-info 0:0:0
 
 #AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
