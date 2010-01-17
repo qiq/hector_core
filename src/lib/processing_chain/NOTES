@@ -1,0 +1,21 @@
+Externi modul, simple (mozno vice vlaken)
+	- zamkni zamek
+	- zapis do pipe procesu cely resouce
+	- precti z pipe cely resource
+	- odemkni zamek
+
+Externi modul, parallel
+	- existuje vlakno, ktere cte z pipe resource, kdyz precte cely, zavola broadcast (cv) na probuzeni cekajicich
+
+	- zamkni write lock
+	- zapis do pipe procesu cely resouce
+	- odemkni write lock
+	- zamkni vystupni lock
+	- pockej si na condition variable, az bude hotovy Tvuj resource
+	- prevezmi si resource
+	- odemkni vystupni lock
+
+V externim modulu (simple)
+	- precti z pipe resource/rpcmessage
+	- zpracuj (vytvor spravny objekt v cilovem jazyce a zavolej Process(), pripadne zavolej metodu)
+	- zapis resource/rpcmessage

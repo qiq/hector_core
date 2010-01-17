@@ -5,14 +5,14 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "ModuleDummyInput.h"
+#include "DummyInput.h"
 #include "WebResource.h"
 
-bool ModuleDummyInput::Init(Config *config) {
+bool DummyInput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *ModuleDummyInput::Process(Resource *resource) {
+Resource *DummyInput::Process(Resource *resource) {
 	assert(resource == NULL);
 	WebResource *wr = new WebResource();
 	char s[1024];
@@ -22,30 +22,30 @@ Resource *ModuleDummyInput::Process(Resource *resource) {
 	return wr;
 }
 
-void ModuleDummyInput::SaveCheckpoint(const char *path, const char *id) {
+void DummyInput::SaveCheckpoint(const char *path, const char *id) {
 	// TODO
 }
 
-void ModuleDummyInput::RestoreCheckpoint(const char *path, const char *id) {
+void DummyInput::RestoreCheckpoint(const char *path, const char *id) {
 	// TODO
 }
 
-char *ModuleDummyInput::getValue(const char *name) {
+char *DummyInput::getValue(const char *name) {
 	return NULL;
 }
 
-bool ModuleDummyInput::setValue(const char *name, const char *value) {
+bool DummyInput::setValue(const char *name, const char *value) {
 	return false;
 }
 
-vector<string> *ModuleDummyInput::listNames() {
+vector<string> *DummyInput::listNames() {
 	return new vector<string>();
 }
 
 // the class factories
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id) {
-	return (Module*)new ModuleDummyInput(objects, id);
+	return (Module*)new DummyInput(objects, id);
 }
 
 extern "C" void destroy(Module* p) {

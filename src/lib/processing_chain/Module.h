@@ -8,8 +8,8 @@
 #include <config.h>
 
 #include <string>
+#include <vector>
 #include <log4cxx/logger.h>
-#include "Config.h"
 #include "Object.h"
 #include "Resource.h"
 
@@ -25,7 +25,7 @@ class Module : public Object {
 public:
 	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
 	virtual ~Module() {};
-	virtual bool Init(Config *config) = 0;
+	virtual bool Init(vector<pair<string, string> > *args) = 0;
 	virtual module_t getType() = 0;
 	virtual Resource *Process(Resource *resource);
 	virtual int Process(Resource **in, Resource **out);

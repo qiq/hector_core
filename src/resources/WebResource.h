@@ -18,7 +18,7 @@ using namespace std;
 
 class WebResource : public Resource {
 protected:
-	hector::lib::processing_chain::WebResource r;
+	hector::resources::WebResource r;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -31,12 +31,37 @@ public:
 	int getSize();
 
 	void setURL(const char *url);
-	string *getURL();
+	const char *getURL();
 
 	string *serialize();
 	bool deserialize(string *s);
 
 //	vector<string> *test();
 };
+
+inline int WebResource::getStatus() {
+	return r.status();
+}
+
+inline void WebResource::setStatus(int status) {
+	r.set_status(status);
+}
+
+inline int WebResource::getId() {
+	return r.id();
+}
+
+inline void WebResource::setId(int id) {
+	r.set_id(id);
+}
+
+inline const char *WebResource::getURL() {
+	return r.url().c_str();
+}
+
+inline void WebResource::setURL(const char *url) {
+	r.set_url(url);
+}
+
 
 #endif

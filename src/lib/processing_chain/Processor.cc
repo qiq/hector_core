@@ -72,8 +72,21 @@ bool Processor::Init(Config *config) {
 				return false;
 			}
 			Module *m = (*create)(objects, mid);
-			if (!m->Init(config))
+			// create name-value argument pairs
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", getId());
+			vector<string> *names = config->getValues(buffer);
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@value", getId());
+			vector<string> *values = config->getValues(buffer);
+			assert(names->size() == values->size());
+			vector<pair<string, string> > *c = new vector<pair<string, string> >();
+			for (int i = 0; i < names->size(); i++) {
+				c->push_back(pair<string, string>((*names)[i], (*values)[i]));
+			}
+			delete values;
+			delete names;
+			if (!m->Init(c))
 				return false;
+			delete c;
 			modules.push_back(m);
 		}
 		delete v;

@@ -11,32 +11,8 @@ WebResource::WebResource() {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
 
-inline int WebResource::getStatus() {
-	return r.status();
-}
-
-inline void WebResource::setStatus(int status) {
-	r.set_status(status);
-}
-
-inline int WebResource::getId() {
-	return r.id();
-}
-
-inline void WebResource::setId(int id) {
-	r.set_id(id);
-}
-
 int WebResource::getSize() {
 	return 1; //FIXME
-}
-
-string *WebResource::getURL() {
-	return r.mutable_url();
-}
-
-void WebResource::setURL(const char *url) {
-	r.set_url(url);
 }
 
 string *WebResource::serialize() {

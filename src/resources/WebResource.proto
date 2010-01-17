@@ -1,4 +1,4 @@
-package hector.lib.processing_chain;
+package hector.resources;
 
 //option java_package = "com.example.tutorial";
 //option java_outer_classname = "AddressBookProtos";

@@ -1,6 +1,6 @@
 <!-- robot config definition -->
 
-<!ELEMENT Config	(Server|ProcessingChain|Processor|Module)* >
+<!ELEMENT Config	(Binary|Server|ProcessingChain|Processor|Module)* >
 <!ATTLIST Config
 	baseDir		CDATA		"" >
 
@@ -13,11 +13,20 @@
 
 <!ELEMENT lib		EMPTY >
 <!ATTLIST lib
-	name		CDATA		"" >
+	name		CDATA		""
+	binary		CDATA		"" >
 
 <!ELEMENT threads	(#PCDATA) >
 
 <!-- Main -->
+
+<!ELEMENT Binary	(path|arg|env)* >
+<!ATTLIST Binary
+	id		ID		#REQUIRED >
+<!ELEMENT path		(#PCDATA) >
+<!ELEMENT arg		(#PCDATA) >
+<!ELEMENT env		(#PCDATA) >
+
 
 <!ELEMENT Server	(threads|serverHost|serverPort|processingChain|lib|param|logConfig)* >
 <!ATTLIST Server
@@ -26,7 +35,6 @@
 <!ELEMENT processingChain	EMPTY >
 <!ATTLIST processingChain
 	ref		IDREF 		#REQUIRED >
-
 <!ELEMENT serverHost	(#PCDATA) >
 <!ELEMENT serverPort	(#PCDATA) >
 <!ELEMENT logConfig	(#PCDATA) >

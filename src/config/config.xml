@@ -29,14 +29,14 @@
 		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1200</serverPort>
-		<lib name="servers/hashserver/libserver-md5.la"/>
+		<lib name="Server-md5.la"/>
 	</Server>
 
 	<Server id="master">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1000</serverPort>
-		<lib name="servers/master/libserver-master.la"/>
+		<lib name="Master.la"/>
 	</Server>
 
 	<Server id="robot">
@@ -46,7 +46,7 @@
 		<processingChain ref="robot_processing_chain"/>
 		<!--processingChain ref="robot_processing_chain2"/-->
 		<logConfig>config/robot.log.props</logConfig>
-		<lib name="servers/robot/libserver_robot.la"/>
+		<lib name="Robot.la"/>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>
@@ -70,15 +70,13 @@
 	</Processor>
 
 	<Module id="load_resource_module1">
-		<lib name="modules/libmodule_dummy_input.la"/>
+		<lib name="DummyInput.la"/>
 		<param name="inputDir" value="/tmp/input"/>
 	</Module>
 
 	<Module id="preprocess_resource_module1">
-		<lib name="module_dummy_simple" type="c++"/>
-		<lib name="ModuleDummy" type="perl"/>
+		<lib name="DummySimple.la"/>
 		<param name="xxx" value="yyy"/>
-		<!--lib name="modules/libmodule_dummy_simple.la"/-->
 	</Module>
 
 	<Processor id="load_resource2">
@@ -92,7 +90,7 @@
 	</Processor>
 
 	<Module id="load_resource_module2">
-		<lib name="modules/libmodule_dummy_input.la"/>
+		<lib name="DummyInput.la"/>
 		<param name="inputDir" value="/tmp/input2"/>
 	</Module>
 
@@ -116,7 +114,7 @@
 	</Processor>
 
 	<Module id="dummy_module">
-		<lib name="modules/libmodule_dummy_simple.la"/>
+		<lib name="DummySimple.la"/>
 	</Module>
 
 	<Processor id="external_test">
@@ -128,8 +126,7 @@
 
 	<Module id="external_test_module">
 		<!--lib name="modules/libmodule-external-simple.la"/-->
-		<lib name="modules/libmodule_dummy_simple.la"/>
-		<param name="path" value="/home/qiq/work/w2c/hector/src/robot/external-modules/ModuleDummy.sh"/>
+		<lib name="DummySimple.pm" binary="perl"/>
 	</Module>
 
 	<Processor id="save_resource">
@@ -143,7 +140,7 @@
 	</Processor>
 
 	<Module id="save_resource_module">
-		<lib name="modules/libmodule_dummy_output.la"/>
+		<lib name="DummyOutput.la"/>
 		<param name="outputDir" value="/tmp/output"/>
 	</Module>
 

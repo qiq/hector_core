@@ -2,8 +2,8 @@
  * Dummy module, does nothing.
  */
 
-#ifndef _MODULE_DUMMY_SIMPLE_H_
-#define _MODULE_DUMMY_SIMPLE_H_
+#ifndef _DUMMY_SIMPLE_H_
+#define _DUMMY_SIMPLE_H_
 
 #include <config.h>
 
@@ -13,22 +13,22 @@
 #include "Lock.h"
 #include "Module.h"
 
-class ModuleDummySimple : public Module {
+class DummySimple : public Module {
 	Lock propertyLock;
 	char *dummy;
 	char *foo;
 
-	std::tr1::unordered_map<string, char*(ModuleDummySimple::*)()> getters;
-	std::tr1::unordered_map<string, void(ModuleDummySimple::*)(const char*)> setters;
+	std::tr1::unordered_map<string, char*(DummySimple::*)()> getters;
+	std::tr1::unordered_map<string, void(DummySimple::*)(const char*)> setters;
 
 	char *getDummy();
 	void setDummy(const char *value);
 	char *getFoo();
 	void setFoo(const char *value);
 public:
-	ModuleDummySimple(ObjectRegistry *objects, const char *id);
-	~ModuleDummySimple();
-	bool Init(Config *config);
+	DummySimple(ObjectRegistry *objects, const char *id);
+	~DummySimple();
+	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
 	Resource *Process(Resource *resource);
 	void SaveCheckpoint(const char *path, const char *id);
@@ -39,7 +39,7 @@ public:
 	vector<string> *listNames();
 };
 
-inline module_t ModuleDummySimple::getType() {
+inline module_t DummySimple::getType() {
 	return MODULE_SIMPLE;
 }
 
