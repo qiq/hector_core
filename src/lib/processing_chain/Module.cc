@@ -15,3 +15,15 @@ int Module::Process(Resource **in, Resource **out) {
 	LOG4CXX_ERROR(logger, "Unimplemented resource processing (multi)");
 	return 0;
 }
+
+char *Module::getValue(const char *name) {
+	return NULL;
+}
+
+bool Module::setValue(const char *name, const char *value) {
+	return false;
+}
+
+vector<string> *Module::listNames() {
+	return new vector<string>();
+}

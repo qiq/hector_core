@@ -1,6 +1,23 @@
+externi modul, simple
+	Process()
+	- zapis do pipe cely resource
+	- precti z pipe resource
+	nebo
+	- pro volani funkce: vytvor RPCMessage, zapis ji do pipe
+	- precti vysledek z pipe, vrat
+
+externi modul, parallel
+	- najednou zapisuj (jsou-li jake) a cti resources (neblokovane)
+	- pokud uz nejde neblokovane, podivej se, jestli mas nejake resources prectene z vystupu
+		- ano -> zapis do vystupni fronty a cti ze vstupni fronty (neblokovane)
+		- ne: podivej se, jestli muzes pridat neco k aktualne zpracovavanym (neni naplnena kapacita modulu)
+			- ano: precti ze vstupni fronty
+			- ne: chvili se zablokuj v selectu na vystupu
+
+VSECHNO SPATNE: :-)
 Externi modul, simple (mozno vice vlaken)
 	- zamkni zamek
-	- zapis do pipe procesu cely resouce
+	- zapis do pipe procesu cely resource
 	- precti z pipe cely resource
 	- odemkni zamek
 

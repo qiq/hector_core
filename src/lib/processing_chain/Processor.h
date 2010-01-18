@@ -23,7 +23,7 @@ class Processor : public Object {
 	int nThreads;
 	pthread_t *threads;
 
-	vector<Module*> modules; 		// all modules
+	vector<Module*> *modules; 		// all modules
 	SyncQueue<Resource> *queue;		// input queue
 	vector<OutputFilter*> outputFilters;	// filters of output resources
 
@@ -43,12 +43,11 @@ public:
 	bool Connect(); // connect processors to other processors
 	bool Running();
 	bool appendResource(Resource *r, bool sleep); // process resource and append it to other queues
-	void runThread();
+	void runThread(int id);
 	void start();
 	void stop();
 	void pause();
 	void resume();
-	void createCheckpoint();
 
 	SyncQueue<Resource> *getQueue();
 

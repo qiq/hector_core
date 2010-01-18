@@ -23,8 +23,10 @@ Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, i
 Processor::~Processor() {
 	delete[] threads;
 
-	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
-		delete *iter;
+	for (int i = 0; i < nThreads; ++i) {
+		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			delete *iter;
+		}
 	}
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
 		delete *iter;
@@ -52,6 +54,8 @@ bool Processor::Init(Config *config) {
 	}
 	free(s);
 
+	modules = new vector<Module*>[nThreads];
+
 	// module(s)
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/modules/module/@ref", getId());
 	v = config->getValues(buffer);
@@ -71,7 +75,6 @@ bool Processor::Init(Config *config) {
 				LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
 				return false;
 			}
-			Module *m = (*create)(objects, mid);
 			// create name-value argument pairs
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", getId());
 			vector<string> *names = config->getValues(buffer);
@@ -84,10 +87,14 @@ bool Processor::Init(Config *config) {
 			}
 			delete values;
 			delete names;
-			if (!m->Init(c))
-				return false;
+
+			for (int i = 0; i < nThreads; ++i) {
+				Module *m = (*create)(objects, mid);
+				if (!m->Init(c))
+					return false;
+				modules[i].push_back(m);
+			}
 			delete c;
-			modules.push_back(m);
 		}
 		delete v;
 	}
@@ -195,55 +202,57 @@ bool Processor::Init(Config *config) {
 	}
 
 	// check modules
-	int n = modules.size();
-	int i = 0;
-	for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
-		switch ((*iter)->getType()) {
-		case MODULE_INPUT:
-			if (i != 0) {
-				LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << getId());
-				return false;
+	if (nThreads > 0) {
+		int n = modules[0].size();
+		int i = 0;
+		for (vector<Module*>::iterator iter = modules[0].begin(); iter != modules[0].end(); ++iter) {
+			switch ((*iter)->getType()) {
+			case MODULE_INPUT:
+				if (i != 0) {
+					LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << getId());
+					return false;
+				}
+				if (queue->getQueuesCount() > 0) {
+					LOG4CXX_ERROR(logger, "queue and input module must not be used together: " << getId());
+					return false;
+				}
+				break;
+			case MODULE_OUTPUT:
+				if (i != n-1) {
+					LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << getId());
+					return false;
+				}
+				if (outputFilters.size() > 0) {
+					LOG4CXX_ERROR(logger, "nextProcessor and output module must not be used together: " << getId());
+					return false;
+				}
+				break;
+			case MODULE_MULTI:
+			case MODULE_SELECT:
+				if (i != 0 && n == 1) {
+					LOG4CXX_ERROR(logger, "Multi/Select module must be the only one in a Processor: " << getId());
+					return false;
+				}
+				if (queue->getQueuesCount() == 0 || outputFilters.size() == 0) {
+					LOG4CXX_ERROR(logger, "No input or output queue defined: " << getId());
+					return false;
+				}
+				break;
+			case MODULE_SIMPLE:
+				if (i == 0 && queue->getQueuesCount() == 0) {
+					LOG4CXX_ERROR(logger, "No input queue defined: " << getId());
+					return false;
+				} else if (i == n-1 && outputFilters.size() == 0) {
+					LOG4CXX_ERROR(logger, "No output queue defined: " << getId());
+					return false;
+				}
+				break;
+			default:
+				LOG4CXX_ERROR(logger, "Should not happen");
+				break;
 			}
-			if (queue->getQueuesCount() > 0) {
-				LOG4CXX_ERROR(logger, "queue and input module must not be used together: " << getId());
-				return false;
-			}
-			break;
-		case MODULE_OUTPUT:
-			if (i != n-1) {
-				LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << getId());
-				return false;
-			}
-			if (outputFilters.size() > 0) {
-				LOG4CXX_ERROR(logger, "nextProcessor and output module must not be used together: " << getId());
-				return false;
-			}
-			break;
-		case MODULE_MULTI:
-		case MODULE_SELECT:
-			if (i != 0 && n == 1) {
-				LOG4CXX_ERROR(logger, "Multi/Select module must be the only one in a Processor: " << getId());
-				return false;
-			}
-			if (queue->getQueuesCount() == 0 || outputFilters.size() == 0) {
-				LOG4CXX_ERROR(logger, "No input or output queue defined: " << getId());
-				return false;
-			}
-			break;
-		case MODULE_SIMPLE:
-			if (i == 0 && queue->getQueuesCount() == 0) {
-				LOG4CXX_ERROR(logger, "No input queue defined: " << getId());
-				return false;
-			} else if (i == n-1 && outputFilters.size() == 0) {
-				LOG4CXX_ERROR(logger, "No output queue defined: " << getId());
-				return false;
-			}
-			break;
-		default:
-			LOG4CXX_ERROR(logger, "Should not happen");
-			break;
+			i++;
 		}
-		i++;
 	}
 
 	free(baseDir);
@@ -286,9 +295,17 @@ bool Processor::Running() {
 	return result;
 }
 
+struct thread {
+	int id;
+	Processor *p;
+};
+
 void *run_processor_thread(void *ptr) {
-	Processor *p = (Processor *)ptr;
-	p->runThread();
+	struct thread *t = (struct thread *)ptr;
+	Processor *p = t->p;
+	int id = t->id;
+	delete t;
+	p->runThread(id);
 	return NULL;
 }
 
@@ -315,8 +332,8 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 	return (copied||appended);
 }
 
-void Processor::runThread() {
-	module_t firstModuleType = modules.front()->getType();
+void Processor::runThread(int id) {
+	module_t firstModuleType = modules[id].front()->getType();
 	if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
 		const int maxRequests = 100;	// FIXME: make it configurable
 		Resource **inputResources = new Resource*[maxRequests+1];
@@ -334,7 +351,7 @@ void Processor::runThread() {
 			activeResources += n;
 
 			// process new requests, get finished requests
-			n = modules[0]->Process(inputResources, outputResources + finishedResources);
+			n = modules[id][0]->Process(inputResources, outputResources + finishedResources);
 			finishedResources += n;
 			inputResources[0] = NULL;
 
@@ -373,7 +390,7 @@ void Processor::runThread() {
 					break;	// cancelled
 			}
 
-			for (vector<Module*>::iterator iter = modules.begin(); iter != modules.end(); ++iter) {
+			for (vector<Module*>::iterator iter = modules[id].begin(); iter != modules[id].end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
 					resource = (*iter)->Process(NULL);
@@ -411,7 +428,10 @@ void Processor::start() {
 	queue->clearCancel();
 
 	for (int i = 0; i < nThreads; i++) {
-		pthread_create(&threads[i], NULL, run_processor_thread, (void *)this);
+		struct thread *t = new struct thread;
+		t->p = this;
+		t->id = i;
+		pthread_create(&threads[i], NULL, run_processor_thread, (void *)t);
 	}
 }
 
@@ -436,10 +456,6 @@ void Processor::pause() {
 
 void Processor::resume() {
 	queue->resume();
-}
-
-void Processor::createCheckpoint() {
-	//TODO
 }
 
 char *Processor::getValue(const char *name) {

@@ -32,9 +32,9 @@ public:
 	virtual void SaveCheckpoint(const char *path, const char *id) = 0;
 	virtual void RestoreCheckpoint(const char *path, const char *id) = 0;
 
-	virtual char *getValue(const char *name) = 0;
-	virtual bool setValue(const char *name, const char *value) = 0;
-	virtual vector<string> *listNames() = 0;
+	virtual char *getValue(const char *name);
+	virtual bool setValue(const char *name, const char *value);
+	virtual vector<string> *listNames();
 
 protected:
 	static log4cxx::LoggerPtr logger;
