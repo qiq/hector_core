@@ -364,7 +364,7 @@ void Processor::runThread(int id) {
 			}
 			if (n == 0 && activeResources == maxRequests)
 				break;	// cancelled
-			// TODO: use cyclic buffer instead of copying
+			// TODO: maybe use cyclic buffer instead of copying?
 			for (int i = 0; i < finishedResources-n; i++) {
 				outputResources[i] = outputResources[n+i];
 			}

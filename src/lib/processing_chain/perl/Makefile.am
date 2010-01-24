@@ -8,14 +8,14 @@ BUILT_SOURCES =
 if WITH_SWIG
 if WITH_PERL
 
-modulesdir = $(pkglibdir)/modules/perl
+perldir = $(pkglibdir)/perl
 
 BUILT_SOURCES += RPCMessage_wrap.cc RPCMessage.pm
 RPCMessage_wrap.cc RPCMessage.pm: ../RPCMessage.i
 	$(SWIG) -c++ -perl -o $@ $<
 
-modules_SCRIPTS = RPCMessage.pm
-modules_LTLIBRARIES = RPCMessage.la
+perl_SCRIPTS = perl_module.pl RPCMessage.pm
+perl_LTLIBRARIES = RPCMessage.la
 RPCMessage_la_SOURCES = \
 	RPCMessage_wrap.cc
 

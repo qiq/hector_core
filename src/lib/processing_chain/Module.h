@@ -21,12 +21,20 @@ typedef enum {
 	MODULE_SELECT = 4
 } module_t;
 
+// used for non-C++ and remote modules
+typedef struct {
+	uint8_t type;
+	uint32_t id;
+	uint32_t length;
+} message_header_t;
+
 class Module : public Object {
 public:
 	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
 	virtual ~Module() {};
 	virtual bool Init(vector<pair<string, string> > *args) = 0;
 	virtual module_t getType() = 0;
+	virtual int busyResources() = 0;
 	virtual Resource *Process(Resource *resource);
 	virtual int Process(Resource **in, Resource **out);
 	virtual void SaveCheckpoint(const char *path, const char *id) = 0;

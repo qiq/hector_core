@@ -26,8 +26,10 @@ public:
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
 	virtual int getSize() = 0;
+//	virtual int getType() = 0;
 
 	Resource *getAnotherResource();
+	Resource *setAnotherResource(Resource *resource);
 
 	virtual string *serialize() = 0;
 	virtual bool deserialize(string *s) = 0;
@@ -44,6 +46,12 @@ inline Resource::~Resource() {
 
 inline Resource *Resource::getAnotherResource() {
 	return anotherResource;
+}
+
+inline Resource *Resource::setAnotherResource(Resource *resource) {
+	Resource *tmp = anotherResource;
+	anotherResource = resource;
+	return tmp;
 }
 
 #endif

@@ -24,6 +24,8 @@ public:
 	RPCMessage();
 	~RPCMessage();
 
+	hector::resources::RPCMessage getMethod();
+
 	// bool Init(vector<pair<string, string> >* c)
 	void set_Init(vector<pair<string, string> >* c);
 	const char *get_Init(int index, bool first);

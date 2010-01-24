@@ -103,7 +103,7 @@ void ProcessingChain::resume() {
 void ProcessingChain::createCheckpoint() {
 	// for all modules try to create a checkpoint
 	for (unsigned i = 0; i < processors.size(); i++) {
-		processors[i]->createCheckpoint();
+		//TODO processors[i]->createCheckpoint();
 	}
 }
 

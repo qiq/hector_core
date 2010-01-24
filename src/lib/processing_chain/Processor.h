@@ -42,7 +42,7 @@ public:
 	bool Init(Config *config);
 	bool Connect(); // connect processors to other processors
 	bool Running();
-	bool appendResource(Resource *r, bool sleep); // process resource and append it to other queues
+	bool appendResource(Resource *r, bool sleep); // process resource and append it to other resources' queues
 	void runThread(int id);
 	void start();
 	void stop();

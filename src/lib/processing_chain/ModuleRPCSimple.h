@@ -12,14 +12,17 @@ using namespace std;
 namespace stdext = ::__gnu_cxx;
 
 class ModuleRPCSimple : public Module {
-	const char *path;
-	const char **args;
+private:
+	ExternalProcess *process;
 
-	pthread_key_t buffer_key;
+	int messageId;
+
+	static log4cxx::LoggerPtr logger;
 public:
-	ModuleRPCSimple();
+	ModuleRPCSimple(ObjectRegistry *objects, const char *id): Module(objects, id) {};
 	~ModuleRPCSimple();
 	bool Init(vector<pair<string, string> > *args);
+	module_t getType();
 	Resource *Process(Resource *resource);
 	void SaveCheckpoint(const char *path, const char *id);
 	void RestoreCheckpoint(const char *path, const char *id);
@@ -28,5 +31,9 @@ public:
 	bool setValue(const char *name, const char *value);
 	vector<string> *listNames();
 };
+
+inline module_t ModuleRPCSimple::getType() {
+	return MODULE_SIMPLE;
+}
 
 #endif

@@ -12,8 +12,9 @@ libhector_processing_chain_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
-	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc
-libhector_processing_chain_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
+	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc \
+	ModuleRPCSimple.h ModuleRPCSimple.cc
+libhector_processing_chain_la_CXXFLAGS = -I.. -I../../resources $(AM_CXXFLAGS)
 libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
 
 BUILT_SOURCES += RPCMessage.pb.h RPCMessage.pb.cc

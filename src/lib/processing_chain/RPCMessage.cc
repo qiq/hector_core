@@ -1,6 +1,5 @@
 
 #include "RPCMessage.h"
-#include "RPCMessage.pb.h"
 
 using namespace std;
 

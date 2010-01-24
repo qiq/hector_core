@@ -2,6 +2,7 @@
 #include "ExternalProcess.h"
 #include <errno.h>
 #include <string.h>	// for strerror()
+#include <stdlib.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -32,7 +33,7 @@ ExternalProcess::~ExternalProcess() {
 }
 
 
-bool ExternalProcess::Init(const char *path, const char *argv[]) {
+bool ExternalProcess::Init(const char *path, const char *argv[], const char *envv[]) {
 	int pipein[2];
 	int pipeout[2];
 	int pipeerr[2];
@@ -67,6 +68,15 @@ bool ExternalProcess::Init(const char *path, const char *argv[]) {
 		close(pipeerr[0]);
 		close(pipeerr[1]);
 
+		// set up environment
+		if (envv) {
+			for (int i = 0; envv[i]; i++) {
+				if (putenv(strdup(envv[i]))) {
+					LOG4CXX_WARN(logger, "Invalid environment varialble: " << envv[i]);
+				}
+			}
+		}
+
 		setsid();
 		if (execvp(path, (char * const*)argv) == -1) {
 			LOG4CXX_ERROR(logger, "Cannot exec: " << strerror(errno));
@@ -84,7 +94,7 @@ bool ExternalProcess::Init(const char *path, const char *argv[]) {
 	return true;
 }
 
-int ExternalProcess::readWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead) {
+int ExternalProcess::ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead) {
 	bool write_done = (writeBuffer == NULL || writeBufferLen == 0) ? true : false;
 	bool read_done = (readBuffer == NULL || readBufferLen == 0) ? true : false;
 	int read_bytes = 0;

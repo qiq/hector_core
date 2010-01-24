@@ -19,8 +19,8 @@ public:
 	ExternalProcess();
 	~ExternalProcess();
 
-	bool Init(const char *path, const char *argv[]);
-	int readWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true);
+	bool Init(const char *path, const char *argv[], const char *env[]);
+	int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true);
 };
 
 #endif

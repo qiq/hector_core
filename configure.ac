@@ -28,6 +28,12 @@ PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
 PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
 PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 0.22])
 
+# hack: protocol buffers need to be linked statically
+# http://groups.google.com/group/protobuf/msg/d4e3b2a967018a10
+xxx1=`echo $PROTOBUF_LIBS|sed -e 's,.*-L\([[^ ]]*\).*,\1,'`'/libprotobuf.a'
+xxx2=`echo $PROTOBUF_LIBS|sed -e "s,-lprotobuf,$xxx1,"`
+PROTOBUF_LIBS=`echo $xxx2|sed -e 's,\(.*\)\(-L[[^ ]]*\)\(.*\),\1\3,'`
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([arpa/inet.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/socket.h sys/time.h unistd.h])

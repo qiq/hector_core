@@ -2,6 +2,13 @@
  * Simple cyclic buffer implementation
  */
 
+#ifndef _CYCLICBUFFER_H_
+#define _CYCLICBUFFER_H_
+
+#include <config.h>
+
+using namespace std;
+
 template<class T>
 class CyclicBuffer {
 	int maxSize;
@@ -12,5 +19,47 @@ public:
 	CyclicBuffer(int size);
 	~CyclicBuffer();
 	bool push(const T &e);
-	bool shift(T &e);
+	T *shift();
+	T *get(int index);
 };
+
+template <class T>
+CyclicBuffer<T>::CyclicBuffer(int size) {
+	this->maxSize = size;
+	this->start = 0;
+	this->size = 0;
+	this->buffer = new T[size];
+}
+
+template <class T>
+CyclicBuffer<T>::~CyclicBuffer() {
+	delete[] buffer;
+}
+
+template <class T>
+bool CyclicBuffer<T>::push(const T *e) {
+	if (size == maxSize)
+		return false;
+	buffer[(start+size) % maxSize] = e;
+	++size;
+	return true;
+}
+
+template <class T>
+T *CyclicBuffer<T>::shift() {
+	if (size == 0)
+		return false;
+	e = buffer[start];
+	start = (start + 1) % maxSize;
+	--size;
+	return true;
+}
+
+template <class T>
+T *CyclicBuffer<T>::get(int index) {
+	if (size == 0)
+		return NULL;
+	return buffer[(start + index) % maxSize];
+}
+
+#endif

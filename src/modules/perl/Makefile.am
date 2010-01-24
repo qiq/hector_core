@@ -1,8 +1,8 @@
 if WITH_SWIG
 if WITH_PERL
 
-modulesdir = $(pkglibdir)/modules/perl
-modules_SCRIPTS = perl_module.pl DummyModule.pm
+modulesdir = $(pkglibdir)/perl/modules
+modules_SCRIPTS = DummyModule.pm
 
 endif
 endif
