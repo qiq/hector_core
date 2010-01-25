@@ -7,6 +7,6 @@ bin_SCRIPTS = client
 server_SOURCES = \
 	server.cc
 
-server_CXXFLAGS = -I../lib $(AM_CXXFLAGS)
+server_CXXFLAGS = $(AM_CXXFLAGS) -I../lib
 server_LDFLAGS = $(AM_LDFLAGS)
 server_LDADD = -lpthread -L../lib -lhector -lltdl

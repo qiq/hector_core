@@ -10,6 +10,7 @@
 
 #include <string>
 #include <log4cxx/logger.h>
+#include "../../resources/ResourceList.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ public:
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
 	virtual int getSize() = 0;
-//	virtual int getType() = 0;
+	virtual resource_t getType() = 0;
 
 	Resource *getAnotherResource();
 	Resource *setAnotherResource(Resource *resource);

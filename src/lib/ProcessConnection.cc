@@ -1,5 +1,5 @@
 
-#include "ExternalProcess.h"
+#include "ProcessConnection.h"
 #include <errno.h>
 #include <string.h>	// for strerror()
 #include <stdlib.h>
@@ -9,9 +9,9 @@
 #include <signal.h>
 #include <unistd.h>
 
-log4cxx::LoggerPtr ExternalProcess::logger(log4cxx::Logger::getLogger("lib.ExternalProcess"));
+log4cxx::LoggerPtr ProcessConnection::logger(log4cxx::Logger::getLogger("lib.ProcessConnection"));
 
-ExternalProcess::ExternalProcess() {
+ProcessConnection::ProcessConnection() {
 	stderr_buffer_len = 0;
 	pid = 0;
 	fdin = -1;
@@ -19,7 +19,7 @@ ExternalProcess::ExternalProcess() {
 	fderr = -1;
 }
 
-ExternalProcess::~ExternalProcess() {
+ProcessConnection::~ProcessConnection() {
 	if (fdin != -1)
 		close(fdin);
 	if (fdout != -1)
@@ -27,13 +27,13 @@ ExternalProcess::~ExternalProcess() {
 	if (fderr != -1)
 		close(fderr);
 	if (pid) {
-		readWrite(NULL, 0, NULL, 0, false);
+		ReadWrite(NULL, 0, NULL, 0, false);
 		kill(-pid, 9);
 	}
 }
 
 
-bool ExternalProcess::Init(const char *path, const char *argv[], const char *envv[]) {
+bool ProcessConnection::Init(const char *path, const char *argv[], const char *envv[]) {
 	int pipein[2];
 	int pipeout[2];
 	int pipeerr[2];
@@ -94,7 +94,7 @@ bool ExternalProcess::Init(const char *path, const char *argv[], const char *env
 	return true;
 }
 
-int ExternalProcess::ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead) {
+int ProcessConnection::ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead) {
 	bool write_done = (writeBuffer == NULL || writeBufferLen == 0) ? true : false;
 	bool read_done = (readBuffer == NULL || readBufferLen == 0) ? true : false;
 	int read_bytes = 0;

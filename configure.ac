@@ -223,6 +223,7 @@ AC_CONFIG_FILES([Makefile
 		src/lib/processing_chain/perl/Makefile
 		src/lib/processing_chain/java/Makefile
 		src/lib/processing_chain/python/Makefile
+		src/lib/perl/Makefile
 		src/servers/Makefile
 		src/servers/robot/Makefile
 		src/bin/Makefile

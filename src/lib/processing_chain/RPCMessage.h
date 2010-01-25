@@ -15,6 +15,13 @@
 
 using namespace std;
 
+// used for non-C++ and remote modules
+typedef struct {
+	uint8_t type;
+	uint32_t id;
+	uint32_t length;
+} message_header_t;
+
 class RPCMessage {
 protected:
 	hector::resources::RPCMessage m;
@@ -22,7 +29,7 @@ protected:
 	static log4cxx::LoggerPtr logger;
 public:
 	RPCMessage();
-	~RPCMessage();
+	~RPCMessage() {};
 
 	hector::resources::RPCMessage getMethod();
 

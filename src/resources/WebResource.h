@@ -29,14 +29,13 @@ public:
 	int getId();
 	void setId(int id);
 	int getSize();
+	resource_t getType();
 
 	void setURL(const char *url);
 	const char *getURL();
 
 	string *serialize();
 	bool deserialize(string *s);
-
-//	vector<string> *test();
 };
 
 inline int WebResource::getStatus() {
@@ -53,6 +52,10 @@ inline int WebResource::getId() {
 
 inline void WebResource::setId(int id) {
 	r.set_id(id);
+}
+
+inline resource_t WebResource::getType() {
+	return RESOURCE_WEB;
 }
 
 inline const char *WebResource::getURL() {

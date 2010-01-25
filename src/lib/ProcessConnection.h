@@ -1,10 +1,11 @@
-#ifndef _EXTERNAL_PROCESS_H_
-#define _EXTERNAL_PROCESS_H_
+#ifndef _PROCESS_CONNECTION_H_
+#define _PROCESS_CONNECTION_H_
 
 #include <log4cxx/logger.h>
 #include <unistd.h>
+#include "Connection.h"
 
-class ExternalProcess {
+class ProcessConnection : Connection {
 	pid_t pid;
 
 	int fdin;
@@ -16,8 +17,8 @@ class ExternalProcess {
 
         static log4cxx::LoggerPtr logger;
 public:
-	ExternalProcess();
-	~ExternalProcess();
+	ProcessConnection();
+	~ProcessConnection();
 
 	bool Init(const char *path, const char *argv[], const char *env[]);
 	int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true);

@@ -21,7 +21,5 @@ public:
 
         string *serialize();
         bool deserialize(string *s);
-
-//        vector<string> *test();
 };
 

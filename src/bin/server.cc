@@ -24,11 +24,11 @@ void printHelp() {
 	fprintf(stderr, "\
 usage: server [options] serverId\n\
 options:\n\
-  --config, -c\tConfig file path (config.xml)\n\
-  --foreground, -f\tDo not fork (0)\n\
-  --verbose, -v\t\t\tBe verbose\n\
-  --help, -h\t\t\tThis help\n\
-  --version, -V\t\t\tVersion information\n");
+  --config, -c		Config file path (config.xml)\n\
+  --foreground, -f	Do not fork (0)\n\
+  --verbose, -v		Be verbose\n\
+  --help, -h		This help\n\
+  --version, -V		Version information\n");
 	exit(EXIT_SUCCESS);
 }
 

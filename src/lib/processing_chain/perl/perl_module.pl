@@ -6,7 +6,7 @@ use Cwd qw(abs_path);
 
 # check command line
 if (@ARGV != 1) {
-	print STDERR "usage: perl-module.pl module_name\n";
+	print STDERR "usage: perl-module.pl module_name ...\n";
 	exit(1);
 }
 my $module = $ARGV[0];
