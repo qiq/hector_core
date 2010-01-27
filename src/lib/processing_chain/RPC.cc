@@ -2,6 +2,7 @@
  * External simple
  */
 
+#include <assert.h>
 #include "common.h"
 #include "RPC.h"
 
@@ -74,6 +75,7 @@ string *RPC::_Receive(int *type, int *id, bool lock) {
 		LOG4CXX_ERROR(logger, "Cannot read header");
 		return NULL;
 	}
+	assert(header.length > 0);
 	char *sin = new char[header.length];
 	if (connection->ReadWrite(NULL, 0, sin, header.length) != (int)header.length) {
 		if (lock)

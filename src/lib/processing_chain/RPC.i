@@ -15,3 +15,9 @@ public:
         string *SendReceive(int *REFERENCE, string *serialIn);
         bool SendReceiveMessage(RPCMessage *message);
 };
+
+%inline %{
+        void delete_string(string *s) {
+                delete s;
+        }
+%}

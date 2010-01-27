@@ -1,4 +1,4 @@
-package hector.resources;
+package hector;
 
 //option java_package = "com.example.tutorial";
 //option java_outer_classname = "AddressBookProtos";
@@ -13,8 +13,9 @@ message RPCMessage {
 		SET_VALUE = 4;
 		LIST_NAMES = 5;
 	}
-	required Method method = 1;
-	repeated string str_args = 2;
-	repeated fixed32 int_args = 3;
-	repeated bool bool_args = 4;
+	required int32 module_index = 1;
+	required Method method = 2;
+	repeated string str_args = 3;
+	repeated fixed32 int_args = 4;
+	repeated bool bool_args = 5;
 }

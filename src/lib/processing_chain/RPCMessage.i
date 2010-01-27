@@ -2,10 +2,23 @@
 #include "RPCMessage.h"
 %}
 
+%inline %{
+#define RPCMESSAGE_INIT                    0
+#define RPCMESSAGE_SAVE_CHECKPOINT         1
+#define RPCMESSAGE_RESTORE_CHECKPOINT      2
+#define RPCMESSAGE_GET_VALUE               3
+#define RPCMESSAGE_SET_VALUE               4
+#define RPCMESSAGE_LIST_NAMES              5
+%}
+
 class RPCMessage {
 public:
         RPCMessage();
         ~RPCMessage();
+
+        int getMethod();
+        int get_module_index();
+        void set_module_index(int index);
 
         // bool Init(vector<pair<string, string> >* c)
         void set_Init(vector<pair<string, string> >* c);

@@ -24,14 +24,16 @@ typedef struct {
 
 class RPCMessage {
 protected:
-	hector::resources::RPCMessage m;
+	hector::RPCMessage m;
 
 	static log4cxx::LoggerPtr logger;
 public:
 	RPCMessage();
 	~RPCMessage() {};
 
-	hector::resources::RPCMessage getMethod();
+	int getMethod();
+	int get_module_index();
+	void set_module_index(int index);
 
 	// bool Init(vector<pair<string, string> >* c)
 	void set_Init(vector<pair<string, string> >* c);
@@ -66,10 +68,22 @@ public:
 	bool deserialize(string *s);
 };
 
+inline int RPCMessage::getMethod() {
+	return m.method();
+}
+
+inline int RPCMessage::get_module_index() {
+	return m.module_index();
+}
+
+inline void RPCMessage::set_module_index(int index) {
+	m.set_module_index(index);
+}
+
 // bool Init(vector<pair<string, string> >* c)
 
 inline void RPCMessage::set_Init(vector<pair<string, string> >* c) {
-	m.set_method(hector::resources::RPCMessage::INIT);
+	m.set_method(hector::RPCMessage::INIT);
 	for (vector<pair<string, string> >::iterator iter = c->begin(); iter != c->end(); ++iter) {
 		m.add_str_args(iter->first);
 		m.add_str_args(iter->second);
@@ -83,75 +97,75 @@ inline const char *RPCMessage::get_Init(int index, bool first) {
 }
 
 inline void RPCMessage::set_response_Init(bool result) {
-	m.set_method(hector::resources::RPCMessage::INIT);
+	m.set_method(hector::RPCMessage::INIT);
 	m.add_bool_args(result);
 }
 
 inline bool RPCMessage::get_response_Init() {
-	assert(bool_args_size() == 1);
+	assert(m.bool_args_size() == 1);
 	return m.bool_args(0);
 }
 
 // void SaveCheckpoint(const char *path, const char *id)
 
 inline void RPCMessage::set_SaveCheckpoint(const char *path, const char *id) {
-	m.set_method(hector::resources::RPCMessage::SAVE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::SAVE_CHECKPOINT);
 	m.add_str_args(path);
 	m.add_str_args(id);
 }
 
 inline const char *RPCMessage::get_SaveCheckpoint(bool first) {
-	assert(m.str_args.size() == 2);
+	assert(m.str_args_size() == 2);
 	return m.str_args(first ? 0 : 1).c_str();
 }
 
 inline void RPCMessage::set_response_SaveCheckpoint() {
-	m.set_method(hector::resources::RPCMessage::SAVE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::SAVE_CHECKPOINT);
 }
 
 // void RestoreCheckpoint(const char *path, const char *id)
 
 inline void RPCMessage::set_RestoreCheckpoint(const char *path, const char *id) {
-	m.set_method(hector::resources::RPCMessage::RESTORE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::RESTORE_CHECKPOINT);
 	m.add_str_args(path);
 	m.add_str_args(id);
 }
 
 inline const char *RPCMessage::get_RestoreCheckpoint(bool first) {
-	assert(m.str_args.size() == 2);
+	assert(m.str_args_size() == 2);
 	return m.str_args(first ? 0 : 1).c_str();
 }
 
 inline void RPCMessage::set_response_RestoreCheckpoint() {
-	m.set_method(hector::resources::RPCMessage::RESTORE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::RESTORE_CHECKPOINT);
 }
 
 // const char *getValue(const char *name)
 
 inline void RPCMessage::set_getValue(const char *name) {
-	m.set_method(hector::resources::RPCMessage::GET_VALUE);
+	m.set_method(hector::RPCMessage::GET_VALUE);
 	m.add_str_args(name);
 }
 
 inline const char *RPCMessage::get_getValue() {
-	assert(m.str_args.size() == 1);
+	assert(m.str_args_size() == 1);
 	return m.str_args(0).c_str();
 }
 
 inline void RPCMessage::set_response_getValue(const char *name) {
-	m.set_method(hector::resources::RPCMessage::GET_VALUE);
+	m.set_method(hector::RPCMessage::GET_VALUE);
 	m.add_str_args(name);
 }
 
 inline const char *RPCMessage::get_response_getValue() {
-	assert(m.str_args.size() == 1);
+	assert(m.str_args_size() == 1);
 	return m.str_args(0).c_str();
 }
 
 // bool setValue(const char *name, const char *value)
 
 inline void RPCMessage::set_setValue(const char *name, const char *value) {
-	m.set_method(hector::resources::RPCMessage::SET_VALUE);
+	m.set_method(hector::RPCMessage::SET_VALUE);
 	m.add_str_args(name);
 	m.add_str_args(value);
 }
@@ -162,7 +176,7 @@ inline const char *RPCMessage::get_setValue(bool first) {
 }
 
 inline void RPCMessage::set_response_setValue(bool result) {
-	m.set_method(hector::resources::RPCMessage::SET_VALUE);
+	m.set_method(hector::RPCMessage::SET_VALUE);
 	m.add_bool_args(result);
 }
 
@@ -174,11 +188,11 @@ inline bool RPCMessage::get_response_setValue() {
 // vector<string> *listNames()
 
 inline void RPCMessage::set_listNames() {
-	m.set_method(hector::resources::RPCMessage::LIST_NAMES);
+	m.set_method(hector::RPCMessage::LIST_NAMES);
 }
 
 inline void RPCMessage::set_response_listNames(const char *name) {
-	m.set_method(hector::resources::RPCMessage::LIST_NAMES);
+	m.set_method(hector::RPCMessage::LIST_NAMES);
 	m.add_str_args(name);
 }
 

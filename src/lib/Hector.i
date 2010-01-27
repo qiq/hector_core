@@ -9,5 +9,6 @@
 %include StdioConnection.i
 %include processing_chain/RPC.i
 %include processing_chain/RPCMessage.i
+%include processing_chain/Resource.i
 %include ../resources/Resources.i
 %include ../resources/WebResource.i

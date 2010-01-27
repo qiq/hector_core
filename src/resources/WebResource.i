@@ -2,7 +2,7 @@
 #include "WebResource.h"
 %}
 
-class WebResource {
+class WebResource : public Resource {
 public:
         WebResource();
         ~WebResource();
