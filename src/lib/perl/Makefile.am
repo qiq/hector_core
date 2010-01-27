@@ -1,0 +1,26 @@
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I@PERL_INCLUDE_DIR@ -I.. -I../processing_chain -I../../resources
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-version
+LIBS = ../libhector.la
+AM_LIBTOOLFLAGS = --tag=disable-static
+
+BUILT_SOURCES =
+
+if WITH_SWIG
+if WITH_PERL
+
+perldir = $(pkglibdir)/perl
+
+perl_SCRIPTS = perl_module.pl Hector.pm
+perl_LTLIBRARIES = Hector.la
+
+BUILT_SOURCES += Hector_wrap.cc Hector.pm
+Hector_wrap.cc Hector.pm: ../Hector.i
+	$(SWIG) -c++ -perl -o $@ $<
+
+Hector_la_SOURCES = \
+	Hector_wrap.cc
+
+endif
+endif
+
+CLEANFILES = $(BUILT_SOURCES)

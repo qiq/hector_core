@@ -4,7 +4,7 @@
 #include <log4cxx/logger.h>
 #include "Connection.h"
 
-class StdioConnection : Connection {
+class StdioConnection : public Connection {
         static log4cxx::LoggerPtr logger;
 public:
 	StdioConnection();

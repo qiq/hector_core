@@ -1,5 +1,3 @@
-SUBDIRS = . perl java python
-
 noinst_LTLIBRARIES = libhector_processing_chain.la
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@

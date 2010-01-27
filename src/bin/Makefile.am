@@ -8,5 +8,5 @@ server_SOURCES = \
 	server.cc
 
 server_CXXFLAGS = $(AM_CXXFLAGS) -I../lib
-server_LDFLAGS = $(AM_LDFLAGS)
-server_LDADD = -lpthread -L../lib -lhector -lltdl
+server_LDFLAGS = $(AM_LDFLAGS) -L../lib
+server_LDADD = -lhector -lpthread -lltdl

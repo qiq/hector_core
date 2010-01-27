@@ -7,7 +7,7 @@ public:
 	~Connection() {};
 
 	virtual bool Init() {};
-	virtual int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true) = 0;
+	virtual int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true) {};
 };
 
 #endif

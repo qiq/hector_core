@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "Connection.h"
 
-class ProcessConnection : Connection {
+class ProcessConnection : public Connection {
 	pid_t pid;
 
 	int fdin;

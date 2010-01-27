@@ -1,8 +1,4 @@
-%module WebResource
-
 %{
-#undef New // protocol buffers + SWIG interaction
-#define SWIG_FILE_WITH_INIT // for Python
 #include "WebResource.h"
 %}
 
@@ -22,4 +18,3 @@ public:
         string *serialize();
         bool deserialize(string *s);
 };
-
