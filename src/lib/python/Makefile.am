@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I@PYTHON_INCLUDE_DIR@ -I.. -I../processing_chain -I../../resources
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-version
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ @PYTHON_CFLAGS@ -I.. -I../processing_engine -I../../resources
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ @PYTHON_LDFLAGS@ -module -avoid-version
 LIBS = ../libhector.la
 AM_LIBTOOLFLAGS = --tag=disable-static
 
@@ -8,7 +8,7 @@ BUILT_SOURCES =
 if WITH_SWIG
 if WITH_PYTHON
 
-pythondir = $(pkglibdir)/python
+pythondir = $(pkglibdir)/modules/python
 
 python_SCRIPTS = Hector.py
 python_LTLIBRARIES = _Hector.la

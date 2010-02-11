@@ -10,3 +10,5 @@ server_SOURCES = \
 server_CXXFLAGS = $(AM_CXXFLAGS) -I../lib
 server_LDFLAGS = $(AM_LDFLAGS) -L../lib
 server_LDADD = -lhector -lpthread -lltdl
+
+EXTRA_DIST = ${bin_SCRIPTS}

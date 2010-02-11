@@ -10,6 +10,7 @@ libhector_processing_engine_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
+	Resource.h \
 	RPC.h RPC.cc \
 	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc \
 	RPCSimpleModule.h RPCSimpleModule.cc \
@@ -34,6 +35,6 @@ RPCMessage.pb.cc RPCMessage.pb.h: RPCMessage.proto
 	$(PROTOC) RPCMessage.proto --cpp_out=.
 
 # SWIG interface
-EXTRA_DIST = RPC.i RPCMessage.i
+EXTRA_DIST = RPC.i RPCMessage.i Resource.i RPCMessage.proto
 
 CLEANFILES = $(BUILT_SOURCES)

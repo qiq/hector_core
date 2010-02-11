@@ -1,4 +1,4 @@
-SUBDIRS = server processing_engine . perl
+SUBDIRS = server processing_engine . perl java python
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@
@@ -20,4 +20,4 @@ libhector_la_LIBADD = server/libhector_server.la processing_engine/libhector_pro
 libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS) -lltdl
 
 # SWIG interface
-EXTRA_DIST = Connection.i StdioConnection.i
+EXTRA_DIST = Connection.i StdioConnection.i Hector.i

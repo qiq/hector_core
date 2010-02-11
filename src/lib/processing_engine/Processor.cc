@@ -13,7 +13,7 @@
 #include "PerlModule.h"
 #include "ProcessConnection.h"
 #include "Processor.h"
-#include "RemoteConnection.h"
+///#include "RemoteConnection.h"
 #include "RPC.h"
 #include "RPCSimpleModule.h"
 #include "RPCMultiModule.h"

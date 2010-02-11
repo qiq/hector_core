@@ -10,7 +10,7 @@ if WITH_PERL
 
 perldir = $(pkglibdir)/modules/perl
 
-perl_SCRIPTS = perl_module.pl Hector.pm
+perl_SCRIPTS = Hector.pm
 perl_LTLIBRARIES = Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.pm
