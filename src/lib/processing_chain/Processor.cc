@@ -10,7 +10,12 @@
 #include <string.h>
 #include <ltdl.h>
 #include "common.h"
+#include "ProcessConnection.h"
 #include "Processor.h"
+#include "RemoteConnection.h"
+#include "RPC.h"
+#include "RPCSimpleModule.h"
+#include "RPCMultiModule.h"
 #include "LibraryLoader.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_chain.Processor"));
@@ -60,20 +65,131 @@ bool Processor::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/modules/module/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
+		// Prepare for local process optimization: in case we run
+		// several local-process modules of the same type/ref, we run
+		// only one language stub and process resources without
+		// unnecessary (de)serialization
+		vector<string> list;
+		vector<int> index;
+		char *prev_type = NULL;
+		char *prev_ref = NULL;
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *mid = iter->c_str();
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@name", mid);
+			char *name = config->getFirstValue(buffer);
+			if (name) {
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@type", mid);
+				char *type = config->getFirstValue(buffer);
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@ref", mid);
+				char *ref = config->getFirstValue(buffer);
+				if (prev_type && !strcmp(prev_type, type) && prev_ref && !strcmp(prev_ref, ref)) {
+					int i = index.back()+1;
+					list.push_back("");
+					list[list.size()-1-i].append(" ");
+					list[list.size()-1-i].append(name);
+					index.push_back(i);
+				} else {
+					list.push_back(name);
+					index.push_back(0);
+				}
+				free(prev_type);
+				free(prev_ref);
+				prev_type = type;
+				prev_ref = ref;
+				free(name);
+			} else {
+				list.push_back("");
+				index.push_back(0);
+				free(prev_type);
+				free(prev_ref);
+				prev_type = NULL;
+				prev_ref = NULL;
+			}
+		}
+		free(prev_type);
+		free(prev_ref);
+
+		int idx = 0;
+		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
+			const char *mid = iter->c_str();
+			Module *module = NULL;
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/lib/@name", mid);
 			s = config->getFirstValue(buffer);
-			if (!s) {
-				LOG4CXX_ERROR(logger, "Module/lib not found: " << mid);
-				return false;
-			}
-			snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-			free(s);
-			Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))LibraryLoader::loadLibrary(buffer, "create");
-			if (!create) {
-				LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
-				return false;
+			if (s) {
+				// C++ library module
+				snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
+				free(s);
+				Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))LibraryLoader::loadLibrary(buffer, "create");
+				if (!create) {
+					LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
+					return false;
+				}
+				for (int i = 0; i < nThreads; ++i) {
+					Module *m = (*create)(objects, mid);
+					modules[i].push_back(m);
+				}
+			} else {
+				const char *lr;
+				Connection *connection;
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@name", mid);
+				s = config->getFirstValue(buffer);
+				if (s) {
+					// local non-C++ module (Perl, Java, Python, ...)
+					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@ref", mid);
+					char *ref = config->getFirstValue(buffer);
+					if (!ref) {
+						LOG4CXX_ERROR(logger, "Module/local/ref not found: " << buffer);
+						return false;
+					}
+					if (index[idx] != 0) {
+						
+					}
+					connection = new ProcessConnection();
+					// process ref (if necessary)
+					//if (!connection->Init(TODO))
+					//	return false;
+					lr = "local";
+					free(ref);
+					free(s);
+				} else {
+					// remote (send resources to defined host/port)
+					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@host", mid);
+					char *host = config->getFirstValue(buffer);
+					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@port", mid);
+					char *port = config->getFirstValue(buffer);
+					if (!host || !port) {
+						LOG4CXX_ERROR(logger, "Module/remote/port or host not found: " << buffer);
+						return false;
+					}
+					int p = atoi(port);
+					//connection = new RemoteConnection();
+					//if (!static_cast<RemoteConnection*>(connection)->Init(host, p))
+					//	return false;
+					lr = "remote";
+					free(port);
+					free(host);
+				}
+				RPC *rpc = new RPC(connection);
+
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/%s/@type", mid, lr);
+				char *type = config->getFirstValue(buffer);
+				bool simple = true;
+				if (type) {
+					if (!strcmp(type, "multi"))
+						simple = false;
+					free(type);
+				}
+
+				for (int i = 0; i < nThreads; ++i) {
+					Module *m;
+#if 0
+					if (simple)
+						m = new RPCSimpleModule(objects, mid, rpc);
+					else
+						m = new RPCMultiModule(objects, mid, rpc);
+#endif
+					modules[i].push_back(m);
+				}
 			}
 			// create name-value argument pairs
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", getId());
@@ -89,12 +205,12 @@ bool Processor::Init(Config *config) {
 			delete names;
 
 			for (int i = 0; i < nThreads; ++i) {
-				Module *m = (*create)(objects, mid);
-				if (!m->Init(c))
+				if (!modules[i].back()->Init(c))
 					return false;
-				modules[i].push_back(m);
 			}
 			delete c;
+
+			++idx;
 		}
 		delete v;
 	}
@@ -421,7 +537,7 @@ void Processor::runThread(int id) {
 	}
 }
 
-void Processor::start() {
+void Processor::Start() {
 	running = true;
 	threads = new pthread_t[nThreads];
 
@@ -435,7 +551,7 @@ void Processor::start() {
 	}
 }
 
-void Processor::stop() {
+void Processor::Stop() {
 	runningLock.lock();
 	running = false;
 	runningLock.unlock();
@@ -450,11 +566,11 @@ void Processor::stop() {
 	threads = NULL;
 }
 
-void Processor::pause() {
+void Processor::Pause() {
 	queue->pause();
 }
 
-void Processor::resume() {
+void Processor::Resume() {
 	queue->resume();
 }
 

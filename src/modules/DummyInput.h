@@ -11,17 +11,11 @@
 
 class DummyInput : public Module {
 public:
-	DummyInput(ObjectRegistry *objects, const char *id): Module(objects, id) {};
+	DummyInput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {};
 	~DummyInput() {};
 	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
 	Resource *Process(Resource *resource);
-	void SaveCheckpoint(const char *path, const char *id);
-	void RestoreCheckpoint(const char *path, const char *id);
-
-	char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
 };
 
 inline module_t DummyInput::getType() {

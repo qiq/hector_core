@@ -30,7 +30,7 @@ bool RPC::_Send(int type, int id, string *serialIn, bool lock) {
 		LOG4CXX_ERROR(logger, "Cannot write header");
 		return false;
 	}
-	if (connection->ReadWrite((char *)serialIn->c_str(), serialIn->length(), NULL, 0) != serialIn->length()) {
+	if (connection->ReadWrite((char *)serialIn->c_str(), serialIn->length(), NULL, 0) != (int)serialIn->length()) {
 		if (lock)
 			read_lock.unlock();
 		LOG4CXX_ERROR(logger, "Cannot write data");
@@ -53,7 +53,7 @@ bool RPC::_Send(int type, int *id, string *serialIn, bool lock) {
 		LOG4CXX_ERROR(logger, "Cannot write header");
 		return false;
 	}
-	if (connection->ReadWrite((char *)serialIn->c_str(), serialIn->length(), NULL, 0) != serialIn->length()) {
+	if (connection->ReadWrite((char *)serialIn->c_str(), serialIn->length(), NULL, 0) != (int)serialIn->length()) {
 		if (lock)
 			read_lock.unlock();
 		LOG4CXX_ERROR(logger, "Cannot write data");

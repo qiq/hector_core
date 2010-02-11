@@ -19,30 +19,10 @@ Resource *DummyOutput::Process(Resource *resource) {
 	return NULL;
 }
 
-void DummyOutput::SaveCheckpoint(const char *path, const char *id) {
-	// TODO
-}
-
-void DummyOutput::RestoreCheckpoint(const char *path, const char *id) {
-	// TODO
-}
-
-char *DummyOutput::getValue(const char *name) {
-	return NULL;
-}
-
-bool DummyOutput::setValue(const char *name, const char *value) {
-	return false;
-}
-
-vector<string> *DummyOutput::listNames() {
-	return new vector<string>();
-}
-
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id) {
-	return (Module*)new DummyOutput(objects, id);
+extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+	return (Module*)new DummyOutput(objects, id, threadIndex);
 }
 
 extern "C" void destroy(Module* p) {

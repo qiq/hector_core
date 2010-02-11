@@ -11,7 +11,7 @@ RobotHTTPServer::RobotHTTPServer(ObjectRegistry *objects) {
 	this->objects = objects;
 }
 
-bool RobotHTTPServer::handleRequest(SimpleHTTPConn *conn) {
+bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 	string method = conn->getRequestMethod();
 	string args = conn->getRequestArgs();
 	if (args.substr(0, 1) == "/")
@@ -29,7 +29,7 @@ bool RobotHTTPServer::handleRequest(SimpleHTTPConn *conn) {
 					conn->setResponseCode(200, "OK");
 					conn->appendResponseBody(value);
 				} else {
-					conn->errorResponse(400, "Object/property not found", "");
+					conn->ErrorResponse(400, "Object/property not found", "");
 				}
 				free(value);
 			} else {
@@ -44,7 +44,7 @@ bool RobotHTTPServer::handleRequest(SimpleHTTPConn *conn) {
 					delete names;
 				} else {
 					// object not found
-					conn->errorResponse(400, "Object not found", "");
+					conn->ErrorResponse(400, "Object not found", "");
 				}
 			}
 		} else {
@@ -71,12 +71,12 @@ bool RobotHTTPServer::handleRequest(SimpleHTTPConn *conn) {
 				if (objects->setObjectValue(object.c_str(), property.c_str(), value.c_str())) {
 					conn->setResponseCode(200, "OK");
 				} else {
-					conn->errorResponse(400, "Object/property not found", "");
+					conn->ErrorResponse(400, "Object/property not found", "");
 				}
 			}
 		} else {
 			// error: no object.property given
-			conn->errorResponse(400, "No object.property argument given", "");
+			conn->ErrorResponse(400, "No object.property argument given", "");
 		}
 		return true;
 	} else if (method == "SHUTDOWN") {

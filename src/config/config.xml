@@ -125,8 +125,9 @@
 	</Processor>
 
 	<Module id="external_test_module">
-		<!--lib name="modules/libmodule-external-simple.la"/-->
-		<lib name="DummySimple.pm" binary="perl"/>
+		<lib name="DummySimple.pm" type="perl"/>
+		<!--remote type="multi" host="xxx" port="yyy"/-->
+		<!--lib name="DummySimple.pm" type="remote" host="xxx" port="yyy"/-->
 	</Module>
 
 	<Processor id="save_resource">

@@ -6,8 +6,8 @@ public:
 	Connection() {};
 	~Connection() {};
 
-	virtual bool Init() {};
-	virtual int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true) {};
+	virtual bool Init() { return true; };
+	virtual int ReadWrite(const char *writeBuffer, int writeBufferLen, char *readBuffer, int readBufferLen, bool waitForRead = true) { return 0; };
 };
 
 #endif

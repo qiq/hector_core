@@ -33,7 +33,7 @@ SimpleHTTPConn::~SimpleHTTPConn() {
 	delete header_fields;
 }
 
-void SimpleHTTPConn::clear() {
+void SimpleHTTPConn::Clear() {
 	int preserve = request_body_length >= 0 ? (int)request_buffer.length()-request_body_offset - request_body_length : 0;
 
 	keep_alive = false;
@@ -62,7 +62,7 @@ bool SimpleHTTPConn::isKeepAlive() {
 	return keep_alive;
 }
 
-request_ready_t SimpleHTTPConn::parseRequestHeader() {
+request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 	// already processed
 	if (header_fields != NULL)
 		return PARSED;
@@ -150,9 +150,9 @@ request_ready_t SimpleHTTPConn::parseRequestHeader() {
 	return PARSED;
 }
 
-request_ready_t SimpleHTTPConn::requestReady() {
+request_ready_t SimpleHTTPConn::RequestReady() {
 	if (header_fields == NULL) {
-		request_ready_t r = parseRequestHeader();
+		request_ready_t r = ParseRequestHeader();
 		if (r != PARSED)
 			return r;
 	}
@@ -170,7 +170,7 @@ request_ready_t SimpleHTTPConn::requestReady() {
 
 #define TIMEOUT 30
 
-bool SimpleHTTPConn::readRequest() {
+bool SimpleHTTPConn::ReadRequest() {
 	while (true) {
 		// set timeout for reading 
 		fd_set recv_fd;
@@ -196,7 +196,7 @@ bool SimpleHTTPConn::readRequest() {
 		buffer[r] = '\0';
 		request_buffer += buffer;
 
-		request_ready_t	status = requestReady();
+		request_ready_t	status = RequestReady();
 		if (status == PARSED)
 			return true;
 		if (status == FAILED)
@@ -230,7 +230,7 @@ string SimpleHTTPConn::getRequestBody() {
 	return request_body_length >= 0 ? request_buffer.substr(request_body_offset, request_body_length) : request_buffer.substr(request_body_offset);
 }
 
-void SimpleHTTPConn::errorResponse(int code, const char *description, const char *message) {
+void SimpleHTTPConn::ErrorResponse(int code, const char *description, const char *message) {
 	setResponseCode(code, description);
 	char s[1000];
 	snprintf(s, sizeof(s), "<html><head><title>%d - %s</title></head><body>%s</body></html>\r\n", code, description, message);
@@ -256,7 +256,7 @@ void SimpleHTTPConn::appendResponseBody(const char *s, bool clear) {
 }
 
 
-void SimpleHTTPConn::sendResponse() {
+void SimpleHTTPConn::SendResponse() {
 	// construct response
 	char s[1024];
 	snprintf(s, sizeof(s), "HTTP/1.0 %d %s\r\n", response_code, response_str.c_str());

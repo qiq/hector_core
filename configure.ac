@@ -115,15 +115,18 @@ if test "x$SWIG" != x; then
 	if test "x$enable_perl" != xno; then
 		PERLB="x"
 		AX_PROG_PERL_VERSION([5.8.0])
+		PERL_CFLAGS=`perl -MExtUtils::Embed -e ccopts`
+		AC_SUBST(PERL_CFLAGS)
+		PERL_LDFLAGS=`perl -MExtUtils::Embed -e ldopts`
+		AC_SUBST(PERL_LDFLAGS)
 		current_CPPFLAGS="$CPPFLAGS"
-		PERL_INCLUDE_DIR=`$PERL -MConfig -e 'print $Config{archlib}."/CORE";'`
-		AC_SUBST(PERL_INCLUDE_DIR)
-		CPPFLAGS="-I$PERL_INCLUDE_DIR"
+		CPPFLAGS="$PERL_CFLAGS"
 		AC_CHECK_HEADERS([EXTERN.h perl.h],,
 			[AC_MSG_WARN([could not find perl.h. The Perl bindings will not be built.])
 			PERLB=
 			],
-			[[#include <EXTERN.h>]])
+			[[#include <EXTERN.h>]]
+		)
 		LIBS=''
 		CPPFLAGS="$current_CPPFLAGS"
 	fi
@@ -149,16 +152,19 @@ if test "x$SWIG" != x; then
 		  AC_MSG_ERROR([no jar binary in PATH, bindings will not be built])
 		fi
 		if test "x$JAVA" != x; then
-			current_CPPFLAGS="$CPPFLAGS"
 			if test "$CPPFLAGS" != ""; then
-				CPPFLAGS="-I$current_CPPFLAGS -I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
+				JAVA_CFLAGS="-I$current_CPPFLAGS -I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
 			else
-				CPPFLAGS="-I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
+				JAVA_CFLAGS="-I$JAVA_INCLUDE_DIR -I$JAVA_INCLUDE_DIR/$PLATFORM"
 			fi
+			AC_SUBST(JAVA_CFLAGS)
+			current_CPPFLAGS="$CPPFLAGS"
+			CPPFLAGS="$JAVA_CFLAGS"
 			AC_CHECK_HEADER(jni.h,,
-					[AC_MSG_WARN([could not find jni.h. The Java bindings will not be built.])
-			JAVA=
-			])
+				[AC_MSG_WARN([could not find jni.h. The Java bindings will not be built.])
+				JAVA=
+				]
+			)
 			CPPFLAGS="$current_CPPFLAGS"
 		fi
 	fi
@@ -186,20 +192,26 @@ if test "x$SWIG" != x; then
 			if test "$PYTHON_LIB_DIR" = ""; then
 				PYTHON_LIB_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBPL')"`
 			fi
+			PYTHON_CFLAGS="-I$PYTHON_INCLUDE_DIR"
+			AC_SUBST(PYTHON_CFLAGS)
+			PYTHON_LDFLAGS="-L$PYTHON_LIB_DIR"
+			AC_SUBST(PYTHON_LDFLAGS)
 			current_CPPFLAGS="$CPPFLAGS"
 			CPPFLAGS="-I$PYTHON_INCLUDE_DIR"
 			AC_CHECK_HEADER(Python.h,,
-					[AC_MSG_WARN([could not find Python.h. The Python bindings will not be built.])
-			PYTHON=
-			])
+				[AC_MSG_WARN([could not find Python.h. The Python bindings will not be built.])
+				PYTHON=
+				]
+			)
 			PYTHON_LIBNAME="python"
 			if test "$PLATFORM" = "linux"; then
 				PYTHON_LIBNAME="python$PYTHON_VERSION"
 			fi
 			AC_CHECK_LIB($PYTHON_LIBNAME, Py_Initialize,,
-					[AC_MSG_WARN([could not find the Python library. The Python bindings will not be built.])
-			PYTHON=
-			])
+				[AC_MSG_WARN([could not find the Python library. The Python bindings will not be built.])
+				PYTHON=
+				]
+			)
 			LIBS=''  # don't append -lpython here.
 			CPPFLAGS="$current_CPPFLAGS"
 		fi

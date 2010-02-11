@@ -1,23 +1,23 @@
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I@JAVA_INCLUDE_DIR@ -I@JAVA_INCLUDE_DIR@/@PLATFORM@ -I.. -I../processing_chain -I../../resources
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @JAVA_LIB_DIR@
 
 BUILT_SOURCES =
 
 if WITH_SWIG
 if WITH_JAVA
 
-BUILT_SOURCES += WebResource_wrap.cc
-WebResource_wrap.cc: ../WebResource.i
+BUILT_SOURCES += Hector_wrap.cc
+Hector_wrap.cc: ../Hector.i
 	$(SWIG) -c++ -java -o $@ $<
 
-lib_LTLIBRARIES = WebResource.la
-WebResource_la_SOURCES = \
-	WebResource_wrap.cc
-WebResource_la_LIBADD = ../libhector_resources.la
-WebResource_la_LDFLAGS = -module -avoid-version
+lib_LTLIBRARIES = Hector.la
+Hector_la_SOURCES = \
+	Hector_wrap.cc
+Hector_la_LIBADD = ../libhector.la
+Hector_la_LDFLAGS = -module -avoid-version
 
 endif
 endif
 
 clean-local:
-	rm -f WebResource_wrap.cc
+	rm -f Hector_wrap.cc

@@ -9,6 +9,7 @@
 
 #include <pthread.h>
 #include <string>
+#include <vector>
 #include <log4cxx/logger.h>
 #include "Config.h"
 #include "Object.h"
@@ -44,10 +45,10 @@ public:
 	bool Running();
 	bool appendResource(Resource *r, bool sleep); // process resource and append it to other resources' queues
 	void runThread(int id);
-	void start();
-	void stop();
-	void pause();
-	void resume();
+	void Start();
+	void Stop();
+	void Pause();
+	void Resume();
 
 	SyncQueue<Resource> *getQueue();
 

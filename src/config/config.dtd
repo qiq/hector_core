@@ -13,8 +13,7 @@
 
 <!ELEMENT lib		EMPTY >
 <!ATTLIST lib
-	name		CDATA		""
-	binary		CDATA		"" >
+	name		CDATA		#REQUIRED >
 
 <!ELEMENT threads	(#PCDATA) >
 
@@ -83,3 +82,13 @@
 <!ELEMENT Module	(lib,param*) >
 <!ATTLIST Module
 	id		ID		#REQUIRED >
+
+<!ELEMENT local		EMPTY >
+<!ATTLIST local
+	name		CDATA		#REQUIRED
+	ref		IDREF		#REQUIRED >
+
+<!ELEMENT remote	EMPTY >
+<!ATTLIST remote
+	host		CDATA		#REQUIRED
+	port		CDATA		#REQUIRED >

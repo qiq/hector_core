@@ -12,22 +12,16 @@
 
 log4cxx::LoggerPtr RPCSimpleModule::logger(log4cxx::Logger::getLogger("lib.processing_chain.RPCSimpleModule"));
 
-RPCSimpleModule::RPCSimpleModule(ObjectRegistry *objects, const char *id): Module(objects, id) {
-	rpc = NULL;
+RPCSimpleModule::RPCSimpleModule(ObjectRegistry *objects, const char *id, int threadIndex, RPC *rpc, int index): Module(objects, id, threadIndex) {
+	this->index = index;
+	this->rpc = rpc;
 }
 
 RPCSimpleModule::~RPCSimpleModule() {
 	delete rpc;
 }
 
-bool RPCSimpleModule::Init(vector<pair<string, string> > *args) {
-	LOG4CXX_ERROR(logger, "Init(args) not supported in this module");
-	return false;
-}
-
-bool RPCSimpleModule::Init(RPC *rpc, vector<pair<string, string> > *c) {
-	this->rpc = rpc;
-
+bool RPCSimpleModule::Init(vector<pair<string, string> > *c) {
 	bool result = false;
 	RPCMessage m;
 	m.set_Init(c);

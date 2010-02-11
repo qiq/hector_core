@@ -70,3 +70,6 @@ V externim modulu (simple)
 	- precti z pipe resource/rpcmessage
 	- zpracuj (vytvor spravny objekt v cilovem jazyce a zavolej Process(), pripadne zavolej metodu)
 	- zapis resource/rpcmessage
+
+
+perl -MExtUtils::Embed -e xsinit -- -o perlxsi.c

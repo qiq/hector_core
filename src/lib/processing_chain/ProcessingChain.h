@@ -17,9 +17,18 @@
 #include "Processor.h"
 
 class ProcessingChain : public Object {
+public:
+	ProcessingChain(ObjectRegistry *objects, const char *id);
+	~ProcessingChain();
+	bool Init(Config *config);
+	void Start();
+	void Stop();
+	void Pause();
+	void Resume();
+
+protected:
 	vector<Processor*> processors;
 
-	Lock propertyLock;
 	bool propRun;
 	bool propPause;
 
@@ -31,23 +40,43 @@ class ProcessingChain : public Object {
 	char *getPause(const char *name);
 	void setPause(const char *name, const char *value);
 
+	void StartSync();
+	void StopSync();
+	void PauseSync();
+	void ResumeSync();
+
 	void doPause();
 	void doResume();
 
-	static log4cxx::LoggerPtr logger;
-public:
-	ProcessingChain(ObjectRegistry *objects, const char *id);
-	~ProcessingChain();
-	bool Init(Config *config);
-	void start();
-	void stop();
-	void pause();
-	void resume();
-	void createCheckpoint();
+	char *getValueSync(const char *name);
+	bool setValueSync(const char *name, const char *value);
+	vector<string> *listNamesSync();
 
-	char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
+	static log4cxx::LoggerPtr logger;
 };
+
+inline void ProcessingChain::Start() {
+	DoLock();
+	StartSync();
+	DoUnlock();
+}
+
+inline void ProcessingChain::Stop() {
+	DoLock();
+	StopSync();
+	DoUnlock();
+}
+
+inline void ProcessingChain::Pause() {
+	DoLock();
+	PauseSync();
+	DoUnlock();
+}
+
+inline void ProcessingChain::Resume() {
+	DoLock();
+	ResumeSync();
+	DoUnlock();
+}
 
 #endif

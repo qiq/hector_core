@@ -23,22 +23,23 @@ typedef enum {
 
 class Module : public Object {
 public:
-	Module(ObjectRegistry *objects, const char *id): Object(objects, id) {};
+	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id), threadIndex(threadIndex) {};
 	virtual ~Module() {};
 	virtual bool Init(vector<pair<string, string> > *args) = 0;
 	virtual module_t getType() = 0;
+	int getThreadIndex();
 	//virtual int busyResources() = 0;
 	virtual Resource *Process(Resource *resource);
 	virtual int Process(Resource **in, Resource **out);
-	virtual void SaveCheckpoint(const char *path, const char *id) = 0;
-	virtual void RestoreCheckpoint(const char *path, const char *id) = 0;
-
-	virtual char *getValue(const char *name);
-	virtual bool setValue(const char *name, const char *value);
-	virtual vector<string> *listNames();
 
 protected:
+	int threadIndex;
+
 	static log4cxx::LoggerPtr logger;
 };
+
+inline int Module::getThreadIndex() {
+	return threadIndex;
+}
 
 #endif

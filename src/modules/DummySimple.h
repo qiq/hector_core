@@ -14,7 +14,14 @@
 #include "Module.h"
 
 class DummySimple : public Module {
-	Lock propertyLock;
+public:
+	DummySimple(ObjectRegistry *objects, const char *id, int threadIndex);
+	~DummySimple();
+	bool Init(vector<pair<string, string> > *params);
+	module_t getType();
+	Resource *Process(Resource *resource);
+
+protected:
 	char *dummy;
 	char *foo;
 
@@ -25,18 +32,13 @@ class DummySimple : public Module {
 	void setDummy(const char *value);
 	char *getFoo();
 	void setFoo(const char *value);
-public:
-	DummySimple(ObjectRegistry *objects, const char *id);
-	~DummySimple();
-	bool Init(vector<pair<string, string> > *params);
-	module_t getType();
-	Resource *Process(Resource *resource);
-	void SaveCheckpoint(const char *path, const char *id);
-	void RestoreCheckpoint(const char *path, const char *id);
 
-	char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
+	char *getValueSync(const char *name);
+	bool setValueSync(const char *name, const char *value);
+	vector<string> *listNamesSync();
+
+//	void SaveCheckpointSync(const char *path, const char *id);
+//	void RestoreCheckpointSync(const char *path, const char *id);
 };
 
 inline module_t DummySimple::getType() {

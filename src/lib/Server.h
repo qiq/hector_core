@@ -20,30 +20,26 @@
 using namespace std;
 
 class Server : public Object {
+public:
+	Server(const char *id);
+	~Server();
+	bool Init(Config *config);
+	void Start(bool wait);
+	void Stop();
+	void Pause();
+	void Resume();
+
+protected:
 	char *serverHost;
 	int serverPort;
 	int threads;
 	vector<ProcessingChain*> processingChains;
 	SimpleHTTPServer *simpleHTTPServer;
 
-	Lock propertiesLock;
 	bool waitForFinish;
 	bool isRunning;
 
 	static log4cxx::LoggerPtr logger;
-public:
-	Server(const char *id);
-	~Server();
-	bool Init(Config *config);
-	void start(bool wait);
-	void stop();
-	void pause();
-	void resume();
-	void createCheckpoint();
-
-	char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
 };
 
 #endif

@@ -1,3 +1,5 @@
+http://docs.bor.org.ua/eBooks/Perl/Manning.Extending_and_Embedding_Perl.2002.pdf
+
 TODO:
 	- do kazdeho header souboru vlozit include <config.h>
 	- preorganizovat header soubory a la featurama v *.{cc,h}

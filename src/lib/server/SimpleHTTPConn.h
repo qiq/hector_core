@@ -42,25 +42,25 @@ class SimpleHTTPConn {
 	string response_header;
 	string response_body;
 
-	request_ready_t parseRequestHeader();
-	request_ready_t requestReady();
+	request_ready_t ParseRequestHeader();
+	request_ready_t RequestReady();
 
 	static log4cxx::LoggerPtr logger;
 public:
 	SimpleHTTPConn(int sock);
 	~SimpleHTTPConn();
-	void clear();
+	void Clear();
 	bool isKeepAlive();
 
-	bool readRequest();
-	void sendResponse();
+	bool ReadRequest();
+	void SendResponse();
 
 	string getRequestMethod();
 	string getRequestArgs();
 	string getRequestHeaderField(string &field);
 	string getRequestBody();
 
-	void errorResponse(int code, const char *description, const char *message);
+	void ErrorResponse(int code, const char *description, const char *message);
 	void setResponseCode(int code, const char *description);
 	void appendResponseHeader(const char *s, bool clear = false);
 	void appendResponseBody(const char *s, bool clear = false);

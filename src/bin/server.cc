@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 		die("Cannot initialize server, sorry.\n");
 
 	// run server
-	server->start(true);
+	server->Start(true);
 
 	// TODO: daemon mode: http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
 
