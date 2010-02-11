@@ -1,2 +1,3 @@
 #!/bin/bash
-CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/
+# aclocal -I m4
+CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/hector

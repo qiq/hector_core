@@ -7,8 +7,12 @@
 
 #include <config.h>
 
+#ifdef HAVE_PERL_H
+
 #include <EXTERN.h>
 #include <perl.h>
+#undef New	// protocol buffers
+#undef Pause	// Processor
 
 #include "Module.h"
 
@@ -36,5 +40,19 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
+
+#else
+
+#include "Module.h"
+
+using namespace std;
+
+class PerlModule : public Module {
+public:
+	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {};
+	~PerlModule() {};
+};
+
+#endif
 
 #endif

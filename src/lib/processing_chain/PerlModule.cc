@@ -24,25 +24,6 @@ PerlModule::~PerlModule() {
 	free(name);
 }
 
-module_t PerlModule::getType() {
-	int result = 0;
-	DoLock();
-	dSP;
-	ENTER;
-        PUSHMARK(SP);
-        XPUSHs(ref);
-        PUTBACK;
-	int count = call_method("getType", G_SCALAR);
-	SPAGAIN;
-	if (count == 1)
-		result = POPi;
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-	DoUnlock();
-	return (module_t)result;
-}
-
 bool PerlModule::Init(vector<pair<string, string> > *c) {
 	// run Perl
 	vector<string> env;
@@ -105,6 +86,25 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	FREETMPS;
 	LEAVE;
 	return result == 1;
+}
+
+module_t PerlModule::getType() {
+	int result = 0;
+	DoLock();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	int count = call_method("getType", G_SCALAR);
+	SPAGAIN;
+	if (count == 1)
+		result = POPi;
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	DoUnlock();
+	return (module_t)result;
 }
 
 Resource *PerlModule::Process(Resource *resource) {

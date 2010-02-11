@@ -7,7 +7,13 @@
 log4cxx::LoggerPtr ObjectRegistry::logger(log4cxx::Logger::getLogger("lib.ObjectRegistry"));
 
 void ObjectRegistry::registerObject(Object *obj) {
-	objects[obj->getId()] = obj;
+	const char *id = obj->getId();
+	std::tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
+	if (iter != objects.end()) {
+		LOG4CXX_ERROR(logger, "Object " << id << " already defined");
+		return;
+	}
+	objects[id] = obj;
 }
 
 bool ObjectRegistry::unregisterObject(const char *id) {

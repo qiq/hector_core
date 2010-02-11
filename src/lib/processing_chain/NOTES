@@ -43,7 +43,7 @@ interni modul, parallel:
 
 		- LOCK(output_resources)
 		- zkopiruj z vystupniho bufferu do output_resources
-		- posli wakeup pro cekajici na zamku, pokud byl aspon jeden zkopirovany
+		- posli signal pro cekajici na zamku, pokud byl aspon jeden zkopirovany
 		- UNLOCK(output_resources)
 
 	- vlakno processoru:

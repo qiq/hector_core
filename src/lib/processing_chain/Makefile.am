@@ -13,7 +13,8 @@ libhector_processing_chain_la_SOURCES = \
 	RPC.h RPC.cc \
 	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc \
 	RPCSimpleModule.h RPCSimpleModule.cc \
-	RPCMultiModule.h RPCMultiModule.cc
+	RPCMultiModule.h RPCMultiModule.cc \
+	PerlModule.h
 
 libhector_processing_chain_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
 libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
@@ -21,8 +22,7 @@ libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
 if WITH_SWIG
 if WITH_PERL
 libhector_processing_chain_la_SOURCES += \
-	PerlModule.h PerlModule.cc \
-	perlxsi.c
+	PerlModule.cc perlxsi.c
 libhector_processing_chain_la_CXXFLAGS += @PERL_CFLAGS@
 libhector_processing_chain_la_CFLAGS = ${libhector_processing_chain_la_CXXFLAGS} @PERL_CFLAGS@
 libhector_processing_chain_la_LDFLAGS += @PERL_LDFLAGS@

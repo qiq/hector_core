@@ -10,6 +10,7 @@
 #include <string.h>
 #include <ltdl.h>
 #include "common.h"
+#include "PerlModule.h"
 #include "ProcessConnection.h"
 #include "Processor.h"
 #include "RemoteConnection.h"
@@ -65,110 +66,54 @@ bool Processor::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/modules/module/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
-		// Prepare for local process optimization: in case we run
-		// several local-process modules of the same type/ref, we run
-		// only one language stub and process resources without
-		// unnecessary (de)serialization
-		vector<string> list;
-		vector<int> index;
-		char *prev_type = NULL;
-		char *prev_ref = NULL;
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *mid = iter->c_str();
-			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@name", mid);
-			char *name = config->getFirstValue(buffer);
-			if (name) {
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@type", mid);
-				char *type = config->getFirstValue(buffer);
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@ref", mid);
-				char *ref = config->getFirstValue(buffer);
-				if (prev_type && !strcmp(prev_type, type) && prev_ref && !strcmp(prev_ref, ref)) {
-					int i = index.back()+1;
-					list.push_back("");
-					list[list.size()-1-i].append(" ");
-					list[list.size()-1-i].append(name);
-					index.push_back(i);
-				} else {
-					list.push_back(name);
-					index.push_back(0);
-				}
-				free(prev_type);
-				free(prev_ref);
-				prev_type = type;
-				prev_ref = ref;
-				free(name);
-			} else {
-				list.push_back("");
-				index.push_back(0);
-				free(prev_type);
-				free(prev_ref);
-				prev_type = NULL;
-				prev_ref = NULL;
-			}
-		}
-		free(prev_type);
-		free(prev_ref);
-
-		int idx = 0;
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			const char *mid = iter->c_str();
-			Module *module = NULL;
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/lib/@name", mid);
-			s = config->getFirstValue(buffer);
-			if (s) {
+			char *name = config->getFirstValue(buffer);
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/lib/@type", mid);
+			char *type = config->getFirstValue(buffer);
+			if (!type || !strcmp(type, "native")) {
 				// C++ library module
-				snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-				free(s);
-				Module *(*create)(ObjectRegistry*, const char*) = (Module*(*)(ObjectRegistry*, const char*))LibraryLoader::loadLibrary(buffer, "create");
+				snprintf(buffer, sizeof(buffer), "%s/modules/%s", baseDir, name);
+				free(name);
+				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(buffer, "create");
 				if (!create) {
 					LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
-					Module *m = (*create)(objects, mid);
+					Module *m = (*create)(objects, mid, i);
 					modules[i].push_back(m);
 				}
-			} else {
-				const char *lr;
-				Connection *connection;
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@name", mid);
-				s = config->getFirstValue(buffer);
-				if (s) {
-					// local non-C++ module (Perl, Java, Python, ...)
-					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/local/@ref", mid);
-					char *ref = config->getFirstValue(buffer);
-					if (!ref) {
-						LOG4CXX_ERROR(logger, "Module/local/ref not found: " << buffer);
-						return false;
-					}
-					if (index[idx] != 0) {
-						
-					}
-					connection = new ProcessConnection();
-					// process ref (if necessary)
-					//if (!connection->Init(TODO))
-					//	return false;
-					lr = "local";
-					free(ref);
-					free(s);
-				} else {
-					// remote (send resources to defined host/port)
-					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@host", mid);
-					char *host = config->getFirstValue(buffer);
-					snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@port", mid);
-					char *port = config->getFirstValue(buffer);
-					if (!host || !port) {
-						LOG4CXX_ERROR(logger, "Module/remote/port or host not found: " << buffer);
-						return false;
-					}
-					int p = atoi(port);
-					//connection = new RemoteConnection();
-					//if (!static_cast<RemoteConnection*>(connection)->Init(host, p))
-					//	return false;
-					lr = "remote";
-					free(port);
-					free(host);
+				// Perl module
+				free(type);
+				free(name);
+			} else if (!strcmp(type, "perl")) {
+				for (int i = 0; i < nThreads; ++i) {
+					Module *m = new PerlModule(objects, mid, i, name);
+					modules[i].push_back(m);
 				}
+				free(type);
+				free(name);
+			} else {
+				// TODO: remote module
+#if 0
+				// remote (send resources to defined host/port)
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@host", mid);
+				char *host = config->getFirstValue(buffer);
+				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@port", mid);
+				char *port = config->getFirstValue(buffer);
+				if (!host || !port) {
+					LOG4CXX_ERROR(logger, "Module/remote/port or host not found: " << buffer);
+					return false;
+				}
+				int p = atoi(port);
+				connection = new RemoteConnection();
+				if (!static_cast<RemoteConnection*>(connection)->Init(host, p))
+					return false;
+				lr = "remote";
+				free(port);
+				free(host);
 				RPC *rpc = new RPC(connection);
 
 				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/%s/@type", mid, lr);
@@ -182,14 +127,15 @@ bool Processor::Init(Config *config) {
 
 				for (int i = 0; i < nThreads; ++i) {
 					Module *m;
-#if 0
 					if (simple)
 						m = new RPCSimpleModule(objects, mid, rpc);
 					else
 						m = new RPCMultiModule(objects, mid, rpc);
-#endif
 					modules[i].push_back(m);
 				}
+#endif
+				LOG4CXX_ERROR(logger, "Unknown module type (" << name << ", " << type << ")");
+				return false;
 			}
 			// create name-value argument pairs
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", getId());
@@ -198,7 +144,7 @@ bool Processor::Init(Config *config) {
 			vector<string> *values = config->getValues(buffer);
 			assert(names->size() == values->size());
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
-			for (int i = 0; i < names->size(); i++) {
+			for (int i = 0; i < (int)names->size(); i++) {
 				c->push_back(pair<string, string>((*names)[i], (*values)[i]));
 			}
 			delete values;
@@ -209,8 +155,6 @@ bool Processor::Init(Config *config) {
 					return false;
 			}
 			delete c;
-
-			++idx;
 		}
 		delete v;
 	}

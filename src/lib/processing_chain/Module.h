@@ -14,19 +14,20 @@
 #include "Resource.h"
 
 typedef enum {
-	MODULE_INPUT =  0,
-	MODULE_OUTPUT = 1,
-	MODULE_SIMPLE = 2,
-	MODULE_MULTI =  3,
-	MODULE_SELECT = 4
+	MODULE_INVALID = 0,
+	MODULE_INPUT =  1,
+	MODULE_OUTPUT = 2,
+	MODULE_SIMPLE = 3,
+	MODULE_MULTI =  4,
+	MODULE_SELECT = 5 
 } module_t;
 
 class Module : public Object {
 public:
 	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id), threadIndex(threadIndex) {};
 	virtual ~Module() {};
-	virtual bool Init(vector<pair<string, string> > *args) = 0;
-	virtual module_t getType() = 0;
+	virtual bool Init(vector<pair<string, string> > *args);
+	virtual module_t getType();
 	int getThreadIndex();
 	//virtual int busyResources() = 0;
 	virtual Resource *Process(Resource *resource);
