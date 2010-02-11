@@ -6,33 +6,33 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "ProcessingChain.h"
+#include "ProcessingEngine.h"
 #include "Processor.h"
 
-log4cxx::LoggerPtr ProcessingChain::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingChain"));
+log4cxx::LoggerPtr ProcessingEngine::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingEngine"));
 
-ProcessingChain::ProcessingChain(ObjectRegistry *objects, const char *id): Object(objects, id) {
+ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	propRun = false;
 	propPause = false;
 
-	getters["run"] = &ProcessingChain::getRun;
-	setters["run"] = &ProcessingChain::setRun;
-	getters["pause"] = &ProcessingChain::getPause;
-	setters["pause"] = &ProcessingChain::setPause;
+	getters["run"] = &ProcessingEngine::getRun;
+	setters["run"] = &ProcessingEngine::setRun;
+	getters["pause"] = &ProcessingEngine::getPause;
+	setters["pause"] = &ProcessingEngine::setPause;
 }
 
-ProcessingChain::~ProcessingChain() {
+ProcessingEngine::~ProcessingEngine() {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
 		delete (*iter);
 	}
 }
 
-bool ProcessingChain::Init(Config *config) {
+bool ProcessingEngine::Init(Config *config) {
 	char buffer[1024];
 	vector<string> *v;
 
 	// create children: processors
-	snprintf(buffer, sizeof(buffer), "/Config/ProcessingChain[@id='%s']/processor/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "/Config/ProcessingEngine[@id='%s']/processor/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
 		// create and initialize all Processors
@@ -49,13 +49,13 @@ bool ProcessingChain::Init(Config *config) {
 		}
 		delete v;
 	} else {
-		LOG4CXX_INFO(logger, "No Processors for ProcessingChain: " << getId());
+		LOG4CXX_INFO(logger, "No Processors for ProcessingEngine: " << getId());
 	}
 
 	return true;
 }
 
-void ProcessingChain::StartSync() {
+void ProcessingEngine::StartSync() {
 	if (!propRun) {
 		for (unsigned i = 0; i < processors.size(); i++) {
 			processors[i]->Start();
@@ -64,7 +64,7 @@ void ProcessingChain::StartSync() {
 	}
 }
 
-void ProcessingChain::StopSync() {
+void ProcessingEngine::StopSync() {
 	if (propRun) {
 		if (propPause) {
 			doResume();
@@ -78,37 +78,37 @@ void ProcessingChain::StopSync() {
 	}
 }
 
-void ProcessingChain::PauseSync() {
+void ProcessingEngine::PauseSync() {
 	if (propRun && !propPause) {
 		doPause();
 		propPause = true;
 	}
 }
 
-void ProcessingChain::ResumeSync() {
+void ProcessingEngine::ResumeSync() {
 	if (propPause) {
 		doResume();
 		propPause = false;
 	}
 }
 
-//void ProcessingChain::createCheckpoint() {
+//void ProcessingEngine::createCheckpoint() {
 	// for all modules try to create a checkpoint
 //	for (unsigned i = 0; i < processors.size(); i++) {
 		//TODO processors[i]->createCheckpoint();
 //	}
 //}
 
-char *ProcessingChain::getValueSync(const char *name) {
+char *ProcessingEngine::getValueSync(const char *name) {
 	char *result = NULL;
-	std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)>::iterator iter = getters.find(name);
+	std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)>::iterator iter = getters.find(name);
 	if (iter != getters.end())
 		result = (this->*(iter->second))(name);
 	return result;
 }
 
-bool ProcessingChain::setValueSync(const char *name, const char *value) {
-	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*, const char*)>::iterator iter = setters.find(name);
+bool ProcessingEngine::setValueSync(const char *name, const char *value) {
+	std::tr1::unordered_map<string, void(ProcessingEngine::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(this->*(iter->second))(name, value);
 		return true;
@@ -116,23 +116,23 @@ bool ProcessingChain::setValueSync(const char *name, const char *value) {
 	return false;
 }
 
-vector<string> *ProcessingChain::listNamesSync() {
+vector<string> *ProcessingEngine::listNamesSync() {
 	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+	for (std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);
 	}
 	return result;
 }
 
-char *ProcessingChain::getRun(const char *name) {
+char *ProcessingEngine::getRun(const char *name) {
 	return bool2str(propRun);
 }
 
-char *ProcessingChain::getPause(const char *name) {
+char *ProcessingEngine::getPause(const char *name) {
 	return bool2str(propPause);
 }
 
-void ProcessingChain::setRun(const char *name, const char *value) {
+void ProcessingEngine::setRun(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		StopSync();
@@ -145,7 +145,7 @@ void ProcessingChain::setRun(const char *name, const char *value) {
 	}
 }
 
-void ProcessingChain::setPause(const char *name, const char *value) {
+void ProcessingEngine::setPause(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		ResumeSync();
@@ -158,13 +158,13 @@ void ProcessingChain::setPause(const char *name, const char *value) {
 	}
 }
 
-void ProcessingChain::doPause() {
+void ProcessingEngine::doPause() {
 	for (unsigned i = 0; i < processors.size(); i++) {
 		processors[i]->Pause();
 	}
 }
 
-void ProcessingChain::doResume() {
+void ProcessingEngine::doResume() {
 	for (unsigned i = 0; i < processors.size(); i++) {
 		processors[i]->Resume();
 	}

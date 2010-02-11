@@ -16,10 +16,10 @@
 #include "ObjectRegistry.h"
 #include "Processor.h"
 
-class ProcessingChain : public Object {
+class ProcessingEngine : public Object {
 public:
-	ProcessingChain(ObjectRegistry *objects, const char *id);
-	~ProcessingChain();
+	ProcessingEngine(ObjectRegistry *objects, const char *id);
+	~ProcessingEngine();
 	bool Init(Config *config);
 	void Start();
 	void Stop();
@@ -32,8 +32,8 @@ protected:
 	bool propRun;
 	bool propPause;
 
-	std::tr1::unordered_map<string, char*(ProcessingChain::*)(const char*)> getters;
-	std::tr1::unordered_map<string, void(ProcessingChain::*)(const char*, const char*)> setters;
+	std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)> getters;
+	std::tr1::unordered_map<string, void(ProcessingEngine::*)(const char*, const char*)> setters;
 
 	char *getRun(const char *name);
 	void setRun(const char *name, const char *value);
@@ -55,25 +55,25 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-inline void ProcessingChain::Start() {
+inline void ProcessingEngine::Start() {
 	DoLock();
 	StartSync();
 	DoUnlock();
 }
 
-inline void ProcessingChain::Stop() {
+inline void ProcessingEngine::Stop() {
 	DoLock();
 	StopSync();
 	DoUnlock();
 }
 
-inline void ProcessingChain::Pause() {
+inline void ProcessingEngine::Pause() {
 	DoLock();
 	PauseSync();
 	DoUnlock();
 }
 
-inline void ProcessingChain::Resume() {
+inline void ProcessingEngine::Resume() {
 	DoLock();
 	ResumeSync();
 	DoUnlock();

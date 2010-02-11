@@ -228,7 +228,7 @@ AC_CONFIG_FILES([Makefile
 		src/modules/python/Makefile
 		src/lib/Makefile
 		src/lib/server/Makefile
-		src/lib/processing_chain/Makefile
+		src/lib/processing_engine/Makefile
 		src/lib/perl/Makefile
 		src/lib/java/Makefile
 		src/lib/python/Makefile

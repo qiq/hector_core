@@ -7,8 +7,8 @@
 
 %include Connection.i
 %include StdioConnection.i
-%include processing_chain/RPC.i
-%include processing_chain/RPCMessage.i
-%include processing_chain/Resource.i
+%include processing_engine/RPC.i
+%include processing_engine/RPCMessage.i
+%include processing_engine/Resource.i
 %include ../resources/Resources.i
 %include ../resources/WebResource.i

@@ -14,7 +14,7 @@
 #include "Config.h"
 #include "Lock.h"
 #include "Object.h"
-#include "processing_chain/ProcessingChain.h"
+#include "processing_engine/ProcessingEngine.h"
 #include "server/SimpleHTTPServer.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ protected:
 	char *serverHost;
 	int serverPort;
 	int threads;
-	vector<ProcessingChain*> processingChains;
+	vector<ProcessingEngine*> processingEngines;
 	SimpleHTTPServer *simpleHTTPServer;
 
 	bool waitForFinish;

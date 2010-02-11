@@ -1,6 +1,6 @@
 SUBDIRS = perl java python
 
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I../lib -I../lib/processing_chain -I../resources
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I../lib -I../lib/processing_engine -I../resources
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 

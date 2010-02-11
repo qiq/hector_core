@@ -1,12 +1,12 @@
-noinst_LTLIBRARIES = libhector_processing_chain.la
+noinst_LTLIBRARIES = libhector_processing_engine.la
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 
 BUILT_SOURCES =
 
-libhector_processing_chain_la_SOURCES = \
-	ProcessingChain.h ProcessingChain.cc \
+libhector_processing_engine_la_SOURCES = \
+	ProcessingEngine.h ProcessingEngine.cc \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
@@ -16,16 +16,16 @@ libhector_processing_chain_la_SOURCES = \
 	RPCMultiModule.h RPCMultiModule.cc \
 	PerlModule.h
 
-libhector_processing_chain_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
-libhector_processing_chain_la_LDFLAGS = $(AM_LDFLAGS)
+libhector_processing_engine_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
+libhector_processing_engine_la_LDFLAGS = $(AM_LDFLAGS)
 
 if WITH_SWIG
 if WITH_PERL
-libhector_processing_chain_la_SOURCES += \
+libhector_processing_engine_la_SOURCES += \
 	PerlModule.cc perlxsi.c
-libhector_processing_chain_la_CXXFLAGS += @PERL_CFLAGS@
-libhector_processing_chain_la_CFLAGS = ${libhector_processing_chain_la_CXXFLAGS} @PERL_CFLAGS@
-libhector_processing_chain_la_LDFLAGS += @PERL_LDFLAGS@
+libhector_processing_engine_la_CXXFLAGS += @PERL_CFLAGS@
+libhector_processing_engine_la_CFLAGS = ${libhector_processing_engine_la_CXXFLAGS} @PERL_CFLAGS@
+libhector_processing_engine_la_LDFLAGS += @PERL_LDFLAGS@
 endif
 endif
 

@@ -16,7 +16,7 @@ Server::Server(const char *id) : Object(NULL, id) {
 
 Server::~Server() {
 	free(serverHost);
-	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
+	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		delete *iter;
 	}
 	delete simpleHTTPServer;
@@ -67,10 +67,10 @@ bool Server::Init(Config *config) {
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
-			ProcessingChain *p = new ProcessingChain(objects, pid);
+			ProcessingEngine *p = new ProcessingEngine(objects, pid);
 			if (!p->Init(config))
 				return false;
-			processingChains.push_back(p);
+			processingEngines.push_back(p);
 		}
 		delete v;
 	}
@@ -103,7 +103,7 @@ void Server::Start(bool wait) {
 	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
 		LOG4CXX_INFO(logger, "Stopping processing chains");
-		for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
+		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
 		LOG4CXX_INFO(logger, "Stopping server");
@@ -112,7 +112,7 @@ void Server::Start(bool wait) {
 
 void Server::Stop() {
 	LOG4CXX_INFO(logger, "Stopping processing chains");
-	for (vector<ProcessingChain*>::iterator iter = processingChains.begin(); iter != processingChains.end(); ++iter) {
+	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		(*iter)->Stop();
 	}
 	LOG4CXX_INFO(logger, "Stopping server");
