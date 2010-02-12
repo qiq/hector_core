@@ -56,27 +56,27 @@ protected:
 };
 
 inline void ProcessingEngine::Start() {
-	DoLock();
+	ObjectLock();
 	StartSync();
-	DoUnlock();
+	ObjectUnlock();
 }
 
 inline void ProcessingEngine::Stop() {
-	DoLock();
+	ObjectLock();
 	StopSync();
-	DoUnlock();
+	ObjectUnlock();
 }
 
 inline void ProcessingEngine::Pause() {
-	DoLock();
+	ObjectLock();
 	PauseSync();
-	DoUnlock();
+	ObjectUnlock();
 }
 
 inline void ProcessingEngine::Resume() {
-	DoLock();
+	ObjectLock();
 	ResumeSync();
-	DoUnlock();
+	ObjectUnlock();
 }
 
 #endif

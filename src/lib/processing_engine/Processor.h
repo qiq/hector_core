@@ -21,28 +21,12 @@
 #include "SyncQueue.h"
 
 class Processor : public Object {
-	int nThreads;
-	pthread_t *threads;
-
-	vector<Module*> *modules; 		// all modules
-	SyncQueue<Resource> *queue;		// input queue
-	vector<OutputFilter*> outputFilters;	// filters of output resources
-
-	Lock runningLock;
-	bool running;
-
-	std::tr1::unordered_map<string, char*(Processor::*)(const char*)> getters;
-	std::tr1::unordered_map<string, void(Processor::*)(const char*, const char*)> setters;
-
-	char *getQueueItems(const char *name);
-
-	static log4cxx::LoggerPtr logger;
 public:
 	Processor(ObjectRegistry *objects, const char *id);
 	~Processor();
 	bool Init(Config *config);
 	bool Connect(); // connect processors to other processors
-	bool Running();
+	bool isRunning();
 	bool appendResource(Resource *r, bool sleep); // process resource and append it to other resources' queues
 	void runThread(int id);
 	void Start();
@@ -52,9 +36,25 @@ public:
 
 	SyncQueue<Resource> *getQueue();
 
-	char *getValue(const char *name);
-	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
+	char *getQueueItems(const char *name);
+
+protected:
+	int nThreads;				// properties, locked by object lock
+	pthread_t *threads;
+	bool running;
+
+	vector<Module*> *modules; 		// all modules
+	SyncQueue<Resource> *queue;		// input queue
+	vector<OutputFilter*> outputFilters;	// filters of output resources
+
+	std::tr1::unordered_map<string, char*(Processor::*)(const char*)> getters;
+	std::tr1::unordered_map<string, void(Processor::*)(const char*, const char*)> setters;
+
+	char *getValueSync(const char *name);
+	bool setValueSync(const char *name, const char *value);
+	vector<string> *listNamesSync();
+
+	static log4cxx::LoggerPtr logger;
 };
 
 inline SyncQueue<Resource> *Processor::getQueue() {

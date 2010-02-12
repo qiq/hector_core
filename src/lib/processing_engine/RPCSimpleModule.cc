@@ -10,7 +10,7 @@
 #include "../../resources/Resources.h"
 #include "RPCSimpleModule.h"
 
-log4cxx::LoggerPtr RPCSimpleModule::logger(log4cxx::Logger::getLogger("lib.processing_chain.RPCSimpleModule"));
+log4cxx::LoggerPtr RPCSimpleModule::logger(log4cxx::Logger::getLogger("lib.processing_engine.RPCSimpleModule"));
 
 RPCSimpleModule::RPCSimpleModule(ObjectRegistry *objects, const char *id, int threadIndex, RPC *rpc, int index): Module(objects, id, threadIndex) {
 	this->index = index;

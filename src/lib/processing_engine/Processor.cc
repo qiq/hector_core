@@ -19,7 +19,7 @@
 #include "RPCMultiModule.h"
 #include "LibraryLoader.h"
 
-log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_chain.Processor"));
+log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_engine.Processor"));
 
 Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	threads = NULL;
@@ -34,6 +34,8 @@ Processor::~Processor() {
 			delete *iter;
 		}
 	}
+	delete[] modules;
+
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
 		delete *iter;
 	}
@@ -75,7 +77,6 @@ bool Processor::Init(Config *config) {
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
 				snprintf(buffer, sizeof(buffer), "%s/modules/%s", baseDir, name);
-				free(name);
 				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(buffer, "create");
 				if (!create) {
 					LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
@@ -138,14 +139,16 @@ bool Processor::Init(Config *config) {
 				return false;
 			}
 			// create name-value argument pairs
-			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", getId());
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", mid);
 			vector<string> *names = config->getValues(buffer);
-			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@value", getId());
+			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@value", mid);
 			vector<string> *values = config->getValues(buffer);
-			assert(names->size() == values->size());
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
-			for (int i = 0; i < (int)names->size(); i++) {
-				c->push_back(pair<string, string>((*names)[i], (*values)[i]));
+			if (names && values) {
+				assert(names->size() == values->size());
+				for (int i = 0; i < (int)names->size(); i++) {
+					c->push_back(pair<string, string>((*names)[i], (*values)[i]));
+				}
 			}
 			delete values;
 			delete names;
@@ -347,11 +350,11 @@ bool Processor::Connect() {
 	return true;
 }
 
-bool Processor::Running() {
+bool Processor::isRunning() {
 	bool result;
-	runningLock.lock();
+	ObjectLock();
 	result = running;
-	runningLock.unlock();
+	ObjectUnlock();
 	return result;
 }
 
@@ -402,7 +405,7 @@ void Processor::runThread(int id) {
 		int finishedResources = 0;
 		inputResources[0] = NULL;
 
-		while (Running()) {
+		while (isRunning()) {
 			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
 			int n = queue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
 			if (n == 0 && activeResources == 0)
@@ -444,17 +447,19 @@ void Processor::runThread(int id) {
 		// simple processing (no parallel or select)
 		Resource *resource = NULL;
 
-		while (Running()) {
+		while (isRunning()) {
 			if (firstModuleType != MODULE_INPUT) {
 				if (!(resource = queue->getItem(true)))
 					break;	// cancelled
 			}
 
-			for (vector<Module*>::iterator iter = modules[id].begin(); iter != modules[id].end(); ++iter) {
+			bool stop = false;
+			for (vector<Module*>::iterator iter = modules[id].begin(); !stop && iter != modules[id].end(); ++iter) {
 				switch ((*iter)->getType()) {
 				case MODULE_INPUT:
 					resource = (*iter)->Process(NULL);
-					assert(resource != NULL);
+					if (!resource)
+						stop = true;
 					break;
 				case MODULE_OUTPUT:
 					(void)(*iter)->Process(resource);
@@ -462,7 +467,8 @@ void Processor::runThread(int id) {
 					break;
 				case MODULE_SIMPLE:
 					resource = (*iter)->Process(resource);
-					assert(resource != NULL);
+					if (!resource)
+						stop = true;
 					break;
 				case MODULE_MULTI:
 				case MODULE_SELECT:
@@ -471,7 +477,11 @@ void Processor::runThread(int id) {
 					break;
 				}
 			}
-			if (resource != NULL) {
+			if (stop) {
+				LOG4CXX_ERROR(logger, "No resource, processor " << getId() << " (thread " << id << ") terminated");
+				break;
+			}
+			if (resource) {
 				if (!appendResource(resource, true))
 					break;	// cancelled
 				resource = NULL;
@@ -482,6 +492,7 @@ void Processor::runThread(int id) {
 }
 
 void Processor::Start() {
+	ObjectLock();
 	running = true;
 	threads = new pthread_t[nThreads];
 
@@ -493,21 +504,30 @@ void Processor::Start() {
 		t->id = i;
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)t);
 	}
+	LOG4CXX_INFO(logger, "Processor " << getId() << " started (" << nThreads << ")");
+	ObjectUnlock();
 }
 
 void Processor::Stop() {
-	runningLock.lock();
+	ObjectLock();
 	running = false;
-	runningLock.unlock();
+
+	pthread_t *copy = threads;
+	threads = NULL;
+	ObjectUnlock();
+
+	// already stopped
+	if (!copy)
+		return;
 
 	queue->cancelAll();
 
 	for (int i = 0; i < nThreads; i++) {
-		pthread_join(threads[i], NULL);
+		pthread_join(copy[i], NULL);
 	}
 
-	delete[] threads;
-	threads = NULL;
+	delete[] copy;
+	LOG4CXX_INFO(logger, "Processor " << getId() << " stopped (" << nThreads << ")");
 }
 
 void Processor::Pause() {
@@ -518,7 +538,7 @@ void Processor::Resume() {
 	queue->resume();
 }
 
-char *Processor::getValue(const char *name) {
+char *Processor::getValueSync(const char *name) {
 	char *result = NULL;
 	std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.find(name);
 	if (iter != getters.end())
@@ -526,11 +546,11 @@ char *Processor::getValue(const char *name) {
 	return result;
 }
 
-bool Processor::setValue(const char *name, const char *value) {
+bool Processor::setValueSync(const char *name, const char *value) {
 	return false;
 }
 
-vector<string> *Processor::listNames() {
+vector<string> *Processor::listNamesSync() {
 	vector<string> *result = new vector<string>();
 	for (std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);

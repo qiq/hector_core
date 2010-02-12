@@ -62,7 +62,7 @@ bool Server::Init(Config *config) {
 	free(s);
 
 	// create processing chain(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingChain/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingEngine/@ref", getId());
 	v = config->getValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {

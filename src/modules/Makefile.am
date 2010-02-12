@@ -5,7 +5,13 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-versio
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 modulesdir = $(pkglibdir)/modules
-modules_LTLIBRARIES = DummySimple.la DummyInput.la DummyOutput.la
+modules_LTLIBRARIES = TestInput.la TestOutput.la DummySimple.la DummyInput.la DummyOutput.la
+
+TestInput_la_SOURCES = \
+		TestInput.h TestInput.cc
+
+TestOutput_la_SOURCES = \
+		TestOutput.h TestOutput.cc
 
 DummySimple_la_SOURCES = \
 		DummySimple.h DummySimple.cc

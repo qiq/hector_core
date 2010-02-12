@@ -25,7 +25,7 @@ void printHelp() {
 usage: server [options] serverId\n\
 options:\n\
   --config, -c		Config file path (config.xml)\n\
-  --foreground, -f	Do not fork (0)\n\
+  --foreground, -f	Do not fork\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
   --version, -V		Version information\n");
@@ -116,10 +116,29 @@ int main(int argc, char *argv[]) {
 	if (!server->Init(config))
 		die("Cannot initialize server, sorry.\n");
 
+	if (!foreground) {
+		pid_t pid, sid;
+
+        	pid = fork();
+		if (pid < 0)
+			exit(EXIT_FAILURE);
+		if (pid > 0)
+			exit(EXIT_SUCCESS);
+
+		// Create a new SID for the child process
+		sid = setsid();
+		if (sid < 0) {
+			LOG4CXX_ERROR(logger, "Error calling setsid()");
+			exit(EXIT_FAILURE);
+		}
+
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		close(STDERR_FILENO);
+	}
+
 	// run server
 	server->Start(true);
-
-	// TODO: daemon mode: http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
 
 	delete server;
 	delete config;

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr RPCMessage::logger(log4cxx::Logger::getLogger("lib.processing_chain.RPCMessage"));
+log4cxx::LoggerPtr RPCMessage::logger(log4cxx::Logger::getLogger("lib.processing_engine.RPCMessage"));
 
 RPCMessage::RPCMessage() {
 	// check library vs header file versions

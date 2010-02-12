@@ -6,7 +6,7 @@
 #include "common.h"
 #include "RPC.h"
 
-log4cxx::LoggerPtr RPC::logger(log4cxx::Logger::getLogger("lib.processing_chain.RPC"));
+log4cxx::LoggerPtr RPC::logger(log4cxx::Logger::getLogger("lib.processing_engine.RPC"));
 
 RPC::RPC(Connection *connection) {
 	this->connection = connection;

@@ -7,7 +7,7 @@
 #include "../common.h"
 #include "PerlModule.h"
 
-log4cxx::LoggerPtr PerlModule::logger(log4cxx::Logger::getLogger("lib.processing_chain.PerlModule"));
+log4cxx::LoggerPtr PerlModule::logger(log4cxx::Logger::getLogger("lib.processing_engine.PerlModule"));
 
 EXTERN_C void xs_init (pTHX);
 
@@ -90,7 +90,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 
 module_t PerlModule::getType() {
 	int result = 0;
-	DoLock();
+	ObjectLock();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -103,14 +103,14 @@ module_t PerlModule::getType() {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
-	DoUnlock();
+	ObjectUnlock();
 	return (module_t)result;
 }
 
 Resource *PerlModule::Process(Resource *resource) {
 	int result = 0;
 	int ptr = (int)&resource;
-	DoLock();
+	ObjectLock();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -124,7 +124,7 @@ Resource *PerlModule::Process(Resource *resource) {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
-	DoUnlock();
+	ObjectUnlock();
 	return (Resource*)result;
 }
 

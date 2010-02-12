@@ -151,6 +151,9 @@ class SyncQueue {
 	int waitingWriters;
 	bool cancel;
 
+	// all data-driven operations must hold this lock for a moment: (purpose: pause/resume)
+	Lock pauseLock;
+
 	vector<SimpleQueue<T>*> queues;
 	std::tr1::unordered_map<int, SimpleQueue<T>*> priority2queue;
 public:
@@ -245,12 +248,12 @@ void SyncQueue<T>::clearCancel() {
 
 template <class T>
 void SyncQueue<T>::pause() {
-	queueLock.lock();
+	pauseLock.lock();
 }
 
 template <class T>
 void SyncQueue<T>::resume() {
-	queueLock.unlock();
+	pauseLock.unlock();
 }
 
 template <class T>
@@ -268,6 +271,8 @@ bool SyncQueue<T>::isSpace(T *r, int priority) {
 
 template <class T>
 bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
+	pauseLock.lock();
+	pauseLock.unlock();
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();
@@ -300,6 +305,8 @@ bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 
 template <class T>
 int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
+	pauseLock.lock();
+	pauseLock.unlock();
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();
@@ -349,6 +356,8 @@ bool SyncQueue<T>::isReady() {
 
 template <class T>
 T *SyncQueue<T>::getItem(bool sleep) {
+	pauseLock.lock();
+	pauseLock.unlock();
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();
@@ -379,6 +388,8 @@ T *SyncQueue<T>::getItem(bool sleep) {
 
 template <class T>
 int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
+	pauseLock.lock();
+	pauseLock.unlock();
 	queueLock.lock();
 	if (cancel) {
 		queueLock.unlock();

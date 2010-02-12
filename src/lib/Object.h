@@ -17,8 +17,8 @@ class Object {
 public:
 	Object(ObjectRegistry *objects, const char *id);
 	~Object();
-	void DoLock();
-	void DoUnlock();
+	void ObjectLock();
+	void ObjectUnlock();
 	const char *getId();
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
@@ -56,48 +56,48 @@ inline const char *Object::getId() {
 	return this->id;
 }
 
-inline void Object::DoLock() {
+inline void Object::ObjectLock() {
 	lock.lock();
 }
 
-inline void Object::DoUnlock() {
+inline void Object::ObjectUnlock() {
 	lock.unlock();
 }
 
 inline char *Object::getValue(const char *name) {
 	char *result;
-	DoLock();
+	ObjectLock();
 	result = getValueSync(name);
-	DoUnlock();
+	ObjectUnlock();
 	return result;
 }
 
 inline bool Object::setValue(const char *name, const char *value) {
 	bool result;
-	DoLock();
+	ObjectLock();
 	result = setValueSync(name, value);
-	DoUnlock();
+	ObjectUnlock();
 	return result;
 }
 
 inline vector<string> *Object::listNames() {
 	vector<string> *result;
-	DoLock();
+	ObjectLock();
 	result = listNamesSync();
-	DoUnlock();
+	ObjectUnlock();
 	return result;
 }
 
 inline void Object::SaveCheckpoint(const char *path, const char *id) {
-	DoLock();
+	ObjectLock();
 	SaveCheckpointSync(path, id);
-	DoUnlock();
+	ObjectUnlock();
 }
 
 inline void Object::RestoreCheckpoint(const char *path, const char *id) {
-	DoLock();
+	ObjectLock();
 	RestoreCheckpointSync(path, id);
-	DoUnlock();
+	ObjectUnlock();
 }
 
 #endif

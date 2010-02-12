@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example config file -->
+<!DOCTYPE Config SYSTEM "config.dtd">
+
+<Config baseDir="../src">
+
+	<Server id="test1">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<processingEngine ref="robot_processing_engine"/>
+		<logConfig>../test/test1.log.props</logConfig>
+		<lib name="servers/robot/Robot.la"/>
+	</Server>
+
+	<ProcessingEngine id="robot_processing_engine">
+		<processor ref="load_resource"/>
+		<processor ref="save_resource"/>
+	</ProcessingEngine>
+
+	<Processor id="load_resource">
+		<threads>1</threads>
+		<modules>
+			<module ref="load_resource_module"/>
+		</modules>
+		<output>
+			<nextProcessor ref="save_resource"/>
+		</output>
+	</Processor>
+
+	<Module id="load_resource_module">
+		<lib name="TestInput.la"/>
+		<param name="items" value="1000"/>
+	</Module>
+
+	<Processor id="save_resource">
+		<threads>1</threads>
+		<modules>
+			<module ref="save_resource_module"/>
+		</modules>
+		<input>
+			<queue/>
+		</input>
+	</Processor>
+
+	<Module id="save_resource_module">
+		<lib name="TestOutput.la"/>
+	</Module>
+
+</Config>

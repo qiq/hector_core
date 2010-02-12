@@ -4,19 +4,6 @@
 
 <Config baseDir="/home/qiq/qiq/work/hector/src">
 
-	<Binary id="perl">
-		<path>/usr/bin/perl</path>
-		<arg>modules/perl/perl_stub.pl</arg>
-		<env>PERL5LIB=...</env>
-	</Binary>
-
-	<Binary id="java">
-		<path>/usr/bin/java</path>
-		<arg>-jar</arg>
-		<arg>xxxx</arg>
-		<env>CLASSPATH=...</env>
-	</Binary>
-
 	<Server id="webserver">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
@@ -43,20 +30,20 @@
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
-		<processingChain ref="robot_processing_chain"/>
-		<!--processingChain ref="robot_processing_chain2"/-->
+		<processingEngine ref="robot_processing_engine"/>
+		<!--processingEngine ref="robot_processing_engine2"/-->
 		<logConfig>config/robot.log.props</logConfig>
-		<lib name="Robot.la"/>
+		<lib name="servers/robot/Robot.la"/>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>
 
-	<ProcessingChain id="robot_processing_chain">
+	<ProcessingEngine id="robot_processing_engine">
 		<processor ref="load_resource1"/>
 		<processor ref="load_resource2"/>
 		<processor ref="dummy"/>
 		<processor ref="save_resource"/>
-	</ProcessingChain>
+	</ProcessingEngine>
 
 	<Processor id="load_resource1">
 		<threads>5</threads>

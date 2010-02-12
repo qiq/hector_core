@@ -9,7 +9,7 @@
 #include "ProcessingEngine.h"
 #include "Processor.h"
 
-log4cxx::LoggerPtr ProcessingEngine::logger(log4cxx::Logger::getLogger("lib.processing_chain.ProcessingEngine"));
+log4cxx::LoggerPtr ProcessingEngine::logger(log4cxx::Logger::getLogger("lib.processing_enging.ProcessingEngine"));
 
 ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	propRun = false;

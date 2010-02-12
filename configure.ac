@@ -235,5 +235,6 @@ AC_CONFIG_FILES([Makefile
 		src/servers/Makefile
 		src/servers/robot/Makefile
 		src/bin/Makefile
+		test/Makefile
 ])
 AC_OUTPUT

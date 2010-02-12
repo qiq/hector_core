@@ -4,7 +4,7 @@
 #include "common.h"
 #include "Module.h"
 
-log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("lib.processing_chain.Module"));
+log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("lib.processing_engine.Module"));
 
 bool Module::Init(vector<pair<string, string> > *args) {
 	LOG4CXX_ERROR(logger, "Unimplemented module " << getId() << " (Init)");
