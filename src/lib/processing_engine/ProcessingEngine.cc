@@ -49,7 +49,7 @@ bool ProcessingEngine::Init(Config *config) {
 		}
 		delete v;
 	} else {
-		LOG4CXX_INFO(logger, "No Processors for ProcessingEngine: " << getId());
+		LOG_INFO(logger, "No Processors");
 	}
 
 	return true;
@@ -141,7 +141,7 @@ void ProcessingEngine::setRun(const char *name, const char *value) {
 		StartSync();
 		break;
 	default:
-		LOG4CXX_ERROR(logger, "Invalid 'run' value: " << value);
+		LOG_ERROR(logger, "Invalid 'run' value: " << value);
 	}
 }
 
@@ -154,7 +154,7 @@ void ProcessingEngine::setPause(const char *name, const char *value) {
 		PauseSync();
 		break;
 	default:
-		LOG4CXX_ERROR(logger, "Invalid 'pause' value: " << value);
+		LOG_ERROR(logger, "Invalid 'pause' value: " << value);
 	}
 }
 

@@ -18,7 +18,7 @@ Resource *DummyInput::Process(Resource *resource) {
 	char s[1024];
 	snprintf(s, sizeof(s), "http://example.org/?id=%ld", random());
 	wr->setURL(s);
-	LOG4CXX_INFO(logger, "Loading resource (URL: " << wr->getURL() << ")");
+	LOG_INFO(logger, "Loading resource (URL: " << wr->getURL() << ")");
 	return wr;
 }
 

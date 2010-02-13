@@ -49,7 +49,7 @@ bool Processor::Init(Config *config) {
 
 	char *baseDir = config->getFirstValue("/Config/@baseDir");
 	if (!baseDir) {
-		LOG4CXX_ERROR(logger, "Cannot find baseDir");
+		LOG_ERROR(logger, "Cannot find baseDir");
 		return false;
 	}
 
@@ -57,7 +57,7 @@ bool Processor::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1) {
-		LOG4CXX_ERROR(logger, "Invalid number of threads: " << s);
+		LOG_ERROR(logger, "Invalid number of threads: " << s);
 		return false;
 	}
 	free(s);
@@ -79,7 +79,7 @@ bool Processor::Init(Config *config) {
 				snprintf(buffer, sizeof(buffer), "%s/modules/%s", baseDir, name);
 				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(buffer, "create");
 				if (!create) {
-					LOG4CXX_ERROR(logger, "Module/lib not found: " << buffer);
+					LOG_ERROR(logger, "Module/lib not found: " << buffer);
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
@@ -105,7 +105,7 @@ bool Processor::Init(Config *config) {
 				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@port", mid);
 				char *port = config->getFirstValue(buffer);
 				if (!host || !port) {
-					LOG4CXX_ERROR(logger, "Module/remote/port or host not found: " << buffer);
+					LOG_ERROR(logger, "Module/remote/port or host not found: " << buffer);
 					return false;
 				}
 				int p = atoi(port);
@@ -135,7 +135,7 @@ bool Processor::Init(Config *config) {
 					modules[i].push_back(m);
 				}
 #endif
-				LOG4CXX_ERROR(logger, "Unknown module type (" << name << ", " << type << ")");
+				LOG_ERROR(logger, "Unknown module type (" << name << ", " << type << ")");
 				return false;
 			}
 			// create name-value argument pairs
@@ -176,7 +176,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &priority) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid priority: " << s);
+					LOG_ERROR(logger, "Invalid priority: " << s);
 					return false;
 				}
 				free(s);
@@ -187,7 +187,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxItems) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid maxItems: " << s);
+					LOG_ERROR(logger, "Invalid maxItems: " << s);
 					return false;
 				}
 				free(s);
@@ -198,7 +198,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxSize) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid maxSize: " << s);
+					LOG_ERROR(logger, "Invalid maxSize: " << s);
 					return false;
 				}
 				free(s);
@@ -224,7 +224,7 @@ bool Processor::Init(Config *config) {
 			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor[%d]/@ref", getId(), i+1);
 			char *ref = config->getFirstValue(buffer);
 			if (!ref) {
-				LOG4CXX_ERROR(logger, "Missing reference: " << s);
+				LOG_ERROR(logger, "Missing reference: " << s);
 				return false;
 			}
 			f->setProcessor(ref);
@@ -235,7 +235,7 @@ bool Processor::Init(Config *config) {
 			if (s) {
 				int priority;
 				if (sscanf(s, "%d", &priority) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid priority: " << s);
+					LOG_ERROR(logger, "Invalid priority: " << s);
 					return false;
 				}
 				f->setPriority(priority);
@@ -255,7 +255,7 @@ bool Processor::Init(Config *config) {
 			if (s) {
 				int filter;
 				if (sscanf(s, "%d", &filter) != 1) {
-					LOG4CXX_ERROR(logger, "Invalid filter: " << s);
+					LOG_ERROR(logger, "Invalid filter: " << s);
 					return false;
 				}
 				f->setFilter(filter);
@@ -272,46 +272,46 @@ bool Processor::Init(Config *config) {
 			switch ((*iter)->getType()) {
 			case MODULE_INPUT:
 				if (i != 0) {
-					LOG4CXX_ERROR(logger, "Input module must be first in a Processor: " << getId());
+					LOG_ERROR(logger, "Input module must be first");
 					return false;
 				}
 				if (queue->getQueuesCount() > 0) {
-					LOG4CXX_ERROR(logger, "queue and input module must not be used together: " << getId());
+					LOG_ERROR(logger, "queue and input module must not be used together");
 					return false;
 				}
 				break;
 			case MODULE_OUTPUT:
 				if (i != n-1) {
-					LOG4CXX_ERROR(logger, "Output module must be last in a Processor: " << getId());
+					LOG_ERROR(logger, "Output module must be last");
 					return false;
 				}
 				if (outputFilters.size() > 0) {
-					LOG4CXX_ERROR(logger, "nextProcessor and output module must not be used together: " << getId());
+					LOG_ERROR(logger, "nextProcessor and output module must not be used together");
 					return false;
 				}
 				break;
 			case MODULE_MULTI:
 			case MODULE_SELECT:
 				if (i != 0 && n == 1) {
-					LOG4CXX_ERROR(logger, "Multi/Select module must be the only one in a Processor: " << getId());
+					LOG_ERROR(logger, "Multi/Select module must be the only one in a Processor");
 					return false;
 				}
 				if (queue->getQueuesCount() == 0 || outputFilters.size() == 0) {
-					LOG4CXX_ERROR(logger, "No input or output queue defined: " << getId());
+					LOG_ERROR(logger, "No input or output queue defined");
 					return false;
 				}
 				break;
 			case MODULE_SIMPLE:
 				if (i == 0 && queue->getQueuesCount() == 0) {
-					LOG4CXX_ERROR(logger, "No input queue defined: " << getId());
+					LOG_ERROR(logger, "No input queue defined");
 					return false;
 				} else if (i == n-1 && outputFilters.size() == 0) {
-					LOG4CXX_ERROR(logger, "No output queue defined: " << getId());
+					LOG_ERROR(logger, "No output queue defined");
 					return false;
 				}
 				break;
 			default:
-				LOG4CXX_ERROR(logger, "Should not happen");
+				LOG_ERROR(logger, "Should not happen");
 				break;
 			}
 			i++;
@@ -331,18 +331,18 @@ bool Processor::Connect() {
 		assert(ref != NULL);
 		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
 		if (!p) {
-			LOG4CXX_ERROR(logger, "Processor not found: " << ref);
+			LOG_ERROR(logger, "Processor not found: " << ref);
 			return false;
 		}
 
 		SyncQueue<Resource> *q = p->getQueue();
 		if (!q) {
-			LOG4CXX_ERROR(logger, "No input queue defined for processor: " << ref);
+			LOG_ERROR(logger, "No input queue defined for processor: " << ref);
 			return false;
 		}
 
 		if (!q->hasQueue(priority)) {
-			LOG4CXX_ERROR(logger, "No input queue with priority " << priority << " for processor: " << ref);
+			LOG_ERROR(logger, "No input queue with priority " << priority << " for processor: " << ref);
 			return false;
 		}
 		(*iter)->setQueue(q);
@@ -390,7 +390,7 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 		}
 	}
 	if (!appended)
-		LOG4CXX_WARN(logger, "Lost resource (id: " /* FIXME << r->getId()*/ << ") in processor " << getId());
+		LOG_ERROR(logger, "Lost resource (id: " /* FIXME << r->getId()*/ << ")");
 
 	return (copied||appended);
 }
@@ -473,12 +473,12 @@ void Processor::runThread(int id) {
 				case MODULE_MULTI:
 				case MODULE_SELECT:
 				default:
-					LOG4CXX_ERROR(logger, "Should not happen");
+					LOG_ERROR(logger, "Should not happen");
 					break;
 				}
 			}
 			if (stop) {
-				LOG4CXX_ERROR(logger, "No resource, processor " << getId() << " (thread " << id << ") terminated");
+				LOG_ERROR(logger, "No resource, thread " << id << " terminated");
 				break;
 			}
 			if (resource) {
@@ -504,7 +504,7 @@ void Processor::Start() {
 		t->id = i;
 		pthread_create(&threads[i], NULL, run_processor_thread, (void *)t);
 	}
-	LOG4CXX_INFO(logger, "Processor " << getId() << " started (" << nThreads << ")");
+	LOG_INFO(logger, "Processor started (" << nThreads << ")");
 	ObjectUnlock();
 }
 
@@ -527,7 +527,7 @@ void Processor::Stop() {
 	}
 
 	delete[] copy;
-	LOG4CXX_INFO(logger, "Processor " << getId() << " stopped (" << nThreads << ")");
+	LOG_INFO(logger, "Processor stopped (" << nThreads << ")");
 }
 
 void Processor::Pause() {

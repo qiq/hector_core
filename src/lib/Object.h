@@ -10,8 +10,16 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <log4cxx/logger.h>
+#include "common.h"
 #include "ObjectRegistry.h"
 #include "Lock.h"
+
+#define LOG_TRACE(logger, ...) LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__)
+#define LOG_DEBUG(logger, ...) LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__)
+#define LOG_INFO(logger, ...) LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__)
+#define LOG_ERROR(logger, ...) LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__)
+#define LOG_FATAL(logger, ...) LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__)
 
 class Object {
 public:

@@ -31,7 +31,7 @@ bool Server::Init(Config *config) {
 
 	char *baseDir = config->getFirstValue("/Config/@baseDir");
 	if (!baseDir) {
-		LOG4CXX_ERROR(logger, "Cannot find baseDir");
+		LOG_ERROR(logger, "Cannot find baseDir");
 		return false;
 	}
 
@@ -39,7 +39,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &threads) != 1) {
-		LOG4CXX_ERROR(logger, "Invalid number of threads, using 1 thread");
+		LOG_ERROR(logger, "Invalid number of threads, using 1 thread");
 		threads = 1;
 	}
 	free(s);
@@ -48,7 +48,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverHost", getId());
 	serverHost = config->getFirstValue(buffer);
 	if (!serverHost) {
-		LOG4CXX_ERROR(logger, "Server/serverHost not found");
+		LOG_ERROR(logger, "Server/serverHost not found");
 		return false;
 	}
 
@@ -56,7 +56,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverPort", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &serverPort) != 1) {
-		LOG4CXX_ERROR(logger, "Server/serverPort not found");
+		LOG_ERROR(logger, "Server/serverPort not found");
 		return false;
 	}
 	free(s);
@@ -79,7 +79,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/lib/@name", getId());
 	s = config->getFirstValue(buffer);
 	if (!s) {
-		LOG4CXX_ERROR(logger, "Server/lib not found");
+		LOG_ERROR(logger, "Server/lib not found");
 		return false;
 	}
 	
@@ -87,7 +87,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
 	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))LibraryLoader::loadLibrary(buffer, "create");
 	if (!create) {
-		LOG4CXX_ERROR(logger, "Invalid library: " << buffer);
+		LOG_ERROR(logger, "Invalid library: " << buffer);
 		return false;
 	}
 	simpleHTTPServer = (*create)(objects);
@@ -99,23 +99,23 @@ bool Server::Init(Config *config) {
 
 void Server::Start(bool wait) {
 	// start server
-	LOG4CXX_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
+	LOG_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
 	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
-		LOG4CXX_INFO(logger, "Stopping processing chains");
+		LOG_INFO(logger, "Stopping processing chains");
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
-		LOG4CXX_INFO(logger, "Stopping server");
+		LOG_INFO(logger, "Stopping server");
 	}
 }
 
 void Server::Stop() {
-	LOG4CXX_INFO(logger, "Stopping processing chains");
+	LOG_INFO(logger, "Stopping processing chains");
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		(*iter)->Stop();
 	}
-	LOG4CXX_INFO(logger, "Stopping server");
+	LOG_INFO(logger, "Stopping server");
 	simpleHTTPServer->Stop();
 }
 

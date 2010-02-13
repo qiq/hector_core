@@ -46,12 +46,12 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	snprintf(s, sizeof(s), "use DummyModule; $module = %s->new();", name);
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(logger, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
 		return false;
 	}
 	ref = get_sv("module", 0);
 	if (!SvOK(ref)) {
-		LOG4CXX_ERROR(logger, "Error initialize module " << name);
+		LOG_ERROR(logger, "Error initialize module " << name);
 		return false;
 	}
 
@@ -74,11 +74,11 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	int count = call_method("Init", G_SCALAR);
 	SPAGAIN;
 	if (count != 1) {
-		LOG4CXX_ERROR(logger, "Error calling Init, module " << name);
+		LOG_ERROR(logger, "Error calling Init, module " << name);
 		return false;
 	}
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
 		return false;
 	}
 	result = POPi;
