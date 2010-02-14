@@ -16,6 +16,6 @@ set robot_processing_engine.run = 0
 shutdown
 EOT
 
-grep "Resource arrived " $id.log|sed -e 's|save_resource_module: Resource arrived (URL: http://test.com/?id=\([-0-9]*\))|\1|'|sort -n >$id.log.test
+grep "Resource arrived " $id.log|sed -e 's|save_resource_module: Resource arrived (\([-0-9]*\))|\1|'|sort -n >$id.log.test
 
 compare

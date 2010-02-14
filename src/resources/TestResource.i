@@ -1,19 +1,19 @@
 %{
-#include "WebResource.h"
+#include "TestResource.h"
 %}
 
-class WebResource : public Resource {
+class TestResource : public Resource {
 public:
-        WebResource();
-        ~WebResource();
+        TestResource();
+        ~TestResource();
         int getId();
         void setId(int id);
         int getStatus();
         void setStatus(int status);
         int getSize();
 
-        void setURL(const char *url);
-        string *getURL();
+        void setStr(const char *str);
+        const char *getStr();
 
         string *serialize();
         bool deserialize(string *s);

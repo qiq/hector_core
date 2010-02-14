@@ -11,4 +11,5 @@
 %include processing_engine/RPCMessage.i
 %include processing_engine/Resource.i
 %include ../resources/Resources.i
+%include ../resources/TestResource.i
 %include ../resources/WebResource.i

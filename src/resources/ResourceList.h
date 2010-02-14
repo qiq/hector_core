@@ -5,7 +5,8 @@
 
 typedef enum {
 	RESOURCE_INVALID = 0,
-	RESOURCE_WEB = 1
+	RESOURCE_TEST = 1,
+	RESOURCE_WEB = 2,
 } resource_t;
 
 #endif

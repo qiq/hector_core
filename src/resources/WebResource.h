@@ -24,10 +24,10 @@ protected:
 public:
 	WebResource();
 	~WebResource() {};
-	int getStatus();
-	void setStatus(int status);
 	int getId();
 	void setId(int id);
+	int getStatus();
+	void setStatus(int status);
 	int getSize();
 	resource_t getType();
 
@@ -38,20 +38,20 @@ public:
 	bool deserialize(string *s);
 };
 
-inline int WebResource::getStatus() {
-	return r.status();
-}
-
-inline void WebResource::setStatus(int status) {
-	r.set_status(status);
-}
-
 inline int WebResource::getId() {
 	return r.id();
 }
 
 inline void WebResource::setId(int id) {
 	r.set_id(id);
+}
+
+inline int WebResource::getStatus() {
+	return r.status();
+}
+
+inline void WebResource::setStatus(int status) {
+	r.set_status(status);
 }
 
 inline resource_t WebResource::getType() {
@@ -65,6 +65,5 @@ inline const char *WebResource::getURL() {
 inline void WebResource::setURL(const char *url) {
 	r.set_url(url);
 }
-
 
 #endif
