@@ -11,6 +11,11 @@
 TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	maxItems = 0;
+	idPrefix = NULL;
+}
+
+TestInput::~TestInput() {
+	free(idPrefix);
 }
 
 bool TestInput::Init(vector<pair<string, string> > *params) {
@@ -19,6 +24,8 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 			maxItems = atoi(iter->second.c_str());
 			if (maxItems)
 				MODULE_LOG_INFO(logger, "Going to produce " << maxItems << " resources.");
+		} else if (iter->first == "id_prefix") {
+			idPrefix = strdup(iter->second.c_str());
 		}
 	}
 	return true;
@@ -30,7 +37,7 @@ Resource *TestInput::Process(Resource *resource) {
 	assert(resource == NULL);
 	TestResource *tr = new TestResource();
 	char s[1024];
-	snprintf(s, sizeof(s), "%d-%d", getThreadIndex(), items++);
+	snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items++);
 	tr->setStr(s);
 	MODULE_LOG_INFO(logger, "Loading resource (" << tr->getStr() << ")");
 	return tr;

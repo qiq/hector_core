@@ -12,7 +12,7 @@
 class TestInput : public Module {
 public:
 	TestInput(ObjectRegistry *objects, const char *id, int threadIndex);
-	~TestInput() {};
+	~TestInput();
 	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
 	Resource *Process(Resource *resource);
@@ -20,6 +20,7 @@ public:
 private:
 	int items;
 	int maxItems;
+	char *idPrefix;
 };
 
 inline module_t TestInput::getType() {
