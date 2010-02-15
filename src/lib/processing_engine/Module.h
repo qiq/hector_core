@@ -22,6 +22,12 @@ typedef enum {
 	MODULE_SELECT = 5 
 } module_t;
 
+#define MODULE_LOG_TRACE(logger, ...) LOG4CXX_TRACE(logger, getId() << "[" << getThreadIndex() << "]: " << __VA_ARGS__)
+#define MODULE_LOG_DEBUG(logger, ...) LOG4CXX_DEBUG(logger, getId() << "[" << getThreadIndex() << "]: " << __VA_ARGS__)
+#define MODULE_LOG_INFO(logger, ...) LOG4CXX_INFO(logger, getId() << "[" << getThreadIndex() << "]: " << __VA_ARGS__)
+#define MODULE_LOG_ERROR(logger, ...) LOG4CXX_ERROR(logger, getId() << "[" << getThreadIndex() << "]: " << __VA_ARGS__)
+#define MODULE_LOG_FATAL(logger, ...) LOG4CXX_FATAL(logger, getId() << "[" << getThreadIndex() << "]: " << __VA_ARGS__)
+
 class Module : public Object {
 public:
 	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id), threadIndex(threadIndex) {};

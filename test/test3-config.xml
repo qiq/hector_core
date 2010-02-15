@@ -4,17 +4,18 @@
 
 <Config baseDir="../src">
 
-	<Server id="test1">
+	<Server id="test3">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test1.log.props</logConfig>
+		<logConfig>../test/test3.log.props</logConfig>
 		<lib name="servers/robot/Robot.la"/>
 	</Server>
 
 	<ProcessingEngine id="robot_processing_engine">
 		<processor ref="P_load_resource"/>
+		<processor ref="P_simple"/>
 		<processor ref="P_save_resource"/>
 	</ProcessingEngine>
 
@@ -24,13 +25,30 @@
 			<module ref="M_load_resource"/>
 		</modules>
 		<output>
-			<nextProcessor ref="P_save_resource"/>
+			<nextProcessor ref="P_simple"/>
 		</output>
 	</Processor>
 
 	<Module id="M_load_resource">
 		<lib name="TestInput.la"/>
 		<param name="items" value="1000"/>
+	</Module>
+
+	<Processor id="P_simple">
+		<threads>1</threads>
+		<modules>
+			<module ref="M_simple"/>
+		</modules>
+		<input>
+			<queue/>
+		</input>
+		<output>
+			<nextProcessor ref="P_save_resource"/>
+		</output>
+	</Processor>
+
+	<Module id="M_simple">
+		<lib name="TestSimple.la"/>
 	</Module>
 
 	<Processor id="P_save_resource">

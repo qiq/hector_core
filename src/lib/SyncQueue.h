@@ -140,8 +140,7 @@ int SimpleQueue<T>::getMaxItems() {
 	return maxItems;
 }
 
-// By default, only one sub-queue with priority == 0 is created, more
-// sub-queues may be added using addQueue()
+// By default, no sub-queuei is created, they may be added using addQueue()
 
 template<class T>
 class SyncQueue {

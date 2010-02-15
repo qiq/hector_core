@@ -80,13 +80,4 @@ int readBytes(int fd, char *s, int length);
 int str2bool(const char *value);
 char *bool2str(bool value);
 
-// FIXME: delete?
-typedef enum {
-	TRACE = 1,
-	DEBUG = 2,
-	INFO = 3,
-	ERROR = 4,
-	FATAL = 5
-} log_level_t;
-
 #endif

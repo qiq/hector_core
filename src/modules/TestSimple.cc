@@ -5,7 +5,7 @@
 
 #include <string.h>
 #include "TestSimple.h"
-#include "WebResource.h"
+#include "TestResource.h"
 
 TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
@@ -21,6 +21,9 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	snprintf(s, sizeof(s), "%d.alias", threadIndex);
 	getters[s] = &TestSimple::getFoo;
 	setters[s] = &TestSimple::setFoo;
+	snprintf(s, sizeof(s), "%d.flip_status", threadIndex);
+	getters[s] = &TestSimple::getFlipStatus;
+	setters[s] = &TestSimple::setFlipStatus;
 }
 
 TestSimple::~TestSimple() {
@@ -42,14 +45,33 @@ void TestSimple::setFoo(const char *value) {
 	foo = strdup(value);
 }
 
+char *TestSimple::getFlipStatus() {
+	return bool2str(flipStatus);
+}
+
+void TestSimple::setFlipStatus(const char *value) {
+	switch (str2bool(value)) {
+	case 0:
+		flipStatus = false;
+		break;
+	case 1:
+		flipStatus = true;
+		break;
+	default:
+		MODULE_LOG_ERROR(logger, "Invalid boolean value: " << value);
+	}
+}
+
 bool TestSimple::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
 Resource *TestSimple::Process(Resource *resource) {
-	WebResource *wr = dynamic_cast<WebResource*>(resource);
-	if (wr) {
-		LOG4CXX_INFO(logger, "Processing resource " << wr->getURL());
+	TestResource *tr = dynamic_cast<TestResource*>(resource);
+	if (tr) {
+		MODULE_LOG_INFO(logger, "Processing TestResource (" << tr->getStr() << ")");
+		if (flipStatus)
+			tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
 		++items;
 	}
 	return resource;

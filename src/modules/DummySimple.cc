@@ -49,7 +49,7 @@ bool DummySimple::Init(vector<pair<string, string> > *params) {
 Resource *DummySimple::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
-		LOG4CXX_INFO(logger, "Dummy: processing resource " << wr->getURL());
+		MODULE_LOG_INFO(logger, "Dummy: processing resource " << wr->getURL());
 	}
 	return resource;
 }

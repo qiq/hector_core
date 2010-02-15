@@ -14,36 +14,36 @@
 	</Server>
 
 	<ProcessingEngine id="robot_processing_engine">
-		<processor ref="load_resource"/>
-		<processor ref="save_resource"/>
+		<processor ref="P_load_resource"/>
+		<processor ref="P_save_resource"/>
 	</ProcessingEngine>
 
-	<Processor id="load_resource">
+	<Processor id="P_load_resource">
 		<threads>5</threads>
 		<modules>
-			<module ref="load_resource_module"/>
+			<module ref="M_load_resource"/>
 		</modules>
 		<output>
-			<nextProcessor ref="save_resource"/>
+			<nextProcessor ref="P_save_resource"/>
 		</output>
 	</Processor>
 
-	<Module id="load_resource_module">
+	<Module id="M_load_resource">
 		<lib name="TestInput.la"/>
 		<param name="items" value="1000"/>
 	</Module>
 
-	<Processor id="save_resource">
+	<Processor id="P_save_resource">
 		<threads>5</threads>
 		<modules>
-			<module ref="save_resource_module"/>
+			<module ref="M_save_resource"/>
 		</modules>
 		<input>
 			<queue/>
 		</input>
 	</Processor>
 
-	<Module id="save_resource_module">
+	<Module id="M_save_resource">
 		<lib name="TestOutput.la"/>
 	</Module>
 

@@ -9,3 +9,7 @@ CLEANFILES += test1.log test1.log.test
 TESTS += test2.sh
 EXTRA_DIST += test2-config.xml test2.log.props test2.log.correct
 CLEANFILES += test2.log test2.log.test
+
+TESTS += test3.sh
+EXTRA_DIST += test3-config.xml test3.log.props test3.log.correct
+CLEANFILES += test3.log test3.log.test

@@ -24,6 +24,7 @@ public:
 protected:
 	int items;
 	char *foo;
+	bool flipStatus;
 
 	std::tr1::unordered_map<string, char*(TestSimple::*)()> getters;
 	std::tr1::unordered_map<string, void(TestSimple::*)(const char*)> setters;
@@ -31,6 +32,8 @@ protected:
 	char *getItems();
 	char *getFoo();
 	void setFoo(const char *value);
+	char *getFlipStatus();
+	void setFlipStatus(const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);

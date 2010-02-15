@@ -13,7 +13,7 @@ bool DummyOutput::Init(vector<pair<string, string> > *params) {
 Resource *DummyOutput::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
-		LOG4CXX_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
+		MODULE_LOG_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
 		delete wr;
 	}
 	return NULL;
