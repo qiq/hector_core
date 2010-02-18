@@ -24,6 +24,8 @@ log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_
 Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	threads = NULL;
 	running = false;
+
+	values = new ObjectValues<Processor>(this);
 }
 
 Processor::~Processor() {
@@ -40,6 +42,8 @@ Processor::~Processor() {
 		delete *iter;
 	}
 	delete queue;
+
+	delete values;
 }
 
 bool Processor::Init(Config *config) {
@@ -142,15 +146,15 @@ bool Processor::Init(Config *config) {
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@name", mid);
 			vector<string> *names = config->getValues(buffer);
 			snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/param/@value", mid);
-			vector<string> *values = config->getValues(buffer);
+			vector<string> *vals = config->getValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
-			if (names && values) {
-				assert(names->size() == values->size());
+			if (names && vals) {
+				assert(names->size() == vals->size());
 				for (int i = 0; i < (int)names->size(); i++) {
-					c->push_back(pair<string, string>((*names)[i], (*values)[i]));
+					c->push_back(pair<string, string>((*names)[i], (*vals)[i]));
 				}
 			}
-			delete values;
+			delete vals;
 			delete names;
 
 			for (int i = 0; i < nThreads; ++i) {
@@ -207,7 +211,7 @@ bool Processor::Init(Config *config) {
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			getters[buffer] = &Processor::getQueueItems;
+			values->addGetter(buffer, &Processor::getQueueItems);
 		}
 	}
 
@@ -536,26 +540,6 @@ void Processor::Pause() {
 
 void Processor::Resume() {
 	queue->resume();
-}
-
-char *Processor::getValueSync(const char *name) {
-	char *result = NULL;
-	std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.find(name);
-	if (iter != getters.end())
-		result = (this->*(iter->second))(name);
-	return result;
-}
-
-bool Processor::setValueSync(const char *name, const char *value) {
-	return false;
-}
-
-vector<string> *Processor::listNamesSync() {
-	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(Processor::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
-		result->push_back(iter->first);
-	}
-	return result;
 }
 
 char *Processor::getQueueItems(const char *name) {

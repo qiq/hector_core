@@ -4,7 +4,7 @@
 #include <config.h>
 
 #include <assert.h>
-#include <stdlib.h>
+#include "common.h"
 #include "TestInput.h"
 #include "TestResource.h"
 
@@ -21,9 +21,9 @@ TestInput::~TestInput() {
 bool TestInput::Init(vector<pair<string, string> > *params) {
 	for (vector<pair<string, string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
 		if (iter->first == "items") {
-			maxItems = atoi(iter->second.c_str());
+			maxItems = str2int(iter->second.c_str());
 			if (maxItems)
-				MODULE_LOG_INFO(logger, "Going to produce " << maxItems << " resources.");
+				LOG_INFO(logger, "Going to produce " << maxItems << " resources.");
 		} else if (iter->first == "id_prefix") {
 			idPrefix = strdup(iter->second.c_str());
 		}
@@ -39,7 +39,7 @@ Resource *TestInput::Process(Resource *resource) {
 	char s[1024];
 	snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items++);
 	tr->setStr(s);
-	MODULE_LOG_INFO(logger, "Loading resource (" << tr->getStr() << ")");
+	LOG_INFO(logger, "Loading resource (" << tr->getStr() << ")");
 	return tr;
 }
 

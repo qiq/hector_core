@@ -10,72 +10,52 @@
 DummySimple::DummySimple(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	dummy = NULL;
 	foo = NULL;
+	values = new ObjectValues<DummySimple>(this);
 
-	getters["dummy"] = &DummySimple::getDummy;
-	setters["dummy"] = &DummySimple::setDummy;
-	getters["foo"] = &DummySimple::getFoo;
-	setters["foo"] = &DummySimple::setFoo;
-	getters["alias"] = &DummySimple::getDummy;
-	setters["alias"] = &DummySimple::setDummy;
+	values->addGetter("dummy", &DummySimple::getDummy);
+	values->addSetter("dummy", &DummySimple::setDummy);
+	values->addGetter("foo", &DummySimple::getFoo);
+	values->addSetter("foo", &DummySimple::setFoo);
+	values->addGetter("alias", &DummySimple::getDummy);
+	values->addSetter("alias", &DummySimple::setDummy);
 }
 
 DummySimple::~DummySimple() {
+	delete values;
+
 	free(dummy);
 	free(foo);
 }
 
-char *DummySimple::getDummy() {
+char *DummySimple::getDummy(const char *name) {
 	return dummy ? strdup(dummy) : NULL;
 }
 
-void DummySimple::setDummy(const char *value) {
+void DummySimple::setDummy(const char *name, const char *value) {
 	free(dummy);
 	dummy = strdup(value);
 }
 
-char *DummySimple::getFoo() {
+char *DummySimple::getFoo(const char *name) {
 	return foo ? strdup(foo) : NULL;
 }
 
-void DummySimple::setFoo(const char *value) {
+void DummySimple::setFoo(const char *name, const char *value) {
 	free(foo);
 	foo = strdup(value);
 }
 
 bool DummySimple::Init(vector<pair<string, string> > *params) {
+	values->InitValues(params);
 	return true;
 }
 
 Resource *DummySimple::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
-		MODULE_LOG_INFO(logger, "Dummy: processing resource " << wr->getURL());
+		LOG_INFO(logger, "Dummy: processing resource " << wr->getURL());
 	}
 	return resource;
-}
-
-char *DummySimple::getValueSync(const char *name) {
-	std::tr1::unordered_map<string, char*(DummySimple::*)()>::iterator iter = getters.find(name);
-	if (iter != getters.end())
-		return (this->*(iter->second))();
-	return NULL;
-}
-
-bool DummySimple::setValueSync(const char *name, const char *value) {
-	std::tr1::unordered_map<string, void(DummySimple::*)(const char*)>::iterator iter = setters.find(name);
-	if (iter != setters.end()) {
-		(this->*(iter->second))(value);
-		return true;
-	}
-	return false;
-}
-
-vector<string> *DummySimple::listNamesSync() {
-	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(DummySimple::*)()>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
-		result->push_back(iter->first);
-	}
-	return result;
 }
 
 // factory functions

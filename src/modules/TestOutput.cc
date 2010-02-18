@@ -13,7 +13,7 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 Resource *TestOutput::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
-		MODULE_LOG_INFO(logger, "Resource arrived (" << tr->getStr() << ")");
+		LOG_INFO(logger, "Resource arrived (" << tr->getStr() << ")");
 		delete tr;
 	}
 	return NULL;

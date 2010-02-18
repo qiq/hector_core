@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Lock.h"
 #include "Module.h"
+#include "ObjectValues.h"
 
 class TestSimple : public Module {
 public:
@@ -25,15 +26,17 @@ protected:
 	int items;
 	char *foo;
 	bool flipStatus;
+	int setStatus;
 
-	std::tr1::unordered_map<string, char*(TestSimple::*)()> getters;
-	std::tr1::unordered_map<string, void(TestSimple::*)(const char*)> setters;
+	ObjectValues<TestSimple> *values;
 
-	char *getItems();
-	char *getFoo();
-	void setFoo(const char *value);
-	char *getFlipStatus();
-	void setFlipStatus(const char *value);
+	char *getItems(const char *name);
+	char *getFoo(const char *name);
+	void setFoo(const char *name, const char *value);
+	char *getFlipStatus(const char *name);
+	void setFlipStatus(const char *name, const char *value);
+	char *getSetStatus(const char *name);
+	void setSetStatus(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -42,6 +45,18 @@ protected:
 
 inline module_t TestSimple::getType() {
 	return MODULE_SIMPLE;
+}
+
+inline char *TestSimple::getValueSync(const char *name) {
+	return values->getValueSync(name);
+}
+
+inline bool TestSimple::setValueSync(const char *name, const char *value) {
+	return values->setValueSync(name, value);
+}
+
+inline vector<string> *TestSimple::listNamesSync() {
+	return values->listNamesSync();
 }
 
 #endif

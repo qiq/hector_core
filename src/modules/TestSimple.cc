@@ -10,46 +10,46 @@
 TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	foo = NULL;
+	flipStatus = false;
+	setStatus = -1;
+	values = new ObjectValues<TestSimple>(this);
 
-	char s[1024];
-
-	snprintf(s, sizeof(s), "%d.items", threadIndex);
-	getters[s] = &TestSimple::getItems;
-	snprintf(s, sizeof(s), "%d.foo", threadIndex);
-	getters[s] = &TestSimple::getFoo;
-	setters[s] = &TestSimple::setFoo;
-	snprintf(s, sizeof(s), "%d.alias", threadIndex);
-	getters[s] = &TestSimple::getFoo;
-	setters[s] = &TestSimple::setFoo;
-	snprintf(s, sizeof(s), "%d.flip_status", threadIndex);
-	getters[s] = &TestSimple::getFlipStatus;
-	setters[s] = &TestSimple::setFlipStatus;
+	values->addGetter("items", &TestSimple::getItems);
+	values->addGetter("foo", &TestSimple::getFoo);
+	values->addSetter("foo", &TestSimple::setFoo);
+	values->addGetter("alias", &TestSimple::getFoo);
+	values->addSetter("alias", &TestSimple::setFoo);
+	values->addGetter("flip_status", &TestSimple::getFlipStatus);
+	values->addSetter("flip_status", &TestSimple::setFlipStatus);
+	values->addGetter("set_status", &TestSimple::getSetStatus);
+	values->addSetter("set_status", &TestSimple::setSetStatus);
 }
 
 TestSimple::~TestSimple() {
+	delete values;
 	free(foo);
 }
 
-char *TestSimple::getItems() {
+char *TestSimple::getItems(const char *name) {
 	char s[1024];
 	snprintf(s, sizeof(s), "%d", items);
 	return strdup(s);
 }
 
-char *TestSimple::getFoo() {
+char *TestSimple::getFoo(const char *name) {
 	return foo ? strdup(foo) : NULL;
 }
 
-void TestSimple::setFoo(const char *value) {
+void TestSimple::setFoo(const char *name, const char *value) {
 	free(foo);
 	foo = strdup(value);
 }
 
-char *TestSimple::getFlipStatus() {
+char *TestSimple::getFlipStatus(const char *name) {
 	return bool2str(flipStatus);
 }
 
-void TestSimple::setFlipStatus(const char *value) {
+void TestSimple::setFlipStatus(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		flipStatus = false;
@@ -58,47 +58,34 @@ void TestSimple::setFlipStatus(const char *value) {
 		flipStatus = true;
 		break;
 	default:
-		MODULE_LOG_ERROR(logger, "Invalid boolean value: " << value);
+		LOG_ERROR(logger, "Invalid boolean value: " << value);
 	}
 }
 
+char *TestSimple::getSetStatus(const char *name) {
+	return int2str(setStatus);
+}
+
+void TestSimple::setSetStatus(const char *name, const char *value) {
+	setStatus = str2int(value);
+}
+
 bool TestSimple::Init(vector<pair<string, string> > *params) {
+	values->InitValues(params);
 	return true;
 }
 
 Resource *TestSimple::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
-		MODULE_LOG_INFO(logger, "Processing TestResource (" << tr->getStr() << ")");
+		LOG_INFO(logger, "Processing TestResource (" << tr->getStr() << ")");
 		if (flipStatus)
 			tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
+		if (setStatus >= 0)
+			tr->setStatus(setStatus);
 		++items;
 	}
 	return resource;
-}
-
-char *TestSimple::getValueSync(const char *name) {
-	std::tr1::unordered_map<string, char*(TestSimple::*)()>::iterator iter = getters.find(name);
-	if (iter != getters.end())
-		return (this->*(iter->second))();
-	return NULL;
-}
-
-bool TestSimple::setValueSync(const char *name, const char *value) {
-	std::tr1::unordered_map<string, void(TestSimple::*)(const char*)>::iterator iter = setters.find(name);
-	if (iter != setters.end()) {
-		(this->*(iter->second))(value);
-		return true;
-	}
-	return false;
-}
-
-vector<string> *TestSimple::listNamesSync() {
-	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(TestSimple::*)()>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
-		result->push_back(iter->first);
-	}
-	return result;
 }
 
 // factory functions

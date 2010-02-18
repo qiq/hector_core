@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Lock.h"
 #include "Module.h"
+#include "ObjectValues.h"
 
 class DummySimple : public Module {
 public:
@@ -25,13 +26,12 @@ protected:
 	char *dummy;
 	char *foo;
 
-	std::tr1::unordered_map<string, char*(DummySimple::*)()> getters;
-	std::tr1::unordered_map<string, void(DummySimple::*)(const char*)> setters;
+	ObjectValues<DummySimple> *values;
 
-	char *getDummy();
-	void setDummy(const char *value);
-	char *getFoo();
-	void setFoo(const char *value);
+	char *getDummy(const char *name);
+	void setDummy(const char *name, const char *value);
+	char *getFoo(const char *name);
+	void setFoo(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -43,6 +43,18 @@ protected:
 
 inline module_t DummySimple::getType() {
 	return MODULE_SIMPLE;
+}
+
+inline char *DummySimple::getValueSync(const char *name) {
+	return values->getValueSync(name);
+}
+
+inline bool DummySimple::setValueSync(const char *name, const char *value) {
+	return values->setValueSync(name, value);
+}
+
+inline vector<string> *DummySimple::listNamesSync() {
+	return values->listNamesSync();
 }
 
 #endif

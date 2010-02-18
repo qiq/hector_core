@@ -79,5 +79,7 @@ int readBytes(int fd, char *s, int length);
 
 int str2bool(const char *value);
 char *bool2str(bool value);
+int str2int(const char *value);
+char *int2str(int value);
 
 #endif

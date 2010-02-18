@@ -32,12 +32,6 @@ using namespace std;
 // (must be done in SyncQueue)
 template<class T>
 class SimpleQueue {
-	int priority;
-	int maxItems;
-	int maxSize;
-	int queueSize;
-	deque<T*> *queue;
-
 public:
 	SimpleQueue(int priority, int maxItems, int maxSize);
 	~SimpleQueue();
@@ -55,6 +49,13 @@ public:
 	int getCurrentItems();
 	int getMaxSize();
 	int getMaxItems();
+
+private:
+	int priority;
+	int maxItems;
+	int maxSize;
+	int queueSize;
+	deque<T*> *queue;
 };
 
 template <class T>
@@ -144,17 +145,6 @@ int SimpleQueue<T>::getMaxItems() {
 
 template<class T>
 class SyncQueue {
-	// queue object, following attributes (+queues) are guarded by queueLock
-	CondLock queueLock;
-	int waitingReaders;
-	int waitingWriters;
-	bool cancel;
-
-	// all data-driven operations must hold this lock for a moment: (purpose: pause/resume)
-	Lock pauseLock;
-
-	vector<SimpleQueue<T>*> queues;
-	std::tr1::unordered_map<int, SimpleQueue<T>*> priority2queue;
 public:
 	SyncQueue();
 	~SyncQueue();
@@ -175,6 +165,19 @@ public:
 	int queueItems(int priority = 0);
 
 	int firstNonEmptyQueueIndex();
+
+private:
+	// queue object, following attributes (+queues) are guarded by queueLock
+	CondLock queueLock;
+	int waitingReaders;
+	int waitingWriters;
+	bool cancel;
+
+	// all data-driven operations must hold this lock for a moment: (purpose: pause/resume)
+	Lock pauseLock;
+
+	vector<SimpleQueue<T>*> queues;
+	std::tr1::unordered_map<int, SimpleQueue<T>*> priority2queue;
 };
 
 template <class T>

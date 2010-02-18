@@ -16,6 +16,7 @@
 #include "ObjectRegistry.h"
 #include "Lock.h"
 #include "Module.h"
+#include "ObjectValues.h"
 #include "OutputFilter.h"
 #include "Resource.h"
 #include "SyncQueue.h"
@@ -47,8 +48,7 @@ protected:
 	SyncQueue<Resource> *queue;		// input queue
 	vector<OutputFilter*> outputFilters;	// filters of output resources
 
-	std::tr1::unordered_map<string, char*(Processor::*)(const char*)> getters;
-	std::tr1::unordered_map<string, void(Processor::*)(const char*, const char*)> setters;
+	ObjectValues<Processor> *values;
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -59,6 +59,18 @@ protected:
 
 inline SyncQueue<Resource> *Processor::getQueue() {
 	return queue;
+}
+
+inline char *Processor::getValueSync(const char *name) {
+	return values->getValueSync(name);
+}
+
+inline bool Processor::setValueSync(const char *name, const char *value) {
+	return values->setValueSync(name, value);
+}
+
+inline vector<string> *Processor::listNamesSync() {
+	return values->listNamesSync();
 }
 
 #endif

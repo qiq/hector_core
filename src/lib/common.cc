@@ -4,6 +4,7 @@
 
 #include <config.h>
 
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <ltdl.h>
@@ -63,4 +64,14 @@ int str2bool(const char *value) {
 
 char *bool2str(bool value) {
 	return value ? strdup("1") : strdup("0");
+}
+
+int str2int(const char *value) {
+	return atoi(value);
+}
+
+char *int2str(int value) {
+	char s[1024];
+	snprintf(s, sizeof(s), "%d", value);
+	return strdup(s);
 }

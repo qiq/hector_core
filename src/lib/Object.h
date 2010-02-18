@@ -24,6 +24,7 @@
 class Object {
 public:
 	Object(ObjectRegistry *objects, const char *id);
+	Object(ObjectRegistry *objects, const char *id, int index);
 	~Object();
 	void ObjectLock();
 	void ObjectUnlock();
@@ -50,6 +51,15 @@ protected:
 inline Object::Object(ObjectRegistry *objects, const char *id) {
 	this->objects = objects;
 	this->id = strdup(id);
+	if (objects)
+		objects->registerObject(this);
+}
+
+inline Object::Object(ObjectRegistry *objects, const char *id, int index) {
+	this->objects = objects;
+	char s[1024];
+	snprintf(s, sizeof(s), "%s[%d]", id, index);
+	this->id = strdup(s);
 	if (objects)
 		objects->registerObject(this);
 }
