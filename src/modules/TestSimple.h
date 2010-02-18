@@ -22,7 +22,7 @@ public:
 	module_t getType();
 	Resource *Process(Resource *resource);
 
-protected:
+private:
 	int items;
 	char *foo;
 	bool flipStatus;

@@ -15,16 +15,19 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Obj
 	propRun = false;
 	propPause = false;
 
-	getters["run"] = &ProcessingEngine::getRun;
-	setters["run"] = &ProcessingEngine::setRun;
-	getters["pause"] = &ProcessingEngine::getPause;
-	setters["pause"] = &ProcessingEngine::setPause;
+	values = new ObjectValues<ProcessingEngine>(this);
+
+	values->addGetter("run", &ProcessingEngine::getRun);
+	values->addSetter("run", &ProcessingEngine::setRun);
+	values->addGetter("pause", &ProcessingEngine::getPause);
+	values->addSetter("pause", &ProcessingEngine::setPause);
 }
 
 ProcessingEngine::~ProcessingEngine() {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
 		delete (*iter);
 	}
+	delete values;
 }
 
 bool ProcessingEngine::Init(Config *config) {
@@ -100,28 +103,15 @@ void ProcessingEngine::ResumeSync() {
 //}
 
 char *ProcessingEngine::getValueSync(const char *name) {
-	char *result = NULL;
-	std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)>::iterator iter = getters.find(name);
-	if (iter != getters.end())
-		result = (this->*(iter->second))(name);
-	return result;
+	return values->getValueSync(name);
 }
 
 bool ProcessingEngine::setValueSync(const char *name, const char *value) {
-	std::tr1::unordered_map<string, void(ProcessingEngine::*)(const char*, const char*)>::iterator iter = setters.find(name);
-	if (iter != setters.end()) {
-		(this->*(iter->second))(name, value);
-		return true;
-	}
-	return false;
+	return values->setValueSync(name, value);
 }
 
 vector<string> *ProcessingEngine::listNamesSync() {
-	vector<string> *result = new vector<string>();
-	for (std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
-		result->push_back(iter->first);
-	}
-	return result;
+	return values->listNamesSync();
 }
 
 char *ProcessingEngine::getRun(const char *name) {

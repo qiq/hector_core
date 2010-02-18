@@ -32,8 +32,7 @@ protected:
 	bool propRun;
 	bool propPause;
 
-	std::tr1::unordered_map<string, char*(ProcessingEngine::*)(const char*)> getters;
-	std::tr1::unordered_map<string, void(ProcessingEngine::*)(const char*, const char*)> setters;
+	ObjectValues<ProcessingEngine> *values;
 
 	char *getRun(const char *name);
 	void setRun(const char *name, const char *value);

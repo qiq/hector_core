@@ -31,9 +31,7 @@ TestSimple::~TestSimple() {
 }
 
 char *TestSimple::getItems(const char *name) {
-	char s[1024];
-	snprintf(s, sizeof(s), "%d", items);
-	return strdup(s);
+	return int2str(items);
 }
 
 char *TestSimple::getFoo(const char *name) {
