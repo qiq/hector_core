@@ -26,7 +26,7 @@ public:
 	ObjectRegistry() {};
 	~ObjectRegistry() {};
 
-	void registerObject(Object *obj);
+	bool registerObject(Object *obj);
 	bool unregisterObject(const char *id);
 	Object *getObject(const char *id);
 	vector<string> *getIds();

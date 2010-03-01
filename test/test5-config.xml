@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Example config file -->
 <!DOCTYPE Config SYSTEM "config.dtd">
+
+<!--
+test5: two readers(1), one simple intermediates(1), one writer(1)
+-->
 
 <Config baseDir="../src">
 
@@ -32,8 +35,8 @@
 
 	<Module id="M_load_resource1">
 		<lib name="TestInput.la"/>
-		<param name="items" value="1000"/>
-		<param name="id_prefix" value="i1-"/>
+		<param name="maxItems" value="1000"/>
+		<param name="idPrefix" value="i1-"/>
 	</Module>
 
 	<Processor id="P_load_resource2">
@@ -48,8 +51,8 @@
 
 	<Module id="M_load_resource2">
 		<lib name="TestInput.la"/>
-		<param name="items" value="2000"/>
-		<param name="id_prefix" value="i2-"/>
+		<param name="maxItems" value="2000"/>
+		<param name="idPrefix" value="i2-"/>
 	</Module>
 
 	<Processor id="P_simple">

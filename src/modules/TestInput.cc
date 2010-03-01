@@ -12,7 +12,6 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	items = 0;
 	maxItems = 0;
 	idPrefix = NULL;
-
 	values = new ObjectValues<TestInput>(this);
 
 	values->addGetter("items", &TestInput::getItems);
@@ -50,7 +49,8 @@ void TestInput::setIdPrefix(const char *name, const char *value) {
 }
 
 bool TestInput::Init(vector<pair<string, string> > *params) {
-	values->InitValues(params);
+	if (!values->InitValues(params))
+		return false;
 	if (maxItems)
 		LOG_INFO(logger, "Going to produce " << maxItems << " resources.");
 	return true;

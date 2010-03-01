@@ -8,6 +8,7 @@
 #include <string>
 #include <tr1/unordered_map>
 #include <vector>
+#include <log4cxx/logger.h>
 
 using namespace std;
 
@@ -19,7 +20,8 @@ public:
 
 	void addGetter(const char *name, char *(T::*f)(const char*));
 	void addSetter(const char *name, void (T::*f)(const char*, const char*));
-	void InitValues(vector<pair<string, string> > *params);
+	bool InitValues(vector<pair<string, string> > *params);
+	bool InitValue(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -30,14 +32,36 @@ private:
 
 	std::tr1::unordered_map<string, char *(T::*)(const char*)> getters;
 	std::tr1::unordered_map<string, void(T::*)(const char*, const char*)> setters;
+
+	static log4cxx::LoggerPtr logger;
 };
 
+template <class T> log4cxx::LoggerPtr ObjectValues<T>::logger(log4cxx::Logger::getLogger("lib.ObjectValues"));
+
+
 template<class T>
-void ObjectValues<T>::InitValues(vector<pair<string, string> > *params) {
+bool ObjectValues<T>::InitValues(vector<pair<string, string> > *params) {
 	for (vector<pair<string, string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
 		typename std::tr1::unordered_map<string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
-		if (iter2 != setters.end())
+		if (iter2 != setters.end()) {
 			(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
+		} else {
+			LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+			return false;
+		}
+	}
+	return true;
+}
+
+template<class T>
+bool ObjectValues<T>::InitValue(const char *name, const char *value) {
+	typename std::tr1::unordered_map<string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
+	if (iter != setters.end()) {
+		(module->*iter->second)(iter->first, iter->second);
+		return true;
+	} else {
+		LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+		return false;
 	}
 }
 

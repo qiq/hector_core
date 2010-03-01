@@ -19,10 +19,10 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	values->addSetter("foo", &TestSimple::setFoo);
 	values->addGetter("alias", &TestSimple::getFoo);
 	values->addSetter("alias", &TestSimple::setFoo);
-	values->addGetter("flip_status", &TestSimple::getFlipStatus);
-	values->addSetter("flip_status", &TestSimple::setFlipStatus);
-	values->addGetter("set_status", &TestSimple::getSetStatus);
-	values->addSetter("set_status", &TestSimple::setSetStatus);
+	values->addGetter("flipStatus", &TestSimple::getFlipStatus);
+	values->addSetter("flipStatus", &TestSimple::setFlipStatus);
+	values->addGetter("setStatus", &TestSimple::getSetStatus);
+	values->addSetter("setStatus", &TestSimple::setSetStatus);
 }
 
 TestSimple::~TestSimple() {

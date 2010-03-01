@@ -48,7 +48,8 @@ bool ProcessingEngine::Init(Config *config) {
 		}
 		// connect Processors to other Processors
 		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-			(*iter)->Connect();
+			if (!(*iter)->Connect())
+				return false;
 		}
 		delete v;
 	} else {

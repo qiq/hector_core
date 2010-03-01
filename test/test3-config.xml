@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Example config file -->
 <!DOCTYPE Config SYSTEM "config.dtd">
+
+<!--
+test3: intermediate (simple): one reader(1), one simple intermediate(1), one writer(1)
+-->
 
 <Config baseDir="../src">
 
@@ -31,7 +34,7 @@
 
 	<Module id="M_load_resource">
 		<lib name="TestInput.la"/>
-		<param name="items" value="1000"/>
+		<param name="maxItems" value="1000"/>
 	</Module>
 
 	<Processor id="P_simple">

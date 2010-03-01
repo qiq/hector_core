@@ -13,7 +13,7 @@ my $server = "localhost";
 my $port = "1100";
 my $term;
 my $ua;
-my %propertyNames;
+my $propertyNames;
 my %commands = (
 	"get" => 1,
 	"set" => 1,
@@ -101,9 +101,22 @@ sub loadHistory {
 	close($f);
 }
 
+# get property names for autocomplete and wildcards
+sub loadPropertyNames {
+	my $objects = getPropertyList(undef);
+	die("Cannot connect to server ($server:$port): cannot list objects") if (not defined $objects);
+	foreach my $o (@{$objects}) {
+		my $prop = getPropertyList($o);
+		foreach my $p (@{$prop}) {
+			$propertyNames->{$o.".".$p} = 1;
+		}
+	}
+}
+
 sub shutdown {
 	my $req = HTTP::Request->new(SHUTDOWN => "http://$server:$port/");
 	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
 	return $res->is_success ? 1 : 0;
 }
 
@@ -137,7 +150,7 @@ sub doComplete {
 	# property
 	if (($cmd eq 'get' or $cmd eq 'set') and $l =~ /^\s*(\S*)$/) {
 		my $property = $1;
-		foreach my $p (keys %propertyNames) {
+		foreach my $p (keys %{$propertyNames}) {
 			if ($property eq '' or (length($property) <= length($p) and substr($p, 0, length($property)) eq $property)) {
 				push(@result, $p);
 			}
@@ -176,16 +189,7 @@ if (@ARGV > 0) {
 	}
 }
 
-# get property names for autocomplete and wildcards
-
-my $objects = getPropertyList(undef);
-die("Cannot connect to server ($server:$port): cannot list objects") if (not defined $objects);
-foreach my $o (@{$objects}) {
-	my $prop = getPropertyList($o);
-	foreach my $p (@{$prop}) {
-		$propertyNames{$o.".".$p} = 1;
-	}
-}
+&loadPropertyNames() if ($interactive);
 
 # main-loop
 
@@ -235,6 +239,7 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 						}
 					} else {
 						# wildcards
+						&loadPropertyNames() if (not defined $propertyNames);
 						$term->addhistory($_) if ($interactive and $_ ne $last_command);
 						my $pattern;
 						if ($object eq '*' and $property eq '*') {
@@ -244,7 +249,7 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 						} else {
 							$pattern = "^$object\.";
 						}
-						foreach my $p (sort keys %propertyNames) {
+						foreach my $p (sort keys %{$propertyNames}) {
 							if ($p =~ /$pattern/) {
 								$p =~ /([^\.]*)\.(.*)/;
 								my ($object, $property) = ($1, $2);
@@ -256,7 +261,7 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 						}
 					}
 				} else {
-					print STDERR "Unknown object/property: $l\n";
+					print STDERR "Invalid object/property: $l\n";
 				}
 			} else {
 				print STDERR "No object.property given\n";
