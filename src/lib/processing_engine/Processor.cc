@@ -254,7 +254,7 @@ bool Processor::Init(Config *config) {
 				free(s);
 			}
 			// filter
-			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue[%d]/@filter", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/output/nextProcessor[%d]/@filter", getId(), i+1);
 			s = config->getFirstValue(buffer);
 			if (s) {
 				int filter;
