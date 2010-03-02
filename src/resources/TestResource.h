@@ -24,6 +24,7 @@ protected:
 public:
 	TestResource();
 	~TestResource() {};
+	Resource *Clone();
 	int getStatus();
 	void setStatus(int status);
 	int getId();

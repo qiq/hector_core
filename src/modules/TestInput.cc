@@ -61,6 +61,7 @@ Resource *TestInput::Process(Resource *resource) {
 		return NULL;
 	assert(resource == NULL);
 	TestResource *tr = new TestResource();
+	tr->setId(getThreadIndex()*10000+items);
 	char s[1024];
 	snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items++);
 	tr->setStr(s);

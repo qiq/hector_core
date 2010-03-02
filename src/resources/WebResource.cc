@@ -11,6 +11,10 @@ WebResource::WebResource() {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
 
+Resource *WebResource::Clone() {
+	return new WebResource(*this);
+}
+
 int WebResource::getSize() {
 	return 1; //FIXME
 }

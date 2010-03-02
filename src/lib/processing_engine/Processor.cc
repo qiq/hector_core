@@ -383,9 +383,13 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
 		OutputFilter *f = *iter;
 		if (f->isEmptyFilter() || f->getFilter() == status) {
+			Resource *copy = NULL;
+			if ((*iter)->getCopy())
+				copy = r->Clone();
 			if (!f->processResource(r, sleep || copied))
 				return false;
-			if ((*iter)->getCopy()) {
+			if (copy) {
+				r = copy;
 				copied = true;
 				continue;
 			}
@@ -393,8 +397,10 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 			break;
 		}
 	}
-	if (!appended)
-		LOG_ERROR(logger, "Lost resource (id: " /* FIXME << r->getId()*/ << ")");
+	if (!appended) {
+		LOG_ERROR(logger, "Lost resource (id: " << r->getId() << ")");
+		delete r;
+	}
 
 	return (copied||appended);
 }

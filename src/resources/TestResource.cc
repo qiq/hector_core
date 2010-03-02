@@ -11,6 +11,10 @@ TestResource::TestResource() {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
 
+Resource *TestResource::Clone() {
+	return new TestResource(*this);
+}
+
 int TestResource::getSize() {
 	return 1; //FIXME
 }

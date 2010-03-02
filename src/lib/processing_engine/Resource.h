@@ -16,12 +16,11 @@ using namespace std;
 
 class Resource {
 protected:
-	Resource *anotherResource;
-
 	static log4cxx::LoggerPtr logger;
 public:
 	Resource();
 	virtual ~Resource();
+	virtual Resource *Clone() = 0;
 	virtual int getId() = 0;
 	virtual void setId(int id) = 0;
 	virtual int getStatus() = 0;
@@ -29,30 +28,14 @@ public:
 	virtual int getSize() = 0;
 	virtual resource_t getType() = 0;
 
-	Resource *getAnotherResource();
-	Resource *setAnotherResource(Resource *resource);
-
 	virtual string *serialize() = 0;
 	virtual bool deserialize(string *s) = 0;
 };
 
 inline Resource::Resource() {
-	anotherResource = NULL;
 }
 
 inline Resource::~Resource() {
-	delete anotherResource;
-	anotherResource = NULL;
-}
-
-inline Resource *Resource::getAnotherResource() {
-	return anotherResource;
-}
-
-inline Resource *Resource::setAnotherResource(Resource *resource) {
-	Resource *tmp = anotherResource;
-	anotherResource = resource;
-	return tmp;
 }
 
 #endif

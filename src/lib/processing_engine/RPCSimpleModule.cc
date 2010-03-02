@@ -68,8 +68,8 @@ Resource *RPCSimpleModule::Process(Resource *resource) {
 			return NULL;
 		}
 
-		resourceOut->setAnotherResource(resource->getAnotherResource());
-		resource->setAnotherResource(NULL);
+		//resourceOut->setAnotherResource(resource->getAnotherResource());
+		//resource->setAnotherResource(NULL);
 		delete resource;
 	}
 

@@ -24,6 +24,7 @@ protected:
 public:
 	WebResource();
 	~WebResource() {};
+	Resource *Clone();
 	int getId();
 	void setId(int id);
 	int getStatus();

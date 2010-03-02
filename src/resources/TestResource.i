@@ -6,6 +6,7 @@ class TestResource : public Resource {
 public:
         TestResource();
         ~TestResource();
+        Resource *Clone();
         int getId();
         void setId(int id);
         int getStatus();
