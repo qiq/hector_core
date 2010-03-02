@@ -29,3 +29,7 @@ CLEANFILES += test6.log.test
 TESTS += test7.sh
 EXTRA_DIST += test7-config.xml test7.log.correct
 CLEANFILES += test7.log.test
+
+TESTS += test8.sh
+EXTRA_DIST += test8-config.xml test8.log.correct
+CLEANFILES += test8.log.test
