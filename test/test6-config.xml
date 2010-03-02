@@ -7,12 +7,12 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 
 <Config baseDir="../src">
 
-	<Server id="test6">
+	<Server id="test">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test6.log.props</logConfig>
+		<logConfig>../test/test.log.props</logConfig>
 		<lib name="servers/robot/Robot.la"/>
 	</Server>
 

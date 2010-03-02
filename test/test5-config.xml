@@ -7,12 +7,12 @@ test5: two readers(1), one simple intermediates(1), one writer(1)
 
 <Config baseDir="../src">
 
-	<Server id="test5">
+	<Server id="test">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test5.log.props</logConfig>
+		<logConfig>../test/test.log.props</logConfig>
 		<lib name="servers/robot/Robot.la"/>
 	</Server>
 

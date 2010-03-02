@@ -7,12 +7,12 @@ test2: multithreaded read-write: one reader(5), one writer(5)
 
 <Config baseDir="../src">
 
-	<Server id="test2">
+	<Server id="test">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test2.log.props</logConfig>
+		<logConfig>../test/test.log.props</logConfig>
 		<lib name="servers/robot/Robot.la"/>
 	</Server>
 

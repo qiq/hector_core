@@ -2,7 +2,7 @@
 <!DOCTYPE Config SYSTEM "config.dtd">
 
 <!--
-test1: read-write: one reader(1), one writer(1)
+test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
 -->
 
 <Config baseDir="../src">
@@ -18,7 +18,8 @@ test1: read-write: one reader(1), one writer(1)
 
 	<ProcessingEngine id="robot_processing_engine">
 		<processor ref="P_load_resource"/>
-		<processor ref="P_save_resource"/>
+		<processor ref="P_save_resource1"/>
+		<processor ref="P_save_resource2"/>
 	</ProcessingEngine>
 
 	<Processor id="P_load_resource">
@@ -27,26 +28,38 @@ test1: read-write: one reader(1), one writer(1)
 			<module ref="M_load_resource"/>
 		</modules>
 		<output>
-			<nextProcessor ref="P_save_resource"/>
+			<nextProcessor ref="P_save_resource1" copy="1"/>
+			<nextProcessor ref="P_save_resource2"/>
 		</output>
 	</Processor>
-
 	<Module id="M_load_resource">
 		<lib name="TestInput.la"/>
 		<param name="maxItems" value="1000"/>
 	</Module>
 
-	<Processor id="P_save_resource">
+	<Processor id="P_save_resource1">
 		<threads>1</threads>
 		<modules>
-			<module ref="M_save_resource"/>
+			<module ref="M_save_resource1"/>
 		</modules>
 		<input>
 			<queue/>
 		</input>
 	</Processor>
+	<Module id="M_save_resource1">
+		<lib name="TestOutput.la"/>
+	</Module>
 
-	<Module id="M_save_resource">
+	<Processor id="P_save_resource2">
+		<threads>1</threads>
+		<modules>
+			<module ref="M_save_resource2"/>
+		</modules>
+		<input>
+			<queue/>
+		</input>
+	</Processor>
+	<Module id="M_save_resource2">
 		<lib name="TestOutput.la"/>
 	</Module>
 

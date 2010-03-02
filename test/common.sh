@@ -9,6 +9,10 @@ else
 fi
 
 function init {
+	if [ $0 == '-bash' ]; then
+		echo "Include please in a test script please"
+		return
+	fi
 	base=`dirname "$0"`
 	cd $base
 	base=`readlink -f "$base"`'/../src'
@@ -17,11 +21,11 @@ function init {
 
 	export LD_LIBRARY_PATH=$base/lib/.libs:$LD_LIBRARY_PATH
 
-	rm -f $id.log
+	rm -f test.log
 }
 
 function run_server {
-	if ! $base/bin/server -c $id-config.xml $id; then
+	if ! $base/bin/server -c $id-config.xml test; then
 		cat $id.log
 		exit 1;
 	fi

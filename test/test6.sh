@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# simple test: one reader, one writer, more threads threaded
-
 . common.sh
 
 init
@@ -12,7 +10,7 @@ client_wait M_save_resource2[0].items 2000
 shutdown_server
 
 # M_save_resource[0]: Resource arrived (i1-0-253)
-grep "Resource arrived " $id.log|sed -e 's|M_save_resource\[[0-9]\+\]: Resource arrived (\([-a-zA-Z0-9]*\))|\1|'|sort -u|sort -n >$id.log.test
+grep "Resource arrived " test.log|sed -e 's|M_save_resource\[[0-9]\+\]: Resource arrived (\([-a-zA-Z0-9]*\))|\1|'|sort -u|sort -n >$id.log.test
 
 compare_result $id.log.test $id.log.correct
 exit $?

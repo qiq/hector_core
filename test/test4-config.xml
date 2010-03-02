@@ -7,12 +7,12 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 
 <Config baseDir="../src">
 
-	<Server id="test4">
+	<Server id="test">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test4.log.props</logConfig>
+		<logConfig>../test/test.log.props</logConfig>
 		<lib name="servers/robot/Robot.la"/>
 	</Server>
 
