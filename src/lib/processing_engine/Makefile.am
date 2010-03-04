@@ -14,7 +14,6 @@ libhector_processing_engine_la_SOURCES = \
 	RPC.h RPC.cc \
 	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc \
 	RPCSimpleModule.h RPCSimpleModule.cc \
-	RPCMultiModule.h RPCMultiModule.cc \
 	PerlModule.h
 
 libhector_processing_engine_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)

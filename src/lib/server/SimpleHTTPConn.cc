@@ -264,7 +264,7 @@ void SimpleHTTPConn::SendResponse() {
 	result.append(response_header);
 	if (keep_alive)
 		result.append("Connection: keep-alive\r\n");
-	snprintf(s, sizeof(s), "Content-Length: %d\r\n\r\n", response_body.length());
+	snprintf(s, sizeof(s), "Content-Length: %d\r\n\r\n", (int)response_body.length());
 	result.append(s);
 	result.append(response_body);
 

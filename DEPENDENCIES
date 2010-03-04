@@ -1,6 +1,6 @@
 Required:
 perl		5.8
-libxml		2.6.3
+libxml2		2.6.3
 log4cxx		0.10.0
 protocol buffers 2.2.0+
 
@@ -13,3 +13,4 @@ g++		4.4.1
 automake	1.11
 autoconf	2.59
 libtool		2.2.6
+pkg-config	0.22

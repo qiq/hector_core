@@ -109,7 +109,7 @@ module_t PerlModule::getType() {
 
 Resource *PerlModule::Process(Resource *resource) {
 	int result = 0;
-	int ptr = (int)&resource;
+	long ptr = (long)&resource;
 	ObjectLock();
 	dSP;
 	ENTER;

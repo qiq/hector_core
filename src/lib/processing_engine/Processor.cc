@@ -16,7 +16,7 @@
 ///#include "RemoteConnection.h"
 #include "RPC.h"
 #include "RPCSimpleModule.h"
-#include "RPCMultiModule.h"
+//#include "RPCMultiModule.h"
 #include "LibraryLoader.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_engine.Processor"));
