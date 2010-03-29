@@ -16,12 +16,17 @@ module_t Module::getType() {
 	return MODULE_INVALID;
 }
 
-Resource *Module::Process(Resource *resource) {
+Resource *Module::ProcessSimple(Resource *resource) {
 	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (single)");
 	return NULL;
 }
 
-int Module::Process(Resource **in, Resource **out) {
+int Module::ProcessMultiInput(Resource *resources) {
+	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (multi)");
+	return 0;
+}
+
+int Module::ProcessMultiOutput(Resource *resources) {
 	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (multi)");
 	return 0;
 }

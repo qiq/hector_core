@@ -29,9 +29,11 @@ public:
 	virtual bool Init(vector<pair<string, string> > *args);
 	virtual module_t getType();
 	int getThreadIndex();
-	//virtual int busyResources() = 0;
-	virtual Resource *Process(Resource *resource);
-	virtual int Process(Resource **in, Resource **out);
+	// Simple/Input/Output modules does only use this interface (one resource a time)
+	virtual Resource *ProcessSimple(Resource *resource);
+	// Multi/Select modules use input/output interface
+	virtual int ProcessMultiInput(Resource *resources);
+	virtual int ProcessMultiOutput(Resource *resources);
 
 protected:
 	int threadIndex;

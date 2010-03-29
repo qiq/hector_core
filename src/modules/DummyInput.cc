@@ -12,7 +12,7 @@ bool DummyInput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *DummyInput::Process(Resource *resource) {
+Resource *DummyInput::ProcessSimple(Resource *resource) {
 	assert(resource == NULL);
 	WebResource *wr = new WebResource();
 	char s[1024];

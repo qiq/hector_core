@@ -16,7 +16,7 @@ public:
 	~TestOutput();
 	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
-	Resource *Process(Resource *resource);
+	Resource *ProcessSimple(Resource *resource);
 
 private:
 	int items;

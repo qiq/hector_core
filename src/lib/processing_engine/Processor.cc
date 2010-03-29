@@ -41,7 +41,7 @@ Processor::~Processor() {
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
 		delete *iter;
 	}
-	delete queue;
+	delete inputQueue;
 
 	delete values;
 }
@@ -167,7 +167,7 @@ bool Processor::Init(Config *config) {
 	}
 
 	// input queue(s)
-	queue = new SyncQueue<Resource>();
+	inputQueue = new SyncQueue<Resource>();
 	snprintf(buffer, sizeof(buffer), "/Config/Processor[@id='%s']/input/queue", getId());
 	v = config->getValues(buffer);
 	if (v) {
@@ -207,11 +207,11 @@ bool Processor::Init(Config *config) {
 				}
 				free(s);
 			}
-			queue->addQueue(priority, maxItems, maxSize);
+			inputQueue->addQueue(priority, maxItems, maxSize);
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			values->addGetter(buffer, &Processor::getQueueItems);
+			values->addGetter(buffer, &Processor::getInputQueueItems);
 		}
 	}
 
@@ -279,7 +279,7 @@ bool Processor::Init(Config *config) {
 					LOG_ERROR(logger, "Input module must be first");
 					return false;
 				}
-				if (queue->getQueuesCount() > 0) {
+				if (inputQueue->getQueuesCount() > 0) {
 					LOG_ERROR(logger, "queue and input module must not be used together");
 					return false;
 				}
@@ -300,13 +300,13 @@ bool Processor::Init(Config *config) {
 					LOG_ERROR(logger, "Multi/Select module must be the only one in a Processor");
 					return false;
 				}
-				if (queue->getQueuesCount() == 0 || outputFilters.size() == 0) {
+				if (inputQueue->getQueuesCount() == 0 || outputFilters.size() == 0) {
 					LOG_ERROR(logger, "No input or output queue defined");
 					return false;
 				}
 				break;
 			case MODULE_SIMPLE:
-				if (i == 0 && queue->getQueuesCount() == 0) {
+				if (i == 0 && inputQueue->getQueuesCount() == 0) {
 					LOG_ERROR(logger, "No input queue defined");
 					return false;
 				} else if (i == n-1 && outputFilters.size() == 0) {
@@ -339,7 +339,7 @@ bool Processor::Connect() {
 			return false;
 		}
 
-		SyncQueue<Resource> *q = p->getQueue();
+		SyncQueue<Resource> *q = p->getInputQueue();
 		if (!q) {
 			LOG_ERROR(logger, "No input queue defined for processor: " << ref);
 			return false;
@@ -367,12 +367,12 @@ struct thread {
 	Processor *p;
 };
 
-void *run_processor_thread(void *ptr) {
+void *run_simple_thread(void *ptr) {
 	struct thread *t = (struct thread *)ptr;
 	Processor *p = t->p;
 	int id = t->id;
 	delete t;
-	p->runThread(id);
+	p->runSimpleThread(id);
 	return NULL;
 }
 
@@ -405,7 +405,56 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 	return (copied||appended);
 }
 
-void Processor::runThread(int id) {
+void Processor::runSimpleThread(int id) {
+	// simple processing (no parallel or select)
+	Resource *resource = NULL;
+	module_t firstModuleType = modules[id].front()->getType();
+
+	while (isRunning()) {
+		if (firstModuleType != MODULE_INPUT) {
+			if (!(resource = inputQueue->getItem(true)))
+				break;	// cancelled
+		}
+
+		bool stop = false;
+		for (vector<Module*>::iterator iter = modules[id].begin(); !stop && iter != modules[id].end(); ++iter) {
+			switch ((*iter)->getType()) {
+			case MODULE_INPUT:
+				resource = (*iter)->ProcessSimple(NULL);
+				if (!resource)
+					stop = true;
+				break;
+			case MODULE_OUTPUT:
+				(void)(*iter)->ProcessSimple(resource);
+				resource = NULL;
+				break;
+			case MODULE_SIMPLE:
+				resource = (*iter)->ProcessSimple(resource);
+				if (!resource)
+					stop = true;
+				break;
+			case MODULE_MULTI:
+			case MODULE_SELECT:
+			default:
+				LOG_ERROR(logger, "Should not happen");
+				break;
+			}
+		}
+		if (stop) {
+			LOG_ERROR(logger, "No resource, thread " << id << " terminated");
+			break;
+		}
+		if (resource) {
+			if (!appendResource(resource, true))
+				break;	// cancelled
+			resource = NULL;
+		}
+	}
+	delete resource;
+}
+
+#if 0
+	}
 	module_t firstModuleType = modules[id].front()->getType();
 	if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
 		const int maxRequests = 100;	// FIXME: make it configurable
@@ -417,7 +466,7 @@ void Processor::runThread(int id) {
 
 		while (isRunning()) {
 			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
-			int n = queue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
+			int n = inputQueue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
 			if (n == 0 && activeResources == 0)
 				break;	// cancelled
 			inputResources[activeResources+n] = NULL;
@@ -454,65 +503,25 @@ void Processor::runThread(int id) {
 		}
 		delete[] outputResources;
 	} else {
-		// simple processing (no parallel or select)
-		Resource *resource = NULL;
-
-		while (isRunning()) {
-			if (firstModuleType != MODULE_INPUT) {
-				if (!(resource = queue->getItem(true)))
-					break;	// cancelled
-			}
-
-			bool stop = false;
-			for (vector<Module*>::iterator iter = modules[id].begin(); !stop && iter != modules[id].end(); ++iter) {
-				switch ((*iter)->getType()) {
-				case MODULE_INPUT:
-					resource = (*iter)->Process(NULL);
-					if (!resource)
-						stop = true;
-					break;
-				case MODULE_OUTPUT:
-					(void)(*iter)->Process(resource);
-					resource = NULL;
-					break;
-				case MODULE_SIMPLE:
-					resource = (*iter)->Process(resource);
-					if (!resource)
-						stop = true;
-					break;
-				case MODULE_MULTI:
-				case MODULE_SELECT:
-				default:
-					LOG_ERROR(logger, "Should not happen");
-					break;
-				}
-			}
-			if (stop) {
-				LOG_ERROR(logger, "No resource, thread " << id << " terminated");
-				break;
-			}
-			if (resource) {
-				if (!appendResource(resource, true))
-					break;	// cancelled
-				resource = NULL;
-			}
-		}
-		delete resource;
-	}
 }
+#endif
 
 void Processor::Start() {
 	ObjectLock();
 	running = true;
 	threads = new pthread_t[nThreads];
 
-	queue->clearCancel();
+	inputQueue->clearCancel();
 
+	module_t firstModuleType = modules[0].front()->getType();
 	for (int i = 0; i < nThreads; i++) {
 		struct thread *t = new struct thread;
 		t->p = this;
 		t->id = i;
-		pthread_create(&threads[i], NULL, run_processor_thread, (void *)t);
+		if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT)
+			pthread_create(&threads[i], NULL, run_simple_thread, (void *)t);
+		else
+			pthread_create(&threads[i], NULL, run_simple_thread, (void *)t);
 	}
 	LOG_INFO(logger, "Processor started (" << nThreads << ")");
 	ObjectUnlock();
@@ -530,7 +539,9 @@ void Processor::Stop() {
 	if (!copy)
 		return;
 
-	queue->cancelAll();
+	// cancel all threads waiting in input queues + multi module queues
+	inputQueue->cancelAll();
+	//TODO cancel threads waiting in multi module???
 
 	for (int i = 0; i < nThreads; i++) {
 		pthread_join(copy[i], NULL);
@@ -541,14 +552,14 @@ void Processor::Stop() {
 }
 
 void Processor::Pause() {
-	queue->pause();
+	inputQueue->pause();
 }
 
 void Processor::Resume() {
-	queue->resume();
+	inputQueue->resume();
 }
 
-char *Processor::getQueueItems(const char *name) {
+char *Processor::getInputQueueItems(const char *name) {
 	// get queue priority first
 	string n(name);
 	size_t dot = n.find_last_of('.');
@@ -559,7 +570,7 @@ char *Processor::getQueueItems(const char *name) {
 	if (sscanf(s.c_str(), "%d", &priority) != 1)
 		return NULL;
 	// get size of priority queue
-	int queueItems = queue->queueItems(priority);
+	int queueItems = inputQueue->queueItems(priority);
 	char s2[1024];
 	snprintf(s2, sizeof(s2), "%d", queueItems);
 	return strdup(s2);

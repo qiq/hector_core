@@ -27,7 +27,7 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestOutput::Process(Resource *resource) {
+Resource *TestOutput::ProcessSimple(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
 		LOG_INFO(logger, "Resource arrived (" << tr->getStr() << ")");

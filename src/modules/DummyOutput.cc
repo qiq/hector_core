@@ -10,7 +10,7 @@ bool DummyOutput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *DummyOutput::Process(Resource *resource) {
+Resource *DummyOutput::ProcessSimple(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG_INFO(logger, "Saving resource (URL: " << wr->getURL() << ")");
