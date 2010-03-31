@@ -154,7 +154,7 @@ void SimpleServer::MainThread() {
 	}
 	main_lock.unlock();
 
-	queue->cancelAll();
+	queue->Stop();
         for (int i = 0; i < nThreads; i++) {
 		pthread_join(threads[i], NULL);
 	}

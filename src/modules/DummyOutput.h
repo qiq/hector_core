@@ -15,7 +15,7 @@ public:
 	~DummyOutput() {};
 	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
-	Resource *ProcessSimple(Resource *resource);
+	Resource *Process(Resource *resource);
 };
 
 inline module_t DummyOutput::getType() {

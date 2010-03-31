@@ -69,7 +69,7 @@ SimpleQueue<T>::SimpleQueue(int priority, int maxItems, int maxSize) {
 
 template <class T>
 SimpleQueue<T>::~SimpleQueue() {
-	// to be sure, should be deleted in SyncQueue::cancelAll()
+	// to be sure, should be deleted in SyncQueue::Stop()
 	for (typename deque<T*>::iterator iter = queue->begin(); iter != queue->end(); ++iter) {
 		delete (*iter);
 	}
@@ -151,10 +151,10 @@ public:
 	void addQueue(int priority, int maxItems, int maxSize);
 	bool hasQueue(int priority);
 	int getQueuesCount();
-	void cancelAll();
-	void clearCancel();
-	void pause();
-	void resume();
+	void Stop();
+	void Start();
+	void Pause();
+	void Resume();
 
 	bool isSpace(T *r, int priority = 0);
 	bool putItem(T *r, bool sleep, int priority = 0);
@@ -189,8 +189,8 @@ SyncQueue<T>::SyncQueue() {
 
 template <class T>
 SyncQueue<T>::~SyncQueue() {
-	cancelAll();
-	// to be sure, should be deleted in cancelAll()
+	Stop();
+	// to be sure, should be deleted in Stop()
 	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
 		delete *iter;
 	}
@@ -219,7 +219,7 @@ int SyncQueue<T>::getQueuesCount() {
 }
 
 template <class T>
-void SyncQueue<T>::cancelAll() {
+void SyncQueue<T>::Stop() {
 	queueLock.lock();
 	cancel = true;
 	while (waitingReaders > 0) {
@@ -242,19 +242,19 @@ void SyncQueue<T>::cancelAll() {
 }
 
 template <class T>
-void SyncQueue<T>::clearCancel() {
+void SyncQueue<T>::Start() {
 	queueLock.lock();
 	cancel = false;
 	queueLock.unlock();
 }
 
 template <class T>
-void SyncQueue<T>::pause() {
+void SyncQueue<T>::Pause() {
 	pauseLock.lock();
 }
 
 template <class T>
-void SyncQueue<T>::resume() {
+void SyncQueue<T>::Resume() {
 	pauseLock.unlock();
 }
 
@@ -271,6 +271,7 @@ bool SyncQueue<T>::isSpace(T *r, int priority) {
 	return result;
 }
 
+// returns false if canceled
 template <class T>
 bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 	pauseLock.lock();

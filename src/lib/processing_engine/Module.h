@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <log4cxx/logger.h>
 #include "Object.h"
 #include "Resource.h"
@@ -30,10 +31,13 @@ public:
 	virtual module_t getType();
 	int getThreadIndex();
 	// Simple/Input/Output modules does only use this interface (one resource a time)
-	virtual Resource *ProcessSimple(Resource *resource);
+	virtual Resource *Process(Resource *resource);
 	// Multi/Select modules use input/output interface
-	virtual int ProcessMultiInput(Resource *resources);
-	virtual int ProcessMultiOutput(Resource *resources);
+	virtual int Process(deque<Resource*> *inputResources, deque<Resource*> *outputResources);
+	virtual void Start();
+	virtual void Stop();
+	virtual void Pause();
+	virtual void Resume();
 
 protected:
 	int threadIndex;

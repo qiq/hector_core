@@ -56,7 +56,7 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestInput::ProcessSimple(Resource *resource) {
+Resource *TestInput::Process(Resource *resource) {
 	if (maxItems && items >= maxItems)
 		return NULL;
 	assert(resource == NULL);

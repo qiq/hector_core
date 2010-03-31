@@ -20,7 +20,7 @@ public:
 	~TestSimple();
 	bool Init(vector<pair<string, string> > *params);
 	module_t getType();
-	Resource *ProcessSimple(Resource *resource);
+	Resource *Process(Resource *resource);
 
 private:
 	int items;

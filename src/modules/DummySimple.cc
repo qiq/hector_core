@@ -50,7 +50,7 @@ bool DummySimple::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *DummySimple::ProcessSimple(Resource *resource) {
+Resource *DummySimple::Process(Resource *resource) {
 	WebResource *wr = dynamic_cast<WebResource*>(resource);
 	if (wr) {
 		LOG_INFO(logger, "Dummy: processing resource " << wr->getURL());
