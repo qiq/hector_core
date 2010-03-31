@@ -30,6 +30,8 @@ public:
 	bool isRunning();
 	bool appendResource(Resource *r, bool sleep); // process resource and append it to other resources' queues
 	void runSimpleThread(int id);
+	void runMultiThreadInput(int id);
+	void runMultiThreadOutput(int id);
 	void Start();
 	void Stop();
 	void Pause();
@@ -44,8 +46,8 @@ protected:
 	pthread_t *threads;
 	bool running;
 
-	vector<Module*> *modules; 		// all modules
-	SyncQueue<Resource> *inputQueue;		// input queue
+	vector<Module*> *modules; 		// all modules; every thread has a module instance
+	SyncQueue<Resource> *inputQueue;	// input queue
 	vector<OutputFilter*> outputFilters;	// filters of output resources
 
 	ObjectValues<Processor> *values;

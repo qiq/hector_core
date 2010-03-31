@@ -376,25 +376,24 @@ void *run_simple_thread(void *ptr) {
 	return NULL;
 }
 
-bool Processor::appendResource(Resource *r, bool sleep) {
+// returns: filterIndex or -1 (sleep and cancelled)
+int Processor::appendResource(int filterIndex, Resource *r, bool sleep) {
 	int status = r->getStatus();
 	bool copied = false;
 	bool appended = false;
-	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
+	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+filterIndex; iter != outputFilters.end(); ++iter) {
 		OutputFilter *f = *iter;
 		if (f->isEmptyFilter() || f->getFilter() == status) {
-			Resource *copy = NULL;
-			if ((*iter)->getCopy())
-				copy = r->Clone();
-			if (!f->processResource(r, sleep || copied))
-				return false;
-			if (copy) {
-				r = copy;
-				copied = true;
-				continue;
+			Resource *copy = (*iter)->getCopy() ? r->Clone() : NULL;
+			if (!f->processResource(r, sleep))
+				return sleep ? -1 : filterIndex; // cancelled or no space available
 			}
-			appended = true;
-			break;
+			filterIndex++;
+			if (!copy) {
+				appended = true;
+				break;
+			}
+			r = copy;
 		}
 	}
 	if (!appended) {
@@ -402,126 +401,170 @@ bool Processor::appendResource(Resource *r, bool sleep) {
 		delete r;
 	}
 
-	return (copied||appended);
+	return 0;
 }
 
-void Processor::runSimpleThread(int id) {
-	// simple processing (no parallel or select)
-	Resource *resource = NULL;
+void Processor::runThread(int id) {
 	module_t firstModuleType = modules[id].front()->getType();
-
-	while (isRunning()) {
-		if (firstModuleType != MODULE_INPUT) {
-			if (!(resource = inputQueue->getItem(true)))
-				break;	// cancelled
-		}
-
-		bool stop = false;
-		for (vector<Module*>::iterator iter = modules[id].begin(); !stop && iter != modules[id].end(); ++iter) {
-			switch ((*iter)->getType()) {
-			case MODULE_INPUT:
-				resource = (*iter)->ProcessSimple(NULL);
-				if (!resource)
-					stop = true;
-				break;
-			case MODULE_OUTPUT:
-				(void)(*iter)->ProcessSimple(resource);
-				resource = NULL;
-				break;
-			case MODULE_SIMPLE:
-				resource = (*iter)->ProcessSimple(resource);
-				if (!resource)
-					stop = true;
-				break;
-			case MODULE_MULTI:
-			case MODULE_SELECT:
-			default:
-				LOG_ERROR(logger, "Should not happen");
-				break;
-			}
-		}
-		if (stop) {
-			LOG_ERROR(logger, "No resource, thread " << id << " terminated");
-			break;
-		}
-		if (resource) {
-			if (!appendResource(resource, true))
-				break;	// cancelled
-			resource = NULL;
-		}
-	}
-	delete resource;
-}
-
-#if 0
-	}
-	module_t firstModuleType = modules[id].front()->getType();
-	if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
-		const int maxRequests = 100;	// FIXME: make it configurable
-		Resource **inputResources = new Resource*[maxRequests+1];
-		Resource **outputResources = new Resource*[maxRequests+1];
-		int activeResources = 0;
-		int finishedResources = 0;
-		inputResources[0] = NULL;
-
+	if (firstModuleType == MODULE_INPUT || firstModuleType == MODULE_SIMPLE) {
+		// simple processing (no parallel or select)
+		Resource *resource = NULL;
 		while (isRunning()) {
-			// get up to maxRequests Resources items from the source queue, blocked in case we have no running requests
-			int n = inputQueue->getItems(inputResources, maxRequests-activeResources, activeResources == 0);
-			if (n == 0 && activeResources == 0)
-				break;	// cancelled
-			inputResources[activeResources+n] = NULL;
-			activeResources += n;
+			if (firstModuleType != MODULE_INPUT) {
+				if (!(resource = inputQueue->getItem(true)))
+					break;	// cancelled
+			}
 
-			// process new requests, get finished requests
-			n = modules[id][0]->Process(inputResources, outputResources + finishedResources);
-			finishedResources += n;
-			inputResources[0] = NULL;
-
-			// pass processed Resources into correct queues
-			n = 0;
-			while (n < finishedResources) {
-				if (!appendResource(outputResources[n], activeResources == maxRequests))
+			bool stop = false;
+			for (vector<Module*>::iterator iter = modules[id].begin(); !stop && iter != modules[id].end(); ++iter) {
+				switch ((*iter)->getType()) {
+				case MODULE_INPUT:
+					resource = (*iter)->ProcessSimple(NULL);
+					if (!resource)
+						stop = true;
 					break;
-				n++;
+				case MODULE_OUTPUT:
+					(void)(*iter)->ProcessSimple(resource);
+					resource = NULL;
+					break;
+				case MODULE_SIMPLE:
+					resource = (*iter)->ProcessSimple(resource);
+					if (!resource)
+						stop = true;
+					break;
+				case MODULE_MULTI:
+				case MODULE_SELECT:
+				default:
+					LOG_ERROR(logger, "Should not happen");
+					break;
+				}
 			}
-			if (n == 0 && activeResources == maxRequests)
-				break;	// cancelled
-			// TODO: maybe use cyclic buffer instead of copying?
-			for (int i = 0; i < finishedResources-n; i++) {
-				outputResources[i] = outputResources[n+i];
+			if (stop) {
+				LOG_ERROR(logger, "No resource, thread " << id << " terminated");
+				break;
 			}
-			finishedResources -= n;
-			activeResources -= n;
+			if (resource) {
+				if (appendResource(0, resource, true) < 0)
+					break;	// cancelled
+				resource = NULL;
+			}
+		}
+		delete resource;
+	} else {
+		// parallel processing: read items from input queue, process them and put items into output queue
+		deque<Resource*> *inputResources = new deque<Resource*>();
+		deque<Resource*> *outputResources = new deque<Resource*>();
+		int outputFilterIndex = 0;
+
+		Module *module = modules[id].front();
+		int n = module->Process(inputResources, outputResources);
+		while (outputResources->size() > 0) {
+			outputFilterIndex = appendResource(outputFilterIndex, outputResources->front(), false);
+			if (outputFilterIndex < 0)
+				break;	// no space, continue later
+			outputResources.pop_front();
+			outputFilterIndex = 0;
 		}
 
-		for (int i = 0; inputResources[i] != NULL; i++) {
-			delete inputResources[i];
+		while (isRunning() && n >= 0) {
+			inputResources.erase();
+			int i;
+			for (i = 0; i < n; i++) {
+				Resource *resource = inputQueue->getItem(false);
+				if (!resource)
+					break; // cancelled
+				inputResources.push_back(resource);
+			}
+			if (i < n)
+				break;	// cancelled
+
+			n = module->Process(inputResources, outputResources);
+			
+			while (outputResources->size() > 0) {
+				outputFilterIndex = appendResource(outputFilterIndex, outputResources->front(), false);
+				if (outputFilterIndex < 0)
+					break;	// no space, continue later
+				outputResources.pop_front();
+				outputFilterIndex = 0;
+			}
 		}
-		delete[] inputResources;
-		for (int i = 0; i < finishedResources; i++) {
-			delete outputResources[i];
-		}
-		delete[] outputResources;
-	} else {
+	}
 }
-#endif
+
+void *run_multi_thread_input(void *ptr) {
+	struct thread *t = (struct thread *)ptr;
+	Processor *p = t->p;
+	int id = t->id;
+	delete t;
+	p->runMultiThreadInput(id);
+	return NULL;
+}
+
+void *run_multi_thread_output(void *ptr) {
+	struct thread *t = (struct thread *)ptr;
+	Processor *p = t->p;
+	int id = t->id;
+	delete t;
+	p->runMultiThreadOutput(id);
+	return NULL;
+}
+
+void Processor::runMultiThreadInput(int id) {
+	// parallel processing: input-feeding thread
+	Module *module = modules[id].front();
+
+	int maxResources = module->ProcessMultiInput(NULL, 0);
+	Resource **resources = new Resource*[maxResources];
+
+	int n = maxResources;
+	while (isRunning() && n > 0) {
+		n = inputQueue->getItems(resources, n, true);
+		if (!n)
+			break;		// cancelled
+		n = module->ProcessMultiInput(*resources, n);
+		if (n > maxResources) {
+			maxResources = n;
+			delete[] resources;
+			resources = new Resource*[maxResources];
+		}
+	}
+}
+
+// number of resources we process in one turn
+#define MAX_OUTPUT_RESOURCES 100
+void Processor::runMultiThreadOutput(int id) {
+	// parallel processing: output-consuming thread
+	Resource **resources = new Resource*[MAX_OUTPUT_RESOURCES];
+	Module *module = modules[id].front();
+
+	int n = 1;
+	while (isRunning() && n > 0) {
+		n = module->ProcessMultiOutput(*resources, MAX_OUTPUT_RESOURCES);
+
+		for (int i = 0; i < n; i++) {
+			if (!appendResource(resources[i], true))
+				break;	// cancelled
+		}
+	}
+}
 
 void Processor::Start() {
 	ObjectLock();
 	running = true;
 	threads = new pthread_t[nThreads];
 
-	inputQueue->clearCancel();
+	inputQueue->Start();
 
 	module_t firstModuleType = modules[0].front()->getType();
 	for (int i = 0; i < nThreads; i++) {
 		struct thread *t = new struct thread;
 		t->p = this;
 		t->id = i;
-		if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT)
+		if (firstModuleType == MODULE_MULTI || firstModuleType == MODULE_SELECT) {
 			pthread_create(&threads[i], NULL, run_simple_thread, (void *)t);
-		else
+		} else {
 			pthread_create(&threads[i], NULL, run_simple_thread, (void *)t);
+		}
 	}
 	LOG_INFO(logger, "Processor started (" << nThreads << ")");
 	ObjectUnlock();
@@ -540,7 +583,7 @@ void Processor::Stop() {
 		return;
 
 	// cancel all threads waiting in input queues + multi module queues
-	inputQueue->cancelAll();
+	inputQueue->Stop();
 	//TODO cancel threads waiting in multi module???
 
 	for (int i = 0; i < nThreads; i++) {
@@ -552,11 +595,11 @@ void Processor::Stop() {
 }
 
 void Processor::Pause() {
-	inputQueue->pause();
+	inputQueue->Pause();
 }
 
 void Processor::Resume() {
-	inputQueue->resume();
+	inputQueue->Resume();
 }
 
 char *Processor::getInputQueueItems(const char *name) {
