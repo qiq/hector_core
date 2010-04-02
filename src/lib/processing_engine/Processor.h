@@ -55,7 +55,7 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 
-	int appendResource(Resource *r, bool sleep, int filterIndex); // process resource and append it to other resources' queues
+	bool appendResource(Resource *r, bool sleep, int *filterIndex); // process resource and append it to other resources' queues
 };
 
 inline SyncQueue<Resource> *Processor::getInputQueue() {

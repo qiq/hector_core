@@ -21,7 +21,7 @@ Resource *Module::Process(Resource *resource) {
 	return NULL;
 }
 
-int Module::Process(deque<Resource*> *inputResources, deque<Resource*> *outputResources) {
+int Module::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
 	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (multi)");
 	return 0;
 }

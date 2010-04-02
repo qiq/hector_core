@@ -9,7 +9,7 @@
 
 #include <string>
 #include <vector>
-#include <deque>
+#include <queue>
 #include <log4cxx/logger.h>
 #include "Object.h"
 #include "Resource.h"
@@ -20,7 +20,6 @@ typedef enum {
 	MODULE_OUTPUT = 2,
 	MODULE_SIMPLE = 3,
 	MODULE_MULTI =  4,
-	MODULE_SELECT = 5 
 } module_t;
 
 class Module : public Object {
@@ -32,8 +31,9 @@ public:
 	int getThreadIndex();
 	// Simple/Input/Output modules does only use this interface (one resource a time)
 	virtual Resource *Process(Resource *resource);
-	// Multi/Select modules use input/output interface
-	virtual int Process(deque<Resource*> *inputResources, deque<Resource*> *outputResources);
+	// Multi modules use input/output interface: inputResources should be consumed, outputResources should be produced
+	// returns number of resources we are expecting on the input, -1 in case we should block in waiting for input resources
+	virtual int Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 	virtual void Start();
 	virtual void Stop();
 	virtual void Pause();
