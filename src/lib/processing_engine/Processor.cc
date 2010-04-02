@@ -484,7 +484,7 @@ void Processor::runThread(int id) {
 
 			// get upto readMax resources from the input queue	
 			readMax -= inputResources->size();
-			int i;
+			int i = 0;
 			while (i < readMax) {
 				Resource *resource = inputQueue->getItem(block && i == 0);
 				if (!resource)
