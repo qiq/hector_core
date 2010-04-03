@@ -3,6 +3,7 @@
 #ifndef _RESOURCES_H_
 #define _RESOURCES_H_
 
+#include <queue>
 #include <string>
 #include "Resource.h"
 #include "TestResource.h"
@@ -37,6 +38,22 @@ inline TestResource *Resource2TestResource(Resource *resource) {
 
 inline WebResource *Resource2WebResource(Resource *resource) {
 	return dynamic_cast<WebResource*>(resource);
+}
+
+// Helper methods for SWIG
+
+inline void ResourceQueuePush(queue<Resource*> *queue, Resource *resource) {
+	queue->push(resource);
+}
+
+inline Resource *ResourceQueuePop(queue<Resource*> *queue) {
+	Resource *resource = queue->front();
+	queue->pop();
+	return resource;
+}
+
+inline int ResourceQueueSize(queue<Resource*> *queue) {
+	return queue->size();
 }
 
 #endif

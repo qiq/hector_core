@@ -456,7 +456,7 @@ void Processor::runThread(int id) {
 		Module *module = modules[id].front();
 		int n;
 		while (isRunning()) {
-			n = module->Process(inputResources, outputResources);
+			n = module->ProcessMulti(inputResources, outputResources);
 			// n >= 0: at least one resource is being processed, do not block
 			// n < 0: no resources are processed, wait for input resources
 			// m = number of output resources appended to output queue (may be less than outputResources->size())

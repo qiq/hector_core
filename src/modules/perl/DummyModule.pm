@@ -66,4 +66,12 @@ sub Process() {
 	return $resource+1;
 }
 
+sub ProcessMulti() {
+	my ($self, $inputResources, $outputResources) = @_;
+
+	print STDERR "ProcessMulti()\n";
+
+	return 1;
+}
+
 1;

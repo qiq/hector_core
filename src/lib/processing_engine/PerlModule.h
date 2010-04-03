@@ -25,6 +25,7 @@ public:
 	bool Init(vector<pair<string, string> > *args);
 	module_t getType();
 	Resource *Process(Resource *resource);
+	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
 protected:
 	char *getValueSync(const char *name);

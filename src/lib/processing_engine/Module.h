@@ -33,7 +33,7 @@ public:
 	virtual Resource *Process(Resource *resource);
 	// Multi modules use input/output interface: inputResources should be consumed, outputResources should be produced
 	// returns number of resources we are expecting on the input, -1 in case we should block in waiting for input resources
-	virtual int Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	virtual int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 	virtual void Start();
 	virtual void Stop();
 	virtual void Pause();

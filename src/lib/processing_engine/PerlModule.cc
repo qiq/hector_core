@@ -128,6 +128,29 @@ Resource *PerlModule::Process(Resource *resource) {
 	return (Resource*)result;
 }
 
+int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+	int result = 0;
+	long ptrir = (long)&inputResources;
+	long ptror = (long)&outputResources;
+	ObjectLock();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        XPUSHs(sv_2mortal(newSViv(ptrir)));
+        XPUSHs(sv_2mortal(newSViv(ptror)));
+        PUTBACK;
+	int count = call_method("ProcessMulti", G_SCALAR);
+	SPAGAIN;
+	if (count == 1)
+		result = POPi;
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	ObjectUnlock();
+	return result;
+}
+
 char *PerlModule::getValueSync(const char *name) {
 	SV *sv;
 	int count;
@@ -230,4 +253,3 @@ void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
 	FREETMPS;
 	LEAVE;
 }
-

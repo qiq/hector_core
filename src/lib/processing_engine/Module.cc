@@ -17,12 +17,12 @@ module_t Module::getType() {
 }
 
 Resource *Module::Process(Resource *resource) {
-	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (single)");
+	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (Process)");
 	return NULL;
 }
 
-int Module::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
-	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (multi)");
+int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+	LOG_ERROR(logger, "Unimplemented resource processing " << getId() << " (ProcessMulti)");
 	return 0;
 }
 
