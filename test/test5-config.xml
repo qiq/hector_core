@@ -1,89 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Config SYSTEM "config.dtd">
-
 <!--
 test5: two readers(1), one simple intermediates(1), one writer(1)
 -->
-
-<Config baseDir="../src">
-
-	<Server id="test">
+<Config>
+	<Server id="test" lib="../src/servers/robot/Robot.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
-		<processingEngine ref="robot_processing_engine"/>
 		<logConfig>../test/test.log.props</logConfig>
-		<lib name="servers/robot/Robot.la"/>
+		<ProcessingEngine id="robot_processing_engine">
+			<Processor id="P_load_resource1">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load_resource1" lib="../src/modules/TestInput.la">
+						<param name="maxItems" value="1000"/>
+						<param name="idPrefix" value="i1-"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_simple"/>
+				</output>
+			</Processor>
+			<Processor id="P_load_resource2">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load_resource2" lib="../src/modules/TestInput.la">
+						<param name="maxItems" value="2000"/>
+						<param name="idPrefix" value="i2-"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_simple"/>
+				</output>
+			</Processor>
+			<Processor id="P_simple">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_simple" lib="../src/modules/TestSimple.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+				<output>
+					<nextProcessor ref="P_save_resource"/>
+				</output>
+			</Processor>
+			<Processor id="P_save_resource">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save_resource" lib="../src/modules/TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
 	</Server>
-
-	<ProcessingEngine id="robot_processing_engine">
-		<processor ref="P_load_resource1"/>
-		<processor ref="P_load_resource2"/>
-		<processor ref="P_simple"/>
-		<processor ref="P_save_resource"/>
-	</ProcessingEngine>
-
-	<Processor id="P_load_resource1">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_load_resource1"/>
-		</modules>
-		<output>
-			<nextProcessor ref="P_simple"/>
-		</output>
-	</Processor>
-
-	<Module id="M_load_resource1">
-		<lib name="TestInput.la"/>
-		<param name="maxItems" value="1000"/>
-		<param name="idPrefix" value="i1-"/>
-	</Module>
-
-	<Processor id="P_load_resource2">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_load_resource2"/>
-		</modules>
-		<output>
-			<nextProcessor ref="P_simple"/>
-		</output>
-	</Processor>
-
-	<Module id="M_load_resource2">
-		<lib name="TestInput.la"/>
-		<param name="maxItems" value="2000"/>
-		<param name="idPrefix" value="i2-"/>
-	</Module>
-
-	<Processor id="P_simple">
-		<threads>5</threads>
-		<modules>
-			<module ref="M_simple"/>
-		</modules>
-		<input>
-			<queue/>
-		</input>
-		<output>
-			<nextProcessor ref="P_save_resource"/>
-		</output>
-	</Processor>
-
-	<Module id="M_simple">
-		<lib name="TestSimple.la"/>
-	</Module>
-
-	<Processor id="P_save_resource">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_save_resource"/>
-		</modules>
-		<input>
-			<queue/>
-		</input>
-	</Processor>
-
-	<Module id="M_save_resource">
-		<lib name="TestOutput.la"/>
-	</Module>
-
 </Config>

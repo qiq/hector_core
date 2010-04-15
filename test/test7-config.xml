@@ -1,66 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Config SYSTEM "config.dtd">
-
 <!--
 test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
 -->
-
-<Config baseDir="../src">
-
-	<Server id="test">
+<Config>
+	<Server id="test" lib="../src/servers/robot/Robot.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
-		<processingEngine ref="robot_processing_engine"/>
-		<logConfig>../test/test.log.props</logConfig>
-		<lib name="servers/robot/Robot.la"/>
+		<logConfig>test.log.props</logConfig>
+		<ProcessingEngine id="robot_processing_engine">
+			<Processor id="P_load_resource">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load_resource" lib="../src/modules/TestInput.la">
+						<param name="maxItems" value="1000"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_save_resource1" copy="1"/>
+					<nextProcessor ref="P_save_resource2"/>
+				</output>
+			</Processor>
+			<Processor id="P_save_resource1">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save_resource1" lib="../src/modules/TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+			<Processor id="P_save_resource2">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save_resource2" lib="../src/modules/TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
 	</Server>
-
-	<ProcessingEngine id="robot_processing_engine">
-		<processor ref="P_load_resource"/>
-		<processor ref="P_save_resource1"/>
-		<processor ref="P_save_resource2"/>
-	</ProcessingEngine>
-
-	<Processor id="P_load_resource">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_load_resource"/>
-		</modules>
-		<output>
-			<nextProcessor ref="P_save_resource1" copy="1"/>
-			<nextProcessor ref="P_save_resource2"/>
-		</output>
-	</Processor>
-	<Module id="M_load_resource">
-		<lib name="TestInput.la"/>
-		<param name="maxItems" value="1000"/>
-	</Module>
-
-	<Processor id="P_save_resource1">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_save_resource1"/>
-		</modules>
-		<input>
-			<queue/>
-		</input>
-	</Processor>
-	<Module id="M_save_resource1">
-		<lib name="TestOutput.la"/>
-	</Module>
-
-	<Processor id="P_save_resource2">
-		<threads>1</threads>
-		<modules>
-			<module ref="M_save_resource2"/>
-		</modules>
-		<input>
-			<queue/>
-		</input>
-	</Processor>
-	<Module id="M_save_resource2">
-		<lib name="TestOutput.la"/>
-	</Module>
-
 </Config>

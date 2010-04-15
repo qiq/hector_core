@@ -18,7 +18,7 @@ using namespace std;
 
 class TestResource : public Resource {
 protected:
-	hector::resources::TestResource r;
+	helen::resources::TestResource r;
 
 	static log4cxx::LoggerPtr logger;
 public:

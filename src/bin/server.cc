@@ -99,17 +99,12 @@ int main(int argc, char *argv[]) {
 	free(s);
 
 	// set up logging
-	char *baseDir = config->getFirstValue("/Config/@baseDir");
-	if (!baseDir)
-		die("Cannot find baseDir\n");
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/logConfig", serverId);
 	char *logConfig = config->getFirstValue(buffer);
 	if (!logConfig)
 		die("logConfig not found\n");
-	snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, logConfig);
-	free(baseDir);
 
-	log4cxx::PropertyConfigurator::configure(buffer);
+	log4cxx::PropertyConfigurator::configure(logConfig);
 
 	// create and initialize the Server object
 	Server *server = new Server(serverId);

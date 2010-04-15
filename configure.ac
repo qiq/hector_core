@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(hector, 0.0.1-dev, qiq@ucw.cz)
+AC_INIT(helen, 0.0.1-dev, qiq@ucw.cz)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
@@ -100,7 +100,7 @@ if test "x$enable_swig" != xno; then
 	if test "x$SWIG_PATH" != x; then
 		SWIG_VERSION=`$SWIG -version 2>&1|grep Version|cut -d" " -f3`
 		if test ${SWIG_VERSION:4} -lt 35; then
-			AC_MSG_WARN([You have SWIG $SWIG_VERSION installed, but hector requires at least SWIG 1.3.35. Non-C++ modules will not be built.])
+			AC_MSG_WARN([You have SWIG $SWIG_VERSION installed, but helen requires at least SWIG 1.3.35. Non-C++ modules will not be built.])
 			SWIG=
 		fi
 	fi

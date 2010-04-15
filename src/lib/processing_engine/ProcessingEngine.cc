@@ -35,7 +35,7 @@ bool ProcessingEngine::Init(Config *config) {
 	vector<string> *v;
 
 	// create children: processors
-	snprintf(buffer, sizeof(buffer), "/Config/ProcessingEngine[@id='%s']/processor/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/Processor/@id", getId());
 	v = config->getValues(buffer);
 	if (v) {
 		// create and initialize all Processors

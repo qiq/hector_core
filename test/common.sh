@@ -10,37 +10,47 @@ fi
 
 function init {
 	if [ $0 == '-bash' ]; then
-		echo "Include please in a test script please"
-		return
+		if [ -z "$id" ]; then
+			echo "No id specified"
+			return
+		fi
+		base=.
+	else
+		base=`dirname "$0"`
+		id=`basename "$0" .sh`
 	fi
-	base=`dirname "$0"`
 	cd $base
 	base=`readlink -f "$base"`'/../src'
 	base=`readlink -f "$base"`
-	id=`basename "$0" .sh`
 
-	export LD_LIBRARY_PATH=$base/lib/.libs:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$base:$base/lib/.libs:$LD_LIBRARY_PATH
 
 	rm -f test.log
 }
 
-function run_server {
-	if ! $base/bin/server -c $id-config.xml test; then
-		cat $id.log
+function doexit {
+	if [ $0 != '-bash' ]; then
 		exit 1;
 	fi
 }
 
-function shutdown_server {
-	echo "shutdown"|$base/bin/client || exit 1
+function server_start {
+	if ! $base/bin/server -c $id-config.xml test; then
+		cat test.log
+		doexit
+	fi
+}
+
+function server_shutdown {
+	echo "shutdown"|$base/bin/client || doexit
 }
 
 function client_set {
-	echo "set $1=$2" | $base/bin/client || exit 1
+	echo "set $1=$2" | $base/bin/client || doexit
 }
 
 function client_get {
-	echo "get $1" | ( $base/bin/client || exit 1 ) | sed -e 's/.*= //'
+	echo "get $1" | ( $base/bin/client || doexit ) | sed -e 's/.*= //'
 }
 
 function client_wait {

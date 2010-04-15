@@ -1,9 +1,9 @@
 #!/bin/bash
-if [ $1 == "init" ]; then
+if [ "$1" == "init" -o ! -f configure ]; then
 	libtoolize
 	aclocal -I m4
 	autoheader
 	automake --add-missing
 	autoconf
 fi
-CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/hector
+CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/helen

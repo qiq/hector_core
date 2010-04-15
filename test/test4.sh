@@ -3,7 +3,7 @@
 . common.sh
 
 init
-run_server
+server_start
 client_set robot_processing_engine.run 1
 total=0
 while [ $total -lt 5000 ]; do
@@ -15,7 +15,7 @@ while [ $total -lt 5000 ]; do
 	total=`echo $i0+$i1+$i2+$i3+$i4|bc`
 done
 client_set robot_processing_engine.run 0
-shutdown_server
+server_shutdown
 
 # M_simple[0]: Processing TestResource (1-69)
 grep "Processing TestResource " test.log|sed -e 's|M_simple\[[0-9]\+\]: Processing TestResource (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.test

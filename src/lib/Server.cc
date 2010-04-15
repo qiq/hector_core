@@ -29,14 +29,8 @@ bool Server::Init(Config *config) {
 	char *s;
 	vector<string> *v;
 
-	char *baseDir = config->getFirstValue("/Config/@baseDir");
-	if (!baseDir) {
-		LOG_ERROR(logger, "Cannot find baseDir");
-		return false;
-	}
-
 	// threads
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/threads", getId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &threads) != 1) {
 		LOG_ERROR(logger, "Invalid number of threads, using 1 thread");
@@ -45,7 +39,7 @@ bool Server::Init(Config *config) {
 	free(s);
 
 	// serverHost
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverHost", getId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverHost", getId());
 	serverHost = config->getFirstValue(buffer);
 	if (!serverHost) {
 		LOG_ERROR(logger, "Server/serverHost not found");
@@ -53,7 +47,7 @@ bool Server::Init(Config *config) {
 	}
 
 	// serverPort
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/serverPort", getId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverPort", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &serverPort) != 1) {
 		LOG_ERROR(logger, "Server/serverPort not found");
@@ -62,12 +56,12 @@ bool Server::Init(Config *config) {
 	free(s);
 
 	// create processing chain(s)
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/processingEngine/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine/@id", getId());
 	v = config->getValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			const char *pid = iter->c_str();
-			ProcessingEngine *p = new ProcessingEngine(objects, pid);
+			const char *peid = iter->c_str();
+			ProcessingEngine *p = new ProcessingEngine(objects, peid);
 			if (!p->Init(config))
 				return false;
 			processingEngines.push_back(p);
@@ -76,7 +70,7 @@ bool Server::Init(Config *config) {
 	}
 
 	// library
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/lib/@name", getId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", getId());
 	s = config->getFirstValue(buffer);
 	if (!s) {
 		LOG_ERROR(logger, "Server/lib not found");
@@ -84,16 +78,14 @@ bool Server::Init(Config *config) {
 	}
 	
 	// load library
-	snprintf(buffer, sizeof(buffer), "%s/%s", baseDir, s);
-	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))LibraryLoader::loadLibrary(buffer, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))LibraryLoader::loadLibrary(s, "create");
 	if (!create) {
-		LOG_ERROR(logger, "Invalid library: " << buffer);
+		LOG_ERROR(logger, "Invalid library: " << s);
 		return false;
 	}
 	simpleHTTPServer = (*create)(objects);
 	free(s);
 
-	free(baseDir);
 	return true;
 }
 
