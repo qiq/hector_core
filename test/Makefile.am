@@ -1,6 +1,6 @@
 TESTS =
 EXTRA_DIST = 
-CLEANFILES = test.log
+CLEANFILES = test.log test*.log.valgrind
 
 TESTS += test1.sh
 EXTRA_DIST += test1-config.xml test1.log.correct

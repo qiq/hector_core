@@ -34,7 +34,7 @@ options:\n\
 
 void printVersion() {
 	fprintf(stderr, "server %s(%s)\nbugreports: %s\n", PACKAGE_STRING, PACKAGE_VERSION, PACKAGE_BUGREPORT);
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
 int processOptions(int argc, char *argv[]) {
@@ -105,6 +105,7 @@ int main(int argc, char *argv[]) {
 		die("logConfig not found\n");
 
 	log4cxx::PropertyConfigurator::configure(logConfig);
+	free(logConfig);
 
 	// create and initialize the Server object
 	Server *server = new Server(serverId);

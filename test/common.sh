@@ -35,9 +35,14 @@ function doexit {
 }
 
 function server_start {
-	if ! $base/bin/server -c $id-config.xml test; then
-		cat test.log
-		doexit
+	if [ "$USE_VALGRIND" == 1 ]; then
+		libtool --mode=execute valgrind --leak-check=full --trace-children=yes $base/bin/server -c $id-config.xml -f test 2>${id}.log.valgrind &
+		sleep 15;
+	else
+		if ! $base/bin/server -c $id-config.xml test; then
+			cat test.log
+			doexit
+		fi
 	fi
 }
 
