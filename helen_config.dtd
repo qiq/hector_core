@@ -1,8 +1,6 @@
 <!-- robot config definition -->
 
-<!ELEMENT Config	(Binary|Server|ProcessingEngine|Processor|Module)* >
-<!ATTLIST Config
-	baseDir		CDATA		"" >
+<!ELEMENT Config	(Server+) >
 
 <!-- common elements -->
 
@@ -28,26 +26,19 @@
 <!ELEMENT env		(#PCDATA) >
 
 
-<!ELEMENT Server	(threads|serverHost|serverPort|processingEngine|lib|param|logConfig)* >
+<!ELEMENT Server	(threads|serverHost|serverPort|ProcessingEngine|param|logConfig)* >
 <!ATTLIST Server
-	id		ID		#REQUIRED >
-
-<!ELEMENT processingEngine	EMPTY >
-<!ATTLIST processingEngine
-	ref		IDREF 		#REQUIRED >
+	id		ID		#REQUIRED
+	lib		CDATA		#REQUIRED >
 <!ELEMENT serverHost	(#PCDATA) >
 <!ELEMENT serverPort	(#PCDATA) >
 <!ELEMENT logConfig	(#PCDATA) >
 
 <!-- ProcessingEngine -->
 
-<!ELEMENT ProcessingEngine	(processor)* >
+<!ELEMENT ProcessingEngine	(Processor+) >
 <!ATTLIST ProcessingEngine
-	id		ID		#REQUIRED >
-
-<!ELEMENT processor	EMPTY >
-<!ATTLIST processor
-	ref		IDREF 		#REQUIRED >
+	id		ID		#REQUIRED>
 
 <!-- Processor -->
 
@@ -55,15 +46,11 @@
 <!ATTLIST Processor
 	id		ID		#REQUIRED >
 
-<!ELEMENT modules	(module+) >
+<!ELEMENT modules	(Module+) >
 
 <!ELEMENT input		(queue+) >
 
 <!ELEMENT output	(nextProcessor+) >
-
-<!ELEMENT module	EMPTY >
-<!ATTLIST module
-	ref		IDREF 		#REQUIRED >
 
 <!ELEMENT queue	EMPTY >
 <!ATTLIST queue
@@ -80,16 +67,7 @@
 
 <!-- Module -->
 
-<!ELEMENT Module	(lib,param*) >
+<!ELEMENT Module	(param*) >
 <!ATTLIST Module
-	id		ID		#REQUIRED >
-
-<!ELEMENT local		EMPTY >
-<!ATTLIST local
-	name		CDATA		#REQUIRED
-	ref		IDREF		#REQUIRED >
-
-<!ELEMENT remote	EMPTY >
-<!ATTLIST remote
-	host		CDATA		#REQUIRED
-	port		CDATA		#REQUIRED >
+	id		ID		#REQUIRED
+	lib		CDATA		#REQUIRED >

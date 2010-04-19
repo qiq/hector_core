@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example helen config file -->
+<!DOCTYPE Config SYSTEM "helen_config.dtd">
+<Config>
+	<Server id="webserver" lib="libserver-web.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>8080</serverPort>
+		<param name="test" value="test"/>
+	</Server>
+	<Server id="md5server" lib="Server-md5.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1200</serverPort>
+	</Server>
+	<Server id="master" lib="Master.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1000</serverPort>
+	</Server>
+	<Server id="robot" lib="servers/robot/Robot.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<ProcessingEngine id="robot_processing_engine">
+			<Processor id="P_load_resource1">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_load_resource1" lib="DummyInput.la">
+						<param name="inputDir" value="/tmp/input"/>
+					</Module>
+					<Module id="M_preprocess_resource1" lib="DummySimple.la">
+						<param name="xxx" value="yyy"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_dummy"/>
+				</output>
+			</Processor>
+			<Processor id="P_load_resource2">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load_resource2" lib="DummyInput.la">
+						<param name="inputDir" value="/tmp/input2"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_dummy"/>
+				</output>
+			</Processor>
+			<Processor id="P_dummy">
+				<threads>10</threads>
+				<modules>
+					<Module id="M_dummy" lib="DummySimple.la"/>
+				</modules>
+				<input>
+					<queue priority="100" maxItems="0" maxSize="0"/>
+					<queue priority="0" maxItems="100" maxSize="0"/>
+				</input>
+				<output>
+					<!-- loopback -->
+					<nextProcessor ref="P_dummy" priority="100" filter="1"/>
+					<!-- copy: do not stop processing in case of match, but
+					create resource copy and continue instead -->
+					<nextProcessor ref="P_save_resource" copy="1"/>
+					<nextProcessor ref="P_save_resource"/>
+				</output>
+			</Processor>
+			<Processor id="P_save_resource">
+				<threads>4</threads>
+				<modules>
+					<Module id="M_save_resource" lib="DummyOutput.la">
+						<param name="outputDir" value="/tmp/output"/>
+					</Module>
+				</modules>
+				<input>
+					<queue maxItems="100" maxSize="200"/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+		<logConfig>config/robot.log.props</logConfig>
+		<param name="remotePort" value="2000"/>
+		<param name="remoteHost" value="2001"/>
+	</Server>
+</Config>

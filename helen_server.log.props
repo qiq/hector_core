@@ -11,7 +11,7 @@ log4j.appender.A1.layout.ConversionPattern=%F:%L %p: %m (%t, %d)%n
 #%d{HH:mm:ss,SSS}
 
 log4j.appender.LOGFILE=org.apache.log4j.FileAppender
-log4j.appender.LOGFILE.File=/tmp/robot.log
+log4j.appender.LOGFILE.File=/tmp/server.log
 log4j.appender.LOGFILE.Append=true
 log4j.appender.LOGFILE.Threshold=DEBUG
 #log4j.appender.LOGFILE.Threshold=ERROR
