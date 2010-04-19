@@ -1,6 +1,0 @@
-- prijima seznam URL, ma seznam domen a distribuuje URL jednotlivym robotum
-- udrzuje si prehled o robotech, vi, kolik maji mista...
-
-REGISTER (info o robotovi)
-NEWURL
-SHUTDOWN
