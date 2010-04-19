@@ -4,7 +4,7 @@
 test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5), one writer(5)
 -->
 <Config>
-	<Server id="test" lib="../src/servers/robot/Robot.la">
+	<Server id="test" lib="../lib/processing_engine/servers/TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
@@ -13,7 +13,7 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 			<Processor id="P_load_resource">
 				<threads>5</threads>
 				<modules>
-					<Module id="M_load_resource" lib="../src/modules/TestInput.la">
+					<Module id="M_load_resource" lib="../lib/processing_engine/modules/TestInput.la">
 						<param name="maxItems" value="1000"/>
 					</Module>
 				</modules>
@@ -24,7 +24,7 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 			<Processor id="P_simple">
 				<threads>5</threads>
 				<modules>
-					<Module id="M_simple" lib="../src/modules/TestSimple.la"/>
+					<Module id="M_simple" lib="../lib/processing_engine/modules/TestSimple.la"/>
 				</modules>
 				<input>
 					<queue/>
@@ -36,7 +36,7 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 			<Processor id="P_save_resource">
 				<threads>5</threads>
 				<modules>
-					<Module id="M_save_resource" lib="../src/modules/TestOutput.la"/>
+					<Module id="M_save_resource" lib="../lib/processing_engine/modules/TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>

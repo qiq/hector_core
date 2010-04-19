@@ -10,6 +10,6 @@
 %include processing_engine/RPC.i
 %include processing_engine/RPCMessage.i
 %include processing_engine/Resource.i
-%include ../resources/Resources.i
-%include ../resources/TestResource.i
-%include ../resources/WebResource.i
+%include processing_engine/resources/Resources.i
+%include processing_engine/resources/TestResource.i
+%include processing_engine/resources/WebResource.i

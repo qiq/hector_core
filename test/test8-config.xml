@@ -4,7 +4,7 @@
 test8: loop, every resource is processed twice: one reader(1), one simple intermediate(1), one writer
 -->
 <Config>
-	<Server id="test" lib="../src/servers/robot/Robot.la">
+	<Server id="test" lib="../lib/processing_engine/servers/TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
@@ -13,7 +13,7 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 			<Processor id="P_load_resource">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource" lib="../src/modules/TestInput.la">
+					<Module id="M_load_resource" lib="../lib/processing_engine/modules/TestInput.la">
 						<param name="maxItems" value="1000"/>
 					</Module>
 				</modules>
@@ -24,7 +24,7 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 			<Processor id="P_simple">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_simple" lib="../src/modules/TestSimple.la">
+					<Module id="M_simple" lib="../lib/processing_engine/modules/TestSimple.la">
 						<param name="flipStatus" value="1"/>
 					</Module>
 				</modules>
@@ -40,7 +40,7 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 			<Processor id="P_save_resource">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource" lib="../src/modules/TestOutput.la"/>
+					<Module id="M_save_resource" lib="../lib/processing_engine/modules/TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>

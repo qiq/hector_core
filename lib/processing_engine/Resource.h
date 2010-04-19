@@ -10,7 +10,7 @@
 
 #include <string>
 #include <log4cxx/logger.h>
-#include "../../resources/ResourceList.h"
+#include "resources/ResourceList.h"
 
 using namespace std;
 

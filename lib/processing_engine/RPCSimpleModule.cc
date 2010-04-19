@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include "common.h"
-#include "../../resources/Resources.h"
+#include "resources/Resources.h"
 #include "RPCSimpleModule.h"
 
 log4cxx::LoggerPtr RPCSimpleModule::logger(log4cxx::Logger::getLogger("lib.processing_engine.RPCSimpleModule"));

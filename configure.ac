@@ -228,20 +228,18 @@ AM_CONDITIONAL(WITH_PYTHON, [test "x$PYTHON" != x])
 
 AC_CONFIG_FILES([Makefile
                 src/Makefile
-		src/resources/Makefile
-		src/modules/Makefile
-		src/modules/perl/Makefile
-		src/modules/java/Makefile
-		src/modules/python/Makefile
-		src/lib/Makefile
-		src/lib/server/Makefile
-		src/lib/processing_engine/Makefile
-		src/lib/perl/Makefile
-		src/lib/java/Makefile
-		src/lib/python/Makefile
-		src/servers/Makefile
-		src/servers/robot/Makefile
-		src/bin/Makefile
+		lib/Makefile
+		lib/processing_engine/Makefile
+		lib/processing_engine/modules/Makefile
+		lib/processing_engine/modules/perl/Makefile
+		lib/processing_engine/modules/java/Makefile
+		lib/processing_engine/modules/python/Makefile
+		lib/processing_engine/resources/Makefile
+		lib/processing_engine/servers/Makefile
+		lib/server/Makefile
+		lib/perl/Makefile
+		lib/java/Makefile
+		lib/python/Makefile
 		test/Makefile
 ])
 AC_OUTPUT

@@ -20,7 +20,7 @@ function init {
 		id=`basename "$0" .sh`
 	fi
 	cd $base
-	base=`readlink -f "$base"`'/../src'
+	base=`readlink -f "$base"`'/..'
 	base=`readlink -f "$base"`
 
 	export LD_LIBRARY_PATH=$base:$base/lib/.libs:$LD_LIBRARY_PATH
@@ -36,10 +36,10 @@ function doexit {
 
 function server_start {
 	if [ "$USE_VALGRIND" == 1 ]; then
-		libtool --mode=execute valgrind --leak-check=full --trace-children=yes $base/bin/server -c $id-config.xml -f test 2>${id}.log.valgrind &
+		libtool --mode=execute valgrind --leak-check=full --trace-children=yes $base/src/server -c $id-config.xml -f test 2>${id}.log.valgrind &
 		sleep 15;
 	else
-		if ! $base/bin/server -c $id-config.xml test; then
+		if ! $base/src/server -c $id-config.xml test; then
 			cat test.log
 			doexit
 		fi
@@ -47,15 +47,15 @@ function server_start {
 }
 
 function server_shutdown {
-	echo "shutdown"|$base/bin/client || doexit
+	echo "shutdown"|$base/src/client || doexit
 }
 
 function client_set {
-	echo "set $1=$2" | $base/bin/client || doexit
+	echo "set $1=$2" | $base/src/client || doexit
 }
 
 function client_get {
-	echo "get $1" | ( $base/bin/client || doexit ) | sed -e 's/.*= //'
+	echo "get $1" | ( $base/src/client || doexit ) | sed -e 's/.*= //'
 }
 
 function client_wait {

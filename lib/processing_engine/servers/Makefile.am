@@ -3,8 +3,8 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 hectordir = $(pkglibdir)
-hector_LTLIBRARIES = Robot.la
+hector_LTLIBRARIES = TestServer.la
 
-Robot_la_SOURCES = RobotHTTPServer.h RobotHTTPServer.cc
-Robot_la_CXXFLAGS = $(AM_CXXFLAGS) -I ../../lib
-Robot_la_LDFLAGS = $(AM_LDFLAGS)
+TestServer_la_SOURCES = TestServer.h TestServer.cc
+TestServer_la_CXXFLAGS = $(AM_CXXFLAGS) -I ../..
+TestServer_la_LDFLAGS = $(AM_LDFLAGS)

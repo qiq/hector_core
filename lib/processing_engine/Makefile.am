@@ -1,3 +1,5 @@
+SUBDIRS = resources modules servers
+
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@
@@ -17,6 +19,7 @@ libhector_processing_engine_la_SOURCES = \
 	PerlModule.h
 
 libhector_processing_engine_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
+libhector_processing_engine_la_LIBADD = resources/libhector_resources.la
 libhector_processing_engine_la_LDFLAGS = $(AM_LDFLAGS)
 
 if WITH_SWIG

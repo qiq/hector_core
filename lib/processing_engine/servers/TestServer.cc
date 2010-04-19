@@ -2,16 +2,16 @@
  *
  */
 
-#include "RobotHTTPServer.h"
+#include "TestServer.h"
 #include "Object.h"
 
-log4cxx::LoggerPtr RobotHTTPServer::logger(log4cxx::Logger::getLogger("servers.robot.RobotHTTPServer"));
+log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.robot.TestServer"));
 
-RobotHTTPServer::RobotHTTPServer(ObjectRegistry *objects) {
+TestServer::TestServer(ObjectRegistry *objects) {
 	this->objects = objects;
 }
 
-bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
+bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 	string method = conn->getRequestMethod();
 	string args = conn->getRequestArgs();
 	if (args.substr(0, 1) == "/")
@@ -96,7 +96,7 @@ bool RobotHTTPServer::HandleRequest(SimpleHTTPConn *conn) {
 // factory functions
 
 extern "C" SimpleHTTPServer* create(ObjectRegistry *objects) {
-	return new RobotHTTPServer(objects);
+	return new TestServer(objects);
 }
 
 extern "C" void destroy(SimpleHTTPServer* p) {
