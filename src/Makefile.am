@@ -1,1 +1,1 @@
-SUBDIRS = resources lib servers modules bin
+SUBDIRS = resources servers modules bin
