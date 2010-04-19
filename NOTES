@@ -1,29 +1,15 @@
 http://docs.bor.org.ua/eBooks/Perl/Manning.Extending_and_Embedding_Perl.2002.pdf
 
 TODO:
-	- do kazdeho header souboru vlozit include <config.h>
-	- preorganizovat header soubory a la featurama v *.{cc,h}
-	- pridat @LOG4CXX_*@ a @LIBXML2_*@ do globalniho CXXFLAGS a LDFLAGS
-
-rozmyslet:
-- predavani dat mezi procesy + synchronizace
-	- mmap + ipc
-	- serializace pres protocol buffers
-
-- resource
-	- pomoci PML + prevod PML schematu do protocol buffers .proto nejakym
-	  skriptem?
-	- prevod do C++ struktury -- z ceho, PML schematu, nebo .proto?
-	- prevod instanci PML z XML do protocol buffers
+	- rozdelit hectora na helen (core) a hectora (robot)
+	- v helen udelat jen univerzalni server
 
 Obecne
 
 - C++ (+ nejake bindingy?)
 	- predevsim kvuli velikosti retezcu, dostupnosti knihoven
-- konfigurace v XML (libxml2 pro cteni), ted se pouziva Reader, ale neni
-  idealni, protoze neumi rict, na kterem radku a sloupci se stala chyba ->
-  predelat na SAX2; pripadne cist po radcich (pomoci xmlReaderForIO -- vyzkouset).
 - knihovny:
+	- curl
 	- c-ares: async DNS
 	- libcurl: download
 	- libxml2: config soubory, html parser, uri
@@ -31,6 +17,7 @@ Obecne
 - programy:
 	- djbcache: name server
 	- pdns_recursor, nebo si cachovat sam(?)
+	- unbound?
 - celkove: max. 8-16 GB RAM
 
 Coding style:
@@ -57,3 +44,34 @@ ROBOT
 	- cilova rychlost stahovani: 1000 stranek/s
 	- cilovy pocet URL: 10 M na masinu (idealne vic)
 		- priklady URL: vytahnout od Galambose seznam URL, zkusit zahashovat
+
+
+Adresarova struktura:
+/usr/lib/libhelen.so (sdilena knihovna pro server)
+/usr/bin/client
+/usr/bin/server
+/usr/lib/hector/WebResource.so
+/usr/lib/hector/Robot.so
+/usr/lib/hector/modules/ReadResource.so
+/usr/lib/hector/modules/perl/ReadResource.pm
+/usr/lib/hector/modules/perl/Hector.pm
+/usr/lib/hector/modules/perl/Hector.so
+/usr/share/hector/skript.sh, nejake common.sh
+
+LD_LIBRARY_PATH += $PREFIX/lib/hector:$PREFIX/lib/hector/modules
+PERL5LIB += $PREFIX/lib/hector/modules/perl
+podobne pro python a javu
+
+rozmyslet:
+- predavani dat mezi procesy + synchronizace
+	- mmap + ipc
+	- serializace pres protocol buffers
+	- zatim neni potreba, pokud bude, tak ozivit
+
+- resource pro PML
+	- zatim nedelat, az predelaji TreeX, tak se podivat, jestli uz maji rozumny interface :)
+	- pomoci PML + prevod PML schematu do protocol buffers .proto nejakym
+	  skriptem?
+	- prevod do C++ struktury -- z ceho, PML schematu, nebo .proto?
+	- prevod instanci PML z XML do protocol buffers
+
