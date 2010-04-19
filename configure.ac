@@ -62,6 +62,13 @@ else
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
 
+dnl set PREFIX in config.h
+if test "x${prefix}" = "xNONE"; then
+	AC_DEFINE_UNQUOTED(PREFIX, "${ac_default_prefix}", [Package prefix])
+else
+	AC_DEFINE_UNQUOTED(PREFIX, "${prefix}", [Package prefix] )
+fi
+
 # SWIG + Java/Python/Perl and other stuff borrowed from libkml
 # Which platform are we building on?
 PLATFORM=

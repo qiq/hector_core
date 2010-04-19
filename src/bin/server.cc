@@ -5,6 +5,7 @@
 #include <config.h>
 
 #include <getopt.h>
+#include <stdlib.h>
 #include <string>
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -15,6 +16,7 @@
 log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("bin.server");
 
 const char *configFile = "config.xml";
+const char *baseDir = PREFIX "/lib/helen";
 bool foreground = false;
 bool help = false;
 int verbose = 0;
@@ -24,11 +26,12 @@ void printHelp() {
 	fprintf(stderr, "\
 usage: server [options] serverId\n\
 options:\n\
-  --config, -c		Config file path (config.xml)\n\
+  --config, -c		Config file path (%s)\n\
+  --base, -b		Base dir (%s)\n\
   --foreground, -f	Do not fork\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
-  --version, -V		Version information\n");
+  --version, -V		Version information\n", configFile, baseDir);
 	exit(EXIT_SUCCESS);
 }
 
@@ -42,6 +45,7 @@ int processOptions(int argc, char *argv[]) {
 		int option_index = 0;
 		static struct option long_options[] = {
 			{ "config", 1, NULL, 'c' },
+			{ "base", 1, NULL, 'b'},
 			{ "foreground", 0, NULL, 'f'},
 			{ "verbose", 0, NULL, 'v' },
 			{ "help", 0, NULL, 'h' },
@@ -49,13 +53,16 @@ int processOptions(int argc, char *argv[]) {
 			{ NULL, 0, NULL, 0 }
 		};
 
-		int c = getopt_long(argc, argv, "c:fvhV", long_options, &option_index);
+		int c = getopt_long(argc, argv, "c:b:fvhV", long_options, &option_index);
 		if (c == -1)
 			break;
 
 		switch (c) {
 		case 'c':
 			configFile = strdup(optarg);
+			break;
+		case 'b':
+			baseDir = strdup(optarg);
 			break;
 		case 'f':
 			foreground = true;
@@ -85,6 +92,26 @@ int main(int argc, char *argv[]) {
 	if (cmdIndex >= argc)
 		printHelp();
 	serverId = argv[cmdIndex];
+
+	// set environment variables according to baseDir
+	char value[10240];
+	const char *path = getenv("LD_LIBRARY_PATH");
+	const char *prev = path;
+	if (path) {
+		while (*prev && *prev != '=')
+			prev++;
+	}
+	snprintf(value, sizeof(value), "%s:%s/modules:%s", baseDir, baseDir, prev ? prev+1 : "");
+	setenv("LD_LIBRARY_PATH", value, 1);
+
+	path = getenv("PERL5LIB");
+	prev = path;
+	if (path) {
+		while (*prev && *prev != '=')
+			prev++;
+	}
+	snprintf(value, sizeof(value), "%s/modules/perl:%s", baseDir, prev ? prev+1 : "");
+	setenv("PERL5LIB", value, 1);
 
 	// load config file
 	Config *config = new Config();
