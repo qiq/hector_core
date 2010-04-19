@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Config SYSTEM "config.dtd">
+<!DOCTYPE Config SYSTEM "helen_config.dtd">
 <!--
 test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5), one writer(5)
 -->

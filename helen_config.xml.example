@@ -78,7 +78,7 @@
 				</input>
 			</Processor>
 		</ProcessingEngine>
-		<logConfig>config/robot.log.props</logConfig>
+		<logConfig>helen_server.log.props</logConfig>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>

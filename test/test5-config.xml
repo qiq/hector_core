@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Config SYSTEM "config.dtd">
+<!DOCTYPE Config SYSTEM "helen_config.dtd">
 <!--
 test5: two readers(1), one simple intermediates(1), one writer(1)
 -->
