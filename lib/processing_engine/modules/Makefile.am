@@ -1,11 +1,10 @@
 SUBDIRS = perl java python
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I.. -I../.. -I../resources
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-version
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ -module -avoid-version -rpath `pwd`
 AM_LIBTOOLFLAGS = --tag=disable-static
 
-modulesdir = $(pkglibdir)/modules
-modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la DummySimple.la DummyInput.la DummyOutput.la
+noinst_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la DummySimple.la DummyInput.la DummyOutput.la
 
 TestInput_la_SOURCES = \
 		TestInput.h TestInput.cc

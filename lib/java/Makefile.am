@@ -6,16 +6,14 @@ BUILT_SOURCES =
 if WITH_SWIG
 if WITH_JAVA
 
-javadir = $(pkglibdir)/modules/java
-
 BUILT_SOURCES += Hector_wrap.cc
 Hector_wrap.cc: ../Hector.i
 	$(SWIG) -c++ -java -o $@ $<
 
-lib_LTLIBRARIES = Hector.la
+noinst_LTLIBRARIES = Hector.la
 Hector_la_SOURCES = \
 	Hector_wrap.cc
-Hector_la_LIBADD = ../libhector.la
+Hector_la_LIBADD = ../libhelen.la
 Hector_la_LDFLAGS = -module -avoid-version
 
 endif
