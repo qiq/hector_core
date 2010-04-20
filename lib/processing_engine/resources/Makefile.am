@@ -4,8 +4,8 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 BUILT_SOURCES =
 EXTRA_DIST =
 
-noinst_LTLIBRARIES = libhelen_resources.la
-libhelen_resources_la_SOURCES = \
+noinst_LTLIBRARIES = libhector_resources.la
+libhector_resources_la_SOURCES = \
 	Resources.h ResourceList.h \
 	TestResource.pb.h TestResource.pb.cc TestResource.h TestResource.cc \
 	WebResource.pb.h WebResource.pb.cc WebResource.h WebResource.cc

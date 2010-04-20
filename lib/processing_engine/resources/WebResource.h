@@ -18,7 +18,7 @@ using namespace std;
 
 class WebResource : public Resource {
 protected:
-	helen::resources::WebResource r;
+	hector::resources::WebResource r;
 
 	static log4cxx::LoggerPtr logger;
 public:

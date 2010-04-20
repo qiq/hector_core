@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Example helen config file -->
-<!DOCTYPE Config SYSTEM "helen_config.dtd">
+<!-- Example hector config file -->
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
 <Config>
 	<Server id="webserver" lib="libserver-web.la">
 		<threads>2</threads>
@@ -78,7 +78,7 @@
 				</input>
 			</Processor>
 		</ProcessingEngine>
-		<logConfig>helen_server.log.props</logConfig>
+		<logConfig>hector_server.log.props</logConfig>
 		<param name="remotePort" value="2000"/>
 		<param name="remoteHost" value="2001"/>
 	</Server>

@@ -16,7 +16,7 @@
 log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("bin.server");
 
 const char *configFile = "config.xml";
-const char *baseDir = PREFIX "/lib/helen";
+const char *baseDir = PREFIX "/lib/hector";
 bool foreground = false;
 bool help = false;
 int verbose = 0;

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(helen, 0.0.1-dev, qiq@ucw.cz)
+AC_INIT(hector_core, 0.0.1-dev, qiq@ucw.cz)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])

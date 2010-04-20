@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Config SYSTEM "helen_config.dtd">
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
 <!--
 test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
 -->

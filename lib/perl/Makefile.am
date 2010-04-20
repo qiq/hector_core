@@ -1,6 +1,6 @@
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ @PERL_CFLAGS@ -I.. -I../processing_engine -I../processing_engine/resources
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ @PERL_LDFLAGS@ -module -avoid-version
-LIBS = ../libhelen.la
+LIBS = ../libhector.la
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 BUILT_SOURCES =

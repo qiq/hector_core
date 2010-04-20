@@ -24,7 +24,7 @@ typedef struct {
 
 class RPCMessage {
 protected:
-	helen::RPCMessage m;
+	hector::RPCMessage m;
 
 	static log4cxx::LoggerPtr logger;
 public:
@@ -83,7 +83,7 @@ inline void RPCMessage::set_module_index(int index) {
 // bool Init(vector<pair<string, string> >* c)
 
 inline void RPCMessage::set_Init(vector<pair<string, string> >* c) {
-	m.set_method(helen::RPCMessage::INIT);
+	m.set_method(hector::RPCMessage::INIT);
 	for (vector<pair<string, string> >::iterator iter = c->begin(); iter != c->end(); ++iter) {
 		m.add_str_args(iter->first);
 		m.add_str_args(iter->second);
@@ -97,7 +97,7 @@ inline const char *RPCMessage::get_Init(int index, bool first) {
 }
 
 inline void RPCMessage::set_response_Init(bool result) {
-	m.set_method(helen::RPCMessage::INIT);
+	m.set_method(hector::RPCMessage::INIT);
 	m.add_bool_args(result);
 }
 
@@ -109,7 +109,7 @@ inline bool RPCMessage::get_response_Init() {
 // void SaveCheckpoint(const char *path, const char *id)
 
 inline void RPCMessage::set_SaveCheckpoint(const char *path, const char *id) {
-	m.set_method(helen::RPCMessage::SAVE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::SAVE_CHECKPOINT);
 	m.add_str_args(path);
 	m.add_str_args(id);
 }
@@ -120,13 +120,13 @@ inline const char *RPCMessage::get_SaveCheckpoint(bool first) {
 }
 
 inline void RPCMessage::set_response_SaveCheckpoint() {
-	m.set_method(helen::RPCMessage::SAVE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::SAVE_CHECKPOINT);
 }
 
 // void RestoreCheckpoint(const char *path, const char *id)
 
 inline void RPCMessage::set_RestoreCheckpoint(const char *path, const char *id) {
-	m.set_method(helen::RPCMessage::RESTORE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::RESTORE_CHECKPOINT);
 	m.add_str_args(path);
 	m.add_str_args(id);
 }
@@ -137,13 +137,13 @@ inline const char *RPCMessage::get_RestoreCheckpoint(bool first) {
 }
 
 inline void RPCMessage::set_response_RestoreCheckpoint() {
-	m.set_method(helen::RPCMessage::RESTORE_CHECKPOINT);
+	m.set_method(hector::RPCMessage::RESTORE_CHECKPOINT);
 }
 
 // const char *getValue(const char *name)
 
 inline void RPCMessage::set_getValue(const char *name) {
-	m.set_method(helen::RPCMessage::GET_VALUE);
+	m.set_method(hector::RPCMessage::GET_VALUE);
 	m.add_str_args(name);
 }
 
@@ -153,7 +153,7 @@ inline const char *RPCMessage::get_getValue() {
 }
 
 inline void RPCMessage::set_response_getValue(const char *name) {
-	m.set_method(helen::RPCMessage::GET_VALUE);
+	m.set_method(hector::RPCMessage::GET_VALUE);
 	m.add_str_args(name);
 }
 
@@ -165,7 +165,7 @@ inline const char *RPCMessage::get_response_getValue() {
 // bool setValue(const char *name, const char *value)
 
 inline void RPCMessage::set_setValue(const char *name, const char *value) {
-	m.set_method(helen::RPCMessage::SET_VALUE);
+	m.set_method(hector::RPCMessage::SET_VALUE);
 	m.add_str_args(name);
 	m.add_str_args(value);
 }
@@ -176,7 +176,7 @@ inline const char *RPCMessage::get_setValue(bool first) {
 }
 
 inline void RPCMessage::set_response_setValue(bool result) {
-	m.set_method(helen::RPCMessage::SET_VALUE);
+	m.set_method(hector::RPCMessage::SET_VALUE);
 	m.add_bool_args(result);
 }
 
@@ -188,11 +188,11 @@ inline bool RPCMessage::get_response_setValue() {
 // vector<string> *listNames()
 
 inline void RPCMessage::set_listNames() {
-	m.set_method(helen::RPCMessage::LIST_NAMES);
+	m.set_method(hector::RPCMessage::LIST_NAMES);
 }
 
 inline void RPCMessage::set_response_listNames(const char *name) {
-	m.set_method(helen::RPCMessage::LIST_NAMES);
+	m.set_method(hector::RPCMessage::LIST_NAMES);
 	m.add_str_args(name);
 }
 

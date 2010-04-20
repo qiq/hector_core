@@ -13,7 +13,7 @@ Hector_wrap.cc: ../Hector.i
 noinst_LTLIBRARIES = Hector.la
 Hector_la_SOURCES = \
 	Hector_wrap.cc
-Hector_la_LIBADD = ../libhelen.la
+Hector_la_LIBADD = ../libhector.la
 Hector_la_LDFLAGS = -module -avoid-version
 
 endif

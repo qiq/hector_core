@@ -1,4 +1,4 @@
-<!-- robot config definition -->
+<!-- hector config definition -->
 
 <!ELEMENT Config	(Server+) >
 
