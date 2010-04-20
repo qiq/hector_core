@@ -38,7 +38,6 @@ public:
 	void deleteAllItems();
 	
 	int getPriority();
-	bool operator<(SimpleQueue<T> other);
 
 	bool isSpace(T *r);
 	void putItem(T *r);
@@ -49,6 +48,7 @@ public:
 	int getCurrentItems();
 	int getMaxSize();
 	int getMaxItems();
+	static bool comp(SimpleQueue<T> *a, SimpleQueue<T> *b);
 
 private:
 	int priority;
@@ -87,12 +87,6 @@ void SimpleQueue<T>::deleteAllItems() {
 template <class T>
 int SimpleQueue<T>::getPriority() {
 	return priority;
-}
-
-template <class T>
-bool SimpleQueue<T>::operator<(SimpleQueue<T> other) {
-	// reversed, so that we have descending numbers (higher priority first)
-	return priority > other.getPriority();
 }
 
 template <class T>
@@ -139,6 +133,12 @@ int SimpleQueue<T>::getMaxSize() {
 template <class T>
 int SimpleQueue<T>::getMaxItems() {
 	return maxItems;
+}
+
+template <class T>
+bool SimpleQueue<T>::comp(SimpleQueue<T> *a, SimpleQueue<T> *b) {
+	// reversed, so that we have descending numbers (higher priority first)
+	return a->getPriority() > b->getPriority();
 }
 
 // By default, no sub-queuei is created, they may be added using addQueue()
@@ -204,7 +204,7 @@ void SyncQueue<T>::addQueue(int priority, int maxItems, int maxSize) {
 	assert(iter == priority2queue.end());
 	priority2queue[priority] = q;
 	queues.push_back(q);
-	std::sort(queues.begin(), queues.end());
+	std::sort(queues.begin(), queues.end(), SimpleQueue<T>::comp);
 }
 
 template <class T>
