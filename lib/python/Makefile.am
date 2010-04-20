@@ -8,8 +8,9 @@ BUILT_SOURCES =
 if WITH_SWIG
 if WITH_PYTHON
 
-noinst_SCRIPTS = Hector.py
-noinst_LTLIBRARIES = _Hector.la
+pythondir = $(libdir)/hector/modules/python
+python_SCRIPTS = Hector.py
+python_LTLIBRARIES = _Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.py
 Hector_wrap.cc Hector.py: ../Hector.i

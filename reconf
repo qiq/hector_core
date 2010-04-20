@@ -6,4 +6,4 @@ if [ "$1" == "init" -o ! -f configure ]; then
 	automake --add-missing
 	autoconf
 fi
-CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/helen
+CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/hector

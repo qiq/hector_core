@@ -8,8 +8,9 @@ BUILT_SOURCES =
 if WITH_SWIG
 if WITH_PERL
 
-noinst_SCRIPTS = Hector.pm
-noinst_LTLIBRARIES = Hector.la
+perldir = $(libdir)/hector/modules/perl
+perl_SCRIPTS = Hector.pm
+perl_LTLIBRARIES = Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.pm
 Hector_wrap.cc Hector.pm: ../Hector.i
