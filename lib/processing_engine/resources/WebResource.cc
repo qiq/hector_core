@@ -4,7 +4,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr WebResource::logger(log4cxx::Logger::getLogger("lib.processing_chain.WebResource"));
+log4cxx::LoggerPtr WebResource::logger(log4cxx::Logger::getLogger("lib.processing_engine.WebResource"));
 
 WebResource::WebResource() {
 	// check library vs header file versions

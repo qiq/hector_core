@@ -6,4 +6,5 @@ if [ "$1" == "init" -o ! -f configure ]; then
 	automake --add-missing
 	autoconf
 fi
-CFLAGS="-Wall -O0 -ggdb" CXXFLAGS="-Wall -O0 -ggdb" LDFLAGS="-ggdb" ./configure --prefix=/tmp/hector
+./configure --prefix=/tmp/hector --enable-debug --with-java-include-dir=/usr/lib/jvm/java-6-sun/include/ --with-java-lib-dir=/usr/lib/jvm/java-6-sun/lib/
+

@@ -14,8 +14,8 @@
 #include "Config.h"
 #include "Lock.h"
 #include "Object.h"
-#include "processing_engine/ProcessingEngine.h"
-#include "server/SimpleHTTPServer.h"
+#include "ProcessingEngine.h"
+#include "SimpleHTTPServer.h"
 
 using namespace std;
 

@@ -8,8 +8,8 @@
 #include <pthread.h>
 #include <log4cxx/logger.h>
 #include "ObjectRegistry.h"
-#include "server/SimpleHTTPServer.h"
-#include "server/SimpleHTTPConn.h"
+#include "SimpleHTTPServer.h"
+#include "SimpleHTTPConn.h"
 
 class TestServer : public SimpleHTTPServer {
 	ObjectRegistry *objects;

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("lib.processing_chain.TestResource"));
+log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("lib.processing_engine.TestResource"));
 
 TestResource::TestResource() {
 	// check library vs header file versions

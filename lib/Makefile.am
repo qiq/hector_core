@@ -1,9 +1,12 @@
 SUBDIRS = server processing_engine . perl java python
 
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/server
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@
 
 lib_LTLIBRARIES = libhector.la
+
+hectorincludedir = $(includedir)/hector
+hectorinclude_HEADERS = common.h Lock.h CondLock.h LibraryLoader.h Object.h ObjectRegistry.h ObjectValues.h Server.h
 
 libhector_la_SOURCES = \
 		common.h common.cc \

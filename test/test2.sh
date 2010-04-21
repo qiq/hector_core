@@ -2,7 +2,7 @@
 
 . common.sh
 
-init
+doinit
 server_start
 client_set robot_processing_engine.run 1
 total=0
@@ -19,5 +19,5 @@ server_shutdown
 
 grep "Resource arrived " test.log|sed -e 's|M_save_resource\[[0-9]\+\]: Resource arrived (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.test
 
-compare_result $id.log.test $id.log.correct
+compare_result
 exit $?
