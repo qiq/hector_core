@@ -11,12 +11,7 @@
 #include <ltdl.h>
 #include "common.h"
 #include "PerlModule.h"
-#include "ProcessConnection.h"
 #include "Processor.h"
-///#include "RemoteConnection.h"
-#include "RPC.h"
-#include "RPCSimpleModule.h"
-//#include "RPCMultiModule.h"
 #include "LibraryLoader.h"
 
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_engine.Processor"));
@@ -94,44 +89,6 @@ bool Processor::Init(Config *config) {
 				free(type);
 				free(name);
 			} else {
-				// TODO: remote module
-#if 0
-				// remote (send resources to defined host/port)
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@host", mid);
-				char *host = config->getFirstValue(buffer);
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/remote/@port", mid);
-				char *port = config->getFirstValue(buffer);
-				if (!host || !port) {
-					LOG_ERROR(logger, "Module/remote/port or host not found: " << buffer);
-					return false;
-				}
-				int p = atoi(port);
-				connection = new RemoteConnection();
-				if (!static_cast<RemoteConnection*>(connection)->Init(host, p))
-					return false;
-				lr = "remote";
-				free(port);
-				free(host);
-				RPC *rpc = new RPC(connection);
-
-				snprintf(buffer, sizeof(buffer), "/Config/Module[@id='%s']/%s/@type", mid, lr);
-				char *type = config->getFirstValue(buffer);
-				bool simple = true;
-				if (type) {
-					if (!strcmp(type, "multi"))
-						simple = false;
-					free(type);
-				}
-
-				for (int i = 0; i < nThreads; ++i) {
-					Module *m;
-					if (simple)
-						m = new RPCSimpleModule(objects, mid, rpc);
-					else
-						m = new RPCMultiModule(objects, mid, rpc);
-					modules[i].push_back(m);
-				}
-#endif
 				LOG_ERROR(logger, "Unknown module type (" << name << ", " << type << ")");
 				return false;
 			}

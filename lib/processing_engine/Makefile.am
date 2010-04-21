@@ -13,9 +13,6 @@ libhector_processing_engine_la_SOURCES = \
 	Module.h Module.cc \
 	OutputFilter.h \
 	Resource.h \
-	RPC.h RPC.cc \
-	RPCMessage.h RPCMessage.cc RPCMessage.pb.h RPCMessage.pb.cc \
-	RPCSimpleModule.h RPCSimpleModule.cc \
 	PerlModule.h
 
 libhector_processing_engine_la_CXXFLAGS = -I.. $(AM_CXXFLAGS)
@@ -32,11 +29,8 @@ libhector_processing_engine_la_LDFLAGS += @PERL_LDFLAGS@
 endif
 endif
 
-BUILT_SOURCES += RPCMessage.pb.h RPCMessage.pb.cc
-RPCMessage.pb.cc RPCMessage.pb.h: RPCMessage.proto
-	$(PROTOC) RPCMessage.proto --cpp_out=.
 
 # SWIG interface
-EXTRA_DIST = RPC.i RPCMessage.i Resource.i RPCMessage.proto
+EXTRA_DIST = Resource.i
 
 CLEANFILES = $(BUILT_SOURCES)
