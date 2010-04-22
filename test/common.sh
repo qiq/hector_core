@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# simple test: one reader, one writer, single threaded
+# current directory is writable, directory with this script may be not (VPATH builds -- make distcheck)
 
 function doinit {
 	if which perl >/dev/null; then

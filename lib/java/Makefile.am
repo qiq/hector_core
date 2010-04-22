@@ -22,4 +22,4 @@ endif
 endif
 
 clean-local:
-	rm -f Hector_wrap.cc
+	rm -f Hector_wrap.cc *.java
