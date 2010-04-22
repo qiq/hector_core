@@ -3,14 +3,32 @@
 #ifndef _RESOURCES_H_
 #define _RESOURCES_H_
 
+#include <config.h>
+
 #include <queue>
 #include <string>
+#include <tr1/unordered_map>
+#include <log4cxx/logger.h>
+#include "Lock.h"
 #include "Resource.h"
-#include "TestResource.h"
-#include "WebResource.h"
 
 using namespace std;
 
+class Resources {
+public:
+	Resources() {};
+	~Resources() {};
+
+	static Resource *CreateResource(int id);
+	static int Name2Id(const char *name);
+private:
+	static Lock lock;
+	static std::tr1::unordered_map<string, int> name2id;
+	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
+	static log4cxx::LoggerPtr logger;
+};
+
+#if 0
 // Update this function to create new Resource type
 inline Resource *ConstructResource(resource_t type, string *serial = NULL) {
 	Resource *r;
@@ -39,6 +57,7 @@ inline TestResource *Resource2TestResource(Resource *resource) {
 inline WebResource *Resource2WebResource(Resource *resource) {
 	return dynamic_cast<WebResource*>(resource);
 }
+#endif
 
 // Helper methods for SWIG
 

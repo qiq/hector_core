@@ -8,63 +8,69 @@
 
 #include <config.h>
 
-#include <vector>
 #include <string>
 #include <log4cxx/logger.h>
 #include "Resource.h"
-#include "TestResource.pb.h"
 
 using namespace std;
 
 class TestResource : public Resource {
-protected:
-	hector::resources::TestResource r;
-
-	static log4cxx::LoggerPtr logger;
 public:
 	TestResource();
 	~TestResource() {};
+	// create copy of a resource
 	Resource *Clone();
-	int getStatus();
-	void setStatus(int status);
+	// type id of a resource (to be used by Resources::CreateResource(typeid))
+	int getType();
+	// id should be unique across all resources
 	int getId();
 	void setId(int id);
+	// status may be tested in Processor to select target queue
+	int getStatus();
+	void setStatus(int status);
+	// save and restore resource
+	string *serialize();
+	bool deserialize(string *s);
+	// used by queues in case there is limit on queue size
 	int getSize();
-	resource_t getType();
 
 	void setStr(const char *s);
 	const char *getStr();
 
-	string *serialize();
-	bool deserialize(string *s);
+protected:
+	int id;
+	int status;
+	string str;
+
+	static log4cxx::LoggerPtr logger;
 };
 
+inline int TestResource::getType() {
+	return 1;
+}
+
 inline int TestResource::getId() {
-	return r.id();
+	return id;
 }
 
 inline void TestResource::setId(int id) {
-	r.set_id(id);
+	this->id = id;
 }
 
 inline int TestResource::getStatus() {
-	return r.status();
+	return status;
 }
 
 inline void TestResource::setStatus(int status) {
-	r.set_status(status);
-}
-
-inline resource_t TestResource::getType() {
-	return RESOURCE_TEST;
+	this->status = status;
 }
 
 inline const char *TestResource::getStr() {
-	return r.str().c_str();
+	return str.c_str();
 }
 
 inline void TestResource::setStr(const char *str) {
-	r.set_str(str);
+	this->str = str;
 }
 
 #endif

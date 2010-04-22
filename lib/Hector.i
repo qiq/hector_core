@@ -8,6 +8,5 @@
 %include Connection.i
 %include StdioConnection.i
 %include processing_engine/Resource.i
-%include processing_engine/resources/Resources.i
+%include processing_engine/Resources.i
 %include processing_engine/resources/TestResource.i
-%include processing_engine/resources/WebResource.i

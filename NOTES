@@ -56,21 +56,18 @@ Adresarova struktura:
 /usr/lib/hector/modules/perl/ReadResource.pm
 /usr/lib/hector/modules/perl/Hector.pm
 /usr/lib/hector/modules/perl/Hector.so
+/usr/lib/hector/resources/TestResource.so
 /usr/share/hector/skript.sh, nejake common.sh
-/usr/include/hector/*.h
+/usr/include/hector/*.h (vse pro externi Resource a Module)
 
 LD_LIBRARY_PATH += $PREFIX/lib/hector:$PREFIX/lib/hector/modules
 PERL5LIB += $PREFIX/lib/hector/modules/perl
 podobne pro python a javu
 
-DONE
-- helen -> hector_core
-
 TODO
 
-- hector -> hector_robot
+- nejak vylepsit testy
 - do /usr/share/hector/skript.sh nejake common.sh
-- dynamicke Resources (i nahravani)
 
 rozmyslet:
 - predavani dat mezi procesy + synchronizace

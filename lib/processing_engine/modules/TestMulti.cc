@@ -80,7 +80,3 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return new TestMulti(objects, id, threadIndex);
 }
-
-extern "C" void destroy(Module* p) {
-	delete p;
-}

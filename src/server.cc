@@ -96,21 +96,11 @@ int main(int argc, char *argv[]) {
 	// set environment variables according to baseDir
 	char value[10240];
 	const char *path = getenv("LD_LIBRARY_PATH");
-	const char *prev = path;
-	if (path) {
-		while (*prev && *prev != '=')
-			prev++;
-	}
-	snprintf(value, sizeof(value), "%s:%s/modules:%s", baseDir, baseDir, prev ? prev+1 : "");
+	snprintf(value, sizeof(value), "%s:%s/modules:%s/resources:%s", baseDir, baseDir, baseDir, path ? path : "");
 	setenv("LD_LIBRARY_PATH", value, 1);
 
 	path = getenv("PERL5LIB");
-	prev = path;
-	if (path) {
-		while (*prev && *prev != '=')
-			prev++;
-	}
-	snprintf(value, sizeof(value), "%s/modules/perl:%s", baseDir, prev ? prev+1 : "");
+	snprintf(value, sizeof(value), "%s/modules/perl:%s", baseDir, path ? path : "");
 	setenv("PERL5LIB", value, 1);
 
 	// load config file

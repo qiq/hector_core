@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ @PYTHON_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ @PYTHON_LDFLAGS@ -module -avoid-version
+AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ @PYTHON_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
+AM_LDFLAGS = @LOG4CXX_LIBS@ @PROTOBUF_LIBS@ @PYTHON_LDFLAGS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 BUILT_SOURCES =

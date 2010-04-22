@@ -1,14 +1,14 @@
 
+#include <stdio.h>
 #include "TestResource.h"
-#include "TestResource.pb.h"
 
 using namespace std;
 
 log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("lib.processing_engine.TestResource"));
 
 TestResource::TestResource() {
-	// check library vs header file versions
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	id = 0;
+	status = 0;
 }
 
 Resource *TestResource::Clone() {
@@ -16,20 +16,27 @@ Resource *TestResource::Clone() {
 }
 
 int TestResource::getSize() {
-	return 1; //FIXME
+	return 1;
 }
 
 string *TestResource::serialize() {
-	string *result = new string();
-	if (!r.SerializeToString(result)) {
-		LOG4CXX_ERROR(logger, "Cannot serialize Resource");
-		delete result;
-		return NULL;
+	string *strcopy = new string(str);
+	size_t idx;
+	while ((idx = strcopy->find('\n')) != string::npos) {
+		strcopy->replace(idx, 1, " ");
 	}
-	return result;
+	char s[1024];
+	snprintf(s, sizeof(s), "%d\n%d\n%s\n", id, status, strcopy->c_str());
+	delete strcopy;
+	return new string(s);
 }
 
 bool TestResource::deserialize(string *s) {
-	r.ParseFromString(*s);
+	char buf[1024];
+	if (sscanf(s->c_str(), "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
+		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
+		return false;
+	}
+	str.assign(buf);
 	return true;
 }

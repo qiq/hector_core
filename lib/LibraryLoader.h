@@ -12,16 +12,18 @@
 using namespace std;
 
 class LibraryLoader {
-	static Lock lock;
-	static bool initialized;
-	static std::tr1::unordered_map<string, lt_dlhandle*> handles;
-
-	static log4cxx::LoggerPtr logger;
 public:
 	LibraryLoader();
 	~LibraryLoader();
 
 	static void *loadLibrary(const char *lib, const char *sym);
+
+private:
+	static Lock lock;
+	static bool initialized;
+	static std::tr1::unordered_map<string, lt_dlhandle*> handles;
+
+	static log4cxx::LoggerPtr logger;
 };
 
 #endif

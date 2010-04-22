@@ -91,7 +91,3 @@ Resource *TestSimple::Process(Resource *resource) {
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return new TestSimple(objects, id, threadIndex);
 }
-
-extern "C" void destroy(Module* p) {
-	delete p;
-}

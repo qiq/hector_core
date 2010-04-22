@@ -42,8 +42,3 @@ Resource *TestOutput::Process(Resource *resource) {
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return (Module*)new TestOutput(objects, id, threadIndex);
 }
-
-extern "C" void destroy(Module* p) {
-	delete p;
-}
-

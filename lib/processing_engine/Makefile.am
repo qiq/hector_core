@@ -6,7 +6,7 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h
+hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h Resource.i Resources.h Resources.i
 
 BUILT_SOURCES =
 
@@ -16,10 +16,10 @@ libhector_processing_engine_la_SOURCES = \
 	Module.h Module.cc \
 	OutputFilter.h \
 	Resource.h \
+	Resources.h Resources.cc \
 	PerlModule.h
 
 libhector_processing_engine_la_CXXFLAGS = $(AM_CXXFLAGS)
-libhector_processing_engine_la_LIBADD = resources/libhector_resources.la
 libhector_processing_engine_la_LDFLAGS = $(AM_LDFLAGS)
 
 if WITH_SWIG
@@ -34,6 +34,6 @@ endif
 
 
 # SWIG interface
-EXTRA_DIST = Resource.i
+EXTRA_DIST = Resource.i Resources.i
 
 CLEANFILES = $(BUILT_SOURCES)

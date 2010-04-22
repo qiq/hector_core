@@ -22,7 +22,7 @@ function doinit {
 	base=`readlink -f "$base"`'/..'
 	base=`readlink -f "$base"`
 	export PATH=$base/src:$PATH
-	export LD_LIBRARY_PATH=$base/lib/.libs:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$base/lib:$base/lib/processing_engine/modules:$base/lib/processing_engine/resources:$LD_LIBRARY_PATH
 
 	rm -f test.log
 }

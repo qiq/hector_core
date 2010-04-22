@@ -19,6 +19,8 @@ public:
 	Resource *Process(Resource *resource);
 
 private:
+	int typeId;		// to create TestResource
+
 	int items;
 	int maxItems;
 	char *idPrefix;

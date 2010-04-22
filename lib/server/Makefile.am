@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
+AM_CXXFLAGS = @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib
+AM_LDFLAGS = @LOG4CXX_LIBS@
 
 noinst_LTLIBRARIES = libhector_server.la
 

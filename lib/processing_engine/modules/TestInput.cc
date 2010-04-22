@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include "common.h"
+#include "Resources.h"
 #include "TestInput.h"
 #include "TestResource.h"
 
@@ -53,6 +54,11 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 		return false;
 	if (maxItems)
 		LOG_INFO(logger, "Going to produce " << maxItems << " resources.");
+	typeId = Resources::Name2Id("TestResource");
+	if (typeId < 0) {
+		LOG_ERROR(logger, "Cannot load TestResource library");
+		return false;
+	}
 	return true;
 }
 
@@ -60,7 +66,8 @@ Resource *TestInput::Process(Resource *resource) {
 	if (maxItems && items >= maxItems)
 		return NULL;
 	assert(resource == NULL);
-	TestResource *tr = new TestResource();
+	// we can use just new TestResource(), we use Resources::CreateResource() for demo purpose
+	TestResource *tr = dynamic_cast<TestResource*>(Resources::CreateResource(typeId));
 	tr->setId(getThreadIndex()*10000+items);
 	char s[1024];
 	snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items++);
@@ -74,8 +81,3 @@ Resource *TestInput::Process(Resource *resource) {
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return (Module*)new TestInput(objects, id, threadIndex);
 }
-
-extern "C" void destroy(Module* p) {
-	delete p;
-}
-

@@ -98,7 +98,3 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 extern "C" SimpleHTTPServer* create(ObjectRegistry *objects) {
 	return new TestServer(objects);
 }
-
-extern "C" void destroy(SimpleHTTPServer* p) {
-	delete p;
-}
