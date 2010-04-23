@@ -66,6 +66,11 @@ podobne pro python a javu
 
 TODO
 
+- hector_robot: pridat webresource, adresare: modules(/perl,python/java), resources, servers
+
+- univerzalni Loader/saver module pro resources
+
+- vyhodit procol buffers z _core, naopak vyzadovat ho v _robot
 - nejak vylepsit testy
 - do /usr/share/hector/skript.sh nejake common.sh
 

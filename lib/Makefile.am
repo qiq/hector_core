@@ -1,7 +1,7 @@
 SUBDIRS = server processing_engine . perl java python
 
 AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/server
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 
 lib_LTLIBRARIES = libhector.la
 

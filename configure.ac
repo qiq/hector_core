@@ -20,19 +20,11 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
-AC_CHECK_PROG(PROTOC, protoc, protoc)
 AC_CHECK_PROG(PERL, perl, perl)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
 PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
-PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 0.22])
-
-# hack: protocol buffers need to be linked statically
-# http://groups.google.com/group/protobuf/msg/d4e3b2a967018a10
-#xxx1=`echo $PROTOBUF_LIBS|sed -e 's,.*-L\([[^ ]]*\).*,\1,'`'/libprotobuf.a'
-#xxx2=`echo $PROTOBUF_LIBS|sed -e "s,-lprotobuf,$xxx1,"`
-#PROTOBUF_LIBS=`echo $xxx2|sed -e 's,\(.*\)\(-L[[^ ]]*\)\(.*\),\1\3,'`
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -241,5 +233,6 @@ AC_CONFIG_FILES([Makefile
 		lib/java/Makefile
 		lib/python/Makefile
 		test/Makefile
+		hector_core.pc
 ])
 AC_OUTPUT

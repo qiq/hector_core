@@ -1,4 +1,4 @@
-AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine
+AM_CXXFLAGS = @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine
 AM_LDFLAGS = @LOG4CXX_LIBS@
 AM_LIBTOOLFLAGS = --tag=disable-static
 

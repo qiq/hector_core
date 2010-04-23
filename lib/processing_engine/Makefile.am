@@ -1,6 +1,6 @@
 SUBDIRS = resources modules servers
 
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib
 AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 
 noinst_LTLIBRARIES = libhector_processing_engine.la
