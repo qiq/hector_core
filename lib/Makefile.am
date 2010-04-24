@@ -6,11 +6,11 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 lib_LTLIBRARIES = libhector.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = common.h Lock.h CondLock.h LibraryLoader.h Object.h ObjectRegistry.h ObjectValues.h Server.h
+hectorinclude_HEADERS = common.h PlainLock.h RWLock.h CondLock.h LibraryLoader.h SyncQueue.h Object.h ObjectRegistry.h ObjectValues.h Server.h
 
 libhector_la_SOURCES = \
 		common.h common.cc \
-		Lock.h CondLock.h \
+		PlainLock.h RWLock.h CondLock.h \
 		Config.h Config.cc \
 		CyclicBuffer.h \
 		SyncQueue.h \

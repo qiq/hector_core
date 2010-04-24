@@ -14,7 +14,6 @@
 #include "Config.h"
 #include "Object.h"
 #include "ObjectRegistry.h"
-#include "Lock.h"
 #include "Module.h"
 #include "ObjectValues.h"
 #include "OutputFilter.h"

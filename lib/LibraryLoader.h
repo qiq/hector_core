@@ -7,7 +7,7 @@
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 #include "common.h"
-#include "Lock.h"
+#include "PlainLock.h"
 
 using namespace std;
 
@@ -19,7 +19,7 @@ public:
 	static void *loadLibrary(const char *lib, const char *sym);
 
 private:
-	static Lock lock;
+	static PlainLock lock;
 	static bool initialized;
 	static std::tr1::unordered_map<string, lt_dlhandle*> handles;
 

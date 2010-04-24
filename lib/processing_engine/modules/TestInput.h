@@ -21,9 +21,9 @@ public:
 private:
 	int typeId;		// to create TestResource
 
-	int items;
-	int maxItems;
-	char *idPrefix;
+	int items;		// guarded by ObjectLock
+	int maxItems;		// guarded by ObjectLock
+	char *idPrefix;		// guarded by ObjectLock
 
 	ObjectValues<TestInput> *values;
 

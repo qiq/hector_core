@@ -9,7 +9,7 @@
 #include <string>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
-#include "Lock.h"
+#include "PlainLock.h"
 #include "Resource.h"
 
 using namespace std;
@@ -22,7 +22,7 @@ public:
 	static Resource *CreateResource(int id);
 	static int Name2Id(const char *name);
 private:
-	static Lock lock;
+	static PlainLock lock;
 	static std::tr1::unordered_map<string, int> name2id;
 	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
 	static log4cxx::LoggerPtr logger;

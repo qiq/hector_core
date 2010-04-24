@@ -14,7 +14,6 @@
 #include <string>
 #include <tr1/unordered_set>
 #include <log4cxx/logger.h>
-#include "common.h"
 #include "CondLock.h"
 #include "SyncQueue.h"
 
@@ -41,7 +40,7 @@ class SimpleServer {
 	struct in_addr server_addr;
 	int server_port;
 
-	Lock main_lock;
+	PlainLock main_lock;
 	pthread_t main_thread;		// guarded by main_lock
 	bool main_running;		// guarded by main_lock
 	int main_socket;		// guarded by main_lock

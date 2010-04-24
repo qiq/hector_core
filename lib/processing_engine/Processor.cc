@@ -303,7 +303,7 @@ bool Processor::Connect() {
 
 bool Processor::isRunning() {
 	bool result;
-	ObjectLock();
+	ObjectLockWrite();
 	result = running;
 	ObjectUnlock();
 	return result;
@@ -447,7 +447,7 @@ void Processor::runThread(int id) {
 }
 
 void Processor::Start() {
-	ObjectLock();
+	ObjectLockWrite();
 	running = true;
 	threads = new pthread_t[nThreads];
 
@@ -470,7 +470,7 @@ void Processor::Start() {
 }
 
 void Processor::Stop() {
-	ObjectLock();
+	ObjectLockWrite();
 	running = false;
 
 	pthread_t *copy = threads;

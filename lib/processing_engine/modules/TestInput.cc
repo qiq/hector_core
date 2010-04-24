@@ -63,8 +63,12 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestInput::Process(Resource *resource) {
-	if (maxItems && items >= maxItems)
+	ObjectLockRead();
+	if (maxItems && items >= maxItems) {
+		ObjectUnlock();
 		return NULL;
+	}
+	ObjectUnlock();
 	assert(resource == NULL);
 	// we can use just new TestResource(), we use Resources::CreateResource() for demo purpose
 	TestResource *tr = dynamic_cast<TestResource*>(Resources::CreateResource(typeId));

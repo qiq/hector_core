@@ -174,7 +174,7 @@ private:
 	bool cancel;
 
 	// all data-driven operations must hold this lock for a moment: (purpose: pause/resume)
-	Lock pauseLock;
+	PlainLock pauseLock;
 
 	vector<SimpleQueue<T>*> queues;
 	std::tr1::unordered_map<int, SimpleQueue<T>*> priority2queue;
@@ -220,65 +220,65 @@ int SyncQueue<T>::getQueuesCount() {
 
 template <class T>
 void SyncQueue<T>::Stop() {
-	queueLock.lock();
+	queueLock.Lock();
 	cancel = true;
 	while (waitingReaders > 0) {
-		queueLock.signalRecv();
-		queueLock.unlock();
+		queueLock.SignalRecv();
+		queueLock.Unlock();
 		sched_yield();
-		queueLock.lock();
+		queueLock.Lock();
 	}
 	while (waitingWriters > 0) {
-		queueLock.signalSend();
-		queueLock.unlock();
+		queueLock.SignalSend();
+		queueLock.Unlock();
 		sched_yield();
-		queueLock.lock();
+		queueLock.Lock();
 	}
 
 	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
 		(*iter)->deleteAllItems();
 	}
-	queueLock.unlock();
+	queueLock.Unlock();
 }
 
 template <class T>
 void SyncQueue<T>::Start() {
-	queueLock.lock();
+	queueLock.Lock();
 	cancel = false;
-	queueLock.unlock();
+	queueLock.Unlock();
 }
 
 template <class T>
 void SyncQueue<T>::Pause() {
-	pauseLock.lock();
+	pauseLock.Lock();
 }
 
 template <class T>
 void SyncQueue<T>::Resume() {
-	pauseLock.unlock();
+	pauseLock.Unlock();
 }
 
 template <class T>
 bool SyncQueue<T>::isSpace(T *r, int priority) {
 	bool result = false;
-	queueLock.lock();
+	queueLock.Lock();
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = *iter;
 	if (q->getCurrentItems() < q->getMaxItems() && q->getCurrentSize()+r->getSize() <= q->getMaxSize())
 		result = true;
-	queueLock.unlock();
+	queueLock.Unlock();
 	return result;
 }
 
 // returns false if canceled
 template <class T>
 bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
-	pauseLock.lock();
-	pauseLock.unlock();
-	queueLock.lock();
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	queueLock.Lock();
 	if (cancel) {
-		queueLock.unlock();
+		queueLock.Unlock();
 		return false;
 	}
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
@@ -287,32 +287,32 @@ bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 	int itemSize = r->getSize();
 	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize())) {
 		if (!sleep) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return false;
 		}
 		waitingWriters++;
-		queueLock.waitSend();
+		queueLock.WaitSend();
 		waitingWriters--;
 		if (cancel) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return false;
 		}
 	}
 
 	q->putItem(r);
 
-	queueLock.signalRecv();
-	queueLock.unlock();
+	queueLock.SignalRecv();
+	queueLock.Unlock();
 	return true;
 }
 
 template <class T>
 int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
-	pauseLock.lock();
-	pauseLock.unlock();
-	queueLock.lock();
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	queueLock.Lock();
 	if (cancel) {
-		queueLock.unlock();
+		queueLock.Unlock();
 		return 0;
 	}
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
@@ -321,14 +321,14 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
 	int itemSize = r[0]->getSize();
 	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize()))  {
 		if (!sleep) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return 0;
 		}
 		waitingWriters++;
-		queueLock.waitSend();
+		queueLock.WaitSend();
 		waitingWriters--;
 		if (cancel) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return 0;
 		}
 	}
@@ -342,72 +342,72 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
 		q->putItem(r[i]);
 	}
 
-	queueLock.signalRecv();
-	queueLock.unlock();
+	queueLock.SignalRecv();
+	queueLock.Unlock();
 	return i;
 }
 
 template <class T>
 bool SyncQueue<T>::isReady() {
 	bool result = false;
-	queueLock.lock();
+	queueLock.Lock();
 	if (firstNonEmptyQueueIndex() >= 0)
 		result = true;
-	queueLock.unlock();
+	queueLock.Unlock();
 	return result;
 }
 
 template <class T>
 T *SyncQueue<T>::getItem(bool sleep) {
-	pauseLock.lock();
-	pauseLock.unlock();
-	queueLock.lock();
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	queueLock.Lock();
 	if (cancel) {
-		queueLock.unlock();
+		queueLock.Unlock();
 		return NULL;
 	}
 
 	while (firstNonEmptyQueueIndex() < 0) {
 		if (!sleep) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return NULL;
 		}
 		waitingReaders++;
-		queueLock.waitRecv();
+		queueLock.WaitRecv();
 		waitingReaders--;
 		if (cancel) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return NULL;
 		}
 	}
 
 	T *r = queues[firstNonEmptyQueueIndex()]->getItem();
 
-	queueLock.signalSend();
-	queueLock.unlock();
+	queueLock.SignalSend();
+	queueLock.Unlock();
 
 	return r;
 }
 
 template <class T>
 int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
-	pauseLock.lock();
-	pauseLock.unlock();
-	queueLock.lock();
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	queueLock.Lock();
 	if (cancel) {
-		queueLock.unlock();
+		queueLock.Unlock();
 		return 0;
 	}
 	while (firstNonEmptyQueueIndex() < 0) {
 		if (!sleep) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return 0;
 		}
 		waitingReaders++;
-		queueLock.waitRecv();
+		queueLock.WaitRecv();
 		waitingReaders--;
 		if (cancel) {
-			queueLock.unlock();
+			queueLock.Unlock();
 			return 0;
 		}
 	}
@@ -419,8 +419,8 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 		}
 	}
 
-	queueLock.signalSend();
-	queueLock.unlock();
+	queueLock.SignalSend();
+	queueLock.Unlock();
 
 	return i;
 }

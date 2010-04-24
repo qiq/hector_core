@@ -31,7 +31,9 @@ Resource *TestOutput::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
 		LOG_INFO(logger, "Resource arrived (" << tr->getStr() << ")");
+		ObjectLockWrite();
 		items++;
+		ObjectUnlock();
 		delete tr;
 	}
 	return NULL;

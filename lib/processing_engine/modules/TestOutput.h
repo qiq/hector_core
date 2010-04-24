@@ -19,7 +19,7 @@ public:
 	Resource *Process(Resource *resource);
 
 private:
-	int items;
+	int items;		// guarded by ObjectLock
 
 	ObjectValues<TestOutput> *values;
 

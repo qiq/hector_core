@@ -90,7 +90,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 
 module_t PerlModule::getType() {
 	int result = 0;
-	ObjectLock();
+	ObjectLockWrite();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -110,7 +110,7 @@ module_t PerlModule::getType() {
 Resource *PerlModule::Process(Resource *resource) {
 	int result = 0;
 	long ptr = (long)&resource;
-	ObjectLock();
+	ObjectLockWrite();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -132,7 +132,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	int result = 0;
 	long ptrir = (long)&inputResources;
 	long ptror = (long)&outputResources;
-	ObjectLock();
+	ObjectLockWrite();
 	dSP;
 	ENTER;
         PUSHMARK(SP);

@@ -11,7 +11,6 @@
 #include <string>
 #include <tr1/unordered_map>
 #include "common.h"
-#include "Lock.h"
 #include "Module.h"
 #include "ObjectValues.h"
 #include "TestResource.h"
@@ -25,7 +24,7 @@ public:
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
 private:
-	int items;
+	int items;		// guarded by ObjectLock
 	char *foo;
 	queue<TestResource*> *resources;
 

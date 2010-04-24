@@ -9,7 +9,7 @@
 
 log4cxx::LoggerPtr LibraryLoader::logger(log4cxx::Logger::getLogger("lib.LibraryLoader"));
 
-Lock LibraryLoader::lock;
+PlainLock LibraryLoader::lock;
 bool LibraryLoader::initialized;
 std::tr1::unordered_map<string, lt_dlhandle*> LibraryLoader::handles;
 
@@ -20,21 +20,21 @@ LibraryLoader::LibraryLoader() {
 }
 
 LibraryLoader::~LibraryLoader() {
-	lock.lock();
+	lock.Lock();
 	for (std::tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
 		lt_dlclose(*iter->second);
 		delete iter->second;
 	}
 	lt_dlexit();
 	initialized = false;
-	lock.unlock();
+	lock.Unlock();
 }
 
 void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
-	lock.lock();
+	lock.Lock();
 	if (!initialized) {
 		if (lt_dlinit() != 0) {
-			lock.unlock();
+			lock.Unlock();
 			LOG4CXX_ERROR(logger, "Cannot initialize libtool: " << lt_dlerror());
 			return NULL;
 		}
@@ -48,7 +48,7 @@ void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
 		handle = new lt_dlhandle;
 		*handle = lt_dlopen(lib);
 		if (*handle == NULL) {
-			lock.unlock();
+			lock.Unlock();
 			delete handle;
 			LOG4CXX_ERROR(logger, "Cannot load library: " << lt_dlerror());
 			return NULL;
@@ -56,7 +56,7 @@ void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
 		handles[lib] = handle;
 	}
 	void *p = lt_dlsym(*handle, sym);
-	lock.unlock();
+	lock.Unlock();
 	if (!p)
 		LOG4CXX_ERROR(logger, "Cannot find symbol: " << lt_dlerror());
 	return p;

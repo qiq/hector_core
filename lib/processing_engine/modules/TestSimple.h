@@ -10,7 +10,6 @@
 #include <string>
 #include <tr1/unordered_map>
 #include "common.h"
-#include "Lock.h"
 #include "Module.h"
 #include "ObjectValues.h"
 
@@ -23,10 +22,10 @@ public:
 	Resource *Process(Resource *resource);
 
 private:
-	int items;
-	char *foo;
-	bool flipStatus;
-	int setStatus;
+	int items;		// guarded by ObjectLock
+	char *foo;		// guarded by ObjectLock
+	bool flipStatus;	// guarded by ObjectLock
+	int setStatus;		// guarded by ObjectLock
 
 	ObjectValues<TestSimple> *values;
 

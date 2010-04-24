@@ -12,7 +12,6 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Config.h"
-#include "Lock.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
 #include "SimpleHTTPServer.h"

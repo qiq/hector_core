@@ -10,7 +10,6 @@
 #include <string>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
-#include "../common.h"
 
 using namespace std;
 

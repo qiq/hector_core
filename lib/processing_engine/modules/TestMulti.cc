@@ -70,7 +70,9 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	resources->pop();
 	outputResources->push(tr);
 	LOG_INFO(logger, "Processed TestResource (" << tr->getStr() << ")");
+	ObjectLockWrite();
 	++items;
+	ObjectUnlock();
 	
 	return MAX_RESOURCES-resources->size();
 }

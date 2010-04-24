@@ -77,11 +77,15 @@ Resource *TestSimple::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
 		LOG_INFO(logger, "Processing TestResource (" << tr->getStr() << ")");
-		if (flipStatus)
-			tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
-		if (setStatus >= 0)
-			tr->setStatus(setStatus);
+		ObjectLockWrite();
+		bool fs = flipStatus;
+		int ss = setStatus;
 		++items;
+		ObjectUnlock();
+		if (fs)
+			tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
+		if (ss >= 0)
+			tr->setStatus(ss);
 	}
 	return resource;
 }

@@ -34,21 +34,21 @@ SimpleServer::~SimpleServer() {
 // thread safe
 bool SimpleServer::getRunning() {
 	bool result;
-	main_lock.lock();
+	main_lock.Lock();
 	result = main_running;
-	main_lock.unlock();
+	main_lock.Unlock();
 	return result;
 }
 
 // thread safe
 void SimpleServer::setRunning(bool running) {
-	main_lock.lock();
+	main_lock.Lock();
 	main_running = running;
 	if (!running) {
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);
 	}
-	main_lock.unlock();
+	main_lock.Unlock();
 }
 
 void SimpleServer::RestrictAccess(const char *addr) {
@@ -145,14 +145,14 @@ void SimpleServer::MainThread() {
 			break;	// canceled
 		}
 	}
-	main_lock.lock();
+	main_lock.Lock();
 	main_running = false;
 	if (main_socket != -1) {
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);
 		main_socket = -1;
 	}
-	main_lock.unlock();
+	main_lock.Unlock();
 
 	queue->Stop();
         for (int i = 0; i < nThreads; i++) {
@@ -165,17 +165,17 @@ void SimpleServer::Start(const char *addr, int port, int max_threads, bool wait)
 		server_addr.s_addr = INADDR_ANY;
 	server_port = port;
 	this->nThreads = max_threads;
-	main_lock.lock();
+	main_lock.Lock();
 	pthread_create(&main_thread, NULL, http_main_thread, (void *)this);
 	main_running = true;
-	main_lock.unlock();
+	main_lock.Unlock();
 
 	if (wait)
 		pthread_join(main_thread, NULL);
 }
 
 void SimpleServer::Stop() {
-	main_lock.lock();
+	main_lock.Lock();
 	if (main_running) {
 		main_running = false;
 		if (main_socket != -1) {
@@ -184,7 +184,7 @@ void SimpleServer::Stop() {
 			main_socket = -1;
 		}
 	}
-	main_lock.unlock();
+	main_lock.Unlock();
 	
 	pthread_join(main_thread, NULL);
 }

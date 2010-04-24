@@ -13,7 +13,7 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "ObjectRegistry.h"
-#include "Lock.h"
+#include "RWLock.h"
 
 #define LOG_TRACE(logger, ...) LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__)
 #define LOG_DEBUG(logger, ...) LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__)
@@ -26,7 +26,8 @@ public:
 	Object(ObjectRegistry *objects, const char *id);
 	Object(ObjectRegistry *objects, const char *id, int index);
 	~Object();
-	void ObjectLock();
+	void ObjectLockRead();
+	void ObjectLockWrite();
 	void ObjectUnlock();
 	const char *getId();
 	char *getValue(const char *name);
@@ -38,7 +39,7 @@ public:
 protected:
 	ObjectRegistry *objects;
 	char *id;
-	Lock lock;
+	RWLock rwlock;
 
 	virtual char *getValueSync(const char *name);
 	virtual bool setValueSync(const char *name, const char *value);
@@ -74,17 +75,21 @@ inline const char *Object::getId() {
 	return this->id;
 }
 
-inline void Object::ObjectLock() {
-	lock.lock();
+inline void Object::ObjectLockRead() {
+	rwlock.LockRead();
+}
+
+inline void Object::ObjectLockWrite() {
+	rwlock.LockWrite();
 }
 
 inline void Object::ObjectUnlock() {
-	lock.unlock();
+	rwlock.Unlock();
 }
 
 inline char *Object::getValue(const char *name) {
 	char *result;
-	ObjectLock();
+	ObjectLockRead();
 	result = getValueSync(name);
 	ObjectUnlock();
 	return result;
@@ -92,7 +97,7 @@ inline char *Object::getValue(const char *name) {
 
 inline bool Object::setValue(const char *name, const char *value) {
 	bool result;
-	ObjectLock();
+	ObjectLockWrite();
 	result = setValueSync(name, value);
 	ObjectUnlock();
 	return result;
@@ -100,20 +105,20 @@ inline bool Object::setValue(const char *name, const char *value) {
 
 inline vector<string> *Object::listNames() {
 	vector<string> *result;
-	ObjectLock();
+	ObjectLockRead();
 	result = listNamesSync();
 	ObjectUnlock();
 	return result;
 }
 
 inline void Object::SaveCheckpoint(const char *path, const char *id) {
-	ObjectLock();
+	ObjectLockWrite();
 	SaveCheckpointSync(path, id);
 	ObjectUnlock();
 }
 
 inline void Object::RestoreCheckpoint(const char *path, const char *id) {
-	ObjectLock();
+	ObjectLockWrite();
 	RestoreCheckpointSync(path, id);
 	ObjectUnlock();
 }

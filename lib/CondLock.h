@@ -8,24 +8,19 @@
 #include <config.h>
 
 #include <pthread.h>
-#include "Lock.h"
+#include "PlainLock.h"
 
-class CondLock: public Lock {
+class CondLock: public PlainLock {
 	pthread_cond_t *condSend;
 	pthread_cond_t *condRecv;
 public:
 	CondLock();
 	~CondLock();
 
-	void waitSend() { pthread_cond_wait(condSend, mutex); }
-	void signalSend() { pthread_cond_broadcast(condSend); }
-	void waitRecv() { pthread_cond_wait(condRecv, mutex); }
-	void signalRecv() { pthread_cond_broadcast(condRecv); }
-
-/*	pthread_cond_t *getCondSend();
-	pthread_cond_t *getCondRecv();
-	void setCondSend(pthread_cond_t *condSend, bool free);
-	void setCondRecv(pthread_cond_t *condRecv, bool free);*/
+	void WaitSend() { pthread_cond_wait(condSend, mutex); }
+	void SignalSend() { pthread_cond_broadcast(condSend); }
+	void WaitRecv() { pthread_cond_wait(condRecv, mutex); }
+	void SignalRecv() { pthread_cond_broadcast(condRecv); }
 };
 
 inline CondLock::CondLock() {
@@ -41,29 +36,5 @@ inline CondLock::~CondLock() {
 	delete condSend;
 	delete condRecv;
 }
-
-/*inline pthread_cond_t *CondLock::getCondSend() {
-	return condSend;
-}
-
-inline pthread_cond_t *CondLock::getCondRecv() {
-	return condRecv;
-}
-
-inline void CondLock::setCondSend(pthread_cond_t *condSend, bool free) {
-	if (this->condSend != condSend) {
-		if (free)
-			delete this->condSend;
-		this->condSend = condSend;
-	}
-}
-
-inline void CondLock::setCondRecv(pthread_cond_t *condRecv, bool free) {
-	if (this->condRecv != condRecv) {
-		if (free)
-			delete this->condRecv;
-		this->condRecv = condRecv;
-	}
-}*/
 
 #endif

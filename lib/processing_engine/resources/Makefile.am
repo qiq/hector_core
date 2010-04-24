@@ -5,6 +5,9 @@ AM_LIBTOOLFLAGS = --tag=disable-static
 resourcesdir = $(libdir)/hector/resources
 resources_LTLIBRARIES = libTestResource.la TestResource.la
 
+hectorincludedir = $(includedir)/hector
+hectorinclude_HEADERS = TestResource.h
+
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
 libTestResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 
