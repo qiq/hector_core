@@ -12,7 +12,7 @@ public:
         virtual void setId(int id) = 0;
         virtual int getStatus() = 0;
         virtual void setStatus(int status) = 0;
-        virtual string *serialize() = 0;
-        virtual bool deserialize(string *s) = 0;
+        virtual string *Serialize() = 0;
+        virtual bool Deserialize(string *s) = 0;
         virtual int getSize() = 0;
 };

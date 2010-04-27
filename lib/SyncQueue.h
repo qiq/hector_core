@@ -39,7 +39,7 @@ public:
 	
 	int getPriority();
 
-	bool isSpace(T *r);
+	bool isSpaceFor(int itemSize);
 	void putItem(T *r);
 	bool isReady();
 	T *getItem();
@@ -90,8 +90,8 @@ int SimpleQueue<T>::getPriority() {
 }
 
 template <class T>
-bool SimpleQueue<T>::isSpace(T *r) {
-	return ((int)queue->size() < maxItems && queueSize+r->getSize() <= maxSize) ? true : false;
+bool SimpleQueue<T>::isSpaceFor(int itemSize) {
+	return ((maxItems == 0 || (int)queue->size() < maxItems) && (maxSize == 0 || queueSize+itemSize <= maxSize)) ? true : false;
 }
 
 template <class T>
@@ -141,7 +141,7 @@ bool SimpleQueue<T>::comp(SimpleQueue<T> *a, SimpleQueue<T> *b) {
 	return a->getPriority() > b->getPriority();
 }
 
-// By default, no sub-queuei is created, they may be added using addQueue()
+// By default, no sub-queue is created, they may be added using addQueue()
 
 template<class T>
 class SyncQueue {
@@ -265,8 +265,7 @@ bool SyncQueue<T>::isSpace(T *r, int priority) {
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = *iter;
-	if (q->getCurrentItems() < q->getMaxItems() && q->getCurrentSize()+r->getSize() <= q->getMaxSize())
-		result = true;
+	result = q->isSpaceFor(r->getSize());
 	queueLock.Unlock();
 	return result;
 }
@@ -285,7 +284,7 @@ bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = iter->second;
 	int itemSize = r->getSize();
-	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize())) {
+	while (!q->isSpaceFor(itemSize)) {
 		if (!sleep) {
 			queueLock.Unlock();
 			return false;

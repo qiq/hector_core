@@ -16,6 +16,6 @@ public:
         void setStr(const char *str);
         const char *getStr();
 
-        string *serialize();
-        bool deserialize(string *s);
+        string *Serialize();
+        bool Deserialize(string *s);
 };

@@ -15,11 +15,11 @@
 #include "ObjectRegistry.h"
 #include "RWLock.h"
 
-#define LOG_TRACE(logger, ...) LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__)
-#define LOG_DEBUG(logger, ...) LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__)
-#define LOG_INFO(logger, ...) LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__)
-#define LOG_ERROR(logger, ...) LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__)
-#define LOG_FATAL(logger, ...) LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__)
+#define LOG_TRACE(logger, ...) { LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_DEBUG(logger, ...) { LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_INFO(logger, ...) { LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_ERROR(logger, ...) { LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_FATAL(logger, ...) { LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__) }
 
 class Object {
 public:

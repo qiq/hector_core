@@ -29,8 +29,8 @@ public:
 	int getStatus();
 	void setStatus(int status);
 	// save and restore resource
-	string *serialize();
-	bool deserialize(string *s);
+	string *Serialize();
+	bool Deserialize(string *s);
 	// used by queues in case there is limit on queue size
 	int getSize();
 

@@ -20,11 +20,21 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
+AC_CHECK_PROG(PROTOC, protoc, protoc)
+if test -z "$PROTOC"; then
+	echo "Please install Protocol Buffers compiler (protoc)";
+	exit 1;
+fi
 AC_CHECK_PROG(PERL, perl, perl)
+if test -z "$PERL"; then
+	echo "Please install Perl";
+	exit 1;
+fi
 
 # Checks for libraries.
 PKG_CHECK_MODULES([LIBXML2], [libxml-2.0 >= 2.5.0])
 PKG_CHECK_MODULES([LOG4CXX], [liblog4cxx >= 0.10.0])
+PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 0.22])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -38,13 +48,16 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_TYPE_UINT32_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT8_T
+AC_SYS_LARGEFILE
 
 # Checks for library functions.
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([dup2 gethostbyname inet_ntoa memset select setlocale socket sqrt strcasecmp strdup strerror])
+AC_CHECK_FUNCS([dup2 gethostbyname inet_ntoa memset select setlocale socket sqrt strcasecmp strdup strerror strndup putenv setenv])
 
 # Misc
 dnl Check for debug options

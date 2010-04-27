@@ -20,3 +20,5 @@ TestMulti_la_SOURCES = TestMulti.h TestMulti.cc
 TestMulti_la_LIBADD = ../resources/libTestResource.la
 
 LoadResource_la_SOURCES = LoadResource.h LoadResource.cc
+LoadResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
+LoadResource_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@

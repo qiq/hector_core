@@ -27,9 +27,10 @@ public:
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
 	// save and restore resource
-	virtual string *serialize() = 0;
-	virtual bool deserialize(string *s) = 0;
-	// used by queues in case there is limit on queue size
+	virtual string *Serialize() = 0;
+	virtual bool Deserialize(string *s) = 0;
+	// used by queues in case there is limit on queue size, this size may
+	// be somewhat arbitrary
 	virtual int getSize() = 0;
 protected:
 	static log4cxx::LoggerPtr logger;

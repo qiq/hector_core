@@ -6,7 +6,7 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h Resource.i Resources.h Resources.i
+hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h Resource.i Resources.h Resources.i
 
 BUILT_SOURCES =
 
@@ -15,7 +15,7 @@ libhector_processing_engine_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
-	Resource.h \
+	Resource.h ProtobufResource.h \
 	Resources.h Resources.cc \
 	PerlModule.h
 
@@ -26,9 +26,9 @@ if WITH_SWIG
 if WITH_PERL
 libhector_processing_engine_la_SOURCES += \
 	PerlModule.cc perlxsi.c
-libhector_processing_engine_la_CXXFLAGS += @PERL_CFLAGS@
-libhector_processing_engine_la_CFLAGS = ${libhector_processing_engine_la_CXXFLAGS} @PERL_CFLAGS@
-libhector_processing_engine_la_LDFLAGS += @PERL_LDFLAGS@
+libhector_processing_engine_la_CXXFLAGS += @PERL_CFLAGS@ @PROTOBUF_CFLAGS@
+libhector_processing_engine_la_CFLAGS = ${libhector_processing_engine_la_CXXFLAGS} @PERL_CFLAGS@ @PROTOBUF_CFLAGS@
+libhector_processing_engine_la_LDFLAGS += @PERL_LDFLAGS@ @PROTOBUF_LIBS@
 endif
 endif
 

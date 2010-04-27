@@ -19,7 +19,7 @@ int TestResource::getSize() {
 	return 1;
 }
 
-string *TestResource::serialize() {
+string *TestResource::Serialize() {
 	string *strcopy = new string(str);
 	size_t idx;
 	while ((idx = strcopy->find('\n')) != string::npos) {
@@ -31,7 +31,7 @@ string *TestResource::serialize() {
 	return new string(s);
 }
 
-bool TestResource::deserialize(string *s) {
+bool TestResource::Deserialize(string *s) {
 	char buf[1024];
 	if (sscanf(s->c_str(), "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
 		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
