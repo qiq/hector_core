@@ -29,9 +29,10 @@ LoadResource::LoadResource(ObjectRegistry *objects, const char *id, int threadIn
 }
 
 LoadResource::~LoadResource() {
+	if (!stream->Close())
+		LOG_ERROR(logger, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
+	delete stream;
 	free(filename);
-	close(fd);
-
 	delete values;
 }
 
@@ -77,19 +78,22 @@ bool LoadResource::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool LoadResource::ReadFromFile(void *data, int size, int fd, char *filename) {
+bool LoadResource::ReadFromFile(void *data, int size) {
 	while (size > 0) {
 		ssize_t rd = read(fd, data, size);
 		if (rd > 0) {
 			size -= rd;
 		} else {
+			ObjectLockRead();
 			if (rd < 0)
 				LOG_ERROR(logger, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 			else
-				LOG_INFO(logger, "Input file: " << filename << " read, finishing.")
+				LOG_INFO(logger, "Input file: " << filename << " read, finishing.");
+			ObjectUnlock();
 			return false;
 		}
 	}
+	return true;
 }
 
 Resource *LoadResource::Process(Resource *resource) {
@@ -102,16 +106,10 @@ Resource *LoadResource::Process(Resource *resource) {
 	assert(resource == NULL);
 	uint32_t size;
 	uint8_t typeId;
-	ObjectLockRead();
-	if (!ReadFromFile(&size, sizeof(size), fd, filename)) {
-		ObjectUnlock();
+	if (!ReadFromFile(&size, sizeof(size)))
 		return NULL;
-	}
-	if (!ReadFromFile(&typeId, sizeof(typeId), fd, filename)) {
-		ObjectUnlock();
+	if (!ReadFromFile(&typeId, sizeof(typeId)))
 		return NULL;
-	}
-	ObjectUnlock();
 
 	Resource *r = Resources::CreateResource(typeId);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(r);
@@ -120,9 +118,7 @@ Resource *LoadResource::Process(Resource *resource) {
 			return NULL;
 	} else {
 		void *data = malloc(size);
-		ObjectLockRead();
-		if (!ReadFromFile(data, size, fd, filename)) {
-			ObjectUnlock();
+		if (!ReadFromFile(data, size)) {
 			free(data);
 			delete r;
 			return NULL;
@@ -138,6 +134,9 @@ Resource *LoadResource::Process(Resource *resource) {
 		delete s;
 		free(data);
 	}
+	ObjectLockWrite();
+	++items;
+	ObjectUnlock();
 	return r;
 }
 
