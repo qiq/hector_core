@@ -1,6 +1,5 @@
 /**
  * Class representing queue of resources (mainly HTML pages) while processing.
- * It uses Google Protocol Buffers to de/serialize.
  */
 
 #ifndef _TEST_RESOURCE_H_

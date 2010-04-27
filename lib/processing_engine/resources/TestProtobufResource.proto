@@ -1,0 +1,10 @@
+package hector.resources;
+
+option optimize_for = SPEED;
+
+message TestProtobufResource {
+        required uint32 id = 1;                 // id of a resource
+        required int32 status = 2;              // status to be used by filters
+
+        optional string str = 3;                // test data
+}
