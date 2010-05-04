@@ -70,4 +70,5 @@
 <!ELEMENT Module	(param*) >
 <!ATTLIST Module
 	id		ID		#REQUIRED
-	lib		CDATA		#REQUIRED >
+	lib		CDATA		#REQUIRED
+	type		CDATA		"native" >

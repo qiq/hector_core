@@ -4,7 +4,7 @@
 test6: sort according to status: two readers(1), connected to two intermediates(1), another simple intermediate, two writers(1)
 -->
 <Config>
-	<Server id="test" lib="../lib/processing_engine/servers/TestServer.la">
+	<Server id="test" lib="TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
@@ -13,11 +13,11 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 			<Processor id="P_load_resource1">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource1" lib="../lib/processing_engine/modules/TestInput.la">
+					<Module id="M_load_resource1" lib="TestInput.la">
 						<param name="maxItems" value="1000"/>
 						<param name="idPrefix" value="i1-"/>
 					</Module>
-					<Module id="M_simple1" lib="../lib/processing_engine/modules/TestSimple.la">
+					<Module id="M_simple1" lib="TestSimple.la">
 						<param name="setStatus" value="1"/>
 					</Module>
 				</modules>
@@ -28,11 +28,11 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 			<Processor id="P_load_resource2">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource2" lib="../lib/processing_engine/modules/TestInput.la">
+					<Module id="M_load_resource2" lib="TestInput.la">
 						<param name="maxItems" value="2000"/>
 						<param name="idPrefix" value="i2-"/>
 					</Module>
-					<Module id="M_simple2" lib="../lib/processing_engine/modules/TestSimple.la">
+					<Module id="M_simple2" lib="TestSimple.la">
 						<param name="setStatus" value="0"/>
 					</Module>
 				</modules>
@@ -43,7 +43,7 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 			<Processor id="P_simple">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_simple" lib="../lib/processing_engine/modules/TestSimple.la"/>
+					<Module id="M_simple" lib="TestSimple.la"/>
 				</modules>
 				<input>
 					<queue/>
@@ -56,7 +56,7 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 			<Processor id="P_save_resource1">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource1" lib="../lib/processing_engine/modules/TestOutput.la"/>
+					<Module id="M_save_resource1" lib="TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>
@@ -65,7 +65,7 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 			<Processor id="P_save_resource2">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource2" lib="../lib/processing_engine/modules/TestOutput.la"/>
+					<Module id="M_save_resource2" lib="TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>

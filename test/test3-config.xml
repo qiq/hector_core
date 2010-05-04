@@ -4,7 +4,7 @@
 test3: intermediate (simple): one reader(1), one simple intermediate(1), one writer(1)
 -->
 <Config>
-	<Server id="test" lib="../lib/processing_engine/servers/TestServer.la">
+	<Server id="test" lib="TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
@@ -13,7 +13,7 @@ test3: intermediate (simple): one reader(1), one simple intermediate(1), one wri
 			<Processor id="P_load_resource">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource" lib="../lib/processing_engine/modules/TestInput.la">
+					<Module id="M_load_resource" lib="TestInput.la">
 						<param name="maxItems" value="1000"/>
 					</Module>
 				</modules>
@@ -24,7 +24,7 @@ test3: intermediate (simple): one reader(1), one simple intermediate(1), one wri
 			<Processor id="P_simple">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_simple" lib="../lib/processing_engine/modules/TestSimple.la"/>
+					<Module id="M_simple" lib="TestSimple.la"/>
 				</modules>
 				<input>
 					<queue/>
@@ -36,7 +36,7 @@ test3: intermediate (simple): one reader(1), one simple intermediate(1), one wri
 			<Processor id="P_save_resource">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource" lib="../lib/processing_engine/modules/TestOutput.la"/>
+					<Module id="M_save_resource" lib="TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>

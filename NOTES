@@ -66,9 +66,15 @@ podobne pro python a javu
 
 TODO
 
-- univerzalni Loader/saver module pro resources 
-- nejaky generator webresources (do robota)
+- v perl PerlModule lepsi reseni chyb (napr. listNames nevrati odkaz na pole -> aby to nespadlo)
+- pro perl moduly zpristupnit log4cxx
+- pro perl moduly zpristupnit ObjectRegistry a moznost zjistovat/nastavovat values
+
+- nejaky generator webresources (do robota) + otestovat load a save
 - napsat nejake testy pro perl... a taky vlastne nejaky Perl modul
+- client: zrychlit nabihani, implementovat reconnect
+
+- Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl
 
 - nejak vylepsit testy, pridat testy perlu/pythonu/javy
 - do /usr/share/hector/skript.sh nejake common.sh

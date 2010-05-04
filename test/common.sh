@@ -22,7 +22,8 @@ function doinit {
 	base=`readlink -f "$base"`'/..'
 	base=`readlink -f "$base"`
 	export PATH=$base/src:$PATH
-	export LD_LIBRARY_PATH=$base/lib:$base/lib/processing_engine/modules:$base/lib/processing_engine/resources:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$base/lib:$base/lib/processing_engine/servers:$base/lib/processing_engine/modules:$base/lib/processing_engine/resources:$base/lib/perl/.libs:$LD_LIBRARY_PATH
+	export PERL5LIB=$base/lib/perl:$base/lib/processing_engine/modules/perl:$PERL5LIB
 
 	rm -f test.log
 }
@@ -42,7 +43,7 @@ function server_start {
                 clean=1
         fi
 	if [ "$USE_VALGRIND" == 1 ]; then
-		( cd $base; libtool --mode=execute valgrind --leak-check=full --trace-children=yes server -c $base/test/$id-config.xml -f test 2>${id}.log.valgrind & )
+		( cd $base; libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes --log-file=${id}.log.valgrind server -c $base/test/$id-config.xml -f test & )
 		sleep 15;
 	else
 		if ! server -c $base/test/$id-config.xml test; then

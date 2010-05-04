@@ -113,7 +113,7 @@ bool Processor::Init(Config *config) {
 			}
 			delete c;
 
-			moduleType.push_back(modules[0].front()->getType());
+			moduleType.push_back(modules[0].back()->getType());
 		}
 		delete v;
 	}

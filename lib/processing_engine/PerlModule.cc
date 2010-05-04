@@ -16,28 +16,28 @@ EXTERN_C void xs_init (pTHX);
 XS(_wrap_new_Any) {
 	int argvi = 0;
 	int ecode;
-	long addr;
+	unsigned long addr;
 	char *name = NULL;
 	dXSARGS;
-    
+
 	if ((items < 2) || (items > 2)) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Usage: new_Any(long, string);");
+		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Usage: new_Any(string, unsigned long);");
 		croak(Nullch);
 	}
 
-	if (!SvIOK(ST(0))) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid address (long)");
-		croak(Nullch);
-	}
-	addr = SvIV(ST(0));
-
-	if (!SvPOK(ST(1))) {
+	if (!SvPOK(ST(0))) {
 		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid name (string)");
 		croak(Nullch);
 	}
 	STRLEN len = 0;
-	char *cstr = SvPV(ST(1), len); 
+	char *cstr = SvPV(ST(0), len); 
 	name = strndup(cstr, len);
+
+	if (!SvIOK(ST(1))) {
+		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid address (unsigned long)");
+		croak(Nullch);
+	}
+	addr = SvIV(ST(1));
 
 // SWIG_Perl_NewPointerObj(SWIG_MAYBE_PERL_OBJECT void *ptr, swig_type_info *t, int flags) {
 	SV *sv = sv_newmortal();
@@ -74,7 +74,8 @@ XS(_wrap_new_Any) {
 
 // based on SWIG code
 
-void *convert_ptr(SV *sv) {
+void *convert_ptr(SV *sv, bool disown) {
+	void *ptr = NULL;
 	SV *tsv = 0;
 	/* If magical, apply more magic */
 	if (SvGMAGICAL(sv))
@@ -101,33 +102,20 @@ void *convert_ptr(SV *sv) {
 		} else {
 			tmp = SvIV(tsv);
 		}
+   		/* SWIG: DISOWN implementation: we need a perl guru to check this one. */
+		if (tsv && disown) {
+			SV *obj = sv;
+			HV *stash = SvSTASH(SvRV(obj));
+			GV *gv = *(GV**) hv_fetch(stash, "OWNER", 5, TRUE);
+			if (isGV(gv)) {
+				HV *hv = GvHVn(gv);
+				if (hv_exists_ent(hv, obj, 0))
+					hv_delete_ent(hv, obj, 0, 0);
+			}
+		}
 		return (void*)(unsigned long)(tmp);
 	} 
 	return NULL;
-}
-
-
-XS(_wrap_getPointer_Any) {
-	void *ptr = NULL;
-	int argvi = 0;
-	dXSARGS;
-    
-	if ((items < 1) || (items > 1)) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Usage: getPointer_Any(self);");
-		croak(Nullch);
-	}
-	ptr = convert_ptr(ST(0));
-	if (!ptr) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid pointer: getPointer_Any(self);");
-		croak(Nullch);
-	}
-
-	SV *result = sv_newmortal();
-	sv_setiv(result, (IV)ptr);
-	ST(argvi) = result;
-	argvi++;
-
-	XSRETURN(argvi);
 }
 
 PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {
@@ -136,7 +124,6 @@ PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex,
 	char *dot = strrchr(this->name, '.');
 	if (dot)
 		*dot = '\0';
-	this->id = strdup(id);
 	this->threadIndex = threadIndex;
 	my_perl = perl_alloc();
 	perl_construct(my_perl);
@@ -146,7 +133,6 @@ PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex,
 PerlModule::~PerlModule() {
 	perl_destruct(my_perl);
 	perl_free(my_perl);
-	free(id);
 	free(name);
 }
 
@@ -170,7 +156,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	firstTimeProcess = true;
 	perl_run(my_perl);
 	char s[1024];
-	snprintf(s, sizeof(s), "use %s; $_module = %s->new(%s, %d);", name, name, id, threadIndex);
+	snprintf(s, sizeof(s), "use %s; $_module = %s->new('%s', %d);", name, name, getId(), threadIndex);
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
@@ -184,7 +170,6 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 
 	// Init swig extension (_new_Any)
 	newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
-	newXS("Hectorc::getPointer_Any", _wrap_getPointer_Any, (char*)__FILE__);
 
 	// call Init()
 	AV *table = newAV();
@@ -220,6 +205,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 }
 
 Module::Type PerlModule::getType() {
+	PERL_SET_CONTEXT(my_perl);
 	int result = 0;
 	ObjectLockRead();
 	dSP;
@@ -239,46 +225,53 @@ Module::Type PerlModule::getType() {
 }
 
 Resource *PerlModule::Process(Resource *resource) {
-	Resource *result = NULL;
 	if (firstTimeProcess) {
+		// first call in a new thread
 		firstTimeProcess = false;
 		PERL_SET_CONTEXT(my_perl);
 	}
-	const char *type = resource->getTypeStr();
-
-	// initialize resource type
-	if (initialized.find(type) == initialized.end()) {
-		char s[1024];
-		snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any(\"Hector::%s\", shift); bless $self, $pkg if defined($self); }", type, type);
-		eval_pv(s, FALSE);
-		if (SvTRUE(ERRSV)) {
-			LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
-			return NULL;
-		}
-	}
-	// create new instance of a resource (of given type): Hector::XXXResource->new2(0xabc)
+	Resource *result = NULL;
 	SV *resourceSV;
-	{
-		dSP;
-		ENTER;
-	        PUSHMARK(SP);
-	        XPUSHs(sv_2mortal(newSVpv(type, strlen(type))));
-	        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
-	        PUTBACK;
-		int count = call_method("new2", G_SCALAR);
-		SPAGAIN;
-		if (count != 1) {
-			LOG_ERROR(logger, "Error calling new2 for " << type);
-			return false;
+	if (resource) {
+		const char *type = resource->getTypeStr();
+
+		// initialize resource type
+		if (initialized.find(type) == initialized.end()) {
+			char s[1024];
+			snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any(\"Hector::%s\", shift); bless $self, $pkg if defined($self); }", type, type);
+			eval_pv(s, FALSE);
+			if (SvTRUE(ERRSV)) {
+				LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
+				return NULL;
+			}
 		}
-		if (SvTRUE(ERRSV)) {
-			LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
-			return false;
+		// create new instance of a resource (of given type): Hector::XXXResource->new2(0xabc)
+		{
+			char s[1024];
+			snprintf(s, sizeof(s), "Hector::%s", type);
+			dSP;
+			ENTER;
+		        PUSHMARK(SP);
+		        XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
+		        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
+		        PUTBACK;
+			int count = call_method("new2", G_SCALAR);
+			SPAGAIN;
+			if (count != 1) {
+				LOG_ERROR(logger, "Error calling new2 for " << type);
+				return false;
+			}
+			if (SvTRUE(ERRSV)) {
+				LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+				return false;
+			}
+			resourceSV = SvREFCNT_inc(POPs);
+			PUTBACK;
+			FREETMPS;
+			LEAVE;
 		}
-		resourceSV = SvREFCNT_inc(POPs);
-		PUTBACK;
-		FREETMPS;
-		LEAVE;
+	} else {
+		resourceSV = &PL_sv_undef;
 	}
 
 	// call Process method: $module->Process($resource)
@@ -300,36 +293,9 @@ Resource *PerlModule::Process(Resource *resource) {
 	}
 	ObjectUnlock();
 
-	// get pointer of C++ resource object
-	{
-		dSP;
-		ENTER;
-	        PUSHMARK(SP);
-	        XPUSHs(sv_2mortal(newSVpv(type, strlen(type))));
-	        PUTBACK;
-		int count = call_method("getPointer_Any", G_DISCARD);
-		SPAGAIN;
-		if (count == 1)
-			result = (Resource*)POPi;
-		PUTBACK;
-		FREETMPS;
-		LEAVE;
-	}
+	// get Resource C++ pointer & DISOWN
+	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
 
-	// disown resource: $resource->DISOWN();
-	{
-		dSP;
-		ENTER;
-	        PUSHMARK(SP);
-	        XPUSHs(resourceSV);
-	        PUTBACK;
-		int count = call_method("DISOWN", G_DISCARD);
-		SPAGAIN;
-		PUTBACK;
-		FREETMPS;
-		LEAVE;
-	}
-	
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
 
@@ -337,7 +303,11 @@ Resource *PerlModule::Process(Resource *resource) {
 }
 
 int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
-	// nejake helper metody, ktere budou vracet 
+	if (firstTimeProcess) {
+		firstTimeProcess = false;
+		PERL_SET_CONTEXT(my_perl);
+	}
+	// nejake helper metody, ktere budou vracet FIXME
 	int result = 0;
 	long ptrir = (long)inputResources;
 	long ptror = (long)outputResources;
@@ -361,6 +331,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 }
 
 char *PerlModule::getValueSync(const char *name) {
+	PERL_SET_CONTEXT(my_perl);
 	SV *sv;
 	int count;
 	char *result = NULL;
@@ -386,6 +357,7 @@ char *PerlModule::getValueSync(const char *name) {
 }
 
 bool PerlModule::setValueSync(const char *name, const char *value) {
+	PERL_SET_CONTEXT(my_perl);
 	int result = 0;
 	dSP;
 	ENTER;
@@ -405,6 +377,7 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
 }
 
 vector<string> *PerlModule::listNamesSync() {
+	PERL_SET_CONTEXT(my_perl);
 	vector<string> *result = new vector<string>();
 	dSP;
 	ENTER;
@@ -436,6 +409,7 @@ vector<string> *PerlModule::listNamesSync() {
 }
 
 void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
+	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -450,6 +424,7 @@ void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
 }
 
 void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
+	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;
         PUSHMARK(SP);
