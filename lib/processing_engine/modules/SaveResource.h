@@ -20,7 +20,7 @@ public:
 	SaveResource(ObjectRegistry *objects, const char *id, int threadIndex);
 	~SaveResource();
 	bool Init(vector<pair<string, string> > *params);
-	module_t getType();
+	Module::Type getType();
 	Resource *Process(Resource *resource);
 
 private:
@@ -42,8 +42,8 @@ private:
 	bool WriteToFile(const void *data, int size);
 };
 
-inline module_t SaveResource::getType() {
-	return MODULE_INPUT;
+inline Module::Type SaveResource::getType() {
+	return INPUT;
 }
 
 inline char *SaveResource::getValueSync(const char *name) {

@@ -11,8 +11,11 @@
 
 #include <EXTERN.h>
 #include <perl.h>
+#include <XSUB.h>
 #undef New	// protocol buffers
 #undef Pause	// Processor
+
+#include <tr1/unordered_set>
 
 #include "Module.h"
 
@@ -23,7 +26,7 @@ public:
 	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name);
 	~PerlModule();
 	bool Init(vector<pair<string, string> > *args);
-	module_t getType();
+	Module::Type getType();
 	Resource *Process(Resource *resource);
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
@@ -36,8 +39,11 @@ protected:
 	void RestoreCheckpointSync(const char *path, const char *id);
 
 	char *name;
+	bool firstTimeProcess;		// used to switch to correct Perl interpreter
 	PerlInterpreter *my_perl;
 	SV *ref;
+
+	std::tr1::unordered_set<string> initialized;
 
 	static log4cxx::LoggerPtr logger;
 };

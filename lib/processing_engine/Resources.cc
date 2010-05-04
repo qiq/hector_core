@@ -45,7 +45,7 @@ int Resources::Name2Id(const char *name) {
 
 	// get id and save it into name2id
 	Resource *r = (*create)();
-	int id = r->getType();
+	int id = r->getTypeId();
 	name2id[name] = id;
 	delete r;
 

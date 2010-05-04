@@ -1,12 +1,12 @@
 %{
-#include "Resource.h"
+#include "ProtobufResource.h"
 %}
 
-class Resource {
+class ProtobufResource {
 public:
-        Resource();
-        virtual ~Resource();
-        virtual Resource *Clone() = 0;
+        ProtobufResource();
+        virtual ~ProtobufResource();
+        virtual ProtobufResource *Clone() = 0;
         virtual int getTypeId() = 0;
         virtual const char *getTypeStr() = 0;
         virtual int getId() = 0;

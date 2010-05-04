@@ -20,7 +20,7 @@ public:
 	TestMulti(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestMulti();
 	bool Init(vector<pair<string, string> > *params);
-	module_t getType();
+	Module::Type getType();
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
 private:
@@ -39,8 +39,8 @@ private:
 	vector<string> *listNamesSync();
 };
 
-inline module_t TestMulti::getType() {
-	return MODULE_MULTI;
+inline Module::Type TestMulti::getType() {
+	return MULTI;
 }
 
 inline char *TestMulti::getValueSync(const char *name) {

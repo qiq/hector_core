@@ -15,7 +15,7 @@ public:
 	TestOutput(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestOutput();
 	bool Init(vector<pair<string, string> > *params);
-	module_t getType();
+	Module::Type getType();
 	Resource *Process(Resource *resource);
 
 private:
@@ -30,8 +30,8 @@ private:
 	vector<string> *listNamesSync();
 };
 
-inline module_t TestOutput::getType() {
-	return MODULE_OUTPUT;
+inline Module::Type TestOutput::getType() {
+	return OUTPUT;
 }
 
 inline char *TestOutput::getValueSync(const char *name) {

@@ -20,7 +20,9 @@ public:
 	// create copy of a resource
 	Resource *Clone();
 	// type id of a resource (to be used by Resources::CreateResource(typeid))
-	int getType();
+	int getTypeId();
+	// type string of a resource
+	const char *getTypeStr();
 	// id should be unique across all resources
 	int getId();
 	void setId(int id);
@@ -44,8 +46,12 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-inline int TestResource::getType() {
+inline int TestResource::getTypeId() {
 	return 1;
+}
+
+inline const char *TestResource::getTypeStr() {
+	return "TestResource";
 }
 
 inline int TestResource::getId() {

@@ -33,5 +33,4 @@ TestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
 TestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version @PROTOBUF_LIBS@
 TestProtobufResource_la_LIBADD = libTestProtobufResource.la
 
-EXTRA_DIST += TestProtobufResource.i
-
+EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto TestProtobufResource.pb.h TestProtobufResource.pb.cc

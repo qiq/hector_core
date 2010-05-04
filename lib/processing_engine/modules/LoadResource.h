@@ -20,7 +20,7 @@ public:
 	LoadResource(ObjectRegistry *objects, const char *id, int threadIndex);
 	~LoadResource();
 	bool Init(vector<pair<string, string> > *params);
-	module_t getType();
+	Module::Type getType();
 	Resource *Process(Resource *resource);
 
 private:
@@ -45,8 +45,8 @@ private:
 	bool ReadFromFile(void *data, int size);
 };
 
-inline module_t LoadResource::getType() {
-	return MODULE_INPUT;
+inline Module::Type LoadResource::getType() {
+	return INPUT;
 }
 
 inline char *LoadResource::getValueSync(const char *name) {

@@ -43,6 +43,7 @@ protected:
 	bool running;
 
 	vector<Module*> *modules; 		// all modules; every thread has a module instance
+	vector<Module::Type> moduleType;	// type of processor modules (mainly due to expensive Perl calls)
 	SyncQueue<Resource> *inputQueue;	// input queue
 	vector<OutputFilter*> outputFilters;	// filters of output resources
 

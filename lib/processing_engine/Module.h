@@ -14,20 +14,20 @@
 #include "Object.h"
 #include "Resource.h"
 
-typedef enum {
-	MODULE_INVALID = 0,
-	MODULE_INPUT =  1,
-	MODULE_OUTPUT = 2,
-	MODULE_SIMPLE = 3,
-	MODULE_MULTI =  4,
-} module_t;
-
 class Module : public Object {
 public:
+	enum Type {
+		INVALID = 0,
+		INPUT =  1,
+		OUTPUT = 2,
+		SIMPLE = 3,
+		MULTI =  4,
+	};
+
 	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id, threadIndex), threadIndex(threadIndex) {};
 	virtual ~Module() {};
 	virtual bool Init(vector<pair<string, string> > *args);
-	virtual module_t getType();
+	virtual Module::Type getType();
 	int getThreadIndex();
 	// Simple/Input/Output modules does only use this interface (one resource a time)
 	virtual Resource *Process(Resource *resource);

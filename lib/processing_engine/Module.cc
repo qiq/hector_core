@@ -11,9 +11,9 @@ bool Module::Init(vector<pair<string, string> > *args) {
 	return false;
 }
 
-module_t Module::getType() {
+Module::Type Module::getType() {
 	LOG_ERROR(logger, "Unimplemented module " << getId() << " (getType)");
-	return MODULE_INVALID;
+	return Module::INVALID;
 }
 
 Resource *Module::Process(Resource *resource) {

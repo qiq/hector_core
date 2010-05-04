@@ -88,7 +88,7 @@ Resource *SaveResource::Process(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
 	uint32_t size;
-	uint8_t typeId = pr->getType();
+	uint8_t typeId = pr->getTypeId();
 	if (pr) {
 		if (!WriteToFile(&size, sizeof(size)))
 			return NULL;

@@ -15,7 +15,7 @@ libhector_processing_engine_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
-	Resource.h ProtobufResource.h \
+	Resource.h ProtobufResource.h ProtobufResource.cc \
 	Resources.h Resources.cc \
 	PerlModule.h
 
@@ -34,6 +34,6 @@ endif
 
 
 # SWIG interface
-EXTRA_DIST = Resource.i Resources.i
+EXTRA_DIST = Resource.i ProtobufResource.i Resources.i Module.i
 
 CLEANFILES = $(BUILT_SOURCES)
