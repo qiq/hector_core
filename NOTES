@@ -68,6 +68,7 @@ TODO
 
 - v perl PerlModule lepsi reseni chyb (napr. listNames nevrati odkaz na pole -> aby to nespadlo)
 - pro perl moduly zpristupnit log4cxx
+- otestovat Perl moduly na memory leaks (mockrat volat metody)
 - pro perl moduly zpristupnit ObjectRegistry a moznost zjistovat/nastavovat values
 
 - nejaky generator webresources (do robota) + otestovat load a save

@@ -4,8 +4,8 @@
 
 class TestProtobufResource : public ProtobufResource {
 public:
-        TestResource();
-        ~TestResource();
+        TestProtobufResource();
+        ~TestProtobufResource();
         Resource *Clone();
         int getTypeId();
         const char *getTypeStr();

@@ -8,6 +8,7 @@
 
 %include Connection.i
 %include StdioConnection.i
+%include Object.i
 %include processing_engine/Module.i
 %include processing_engine/Resource.i
 %include processing_engine/ProtobufResource.i

@@ -18,14 +18,6 @@
 
 <!-- Main -->
 
-<!ELEMENT Binary	(path|arg|env)* >
-<!ATTLIST Binary
-	id		ID		#REQUIRED >
-<!ELEMENT path		(#PCDATA) >
-<!ELEMENT arg		(#PCDATA) >
-<!ELEMENT env		(#PCDATA) >
-
-
 <!ELEMENT Server	(threads|serverHost|serverPort|ProcessingEngine|param|logConfig)* >
 <!ATTLIST Server
 	id		ID		#REQUIRED

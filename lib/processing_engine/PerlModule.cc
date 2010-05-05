@@ -1,5 +1,5 @@
 /**
- * External simple
+ * N.B.: Only one thread can use Perl interpreter at the time, so we had to lock it for write.
  */
 
 #include <assert.h>
@@ -138,25 +138,32 @@ PerlModule::~PerlModule() {
 
 bool PerlModule::Init(vector<pair<string, string> > *c) {
 	// run Perl
-	/*vector<string> env;
-	for (vector<pair<string, string> >::iterator iter = c->begin(); iter != c->end(); ++iter) {
-		if (iter->first == "env") {
-			env.push_back(iter->second);
-		}
-	}
-	const char **envv = new const char*[env.size()+1];
-	for (int i = 0; i < (int)env.size(); i++) {
-		envv[i] = env[i].c_str();
-	}
-	envv[env.size()] = NULL;*/
-
 	const char *embedding[] = { "", "-e", "0" };
 	perl_parse(my_perl, xs_init, 3, (char **)embedding, /*(char **)envv*/ NULL);
-	//delete[] envv;
 	firstTimeProcess = true;
 	perl_run(my_perl);
+
+	// init SWIG extension (_new_Any)
+	newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
+
+	// create Hector::Object::new2()
+	eval_pv("package Hector::Object; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
+		return false;
+	}
+
+	// call Hector::Object->new2()
 	char s[1024];
-	snprintf(s, sizeof(s), "use %s; $_module = %s->new('%s', %d);", name, name, getId(), threadIndex);
+	snprintf(s, sizeof(s), "use Hector; $_object = Hector::Object->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<Object*>(this));
+	eval_pv(s , FALSE);
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
+		return false;
+	}
+
+	// create Perl module
+	snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
@@ -167,9 +174,6 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		LOG_ERROR(logger, "Error initialize module " << name);
 		return false;
 	}
-
-	// Init swig extension (_new_Any)
-	newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
 
 	// call Init()
 	AV *table = newAV();
@@ -205,9 +209,9 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 }
 
 Module::Type PerlModule::getType() {
+	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
 	int result = 0;
-	ObjectLockRead();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -225,6 +229,7 @@ Module::Type PerlModule::getType() {
 }
 
 Resource *PerlModule::Process(Resource *resource) {
+	ObjectLockWrite();
 	if (firstTimeProcess) {
 		// first call in a new thread
 		firstTimeProcess = false;
@@ -238,10 +243,11 @@ Resource *PerlModule::Process(Resource *resource) {
 		// initialize resource type
 		if (initialized.find(type) == initialized.end()) {
 			char s[1024];
-			snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any(\"Hector::%s\", shift); bless $self, $pkg if defined($self); }", type, type);
+			snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", type);
 			eval_pv(s, FALSE);
 			if (SvTRUE(ERRSV)) {
 				LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
+				ObjectUnlock();
 				return NULL;
 			}
 		}
@@ -252,18 +258,20 @@ Resource *PerlModule::Process(Resource *resource) {
 			dSP;
 			ENTER;
 		        PUSHMARK(SP);
-		        XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
+			XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
 		        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
 		        PUTBACK;
 			int count = call_method("new2", G_SCALAR);
 			SPAGAIN;
 			if (count != 1) {
 				LOG_ERROR(logger, "Error calling new2 for " << type);
-				return false;
+				ObjectUnlock();
+				return NULL;
 			}
 			if (SvTRUE(ERRSV)) {
 				LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
-				return false;
+				ObjectUnlock();
+				return NULL;
 			}
 			resourceSV = SvREFCNT_inc(POPs);
 			PUTBACK;
@@ -275,7 +283,6 @@ Resource *PerlModule::Process(Resource *resource) {
 	}
 
 	// call Process method: $module->Process($resource)
-	ObjectLockWrite();
 	{
 		dSP;
 		ENTER;
@@ -291,7 +298,6 @@ Resource *PerlModule::Process(Resource *resource) {
 		FREETMPS;
 		LEAVE;
 	}
-	ObjectUnlock();
 
 	// get Resource C++ pointer & DISOWN
 	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
@@ -299,10 +305,12 @@ Resource *PerlModule::Process(Resource *resource) {
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
 
+	ObjectUnlock();
 	return result;
 }
 
 int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+	ObjectLockWrite();
 	if (firstTimeProcess) {
 		firstTimeProcess = false;
 		PERL_SET_CONTEXT(my_perl);
@@ -311,7 +319,6 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	int result = 0;
 	long ptrir = (long)inputResources;
 	long ptror = (long)outputResources;
-	ObjectLockWrite();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -331,6 +338,8 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 }
 
 char *PerlModule::getValueSync(const char *name) {
+	ObjectUnlock();
+	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
 	SV *sv;
 	int count;
@@ -377,6 +386,8 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
 }
 
 vector<string> *PerlModule::listNamesSync() {
+	ObjectUnlock();
+	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
 	vector<string> *result = new vector<string>();
 	dSP;

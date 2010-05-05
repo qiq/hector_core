@@ -36,6 +36,12 @@ public:
 	void SaveCheckpoint(const char *path, const char *id);
 	void RestoreCheckpoint(const char *path, const char *id);
 
+	void log_trace(const char *s);
+	void log_debug(const char *s);
+	void log_info(const char *s);
+	void log_error(const char *s);
+	void log_fatal(const char *s);
+
 protected:
 	ObjectRegistry *objects;
 	char *id;
@@ -47,6 +53,8 @@ protected:
 
 	virtual void SaveCheckpointSync(const char *path, const char *id);
 	virtual void RestoreCheckpointSync(const char *path, const char *id);
+
+	static log4cxx::LoggerPtr logger;
 };
 
 inline Object::Object(ObjectRegistry *objects, const char *id) {
@@ -121,6 +129,26 @@ inline void Object::RestoreCheckpoint(const char *path, const char *id) {
 	ObjectLockWrite();
 	RestoreCheckpointSync(path, id);
 	ObjectUnlock();
+}
+
+inline void Object::log_trace(const char *s) {
+	LOG_TRACE(logger, s);
+}
+
+inline void Object::log_debug(const char *s) {
+	LOG_DEBUG(logger, s);
+}
+
+inline void Object::log_info(const char *s) {
+	LOG_INFO(logger, s);
+}
+
+inline void Object::log_error(const char *s) {
+	LOG_ERROR(logger, s);
+}
+
+inline void Object::log_fatal(const char *s) {
+	LOG_FATAL(logger, s);
 }
 
 #endif

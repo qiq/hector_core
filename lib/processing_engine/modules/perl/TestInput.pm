@@ -5,9 +5,10 @@ use strict;
 use Hector;
 
 sub new {
-	my ($proto, $id, $threadIndex) = @_;
+	my ($proto, $object, $id, $threadIndex) = @_;
 	my $class = ref($proto) || $proto;
 	my $self = {
+		'_object' => $object,
 		'_id' => $id,
 		'_threadIndex' => $threadIndex,
 		'items' => 0,
@@ -42,7 +43,7 @@ sub getValueSync {
 	if (exists $self->{$name}) {
 		return $self->{$name};
 	} else {
-		print STDERR "Invalid value name: $name\n";
+		$self->{'_object'}->log_error("Invalid value name: $name");
 		return undef;
 	}
 }
@@ -52,7 +53,7 @@ sub setValueSync {
 	if (exists $self->{$name}) {
 		$self->{$name} = $value;
 	} else {
-		print STDERR "Invalid value name: $name\n";
+		$self->{'_object'}->log_error("Invalid value name: $name");
 		return 0;
 	}
 	return 1;
@@ -65,26 +66,26 @@ sub listNamesSync {
 
 sub SaveCheckpoint {
 	my ($self, $path, $id) = @_;
-	print STDERR "SaveCheckpoint($path, $id)\n";
+	$self->{'_object'}->log_info("SaveCheckpoint($path, $id)");
 }
 
 sub RestoreCheckpoint {
 	my ($self, $path, $id) = @_;
-	print STDERR "RestoreCheckpoint($path, $id)\n";
+	$self->{'_object'}->log_info("RestoreCheckpoint($path, $id)");
 }
 
 sub Process() {
 	my ($self, $resource) = @_;
 
 	if (defined $resource) {
-		print STDERR "TestInput: resource is already defined.\n";
+		$self->{'_object'}->log_error("TestInput: resource is already defined.");
 		return undef;
 	}
 	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
 	$resource = Hector::TestResource->new();
 	$resource->setId($self->{'_threadIndex'}*10000+$self->{'items'});
 	$resource->setStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}++));
-	print STDERR "Loading resource (".$resource->getStr().")\n";
+	$self->{'_object'}->log_info("Loading resource (".$resource->getStr().")");
 
 	return $resource;
 }
@@ -92,7 +93,7 @@ sub Process() {
 sub ProcessMulti() {
 	my ($self, $inputResources, $outputResources) = @_;
 
-	print STDERR "ProcessMulti() is not implemented\n";
+	$self->{'_object'}->log_error("ProcessMulti() is not implemented");
 
 	return 1;
 }
