@@ -39,7 +39,6 @@ protected:
 	void RestoreCheckpointSync(const char *path, const char *id);
 
 	char *name;
-	bool firstTimeProcess;		// used to switch to correct Perl interpreter
 	PerlInterpreter *my_perl;
 	SV *ref;
 

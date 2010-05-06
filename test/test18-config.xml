@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test8: loop, every resource is processed twice: one reader(1), one simple intermediate(1), one writer
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<ProcessingEngine id="robot_processing_engine">
+			<Processor id="P_load_resource">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load_resource" type="perl" lib="TestInput.pm">
+						<param name="maxItems" value="1000"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_simple"/>
+				</output>
+			</Processor>
+			<Processor id="P_simple">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_simple" type="perl" lib="TestSimple.pm">
+						<param name="flipStatus" value="1"/>
+					</Module>
+				</modules>
+				<input>
+					<queue priority="100" maxItems="10"/>
+					<queue/>
+				</input>
+				<output>
+					<nextProcessor ref="P_simple" filter="1" priority="100"/>
+					<nextProcessor ref="P_save_resource"/>
+				</output>
+			</Processor>
+			<Processor id="P_save_resource">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save_resource" type="perl" lib="TestOutput.pm"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

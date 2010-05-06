@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test2: multithreaded read-write: one reader(5), one writer(5)
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<ProcessingEngine id="robot_processing_engine">
+			<Processor id="P_load_resource">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_load_resource" type="perl" lib="TestInput.pm">
+						<param name="maxItems" value="1000"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_save_resource"/>
+				</output>
+			</Processor>
+			<Processor id="P_save_resource">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_save_resource" type="perl" lib="TestOutput.pm"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

@@ -43,3 +43,35 @@ CLEANFILES += test9.log.test
 TESTS += test11.sh
 EXTRA_DIST += test11.sh test11-config.xml test11.log.correct
 CLEANFILES += test11.log.test
+
+TESTS += test12.sh
+EXTRA_DIST += test12.sh test12-config.xml test12.log.correct
+CLEANFILES += test12.log.test
+
+TESTS += test13.sh
+EXTRA_DIST += test13.sh test13-config.xml test13.log.correct
+CLEANFILES += test13.log.test
+
+TESTS += test14.sh
+EXTRA_DIST += test14.sh test14-config.xml test14.log.correct
+CLEANFILES += test14.log.test
+
+TESTS += test15.sh
+EXTRA_DIST += test15.sh test15-config.xml test15.log.correct
+CLEANFILES += test15.log.test
+
+TESTS += test16.sh
+EXTRA_DIST += test16.sh test16-config.xml test16.log.correct
+CLEANFILES += test16.log.test
+
+TESTS += test17.sh
+EXTRA_DIST += test17.sh test17-config.xml test17.log.correct
+CLEANFILES += test17.log.test
+
+TESTS += test18.sh
+EXTRA_DIST += test18.sh test18-config.xml test18.log.correct
+CLEANFILES += test18.log.test
+
+#TESTS += test19.sh
+#EXTRA_DIST += test19.sh test19-config.xml test19.log.correct
+#CLEANFILES += test19.log.test

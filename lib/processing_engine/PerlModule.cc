@@ -139,8 +139,8 @@ PerlModule::~PerlModule() {
 bool PerlModule::Init(vector<pair<string, string> > *c) {
 	// run Perl
 	const char *embedding[] = { "", "-e", "0" };
-	perl_parse(my_perl, xs_init, 3, (char **)embedding, /*(char **)envv*/ NULL);
-	firstTimeProcess = true;
+	perl_parse(my_perl, xs_init, 3, (char **)embedding, NULL);
+	PERL_SET_CONTEXT(my_perl);
 	perl_run(my_perl);
 
 	// init SWIG extension (_new_Any)
@@ -230,11 +230,7 @@ Module::Type PerlModule::getType() {
 
 Resource *PerlModule::Process(Resource *resource) {
 	ObjectLockWrite();
-	if (firstTimeProcess) {
-		// first call in a new thread
-		firstTimeProcess = false;
-		PERL_SET_CONTEXT(my_perl);
-	}
+	PERL_SET_CONTEXT(my_perl);
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
@@ -311,10 +307,7 @@ Resource *PerlModule::Process(Resource *resource) {
 
 int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
 	ObjectLockWrite();
-	if (firstTimeProcess) {
-		firstTimeProcess = false;
-		PERL_SET_CONTEXT(my_perl);
-	}
+	PERL_SET_CONTEXT(my_perl);
 	// nejake helper metody, ktere budou vracet FIXME
 	int result = 0;
 	long ptrir = (long)inputResources;
