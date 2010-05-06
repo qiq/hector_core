@@ -118,6 +118,48 @@ void *convert_ptr(SV *sv, bool disown) {
 	return NULL;
 }
 
+SV *PerlModule::CreatePerlResource(Resource *resource) {
+	SV *result;
+	const char *type = resource->getTypeStr();
+	// initialize resource type
+	if (initialized.find(type) == initialized.end()) {
+		char s[1024];
+		snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", type);
+		eval_pv(s, FALSE);
+		if (SvTRUE(ERRSV)) {
+			LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
+			return NULL;
+		}
+		initialized.insert(type);
+	}
+
+	// create new instance of a resource (of given type): Hector::XXXResource->new2(0xabc)
+	char s[1024];
+	snprintf(s, sizeof(s), "Hector::%s", type);
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
+        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
+        PUTBACK;
+	int count = call_method("new2", G_SCALAR);
+	SPAGAIN;
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling new2 for " << type);
+		return NULL;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		return NULL;
+	}
+	result = SvREFCNT_inc(POPs);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	return result;
+}
+
 PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {
 	this->name = strdup(name);
 	// remove .pm at the end of module name
@@ -234,66 +276,29 @@ Resource *PerlModule::Process(Resource *resource) {
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
-		const char *type = resource->getTypeStr();
-
-		// initialize resource type
-		if (initialized.find(type) == initialized.end()) {
-			char s[1024];
-			snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", type);
-			eval_pv(s, FALSE);
-			if (SvTRUE(ERRSV)) {
-				LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
-				ObjectUnlock();
-				return NULL;
-			}
-		}
-		// create new instance of a resource (of given type): Hector::XXXResource->new2(0xabc)
-		{
-			char s[1024];
-			snprintf(s, sizeof(s), "Hector::%s", type);
-			dSP;
-			ENTER;
-		        PUSHMARK(SP);
-			XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
-		        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
-		        PUTBACK;
-			int count = call_method("new2", G_SCALAR);
-			SPAGAIN;
-			if (count != 1) {
-				LOG_ERROR(logger, "Error calling new2 for " << type);
-				ObjectUnlock();
-				return NULL;
-			}
-			if (SvTRUE(ERRSV)) {
-				LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
-				ObjectUnlock();
-				return NULL;
-			}
-			resourceSV = SvREFCNT_inc(POPs);
-			PUTBACK;
-			FREETMPS;
-			LEAVE;
+		// create new instance of a resource (of given type)
+		if (!(resourceSV = CreatePerlResource(resource))) {
+			ObjectUnlock();
+			return NULL;
 		}
 	} else {
 		resourceSV = &PL_sv_undef;
 	}
 
 	// call Process method: $module->Process($resource)
-	{
-		dSP;
-		ENTER;
-	        PUSHMARK(SP);
-	        XPUSHs(ref);
-	        XPUSHs(sv_2mortal(resourceSV));
-	        PUTBACK;
-		int count = call_method("Process", G_SCALAR);
-		SPAGAIN;
-		if (count == 1)
-			resourceSV = SvREFCNT_inc(POPs);
-		PUTBACK;
-		FREETMPS;
-		LEAVE;
-	}
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        XPUSHs(sv_2mortal(resourceSV));
+        PUTBACK;
+	int count = call_method("Process", G_SCALAR);
+	SPAGAIN;
+	if (count == 1)
+		resourceSV = SvREFCNT_inc(POPs);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
 
 	// get Resource C++ pointer & DISOWN
 	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
@@ -308,16 +313,41 @@ Resource *PerlModule::Process(Resource *resource) {
 int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
 	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
-	// nejake helper metody, ktere budou vracet FIXME
 	int result = 0;
-	long ptrir = (long)inputResources;
-	long ptror = (long)outputResources;
+	SV *inputResourcesSV;
+	SV *outputResourcesSV;
+
+	// convert inputResources and outputResources into Perl objects
+	if (inputResources) {
+		AV *a = newAV();
+		while (inputResources->size() > 0) {
+			SV *resourceSV = CreatePerlResource(inputResources->front());
+			if (!resourceSV) {
+				ObjectUnlock();
+				return 0;
+			}
+			av_push(a, newSVsv(resourceSV));
+			inputResources->pop();
+		}
+		inputResourcesSV = newRV_noinc((SV*)a);
+	} else {
+		inputResourcesSV = &PL_sv_undef;
+	}
+
+	if (outputResources) {
+		AV *a = newAV();
+		outputResourcesSV = newRV_noinc((SV*)a);
+	} else {
+		outputResourcesSV = &PL_sv_undef;
+	}
+
+	// call Process method: $module->Process($resource)
 	dSP;
 	ENTER;
         PUSHMARK(SP);
         XPUSHs(ref);
-        XPUSHs(sv_2mortal(newSViv(ptrir)));
-        XPUSHs(sv_2mortal(newSViv(ptror)));
+        XPUSHs(inputResourcesSV);
+        XPUSHs(outputResourcesSV);
         PUTBACK;
 	int count = call_method("ProcessMulti", G_SCALAR);
 	SPAGAIN;
@@ -326,6 +356,21 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+
+	// create back inputResource and outputResource from Perl objects & DISOWN them
+	// inputResources queue was cleaned before, outputResource was not
+	SV *sv;
+	while ((sv = av_shift((AV*)SvRV(inputResourcesSV))) != &PL_sv_undef) {
+		inputResources->push(reinterpret_cast<Resource*>(convert_ptr(sv, true)));
+	}
+	while ((sv = av_shift((AV*)SvRV(outputResourcesSV))) != &PL_sv_undef) {
+		outputResources->push(reinterpret_cast<Resource*>(convert_ptr(sv, true)));
+	}
+
+	// delete Perl resource object
+	SvREFCNT_dec(inputResourcesSV);
+	SvREFCNT_dec(outputResourcesSV);
+
 	ObjectUnlock();
 	return result;
 }

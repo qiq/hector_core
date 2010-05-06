@@ -72,6 +72,6 @@ TESTS += test18.sh
 EXTRA_DIST += test18.sh test18-config.xml test18.log.correct
 CLEANFILES += test18.log.test
 
-#TESTS += test19.sh
-#EXTRA_DIST += test19.sh test19-config.xml test19.log.correct
-#CLEANFILES += test19.log.test
+TESTS += test19.sh
+EXTRA_DIST += test19.sh test19-config.xml test19.log.correct
+CLEANFILES += test19.log.test

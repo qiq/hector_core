@@ -405,7 +405,7 @@ void Processor::runThread(int id) {
 		while (isRunning()) {
 			n = module->ProcessMulti(inputResources, outputResources);
 			// n >= 0: at least one resource is being processed, do not block
-			// n < 0: no resources are processed, wait for input resources
+			// n < 0: no resources are being processed, wait for input resources
 			// m = number of output resources appended to output queue (may be less than outputResources->size())
 
 			// n >= 0: get upto min(n, m) input resources, but do not wait for them

@@ -71,7 +71,6 @@ TODO
 - pro perl moduly zpristupnit ObjectRegistry a moznost zjistovat/nastavovat values
 
 - nejaky generator webresources (do robota) + otestovat load a save
-- napsat nejake testy pro perl... a taky vlastne nejaky Perl modul
 - client: zrychlit nabihani, implementovat reconnect
 
 - Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl

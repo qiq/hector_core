@@ -89,7 +89,7 @@ sub ProcessMulti() {
 
 	$self->{'_object'}->log_error("ProcessMulti() is not implemented");
 
-	return 1;
+	return 0;
 }
 
 1;

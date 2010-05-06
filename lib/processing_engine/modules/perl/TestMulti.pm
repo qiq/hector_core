@@ -1,4 +1,4 @@
-package TestInput;
+package TestMulti;
 
 use warnings;
 use strict;
@@ -11,9 +11,9 @@ sub new {
 		'_object' => $object,
 		'_id' => $id,
 		'_threadIndex' => $threadIndex,
+		'_resources' => [],
 		'items' => 0,
-		'maxItems' => 0,
-		'idPrefix' => undef,
+		'foo' => 0,
 	};
 	bless($self, $class);
 	return $self;
@@ -28,6 +28,8 @@ sub Init {
 	foreach my $p (@{$params}) {
 		if (exists $self->{$p->[0]}) {
 			$self->{$p->[0]} = $p->[1];
+		} elsif ($p->[0] eq 'alias') {
+			$self->{'foo'} = $p->[1];
 		}
 	}
 	return 1;
@@ -35,13 +37,15 @@ sub Init {
 
 sub getType {
 	my ($self) = @_;
-	return $Hector::Module::INPUT;
+	return $Hector::Module::MULTI;
 }
 
 sub getValueSync {
 	my ($self, $name) = @_;
 	if (exists $self->{$name}) {
 		return $self->{$name};
+	} elsif ($name eq 'alias') {
+		return $self->{'foo'};
 	} else {
 		$self->{'_object'}->log_error("Invalid value name: $name");
 		return undef;
@@ -52,6 +56,8 @@ sub setValueSync {
 	my ($self, $name, $value) = @_;
 	if (exists $self->{$name}) {
 		$self->{$name} = $value;
+	} elsif ($name eq 'alias') {
+		$self->{'foo'} = $value;
 	} else {
 		$self->{'_object'}->log_error("Invalid value name: $name");
 		return 0;
@@ -61,7 +67,7 @@ sub setValueSync {
 
 sub listNamesSync {
 	my ($self) = @_;
-	return [ grep { $_ !~ /^_/ } keys %{$self} ];
+	return [ grep { $_ !~ /^_/ } keys %{$self}, 'alias' ];
 }
 
 sub SaveCheckpoint {
@@ -77,25 +83,30 @@ sub RestoreCheckpoint {
 sub Process() {
 	my ($self, $resource) = @_;
 
-	if (defined $resource) {
-		$self->{'_object'}->log_error("TestInput: resource is already defined.");
-		return undef;
-	}
-	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
-	$resource = Hector::TestResource->new();
-	$resource->setId($self->{'_threadIndex'}*10000+$self->{'items'});
-	$resource->setStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}++));
-	$self->{'_object'}->log_info("Loading resource (".$resource->getStr().")");
-
-	return $resource;
+	$self->{'_object'}->log_error("Process() is not implemented");
 }
 
+my $MAX_RESOURCES = 100;
 sub ProcessMulti() {
 	my ($self, $inputResources, $outputResources) = @_;
 
-	$self->{'_object'}->log_error("ProcessMulti() is not implemented");
+	return 0 if (not defined $inputResources or not defined $outputResources);
 
-	return 0;
+	while (@{$inputResources} > 0 and @{$self->{'_resources'}} <= $MAX_RESOURCES) {
+		my $resource = shift(@{$inputResources});
+		push(@{$self->{'_resources'}}, $resource) if ($resource->getTypeStr() eq 'TestResource');
+	}
+
+	return -1 if (@{$self->{'_resources'}} == 0);
+
+	select(undef, undef, undef, 0.0001);
+
+	my $resource = shift(@{$self->{'_resources'}});
+	push(@{$outputResources}, $resource);
+	$self->{'_object'}->log_info("Processed TestResource (".$resource->getStr().")");
+	$self->{'items'}++;
+	
+	return $MAX_RESOURCES-@{$self->{'_resources'}};
 }
 
 1;

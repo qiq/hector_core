@@ -37,6 +37,8 @@ protected:
 
 	void SaveCheckpointSync(const char *path, const char *id);
 	void RestoreCheckpointSync(const char *path, const char *id);
+	
+	SV *CreatePerlResource(Resource *resource);
 
 	char *name;
 	PerlInterpreter *my_perl;
