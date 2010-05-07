@@ -19,9 +19,6 @@ class Object;
 using namespace std;
 
 class ObjectRegistry {
-	std::tr1::unordered_map<string, Object*> objects;
-
-	static log4cxx::LoggerPtr logger;
 public:
 	ObjectRegistry() {};
 	~ObjectRegistry() {};
@@ -33,6 +30,11 @@ public:
 
 	char *getObjectValue(const char *id, const char *name);
 	bool setObjectValue(const char *id, const char *name, const char *value);
+
+private:
+	std::tr1::unordered_map<string, Object*> objects;
+
+	static log4cxx::LoggerPtr logger;
 };
 
 #endif

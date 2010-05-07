@@ -23,4 +23,4 @@ libhector_la_LIBADD = server/libhector_server.la processing_engine/libhector_pro
 libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS) -lltdl
 
 # SWIG interface
-EXTRA_DIST = Connection.i StdioConnection.i Hector.i Object.i
+EXTRA_DIST = Connection.i StdioConnection.i Hector.i Object.i ObjectRegistry.i

@@ -26,6 +26,7 @@ public:
 	Object(ObjectRegistry *objects, const char *id);
 	Object(ObjectRegistry *objects, const char *id, int index);
 	~Object();
+	ObjectRegistry *getObjectRegistry();
 	void ObjectLockRead();
 	void ObjectLockWrite();
 	void ObjectUnlock();
@@ -78,9 +79,12 @@ inline Object::~Object() {
 		objects->unregisterObject(id);
 	free(id);
 }
+inline ObjectRegistry *Object::getObjectRegistry() {
+	return objects;
+}
 
 inline const char *Object::getId() {
-	return this->id;
+	return id;
 }
 
 inline void Object::ObjectLockRead() {
