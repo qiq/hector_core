@@ -10,9 +10,9 @@
 %include StdioConnection.i
 %include Object.i
 %include ObjectRegistry.i
-%include processing_engine/Module.i
-%include processing_engine/Resource.i
-%include processing_engine/ProtobufResource.i
-%include processing_engine/Resources.i
-%include processing_engine/resources/TestResource.i
-%include processing_engine/resources/TestProtobufResource.i
+%include Module.i
+%include Resource.i
+%include ProtobufResource.i
+%include Resources.i
+%include TestResource.i
+%include TestProtobufResource.i

@@ -67,8 +67,6 @@ podobne pro python a javu
 TODO
 
 - otestovat Perl moduly na memory leaks (mockrat volat metody)
-- pro perl moduly zpristupnit ObjectRegistry a moznost zjistovat/nastavovat values
-	- pridat metodu do Object?
 
 - nejaky generator webresources (do robota) + otestovat load a save
 - client: zrychlit nabihani, implementovat reconnect

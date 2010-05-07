@@ -11,7 +11,7 @@ java_LTLIBRARIES = Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc
 Hector_wrap.cc: $(top_srcdir)/lib/Hector.i
-	$(SWIG) -c++ -java -o $@ $<
+	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -c++ -java -o $@ $<
 
 Hector_la_SOURCES = \
 	Hector_wrap.cc

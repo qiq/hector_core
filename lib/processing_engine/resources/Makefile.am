@@ -9,7 +9,8 @@ resourcesdir = $(libdir)/hector/resources
 resources_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = TestResource.h TestProtobufResource.h
+hectorinclude_HEADERS = TestResource.h TestProtobufResource.h \
+	TestResource.i TestProtobufResource.i
 
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
 libTestResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
