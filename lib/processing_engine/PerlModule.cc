@@ -226,7 +226,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		av_push(table, newRV_noinc((SV*)row ));
 	}
 	SV *sv = newRV_noinc((SV*)table);
-	int result;
+	bool result = false;
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -236,24 +236,29 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	int count = call_method("Init", G_SCALAR);
 	SPAGAIN;
 	if (count != 1) {
-		LOG_ERROR(logger, "Error calling Init, module " << name);
+		LOG_ERROR(logger, "Error calling Init (no result)");
 		return false;
 	}
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(logger, "Error calling Init (" << SvPV_nolen(ERRSV) << ")");
 		return false;
 	}
-	result = POPi;
+	SV *resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(logger, "Error calling Init (invalid result)");
+		return false;
+	}
+	result = (SvIV(resultSV) != 0);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
-	return result == 1;
+	return result;
 }
 
 Module::Type PerlModule::getType() {
 	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
-	int result = 0;
+	Module::Type result = Module::INVALID;
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -261,13 +266,28 @@ Module::Type PerlModule::getType() {
         PUTBACK;
 	int count = call_method("getType", G_SCALAR);
 	SPAGAIN;
-	if (count == 1)
-		result = POPi;
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling getType (no result)");
+		ObjectUnlock();
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling getType (" << SvPV_nolen(ERRSV) << ")");
+		ObjectUnlock();
+		return result;
+	}
+	SV *resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(logger, "Error calling getType (invalid result)");
+		ObjectUnlock();
+		return result;
+	}
+	result = (Module::Type)SvIV(resultSV);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
 	ObjectUnlock();
-	return (Module::Type)result;
+	return result;
 }
 
 Resource *PerlModule::Process(Resource *resource) {
@@ -294,8 +314,17 @@ Resource *PerlModule::Process(Resource *resource) {
         PUTBACK;
 	int count = call_method("Process", G_SCALAR);
 	SPAGAIN;
-	if (count == 1)
-		resourceSV = SvREFCNT_inc(POPs);
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling Process");
+		ObjectUnlock();
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling Process (" << SvPV_nolen(ERRSV) << ")");
+		ObjectUnlock();
+		return result;
+	}
+	resourceSV = SvREFCNT_inc(POPs);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -351,8 +380,23 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
         PUTBACK;
 	int count = call_method("ProcessMulti", G_SCALAR);
 	SPAGAIN;
-	if (count == 1)
-		result = POPi;
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling ProcesMulti (no result)");
+		ObjectUnlock();
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling ProcessMulti (" << SvPV_nolen(ERRSV) << ")");
+		ObjectUnlock();
+		return result;
+	}
+	SV *resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(logger, "Error calling ProcessMulti (invalid result)");
+		ObjectUnlock();
+		return result;
+	}
+	result = SvIV(resultSV);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -379,7 +423,6 @@ char *PerlModule::getValueSync(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
-	SV *sv;
 	int count;
 	char *result = NULL;
 	dSP;
@@ -390,11 +433,30 @@ char *PerlModule::getValueSync(const char *name) {
         PUTBACK;
 	count = call_method("getValueSync", G_SCALAR);
 	SPAGAIN;
-	if (count == 1) {
-		sv = POPs;
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling getValueSync (no result)");
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling getValueSync (" << SvPV_nolen(ERRSV) << ")");
+		return result;
+	}
+	SV *sv = POPs;
+	if (SvPOK(sv)) {
 		STRLEN len;
 		char *s = SvPV(sv, len);
 		result = strndup(s, len);
+	} else if (SvIOK(sv)) {
+		char s[1024];
+		snprintf(s, sizeof(s), "%d", (int)SvIV(sv));
+		result = strdup(s);
+	} else if (SvNOK(sv)) {
+		char s[1024];
+		snprintf(s, sizeof(s), "%lf", SvNV(sv));
+		result = strdup(s);
+	} else {
+		LOG_ERROR(logger, "Error calling getValueSync (invalid result type)");
+		return result;
 	}
 	PUTBACK;
 	FREETMPS;
@@ -405,7 +467,7 @@ char *PerlModule::getValueSync(const char *name) {
 
 bool PerlModule::setValueSync(const char *name, const char *value) {
 	PERL_SET_CONTEXT(my_perl);
-	int result = 0;
+	bool result = false;
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -415,19 +477,31 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
         PUTBACK;
 	int count = call_method("setValueSync", G_SCALAR);
 	SPAGAIN;
-	if (count == 1)
-		result = POPi;
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling setValueSync (no result)");
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling setValueSync (" << SvPV_nolen(ERRSV) << ")");
+		return result;
+	}
+	SV *resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(logger, "Error calling setValueSync (invalid result)");
+		return result;
+	}
+	result = (SvIV(resultSV) != 0);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
-	return result == 1;
+	return result;
 }
 
 vector<string> *PerlModule::listNamesSync() {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
-	vector<string> *result = new vector<string>();
+	vector<string> *result = NULL;
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -435,21 +509,30 @@ vector<string> *PerlModule::listNamesSync() {
         PUTBACK;
 	int count = call_method("listNamesSync", G_SCALAR);
 	SPAGAIN;
-	if (count == 1) {
-		SV *sv = POPs;
-		if (SvTYPE(SvRV(sv)) == SVt_PVAV) {
-			AV *av = (AV*)SvRV(sv);
-			int alen = av_len(av);
+	if (count != 1) {
+		LOG_ERROR(logger, "Error calling listNamesSync (no result)");
+		return result;
+	}
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR(logger, "Error calling listNamesSync (" << SvPV_nolen(ERRSV) << ")");
+		return result;
+	}
+	SV *sv = POPs;
+	if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
+		LOG_ERROR(logger, "Error calling listNamesSync (invalid result)");
+		return result;
+	}
+	result = new vector<string>();
+	AV *av = (AV*)SvRV(sv);
+	int alen = av_len(av);
 
-			for (int i = 0; i <= alen; i++) {
-				STRLEN len;
-				SV **val = av_fetch(av, i, 0);
-				char *s = SvPV(*val, len);
-				char *s2 = strndup(s, len);
-				result->push_back(s2);
-				free(s2);
-			}
-		}
+	for (int i = 0; i <= alen; i++) {
+		STRLEN len;
+		SV **val = av_fetch(av, i, 0);
+		char *s = SvPV(*val, len);
+		char *s2 = strndup(s, len);
+		result->push_back(s2);
+		free(s2);
 	}
 	PUTBACK;
 	FREETMPS;

@@ -44,7 +44,7 @@ function server_start {
         fi
 	if [ "$USE_VALGRIND" == 1 ]; then
 		( cd $base; libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes --log-file=${id}.log.valgrind server -c $base/test/$id-config.xml -f test & )
-		sleep 15;
+		client_wait robot_processing_engine.run 0 1
 	else
 		if ! server -c $base/test/$id-config.xml test; then
 			cat test.log 2>/dev/null
@@ -68,11 +68,23 @@ function client_get {
 	echo "get $1" | ( client || doexit ) | sed -e 's/.*= //'
 }
 
+function client_get_dontfail {
+	echo "get $1" | client 2>/dev/null | sed -e 's/.*= //'
+}
+
 function client_wait {
-	x=`client_get $1`;
-	while [ -n "$x" -a "$x" != "$2" ]; do
-		bash -c "$SLEEP"
+	if [ -z "$3" ]; then
 		x=`client_get $1`;
+	else
+		x=`client_get_dontfail $1`
+	fi
+	while [ -z "$x" -o "$x" != "$2" ]; do
+		bash -c "$SLEEP"
+		if [ -z "$3" ]; then
+			x=`client_get $1`;
+		else
+			x=`client_get_dontfail $1`
+		fi
 		echo "sleeping"
 	done
 }
