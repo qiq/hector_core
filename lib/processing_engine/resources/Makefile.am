@@ -4,6 +4,7 @@ AM_LIBTOOLFLAGS = --tag=disable-static
 
 EXTRA_DIST =
 BUILT_SOURCES = 
+CLEANFILES =
 
 resourcesdir = $(libdir)/hector/resources
 resources_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la
@@ -19,7 +20,7 @@ TestResource_la_SOURCES = TestResourceWrapper.h TestResourceWrapper.cc
 TestResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
 TestResource_la_LIBADD = libTestResource.la
 
-EXTRA_DIST += TestResource.i
+EXTRA_DIST += TestResource.i Testresource.proto
 
 libTestProtobufResource_la_SOURCES = TestProtobufResource.h TestProtobufResource.cc TestProtobufResource.pb.h TestProtobufResource.pb.cc
 libTestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
@@ -34,4 +35,5 @@ TestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
 TestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version @PROTOBUF_LIBS@
 TestProtobufResource_la_LIBADD = libTestProtobufResource.la
 
-EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto TestProtobufResource.pb.h TestProtobufResource.pb.cc
+EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto
+CLEANFILES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
