@@ -47,7 +47,7 @@ ROBOT
 
 
 Adresarova struktura:
-/usr/lib/libhelen.so (sdilena knihovna pro server)
+/usr/lib/libhector.so (sdilena knihovna pro server)
 /usr/bin/client
 /usr/bin/server
 /usr/lib/hector/WebResource.so
@@ -66,8 +66,8 @@ podobne pro python a javu
 
 TODO
 
+- nejaky generator testresources (do robota) + otestovat load a save
 - otestovat Perl moduly na memory leaks (mockrat volat metody)
-- nejaky generator webresources (do robota) + otestovat load a save
 - client: zrychlit nabihani, implementovat reconnect
 
 - Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl

@@ -38,7 +38,7 @@ PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 0.22])
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h float.h limits.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -57,7 +57,8 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([dup2 gethostbyname inet_ntoa memset select setlocale socket sqrt strcasecmp strdup strerror strndup putenv setenv])
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([dup2 floor gethostbyname inet_ntoa memset putenv select setenv setlocale socket sqrt strcasecmp strdup strerror strndup strrchr strtol])
 
 # Misc
 dnl Check for debug options
