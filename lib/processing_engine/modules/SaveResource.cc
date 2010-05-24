@@ -19,6 +19,7 @@
 SaveResource::SaveResource(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	filename = NULL;
 	fd = -1;
+	items = 0;
 	values = new ObjectValues<SaveResource>(this);
 
 	values->addGetter("items", &SaveResource::getItems);
@@ -56,7 +57,7 @@ bool SaveResource::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	if ((fd = open(filename, O_RDONLY) < 0)) {
+	if ((fd = open(filename, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) < 0) {
 		LOG_ERROR(logger, "Cannot open file " << filename << ": " << strerror(errno));
 		return false;
 	}
@@ -88,7 +89,7 @@ Resource *SaveResource::Process(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
 	uint32_t size;
-	uint8_t typeId = pr->getTypeId();
+	uint8_t typeId = resource->getTypeId();
 	if (pr) {
 		if (!WriteToFile(&size, sizeof(size)))
 			return NULL;

@@ -43,7 +43,7 @@ private:
 };
 
 inline Module::Type SaveResource::getType() {
-	return INPUT;
+	return OUTPUT;
 }
 
 inline char *SaveResource::getValueSync(const char *name) {
