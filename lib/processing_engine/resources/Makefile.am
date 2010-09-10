@@ -20,7 +20,7 @@ TestResource_la_SOURCES = TestResourceWrapper.h TestResourceWrapper.cc
 TestResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
 TestResource_la_LIBADD = libTestResource.la
 
-EXTRA_DIST += TestResource.i Testresource.proto
+EXTRA_DIST += TestResource.i
 
 libTestProtobufResource_la_SOURCES = TestProtobufResource.h TestProtobufResource.cc TestProtobufResource.pb.h TestProtobufResource.pb.cc
 libTestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@

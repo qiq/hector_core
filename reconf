@@ -6,5 +6,5 @@ if [ "$1" == "init" -o ! -f configure ]; then
 	automake --add-missing
 	autoconf
 fi
-./configure --prefix=/tmp/hector --enable-debug --with-java-include-dir=/usr/lib/jvm/java-6-sun/include/ --with-java-lib-dir=/usr/lib/jvm/java-6-sun/lib/
+./configure --prefix=/tmp/hector --enable-debug --with-java-include-dir=/usr/lib/jvm/java-6-sun/include/ --with-java-lib-dir=/usr/lib/jvm/java-6-sun/lib/ --with-python-include-dir=/usr/include/python2.6/ --with-python-lib-dir=/usr/lib/python2.6/
 
