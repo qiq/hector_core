@@ -26,9 +26,8 @@ function test_init {
 }
 
 function test_finish {
-	if [ "$clean_test_log_props" = 1 ]; then
-		rm -f test.log.props
-		clean_test_log_props=0
+	if [ -L test.log.props ]; then
+		rm test.log.props;
 	fi
 #	if [ $0 != '-bash' ]; then
 #		exit 1;
@@ -36,9 +35,7 @@ function test_finish {
 }
 
 function test_server_start {
-	if ln -s $base/test/test.log.props . 2>/dev/null; then
-		clean_test_log_props=1
-	fi
+	ln -s $base/test/test.log.props . 2>/dev/null
 	hector_server_start $base/test/${id}-config.xml test
 }
 
