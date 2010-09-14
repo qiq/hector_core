@@ -38,6 +38,8 @@ public:
 	void setStr(const char *s);
 	const char *getStr();
 
+	static const int typeId = 1;
+
 protected:
 	int id;
 	int status;
@@ -47,7 +49,7 @@ protected:
 };
 
 inline int TestResource::getTypeId() {
-	return 1;
+	return typeId;
 }
 
 inline const char *TestResource::getTypeStr() {

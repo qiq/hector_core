@@ -17,6 +17,8 @@
 #include "TestResource.h"
 
 LoadResource::LoadResource(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+	items = 0;
+	maxItems = 0;
 	filename = NULL;
 	fd = -1;
 	values = new ObjectValues<LoadResource>(this);
@@ -68,7 +70,7 @@ bool LoadResource::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	if ((fd = open(filename, O_RDONLY) < 0)) {
+	if ((fd = open(filename, O_RDONLY)) < 0) {
 		LOG_ERROR(logger, "Cannot open file " << filename << ": " << strerror(errno));
 		return false;
 	}
@@ -123,7 +125,6 @@ Resource *LoadResource::Process(Resource *resource) {
 			delete r;
 			return NULL;
 		}
-		ObjectUnlock();
 		string *s = new string((char*)data, size);
 		if (!r->Deserialize(s)) {
 			delete s;

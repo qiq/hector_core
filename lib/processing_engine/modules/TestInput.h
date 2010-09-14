@@ -24,6 +24,7 @@ private:
 	int items;		// guarded by ObjectLock
 	int maxItems;		// guarded by ObjectLock
 	char *idPrefix;		// guarded by ObjectLock
+	char *resourceType;	// guarded by ObjectLock
 
 	ObjectValues<TestInput> *values;
 
@@ -32,6 +33,8 @@ private:
 	void setMaxItems(const char *name, const char *value);
 	char *getIdPrefix(const char *name);
 	void setIdPrefix(const char *name, const char *value);
+	char *getResourceType(const char *name);
+	void setResourceType(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);

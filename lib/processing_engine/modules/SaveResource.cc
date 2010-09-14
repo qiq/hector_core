@@ -74,10 +74,7 @@ bool SaveResource::WriteToFile(const void *data, int size) {
 			size -= wr;
 		} else {
 			ObjectLockRead();
-			if (wr < 0)
-				LOG_ERROR(logger, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
-			else
-				LOG_INFO(logger, "Input file: " << filename << " read, finishing.")
+			LOG_ERROR(logger, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 			ObjectUnlock();
 			return false;
 		}

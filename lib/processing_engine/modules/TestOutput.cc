@@ -35,6 +35,12 @@ Resource *TestOutput::Process(Resource *resource) {
 		items++;
 		ObjectUnlock();
 		delete tr;
+	} else {
+		LOG_INFO(logger, "Resource arrived (" << tr->getId() << ")");
+		ObjectLockWrite();
+		items++;
+		ObjectUnlock();
+		delete resource;
 	}
 	return NULL;
 }

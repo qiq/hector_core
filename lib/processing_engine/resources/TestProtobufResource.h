@@ -43,6 +43,8 @@ public:
 	void setStr(const char *s);
 	const char *getStr();
 
+	static const int typeId = 2;
+
 protected:
 	hector::resources::TestProtobufResource r;
 
@@ -50,7 +52,7 @@ protected:
 };
 
 inline int TestProtobufResource::getTypeId() {
-	return 2;
+	return typeId;
 }
 
 inline const char *TestProtobufResource::getTypeStr() {
