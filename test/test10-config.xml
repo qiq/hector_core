@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test10: test of loading/saving module
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<ProcessingEngine id="test_processing_engine">
+			<Processor id="P_load">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load" lib="LoadResource.la">
+						<param name="filename" value="test10.data.in"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_save"/>
+				</output>
+			</Processor>
+			<Processor id="P_save">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save" lib="SaveResource.la">
+						<param name="filename" value="test10.data.out"/>
+					</Module>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

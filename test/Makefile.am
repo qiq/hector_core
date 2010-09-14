@@ -1,4 +1,4 @@
-TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(LD_LIBRARY_PATH) $(SHELL)
+TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(LD_LIBRARY_PATH) PERL5LIB=$(top_builddir)/lib/perl $(SHELL)
 
 TESTS =
 EXTRA_DIST = common.sh test.log.props
@@ -39,6 +39,10 @@ CLEANFILES += test8.log.test
 TESTS += test9.sh
 EXTRA_DIST += test9.sh test9-config.xml test9.log.correct
 CLEANFILES += test9.log.test
+
+TESTS += test10.sh
+EXTRA_DIST += test10.sh test10-config.xml test10.log.correct
+CLEANFILES += test10.log.test
 
 TESTS += test11.sh
 EXTRA_DIST += test11.sh test11-config.xml test11.log.correct

@@ -27,7 +27,7 @@ function test_init {
 
 function test_finish {
 	if [ "$clean_test_log_props" = 1 ]; then
-		rm -f $base/test.log.props
+		rm -f test.log.props
 		clean_test_log_props=0
 	fi
 #	if [ $0 != '-bash' ]; then
