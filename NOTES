@@ -1,9 +1,5 @@
 http://docs.bor.org.ua/eBooks/Perl/Manning.Extending_and_Embedding_Perl.2002.pdf
 
-TODO:
-	- rozdelit hectora na helen (core) a hectora (robot)
-	- v helen udelat jen univerzalni server
-
 Obecne
 
 - C++ (+ nejake bindingy?)
@@ -48,19 +44,19 @@ ROBOT
 
 Adresarova struktura:
 /usr/lib/libhector.so (sdilena knihovna pro server)
-/usr/bin/client
-/usr/bin/server
-/usr/lib/hector/WebResource.so
-/usr/lib/hector/Robot.so
+/usr/bin/hector_client
+/usr/bin/hector_server
+/usr/lib/hector/Robot.so (server modul)
 /usr/lib/hector/modules/ReadResource.so
 /usr/lib/hector/modules/perl/ReadResource.pm
 /usr/lib/hector/modules/perl/Hector.pm
 /usr/lib/hector/modules/perl/Hector.so
+/usr/lib/hector/resources/WebResource.so
 /usr/lib/hector/resources/TestResource.so
-/usr/share/hector/skript.sh, nejake common.sh
+/usr/share/hector/skript.sh, nejake common.sh (ted je v bin, mozna tak nechat)
 /usr/include/hector/*.h (vse pro externi Resource a Module)
 
-LD_LIBRARY_PATH += $PREFIX/lib/hector:$PREFIX/lib/hector/modules
+LD_LIBRARY_PATH += $PREFIX/lib/hector:$PREFIX/lib/hector/resources:$PREFIX/lib/hector/modules
 PERL5LIB += $PREFIX/lib/hector/modules/perl
 podobne pro python a javu
 

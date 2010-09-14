@@ -2,7 +2,7 @@ server: univerzalni spoustec
 - spusti server na danem portu a adrese
 - nahraje obsluhu serveru, spusti server (+ processing_chain + vsechno ostatni)
 
-client: textovej klient, aby clovek nemusel rucne psat HTTP pozadavky
+client: textovy klient, aby clovek nemusel rucne psat HTTP pozadavky
 - nastavovat a zjistovat nastaveni aby to umelo
 - readline by to melo pouzivat
 - nejak univerzalni by to melo byt
@@ -10,3 +10,4 @@ client: textovej klient, aby clovek nemusel rucne psat HTTP pozadavky
 
 TODO:
 - client is slow (je to pomale -- connect), neslo by to napsat v C++?
+	- slo, ale neni to ted priorita
