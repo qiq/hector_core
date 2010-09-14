@@ -16,7 +16,7 @@ function hector_server_start {
 	server_id=$2;
 	if [ "$USE_VALGRIND" == 1 ]; then
 		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes --log-file=hector_server.log.valgrind hector_server -c ${config_file} -f ${server_id} &
-		client_wait_dontfail robot_processing_engine.run 0
+		hector_client_wait_dontfail robot_processing_engine.run 0
 	else
 		hector_server -c ${config_file} ${server_id}
 	fi
