@@ -9,11 +9,11 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="robot_processing_engine">
-			<Processor id="P_load_resource">
+		<ProcessingEngine id="test_processing_engine">
+			<Processor id="P_input">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource" type="perl" lib="TestInput.pm">
+					<Module id="M_input" type="perl" lib="TestInput.pm">
 						<param name="maxItems" value="1000"/>
 					</Module>
 				</modules>
@@ -34,13 +34,13 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 				</input>
 				<output>
 					<nextProcessor ref="P_simple" filter="1" priority="100"/>
-					<nextProcessor ref="P_save_resource"/>
+					<nextProcessor ref="P_output"/>
 				</output>
 			</Processor>
-			<Processor id="P_save_resource">
+			<Processor id="P_output">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource" type="perl" lib="TestOutput.pm"/>
+					<Module id="M_output" type="perl" lib="TestOutput.pm"/>
 				</modules>
 				<input>
 					<queue/>

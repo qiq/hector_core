@@ -9,11 +9,11 @@ test5: two readers(1), one simple intermediates(1), one writer(1)
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>../test/test.log.props</logConfig>
-		<ProcessingEngine id="robot_processing_engine">
-			<Processor id="P_load_resource1">
+		<ProcessingEngine id="test_processing_engine">
+			<Processor id="P_input1">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource1" type="perl" lib="TestInput.pm">
+					<Module id="M_input1" type="perl" lib="TestInput.pm">
 						<param name="maxItems" value="1000"/>
 						<param name="idPrefix" value="i1-"/>
 					</Module>
@@ -22,10 +22,10 @@ test5: two readers(1), one simple intermediates(1), one writer(1)
 					<nextProcessor ref="P_simple"/>
 				</output>
 			</Processor>
-			<Processor id="P_load_resource2">
+			<Processor id="P_input2">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource2" type="perl" lib="TestInput.pm">
+					<Module id="M_input2" type="perl" lib="TestInput.pm">
 						<param name="maxItems" value="2000"/>
 						<param name="idPrefix" value="i2-"/>
 					</Module>
@@ -43,13 +43,13 @@ test5: two readers(1), one simple intermediates(1), one writer(1)
 					<queue/>
 				</input>
 				<output>
-					<nextProcessor ref="P_save_resource"/>
+					<nextProcessor ref="P_output"/>
 				</output>
 			</Processor>
-			<Processor id="P_save_resource">
+			<Processor id="P_output">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource" type="perl" lib="TestOutput.pm"/>
+					<Module id="M_output" type="perl" lib="TestOutput.pm"/>
 				</modules>
 				<input>
 					<queue/>

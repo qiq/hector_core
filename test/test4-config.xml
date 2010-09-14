@@ -9,11 +9,11 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="robot_processing_engine">
-			<Processor id="P_load_resource">
+		<ProcessingEngine id="test_processing_engine">
+			<Processor id="P_input">
 				<threads>5</threads>
 				<modules>
-					<Module id="M_load_resource" lib="TestInput.la">
+					<Module id="M_input" lib="TestInput.la">
 						<param name="maxItems" value="1000"/>
 					</Module>
 				</modules>
@@ -30,13 +30,13 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 					<queue/>
 				</input>
 				<output>
-					<nextProcessor ref="P_save_resource"/>
+					<nextProcessor ref="P_output"/>
 				</output>
 			</Processor>
-			<Processor id="P_save_resource">
+			<Processor id="P_output">
 				<threads>5</threads>
 				<modules>
-					<Module id="M_save_resource" lib="TestOutput.la"/>
+					<Module id="M_output" lib="TestOutput.la"/>
 				</modules>
 				<input>
 					<queue/>

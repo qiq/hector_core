@@ -9,11 +9,11 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="robot_processing_engine">
-			<Processor id="P_load_resource1">
+		<ProcessingEngine id="test_processing_engine">
+			<Processor id="P_input1">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource1" type="perl" lib="TestInput.pm">
+					<Module id="M_input1" type="perl" lib="TestInput.pm">
 						<param name="maxItems" value="1000"/>
 						<param name="idPrefix" value="i1-"/>
 					</Module>
@@ -25,10 +25,10 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 					<nextProcessor ref="P_simple"/>
 				</output>
 			</Processor>
-			<Processor id="P_load_resource2">
+			<Processor id="P_input2">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load_resource2" type="perl" lib="TestInput.pm">
+					<Module id="M_input2" type="perl" lib="TestInput.pm">
 						<param name="maxItems" value="2000"/>
 						<param name="idPrefix" value="i2-"/>
 					</Module>
@@ -49,23 +49,23 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 					<queue/>
 				</input>
 				<output>
-					<nextProcessor ref="P_save_resource1" filter="1"/>
-					<nextProcessor ref="P_save_resource2"/>
+					<nextProcessor ref="P_output1" filter="1"/>
+					<nextProcessor ref="P_output2"/>
 				</output>
 			</Processor>
-			<Processor id="P_save_resource1">
+			<Processor id="P_output1">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource1" type="perl" lib="TestOutput.pm"/>
+					<Module id="M_output1" type="perl" lib="TestOutput.pm"/>
 				</modules>
 				<input>
 					<queue/>
 				</input>
 			</Processor>
-			<Processor id="P_save_resource2">
+			<Processor id="P_output2">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save_resource2" type="perl" lib="TestOutput.pm"/>
+					<Module id="M_output2" type="perl" lib="TestOutput.pm"/>
 				</modules>
 				<input>
 					<queue/>
