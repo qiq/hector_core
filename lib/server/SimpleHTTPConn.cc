@@ -2,7 +2,6 @@
  * we do support:
  * - keepalive
  * we do not support:
- * - multi-line heaer fields
  * - pipelining
 */
 
@@ -108,9 +107,11 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 		return INCOMPLETE;
 	request_body_offset = body_offset_a < body_offset_b ? body_offset_a + 4 : body_offset_b + 2;
 
-	// parse header fields, we do not support multi-line fields
+	// parse header fields
 	header_fields = new std::tr1::unordered_map<string, string>();
 	int offset = request_header_offset;
+	string var;
+	string val;
 	while (offset < request_body_offset) {
 		size_t nl_a = request_buffer.find("\r\n", offset);
 		size_t nl_b = request_buffer.find("\n", offset);
@@ -122,13 +123,28 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 			break;
 		string field = request_buffer.substr(offset, nl-offset);
 		offset = nl + (nl_a < nl_b ? 2 : 1);
-		size_t col = field.find(": ");
-		if (col == string::npos)
-			continue;		// invalid line
-		string var = field.substr(0, col);
-		string val = field.substr(col+2);
-		(*header_fields)[var] = val;
+		int i = 0;
+		bool cont = false;
+		while (field[i] == ' ' || field[i] == '\t') {
+			cont = true;
+			i++;
+		}
+		if (!cont) {
+			(*header_fields)[var] = val;
+			size_t col = field.find(": ");
+			if (col == string::npos) {
+				var = "";
+				val = "";
+				continue;		// invalid line
+			}
+			var = field.substr(0, col);
+			val = field.substr(col+2);
+		} else {
+			val += field.substr(i-1);
+		}
 	}
+	if (!var.empty())
+		(*header_fields)[var] = val;
 
 	// get length of the request body
 	std::tr1::unordered_map<string, string>::iterator iter = header_fields->find("Content-Length");
