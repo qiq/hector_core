@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 #include "TestProtobufResource.h"
 
 using namespace std;
@@ -17,4 +18,10 @@ ProtobufResource *TestProtobufResource::Clone() {
 
 int TestProtobufResource::getSize() {
 	return 1;
+}
+
+char *TestProtobufResource::toString() {
+	char buf[1024];
+	snprintf(buf, sizeof(buf), "TestProtobufResource [%d, %d]: %s", this->getId(), this->getStatus(), this->getStr());
+	return strdup(buf);
 }

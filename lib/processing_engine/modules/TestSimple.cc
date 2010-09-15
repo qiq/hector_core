@@ -7,6 +7,8 @@
 #include "TestSimple.h"
 #include "TestResource.h"
 
+using namespace std;
+
 TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	foo = NULL;

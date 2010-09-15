@@ -9,6 +9,6 @@ class Resources {
         static int Name2Id(const char *name);
 };
 
-void ResourceQueuePush(queue<Resource*> *queue, Resource *resource);
-Resource *ResourceQueuePop(queue<Resource*> *queue);
-int ResourceQueueSize(queue<Resource*> *queue);
+void ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource);
+Resource *ResourceQueuePop(std::queue<Resource*> *queue);
+int ResourceQueueSize(std::queue<Resource*> *queue);

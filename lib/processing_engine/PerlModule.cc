@@ -11,6 +11,8 @@ log4cxx::LoggerPtr PerlModule::logger(log4cxx::Logger::getLogger("lib.processing
 
 EXTERN_C void xs_init (pTHX);
 
+using namespace std;
+
 // based on SWIG code
 
 XS(_wrap_new_Any) {
@@ -142,17 +144,18 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 	XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
         XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
         PUTBACK;
-	int count = call_method("new2", G_SCALAR);
+	int count = call_method("new2", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling new2 for " << type);
-		return NULL;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
-		return NULL;
+		POPs;
+		result = NULL;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling new2 for " << type);
+		result = NULL;
+	} else {
+		result = SvREFCNT_inc(POPs);
 	}
-	result = SvREFCNT_inc(POPs);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -233,22 +236,24 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(sv));
         PUTBACK;
-	int count = call_method("Init", G_SCALAR);
+	int count = call_method("Init", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling Init (no result)");
-		return false;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling Init (" << SvPV_nolen(ERRSV) << ")");
-		return false;
+		POPs;
+		result = false;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling Init (no result)");
+		result = false;
+	} else {
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG_ERROR(logger, "Error calling Init (invalid result)");
+			result = false;
+		} else {
+			result = (SvIV(resultSV) != 0);
+		}
 	}
-	SV *resultSV = POPs;
-	if (!SvIOK(resultSV)) {
-		LOG_ERROR(logger, "Error calling Init (invalid result)");
-		return false;
-	}
-	result = (SvIV(resultSV) != 0);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -264,25 +269,20 @@ Module::Type PerlModule::getType() {
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
-	int count = call_method("getType", G_SCALAR);
+	int count = call_method("getType", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling getType (no result)");
-		ObjectUnlock();
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling getType (" << SvPV_nolen(ERRSV) << ")");
-		ObjectUnlock();
-		return result;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling getType (no result)");
+	} else {
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG_ERROR(logger, "Error calling getType (invalid result)");
+		} else {
+			result = (Module::Type)SvIV(resultSV);
+		}
 	}
-	SV *resultSV = POPs;
-	if (!SvIOK(resultSV)) {
-		LOG_ERROR(logger, "Error calling getType (invalid result)");
-		ObjectUnlock();
-		return result;
-	}
-	result = (Module::Type)SvIV(resultSV);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -312,15 +312,20 @@ Resource *PerlModule::Process(Resource *resource) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(resourceSV));
         PUTBACK;
-	int count = call_method("Process", G_SCALAR);
+	int count = call_method("Process", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling Process");
-		ObjectUnlock();
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling Process (" << SvPV_nolen(ERRSV) << ")");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return result;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling Process");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
 		ObjectUnlock();
 		return result;
 	}
@@ -378,21 +383,29 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
         XPUSHs(inputResourcesSV);
         XPUSHs(outputResourcesSV);
         PUTBACK;
-	int count = call_method("ProcessMulti", G_SCALAR);
+	int count = call_method("ProcessMulti", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling ProcesMulti (no result)");
-		ObjectUnlock();
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling ProcessMulti (" << SvPV_nolen(ERRSV) << ")");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return result;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling ProcesMulti (no result)");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
 		ObjectUnlock();
 		return result;
 	}
 	SV *resultSV = POPs;
 	if (!SvIOK(resultSV)) {
 		LOG_ERROR(logger, "Error calling ProcessMulti (invalid result)");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
 		ObjectUnlock();
 		return result;
 	}
@@ -431,32 +444,29 @@ char *PerlModule::getValueSync(const char *name) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         PUTBACK;
-	count = call_method("getValueSync", G_SCALAR);
+	count = call_method("getValueSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling getValueSync (no result)");
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling getValueSync (" << SvPV_nolen(ERRSV) << ")");
-		return result;
-	}
-	SV *sv = POPs;
-	if (SvPOK(sv)) {
-		STRLEN len;
-		char *s = SvPV(sv, len);
-		result = strndup(s, len);
-	} else if (SvIOK(sv)) {
-		char s[1024];
-		snprintf(s, sizeof(s), "%d", (int)SvIV(sv));
-		result = strdup(s);
-	} else if (SvNOK(sv)) {
-		char s[1024];
-		snprintf(s, sizeof(s), "%lf", SvNV(sv));
-		result = strdup(s);
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling getValueSync (no result)");
 	} else {
-		LOG_ERROR(logger, "Error calling getValueSync (invalid result type)");
-		return result;
+		SV *sv = POPs;
+		if (SvPOK(sv)) {
+			STRLEN len;
+			char *s = SvPV(sv, len);
+			result = strndup(s, len);
+		} else if (SvIOK(sv)) {
+			char s[1024];
+			snprintf(s, sizeof(s), "%d", (int)SvIV(sv));
+			result = strdup(s);
+		} else if (SvNOK(sv)) {
+			char s[1024];
+			snprintf(s, sizeof(s), "%lf", SvNV(sv));
+			result = strdup(s);
+		} else {
+			LOG_ERROR(logger, "Error calling getValueSync (invalid result type)");
+		}
 	}
 	PUTBACK;
 	FREETMPS;
@@ -475,22 +485,20 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         XPUSHs(sv_2mortal(newSVpv(value, 0)));
         PUTBACK;
-	int count = call_method("setValueSync", G_SCALAR);
+	int count = call_method("setValueSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling setValueSync (no result)");
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling setValueSync (" << SvPV_nolen(ERRSV) << ")");
-		return result;
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling setValueSync (no result)");
+	} else {
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG_ERROR(logger, "Error calling setValueSync (invalid result)");
+		} else {
+			result = (SvIV(resultSV) != 0);
+		}
 	}
-	SV *resultSV = POPs;
-	if (!SvIOK(resultSV)) {
-		LOG_ERROR(logger, "Error calling setValueSync (invalid result)");
-		return result;
-	}
-	result = (SvIV(resultSV) != 0);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -507,32 +515,30 @@ vector<string> *PerlModule::listNamesSync() {
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
-	int count = call_method("listNamesSync", G_SCALAR);
+	int count = call_method("listNamesSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
-	if (count != 1) {
-		LOG_ERROR(logger, "Error calling listNamesSync (no result)");
-		return result;
-	}
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(logger, "Error calling listNamesSync (" << SvPV_nolen(ERRSV) << ")");
-		return result;
-	}
-	SV *sv = POPs;
-	if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
-		LOG_ERROR(logger, "Error calling listNamesSync (invalid result)");
-		return result;
-	}
-	result = new vector<string>();
-	AV *av = (AV*)SvRV(sv);
-	int alen = av_len(av);
-
-	for (int i = 0; i <= alen; i++) {
-		STRLEN len;
-		SV **val = av_fetch(av, i, 0);
-		char *s = SvPV(*val, len);
-		char *s2 = strndup(s, len);
-		result->push_back(s2);
-		free(s2);
+	} else if (count != 1) {
+		LOG_ERROR(logger, "Error calling listNamesSync (no result)");
+	} else {
+		SV *sv = POPs;
+		if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
+			LOG_ERROR(logger, "Error calling listNamesSync (invalid result)");
+		} else {
+			result = new vector<string>();
+			AV *av = (AV*)SvRV(sv);
+			int alen = av_len(av);
+	
+			for (int i = 0; i <= alen; i++) {
+				STRLEN len;
+				SV **val = av_fetch(av, i, 0);
+				char *s = SvPV(*val, len);
+				char *s2 = strndup(s, len);
+				result->push_back(s2);
+				free(s2);
+			}
+		}
 	}
 	PUTBACK;
 	FREETMPS;

@@ -7,11 +7,13 @@
 
 #include "LibraryLoader.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr LibraryLoader::logger(log4cxx::Logger::getLogger("lib.LibraryLoader"));
 
 PlainLock LibraryLoader::lock;
 bool LibraryLoader::initialized;
-std::tr1::unordered_map<string, lt_dlhandle*> LibraryLoader::handles;
+tr1::unordered_map<string, lt_dlhandle*> LibraryLoader::handles;
 
 LibraryLoader ll;
 
@@ -21,7 +23,7 @@ LibraryLoader::LibraryLoader() {
 
 LibraryLoader::~LibraryLoader() {
 	lock.Lock();
-	for (std::tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
+	for (tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
 		lt_dlclose(*iter->second);
 		delete iter->second;
 	}
@@ -40,7 +42,7 @@ void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
 		}
 		initialized = true;
 	}
-	std::tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.find(lib);
+	tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.find(lib);
 	lt_dlhandle *handle;
 	if (iter != handles.end()) {
 		handle = iter->second;

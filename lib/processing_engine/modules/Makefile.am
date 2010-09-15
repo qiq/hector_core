@@ -5,7 +5,7 @@ AM_LDFLAGS = @LOG4CXX_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 modulesdir = $(libdir)/hector/modules
-modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la LoadResource.la SaveResource.la
+modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la Load.la Save.la Dump.la
 
 TestInput_la_SOURCES = TestInput.h TestInput.cc
 TestInput_la_LIBADD = ../resources/libTestResource.la
@@ -19,10 +19,12 @@ TestSimple_la_LIBADD = ../resources/libTestResource.la
 TestMulti_la_SOURCES = TestMulti.h TestMulti.cc
 TestMulti_la_LIBADD = ../resources/libTestResource.la
 
-LoadResource_la_SOURCES = LoadResource.h LoadResource.cc
-LoadResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
-LoadResource_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
+Load_la_SOURCES = Load.h Load.cc
+Load_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
+Load_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
 
-SaveResource_la_SOURCES = SaveResource.h SaveResource.cc
-SaveResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
-SaveResource_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
+Save_la_SOURCES = Save.h Save.cc
+Save_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
+Save_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
+
+Dump_la_SOURCES = Dump.h Dump.cc

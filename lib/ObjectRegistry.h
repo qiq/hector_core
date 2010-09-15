@@ -16,8 +16,6 @@
 
 class Object;
 
-using namespace std;
-
 class ObjectRegistry {
 public:
 	ObjectRegistry() {};
@@ -26,13 +24,13 @@ public:
 	bool registerObject(Object *obj);
 	bool unregisterObject(const char *id);
 	Object *getObject(const char *id);
-	vector<string> *getIds();
+	std::vector<std::string> *getIds();
 
 	char *getObjectValue(const char *id, const char *name);
 	bool setObjectValue(const char *id, const char *name, const char *value);
 
 private:
-	std::tr1::unordered_map<string, Object*> objects;
+	std::tr1::unordered_map<std::string, Object*> objects;
 
 	static log4cxx::LoggerPtr logger;
 };

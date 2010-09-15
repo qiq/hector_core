@@ -6,6 +6,7 @@
 #include "TestOutput.h"
 #include "TestResource.h"
 
+using namespace std;
 
 TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;

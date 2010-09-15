@@ -4,6 +4,8 @@
 #include "Server.h"
 #include "LibraryLoader.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr Server::logger(log4cxx::Logger::getLogger("lib.Server"));
 
 Server::Server(const char *id) : Object(NULL, id) {

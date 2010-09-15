@@ -1,3 +1,6 @@
+%newobject Resource::toString();
+%newobject Resource::Serialize();
+
 %{
 #include "Resource.h"
 %}
@@ -13,7 +16,8 @@ public:
         virtual void setId(int id) = 0;
         virtual int getStatus() = 0;
         virtual void setStatus(int status) = 0;
-        virtual string *Serialize() = 0;
-        virtual bool Deserialize(string *s) = 0;
+        virtual std::string *Serialize() = 0;
+        virtual bool Deserialize(std::string *s) = 0;
         virtual int getSize() = 0;
+        virtual char *toString() = 0;
 };

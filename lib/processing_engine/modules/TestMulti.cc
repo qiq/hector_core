@@ -8,6 +8,8 @@
 #include "TestMulti.h"
 #include "TestResource.h"
 
+using namespace std;
+
 TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	foo = NULL;

@@ -8,6 +8,8 @@
 #include "Resources.h"
 #include "LibraryLoader.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr Resources::logger(log4cxx::Logger::getLogger("lib.processing_engine.Resources"));
 
 PlainLock Resources::lock;

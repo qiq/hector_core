@@ -10,6 +10,8 @@
 #include "common.h"
 #include "Config.h"
 
+using namespace std;
+
 Config::Config() {
 	doc = NULL;
 	root = NULL;

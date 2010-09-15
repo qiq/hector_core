@@ -9,6 +9,8 @@
 #include "ProcessingEngine.h"
 #include "Processor.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr ProcessingEngine::logger(log4cxx::Logger::getLogger("lib.processing_enging.ProcessingEngine"));
 
 ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Object(objects, id) {

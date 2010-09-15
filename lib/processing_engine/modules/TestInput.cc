@@ -9,6 +9,8 @@
 #include "TestInput.h"
 #include "TestResource.h"
 
+using namespace std;
+
 TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	maxItems = 0;

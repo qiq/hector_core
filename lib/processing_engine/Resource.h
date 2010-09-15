@@ -34,6 +34,8 @@ public:
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
+	// return string representation of the resource (e.g. for debugging purposes)
+	virtual char *toString() = 0;
 protected:
 	static log4cxx::LoggerPtr logger;
 };

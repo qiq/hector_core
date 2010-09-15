@@ -14,8 +14,6 @@
 #include "Resource.h"
 #include "Object.h"	// for LOG_*
 
-using namespace std;
-
 class ProtobufResource : public Resource {
 public:
 	ProtobufResource() {};
@@ -33,26 +31,28 @@ public:
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
 	// save and restore resource
-	virtual string *Serialize() = 0;
-	virtual bool Deserialize(string *s) = 0;
+	virtual std::string *Serialize() = 0;
+	virtual bool Deserialize(std::string *s) = 0;
 	virtual int getSerializedSize() = 0;
 	virtual bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
 	virtual bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
+	// return string representation of the resource (e.g. for debugging purposes)
+	virtual char *toString() = 0;
 protected:
 	static log4cxx::LoggerPtr logger;
 
-	string *MessageSerialize(google::protobuf::Message *msg);
-	bool MessageDeserialize(google::protobuf::Message *msg, string *s);
+	std::string *MessageSerialize(google::protobuf::Message *msg);
+	bool MessageDeserialize(google::protobuf::Message *msg, std::string *s);
 	bool MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	int MessageGetSerializedSize(google::protobuf::Message *msg);
 	bool MessageDeserialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyInputStream *input, int size);
 };
 
-inline string *ProtobufResource::MessageSerialize(google::protobuf::Message *msg) {
-	string *result = new string();
+inline std::string *ProtobufResource::MessageSerialize(google::protobuf::Message *msg) {
+	std::string *result = new std::string();
 	if (!msg->SerializeToString(result)) {
 		LOG_ERROR(logger, "Cannot serialize Resource");
 		delete result;
@@ -61,7 +61,7 @@ inline string *ProtobufResource::MessageSerialize(google::protobuf::Message *msg
 	return result;
 }
 
-inline bool ProtobufResource::MessageDeserialize(google::protobuf::Message *msg, string *s) {
+inline bool ProtobufResource::MessageDeserialize(google::protobuf::Message *msg, std::string *s) {
 	return msg->ParseFromString(*s);
 }
 

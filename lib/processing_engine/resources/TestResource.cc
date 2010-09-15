@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 #include "TestResource.h"
 
 using namespace std;
@@ -39,4 +40,10 @@ bool TestResource::Deserialize(string *s) {
 	}
 	str.assign(buf);
 	return true;
+}
+
+char *TestResource::toString() {
+	char buf[1024];
+	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
+	return strdup(buf);
 }

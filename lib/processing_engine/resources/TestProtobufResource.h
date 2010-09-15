@@ -13,8 +13,6 @@
 #include "ProtobufResource.h"
 #include "TestProtobufResource.pb.h"
 
-using namespace std;
-
 class TestProtobufResource : public ProtobufResource {
 public:
 	TestProtobufResource();
@@ -32,13 +30,15 @@ public:
 	int getStatus();
 	void setStatus(int status);
 	// save and restore resource
-	string *Serialize();
-	bool Deserialize(string *s);
+	std::string *Serialize();
+	bool Deserialize(std::string *s);
 	int getSerializedSize();
 	bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
 	bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
 	// used by queues in case there is limit on queue size
 	int getSize();
+	// return string representation of the resource (e.g. for debugging purposes)
+	char *toString();
 
 	void setStr(const char *s);
 	const char *getStr();
@@ -75,11 +75,11 @@ inline void TestProtobufResource::setStatus(int status) {
 	r.set_status(status);
 }
 
-inline string *TestProtobufResource::Serialize() {
+inline std::string *TestProtobufResource::Serialize() {
 	return MessageSerialize(&r);
 }
 
-inline bool TestProtobufResource::Deserialize(string *s) {
+inline bool TestProtobufResource::Deserialize(std::string *s) {
 	return MessageDeserialize(&r, s);
 }
 

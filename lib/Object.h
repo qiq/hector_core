@@ -33,7 +33,7 @@ public:
 	const char *getId();
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
-	vector<string> *listNames();
+	std::vector<std::string> *listNames();
 	void SaveCheckpoint(const char *path, const char *id);
 	void RestoreCheckpoint(const char *path, const char *id);
 
@@ -50,7 +50,7 @@ protected:
 
 	virtual char *getValueSync(const char *name);
 	virtual bool setValueSync(const char *name, const char *value);
-	virtual vector<string> *listNamesSync();
+	virtual std::vector<std::string> *listNamesSync();
 
 	virtual void SaveCheckpointSync(const char *path, const char *id);
 	virtual void RestoreCheckpointSync(const char *path, const char *id);
@@ -115,8 +115,8 @@ inline bool Object::setValue(const char *name, const char *value) {
 	return result;
 }
 
-inline vector<string> *Object::listNames() {
-	vector<string> *result;
+inline std::vector<std::string> *Object::listNames() {
+	std::vector<std::string> *result;
 	ObjectLockRead();
 	result = listNamesSync();
 	ObjectUnlock();

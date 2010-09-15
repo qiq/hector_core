@@ -11,8 +11,6 @@
 #include <log4cxx/logger.h>
 #include "Resource.h"
 
-using namespace std;
-
 class TestResource : public Resource {
 public:
 	TestResource();
@@ -30,10 +28,12 @@ public:
 	int getStatus();
 	void setStatus(int status);
 	// save and restore resource
-	string *Serialize();
-	bool Deserialize(string *s);
+	std::string *Serialize();
+	bool Deserialize(std::string *s);
 	// used by queues in case there is limit on queue size
 	int getSize();
+	// return string representation of the resource (e.g. for debugging purposes)
+	char *toString();
 
 	void setStr(const char *s);
 	const char *getStr();
@@ -43,7 +43,7 @@ public:
 protected:
 	int id;
 	int status;
-	string str;
+	std::string str;
 
 	static log4cxx::LoggerPtr logger;
 };

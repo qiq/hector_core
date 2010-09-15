@@ -3,6 +3,8 @@
 
 #include "Object.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr Object::logger(log4cxx::Logger::getLogger("lib.Object"));
 
 char *Object::getValueSync(const char *name) {

@@ -13,7 +13,7 @@ test10: test of loading/saving module
 			<Processor id="P_load">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_load" lib="LoadResource.la">
+					<Module id="M_load" lib="Load.la">
 						<param name="filename" value="test10.data.in"/>
 					</Module>
 				</modules>
@@ -24,7 +24,7 @@ test10: test of loading/saving module
 			<Processor id="P_save">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_save" lib="SaveResource.la">
+					<Module id="M_save" lib="Save.la">
 						<param name="filename" value="test10.data.out"/>
 					</Module>
 				</modules>

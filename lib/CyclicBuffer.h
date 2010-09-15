@@ -7,8 +7,6 @@
 
 #include <config.h>
 
-using namespace std;
-
 template<class T>
 class CyclicBuffer {
 	int maxSize;

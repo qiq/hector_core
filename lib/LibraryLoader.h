@@ -9,8 +9,6 @@
 #include "common.h"
 #include "PlainLock.h"
 
-using namespace std;
-
 class LibraryLoader {
 public:
 	LibraryLoader();
@@ -21,7 +19,7 @@ public:
 private:
 	static PlainLock lock;
 	static bool initialized;
-	static std::tr1::unordered_map<string, lt_dlhandle*> handles;
+	static std::tr1::unordered_map<std::string, lt_dlhandle*> handles;
 
 	static log4cxx::LoggerPtr logger;
 };

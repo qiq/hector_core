@@ -16,8 +16,6 @@
 #include "ProcessingEngine.h"
 #include "SimpleHTTPServer.h"
 
-using namespace std;
-
 class Server : public Object {
 public:
 	Server(const char *id);
@@ -32,7 +30,7 @@ protected:
 	char *serverHost;
 	int serverPort;
 	int threads;
-	vector<ProcessingEngine*> processingEngines;
+	std::vector<ProcessingEngine*> processingEngines;
 	SimpleHTTPServer *simpleHTTPServer;
 
 	bool waitForFinish;

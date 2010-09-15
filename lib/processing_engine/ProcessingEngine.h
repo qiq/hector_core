@@ -27,7 +27,7 @@ public:
 	void Resume();
 
 protected:
-	vector<Processor*> processors;
+	std::vector<Processor*> processors;
 
 	bool propRun;
 	bool propPause;
@@ -49,7 +49,7 @@ protected:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
-	vector<string> *listNamesSync();
+	std::vector<std::string> *listNamesSync();
 
 	static log4cxx::LoggerPtr logger;
 };

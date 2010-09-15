@@ -42,16 +42,16 @@ protected:
 	pthread_t *threads;
 	bool running;
 
-	vector<Module*> *modules; 		// all modules; every thread has a module instance
-	vector<Module::Type> moduleType;	// type of processor modules (mainly due to expensive Perl calls)
+	std::vector<Module*> *modules; 		// all modules; every thread has a module instance
+	std::vector<Module::Type> moduleType;	// type of processor modules (mainly due to expensive Perl calls)
 	SyncQueue<Resource> *inputQueue;	// input queue
-	vector<OutputFilter*> outputFilters;	// filters of output resources
+	std::vector<OutputFilter*> outputFilters;	// filters of output resources
 
 	ObjectValues<Processor> *values;
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
-	vector<string> *listNamesSync();
+	std::vector<std::string> *listNamesSync();
 
 	static log4cxx::LoggerPtr logger;
 
@@ -70,7 +70,7 @@ inline bool Processor::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
 }
 
-inline vector<string> *Processor::listNamesSync() {
+inline std::vector<std::string> *Processor::listNamesSync() {
 	return values->listNamesSync();
 }
 

@@ -19,7 +19,7 @@ class TestMulti : public Module {
 public:
 	TestMulti(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestMulti();
-	bool Init(vector<pair<string, string> > *params);
+	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
@@ -36,7 +36,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
-	vector<string> *listNamesSync();
+	std::vector<std::string> *listNamesSync();
 };
 
 inline Module::Type TestMulti::getType() {
@@ -51,7 +51,7 @@ inline bool TestMulti::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
 }
 
-inline vector<string> *TestMulti::listNamesSync() {
+inline std::vector<std::string> *TestMulti::listNamesSync() {
 	return values->listNamesSync();
 }
 

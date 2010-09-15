@@ -12,8 +12,6 @@
 #include "PlainLock.h"
 #include "Resource.h"
 
-using namespace std;
-
 class Resources {
 public:
 	Resources() {};
@@ -25,24 +23,24 @@ private:
 	static int LoadResourceLibrary(const char *name, int id);
 
 	static PlainLock lock;
-	static std::tr1::unordered_map<string, int> name2id;
+	static std::tr1::unordered_map<std::string, int> name2id;
 	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
 	static log4cxx::LoggerPtr logger;
 };
 
 // Helper methods for SWIG
 
-inline void ResourceQueuePush(queue<Resource*> *queue, Resource *resource) {
+inline void ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource) {
 	queue->push(resource);
 }
 
-inline Resource *ResourceQueuePop(queue<Resource*> *queue) {
+inline Resource *ResourceQueuePop(std::queue<Resource*> *queue) {
 	Resource *resource = queue->front();
 	queue->pop();
 	return resource;
 }
 
-inline int ResourceQueueSize(queue<Resource*> *queue) {
+inline int ResourceQueueSize(std::queue<Resource*> *queue) {
 	return queue->size();
 }
 

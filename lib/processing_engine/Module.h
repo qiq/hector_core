@@ -26,7 +26,7 @@ public:
 
 	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id, threadIndex), threadIndex(threadIndex) {};
 	virtual ~Module() {};
-	virtual bool Init(vector<pair<string, string> > *args);
+	virtual bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	virtual Module::Type getType();
 	int getThreadIndex();
 	// Simple/Input/Output modules does only use this interface (one resource a time)

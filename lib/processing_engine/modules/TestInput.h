@@ -14,7 +14,7 @@ class TestInput : public Module {
 public:
 	TestInput(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestInput();
-	bool Init(vector<pair<string, string> > *params);
+	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
 	Resource *Process(Resource *resource);
 
@@ -38,7 +38,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
-	vector<string> *listNamesSync();
+	std::vector<std::string> *listNamesSync();
 };
 
 inline Module::Type TestInput::getType() {
@@ -53,7 +53,7 @@ inline bool TestInput::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
 }
 
-inline vector<string> *TestInput::listNamesSync() {
+inline std::vector<std::string> *TestInput::listNamesSync() {
 	return values->listNamesSync();
 }
 

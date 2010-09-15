@@ -13,24 +13,26 @@
 #include "common.h"
 #include "ProtobufResource.h"
 #include "Resources.h"
-#include "LoadResource.h"
+#include "Load.h"
 #include "TestResource.h"
 
-LoadResource::LoadResource(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+using namespace std;
+
+Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	maxItems = 0;
 	filename = NULL;
 	fd = -1;
-	values = new ObjectValues<LoadResource>(this);
+	values = new ObjectValues<Load>(this);
 
-	values->addGetter("items", &LoadResource::getItems);
-	values->addGetter("maxItems", &LoadResource::getMaxItems);
-	values->addSetter("maxItems", &LoadResource::setMaxItems);
-	values->addGetter("filename", &LoadResource::getFilename);
-	values->addSetter("filename", &LoadResource::setFilename);
+	values->addGetter("items", &Load::getItems);
+	values->addGetter("maxItems", &Load::getMaxItems);
+	values->addSetter("maxItems", &Load::setMaxItems);
+	values->addGetter("filename", &Load::getFilename);
+	values->addSetter("filename", &Load::setFilename);
 }
 
-LoadResource::~LoadResource() {
+Load::~Load() {
 	if (!stream->Close())
 		LOG_ERROR(logger, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
@@ -38,28 +40,28 @@ LoadResource::~LoadResource() {
 	delete values;
 }
 
-char *LoadResource::getItems(const char *name) {
+char *Load::getItems(const char *name) {
 	return int2str(items);
 }
 
-char *LoadResource::getMaxItems(const char *name) {
+char *Load::getMaxItems(const char *name) {
 	return int2str(maxItems);
 }
 
-void LoadResource::setMaxItems(const char *name, const char *value) {
+void Load::setMaxItems(const char *name, const char *value) {
 	maxItems = str2int(value);
 }
 
-char *LoadResource::getFilename(const char *name) {
+char *Load::getFilename(const char *name) {
 	return filename ? strdup(filename) : NULL;
 }
 
-void LoadResource::setFilename(const char *name, const char *value) {
+void Load::setFilename(const char *name, const char *value) {
 	free(filename);
 	filename = strdup(value);
 }
 
-bool LoadResource::Init(vector<pair<string, string> > *params) {
+bool Load::Init(vector<pair<string, string> > *params) {
 	if (!values->InitValues(params))
 		return false;
 	if (maxItems)
@@ -80,7 +82,7 @@ bool LoadResource::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool LoadResource::ReadFromFile(void *data, int size) {
+bool Load::ReadFromFile(void *data, int size) {
 	while (size > 0) {
 		ssize_t rd = read(fd, data, size);
 		if (rd > 0) {
@@ -98,7 +100,7 @@ bool LoadResource::ReadFromFile(void *data, int size) {
 	return true;
 }
 
-Resource *LoadResource::Process(Resource *resource) {
+Resource *Load::Process(Resource *resource) {
 	ObjectLockRead();
 	int i = items;
 	int mi = maxItems;
@@ -144,5 +146,5 @@ Resource *LoadResource::Process(Resource *resource) {
 // the class factories
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new LoadResource(objects, id, threadIndex);
+	return (Module*)new Load(objects, id, threadIndex);
 }

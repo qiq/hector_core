@@ -13,21 +13,23 @@
 #include "common.h"
 #include "ProtobufResource.h"
 #include "Resources.h"
-#include "SaveResource.h"
+#include "Save.h"
 #include "TestResource.h"
 
-SaveResource::SaveResource(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+using namespace std;
+
+Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	filename = NULL;
 	fd = -1;
 	items = 0;
-	values = new ObjectValues<SaveResource>(this);
+	values = new ObjectValues<Save>(this);
 
-	values->addGetter("items", &SaveResource::getItems);
-	values->addGetter("filename", &SaveResource::getFilename);
-	values->addSetter("filename", &SaveResource::setFilename);
+	values->addGetter("items", &Save::getItems);
+	values->addGetter("filename", &Save::getFilename);
+	values->addSetter("filename", &Save::setFilename);
 }
 
-SaveResource::~SaveResource() {
+Save::~Save() {
 	if (!stream->Close())
 		LOG_ERROR(logger, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
@@ -35,20 +37,20 @@ SaveResource::~SaveResource() {
 	delete values;
 }
 
-char *SaveResource::getItems(const char *name) {
+char *Save::getItems(const char *name) {
 	return int2str(items);
 }
 
-char *SaveResource::getFilename(const char *name) {
+char *Save::getFilename(const char *name) {
 	return filename ? strdup(filename) : NULL;
 }
 
-void SaveResource::setFilename(const char *name, const char *value) {
+void Save::setFilename(const char *name, const char *value) {
 	free(filename);
 	filename = strdup(value);
 }
 
-bool SaveResource::Init(vector<pair<string, string> > *params) {
+bool Save::Init(vector<pair<string, string> > *params) {
 	if (!values->InitValues(params))
 		return false;
 
@@ -67,7 +69,7 @@ bool SaveResource::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool SaveResource::WriteToFile(const void *data, int size) {
+bool Save::WriteToFile(const void *data, int size) {
 	while (size > 0) {
 		ssize_t wr = write(fd, data, size);
 		if (wr > 0) {
@@ -82,7 +84,7 @@ bool SaveResource::WriteToFile(const void *data, int size) {
 	return true;
 }
 
-Resource *SaveResource::Process(Resource *resource) {
+Resource *Save::Process(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
 	uint32_t size;
@@ -119,5 +121,5 @@ Resource *SaveResource::Process(Resource *resource) {
 // the class factories
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new SaveResource(objects, id, threadIndex);
+	return (Module*)new Save(objects, id, threadIndex);
 }

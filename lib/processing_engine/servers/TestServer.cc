@@ -5,6 +5,8 @@
 #include "TestServer.h"
 #include "Object.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.robot.TestServer"));
 
 TestServer::TestServer(ObjectRegistry *objects) {

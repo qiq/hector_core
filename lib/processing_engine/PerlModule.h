@@ -19,13 +19,11 @@
 
 #include "Module.h"
 
-using namespace std;
-
 class PerlModule : public Module {
 public:
 	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name);
 	~PerlModule();
-	bool Init(vector<pair<string, string> > *args);
+	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
 	Resource *Process(Resource *resource);
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
@@ -33,7 +31,7 @@ public:
 protected:
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
-	vector<string> *listNamesSync();
+	std::vector<std::string> *listNamesSync();
 
 	void SaveCheckpointSync(const char *path, const char *id);
 	void RestoreCheckpointSync(const char *path, const char *id);
@@ -44,7 +42,7 @@ protected:
 	PerlInterpreter *my_perl;
 	SV *ref;
 
-	std::tr1::unordered_set<string> initialized;
+	std::tr1::unordered_set<std::string> initialized;
 
 	static log4cxx::LoggerPtr logger;
 };

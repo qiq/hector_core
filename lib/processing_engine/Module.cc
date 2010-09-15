@@ -4,6 +4,8 @@
 #include "common.h"
 #include "Module.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr Module::logger(log4cxx::Logger::getLogger("lib.processing_engine.Module"));
 
 bool Module::Init(vector<pair<string, string> > *args) {

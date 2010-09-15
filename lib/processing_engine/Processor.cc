@@ -14,6 +14,8 @@
 #include "Processor.h"
 #include "LibraryLoader.h"
 
+using namespace std;
+
 log4cxx::LoggerPtr Processor::logger(log4cxx::Logger::getLogger("lib.processing_engine.Processor"));
 
 Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {

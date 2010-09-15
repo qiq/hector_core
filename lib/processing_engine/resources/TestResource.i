@@ -1,3 +1,6 @@
+%newobject TestResource::Serialize();
+%newobject TestResource::toString();
+
 %{
 #include "TestResource.h"
 %}
@@ -14,9 +17,10 @@ public:
         int getStatus();
         void setStatus(int status);
 
-        string *Serialize();
-        bool Deserialize(string *s);
+        std::string *Serialize();
+        bool Deserialize(std::string *s);
         int getSize();
+        char *toString();
 
         void setStr(const char *str);
         const char *getStr();
