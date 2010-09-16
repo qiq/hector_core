@@ -97,16 +97,21 @@ bool Processor::Init(Config *config) {
 			// create name-value argument pairs
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@name", mid);
 			vector<string> *names = config->getValues(buffer);
-			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@value", mid);
-			vector<string> *vals = config->getValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
-			if (names && vals) {
-				assert(names->size() == vals->size());
-				for (int i = 0; i < (int)names->size(); i++) {
-					c->push_back(pair<string, string>((*names)[i], (*vals)[i]));
+			for (int i = 0; names && i < names->size(); i++) {
+				snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/@value", mid, i+1);
+				char *val = config->getFirstValue(buffer);
+				if (!val) {
+					snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/text()", mid, i+1);
+					val = config->getFirstValue(buffer);
+					if (!val) {
+						LOG_ERROR(logger, "No value for param: " << (*names)[i].c_str());
+						continue;
+					}
 				}
+				c->push_back(pair<string, string>((*names)[i], val));
+				free(val);
 			}
-			delete vals;
 			delete names;
 
 			for (int i = 0; i < nThreads; ++i) {
