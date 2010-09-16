@@ -67,10 +67,16 @@ vector<string> *Config::getValues(const char *xpath) {
 	// at least one result found
 	vector<string> *result = new vector<string>();
 	for (int i = 0; i < nodes->nodesetval->nodeNr; i++) {
-		if (nodes->nodesetval->nodeTab[i]->type == XML_TEXT_NODE) {
-			result->push_back(nodes->nodesetval->nodeTab[i]->content ? (char*)nodes->nodesetval->nodeTab[i]->content : "");
+		xmlNodePtr node = nodes->nodesetval->nodeTab[i];
+		if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
+			string val;
+			do {
+				if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content)
+					val += (char*)node->content;
+			} while ((node = node->next));
+			result->push_back(val);
 		} else {
-			xmlChar *item = xmlNodeListGetString(doc, nodes->nodesetval->nodeTab[i]->xmlChildrenNode, 1);
+			xmlChar *item = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
 			result->push_back(item ? (char*)item : "");
 	        	xmlFree(item);
 		}
@@ -97,10 +103,16 @@ char *Config::getFirstValue(const char *xpath) {
 
 	// at least one result found
 	char *result;
-	if (nodes->nodesetval->nodeTab[0]->type == XML_TEXT_NODE) {
-		result = nodes->nodesetval->nodeTab[0]->content ? strdup((char*)nodes->nodesetval->nodeTab[0]->content) : NULL;
+	xmlNodePtr node = nodes->nodesetval->nodeTab[0];
+	if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
+		string val;
+		do {
+			if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content)
+				val += (char*)node->content;
+		} while ((node = node->next));
+		result = strdup(val.c_str());
 	} else {
-		xmlChar *item = xmlNodeListGetString(doc, nodes->nodesetval->nodeTab[0]->xmlChildrenNode, 1);
+		xmlChar *item = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
 		result = item ? strdup((char*)item) : NULL;
         	xmlFree(item);
 	}
