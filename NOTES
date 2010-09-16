@@ -1,51 +1,26 @@
-http://docs.bor.org.ua/eBooks/Perl/Manning.Extending_and_Embedding_Perl.2002.pdf
+Obecne:
+- system pro pousteni modulu na resources
+- server se sklada z processing_engines
+- processing_engine se sklada z processoru (pospojovanych pomoci front)
+	- fronta ma prioritu, nejdrive se odebiraji prioritni joby
+- processor obsahuje jeden, ci vice modulu
+- modul zpracovava resource (resource je cokoliv, co je zabaleno do C++ objektu)
+
 
 Obecne
-
-- C++ (+ nejake bindingy?)
-	- predevsim kvuli velikosti retezcu, dostupnosti knihoven
+- C++ a bindingy v dalsich jazycich (Perl, Python, Java -- pres SWIG)
+	- C++ predevsim kvuli velikosti retezcu, dostupnosti knihoven a rychlosti
 - knihovny:
-	- curl
-	- c-ares: async DNS
-	- libcurl: download
 	- libxml2: config soubory, html parser, uri
-	- libtidy (HTML -> XHTML)
-- programy:
-	- djbcache: name server
-	- pdns_recursor, nebo si cachovat sam(?)
-	- unbound?
-- celkove: max. 8-16 GB RAM
 
 Coding style:
 - includes: C, C++ (+STL), other libs, local
-
-Struktura
-
-	- master, ktery zna vsechny domeny (ma v pameti)
-		- muze jich byt vic, propojenych one-to-one
-		- staci hashe domen (hash domain->robotid)
-	- roboti, kteri znaji vsechna URL, co obsluhuji
-		- maji je v pameti (teda staci jejich hashe, predpokladame, ze jsou jednoznacne)
-		- + robots.txt
-
-MASTER
-	- prijima a prideluje domeny/URL ke zpracovani
-	- vede si evidenci o domenach (ma v pameti)
-
-ROBOT
-	- ma seznam URL (v pameti)
-	- ma obsah robots.txt ke svym domenam (taky v pameti)
-	- udrzuje si fronty pozadavku na disku v souborech
-	- pracuje jako s paskou, cte+modifikuje+zapisuje
-	- cilova rychlost stahovani: 1000 stranek/s
-	- cilovy pocet URL: 10 M na masinu (idealne vic)
-		- priklady URL: vytahnout od Galambose seznam URL, zkusit zahashovat
-
 
 Adresarova struktura:
 /usr/lib/libhector.so (sdilena knihovna pro server)
 /usr/bin/hector_client
 /usr/bin/hector_server
+/usr/bin/hector_common.sh (to be included)
 /usr/lib/hector/Robot.so (server modul)
 /usr/lib/hector/modules/ReadResource.so
 /usr/lib/hector/modules/perl/ReadResource.pm
@@ -53,24 +28,17 @@ Adresarova struktura:
 /usr/lib/hector/modules/perl/Hector.so
 /usr/lib/hector/resources/WebResource.so
 /usr/lib/hector/resources/TestResource.so
-/usr/share/hector/skript.sh, nejake common.sh (ted je v bin, mozna tak nechat)
-/usr/include/hector/*.h (vse pro externi Resource a Module)
+/usr/include/hector/*.{h,i} (vse pro externi Resource a Module, vcetne SWIG bindingu)
 
 LD_LIBRARY_PATH += $PREFIX/lib/hector:$PREFIX/lib/hector/resources:$PREFIX/lib/hector/modules
 PERL5LIB += $PREFIX/lib/hector/modules/perl
-podobne pro python a javu
+- podobne pro python a javu
 
-TODO
+Zajimava URL:
 
-- nejaky generator testresources (do robota) + otestovat load a save
-- otestovat Perl moduly na memory leaks (mockrat volat metody)
-- client: zrychlit nabihani, implementovat reconnect
+- http://docs.bor.org.ua/eBooks/Perl/Manning.Extending_and_Embedding_Perl.2002.pdf
 
-- Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl
-
-- nejak vylepsit testy, pridat testy perlu/pythonu/javy
-- do /usr/share/hector/skript.sh nejake common.sh
-
+OLD
 rozmyslet:
 - predavani dat mezi procesy + synchronizace
 	- mmap + ipc
@@ -79,8 +47,4 @@ rozmyslet:
 
 - resource pro PML
 	- zatim nedelat, az predelaji TreeX, tak se podivat, jestli uz maji rozumny interface :)
-	- pomoci PML + prevod PML schematu do protocol buffers .proto nejakym
-	  skriptem?
-	- prevod do C++ struktury -- z ceho, PML schematu, nebo .proto?
-	- prevod instanci PML z XML do protocol buffers
-
+	- obalit Perlovou reprezentaci, pridat factory s N vlakny a synchronizaci
