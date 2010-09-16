@@ -1,0 +1,12 @@
+- obslehnout ze SWIG kod pro Python a Javu, aby se daly psat moduly i v nich
+	- Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl
+
+- prepsat klienta do C++, aby to bylo rychle, LWP navazuje spojeni nejak
+  pomalu, asi bude vyzadovat readline knihovnu, nebo ze bych obslehnul z
+  libxml, nacitani i bez readline?
+	- client: zrychlit nabihani, implementovat reconnect
+
+DONE
+- upravit http server, aby akceptoval multi-line headers (nemelo by byt az tak
+  tezke, proste klasicke zpozdene zapisovani), neni poradne otestovano(!)
+
