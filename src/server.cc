@@ -18,6 +18,7 @@ log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("bin.server");
 
 const char *configFile = "config.xml";
 const char *baseDir = PREFIX "/lib/hector";
+bool autostart = false;
 bool foreground = false;
 bool help = false;
 int verbose = 0;
@@ -29,6 +30,7 @@ usage: server [options] serverId [args]\n\
 options:\n\
   --config, -c		Config file path (%s)\n\
   --base, -b		Base dir (%s)\n\
+  --autostart, -a	Start processing engines immediately\n\
   --foreground, -f	Do not fork\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
@@ -48,6 +50,7 @@ int processOptions(int argc, char *argv[]) {
 		static struct option long_options[] = {
 			{ "config", 1, NULL, 'c' },
 			{ "base", 1, NULL, 'b'},
+			{ "autostart", 0, NULL, 'a'},
 			{ "foreground", 0, NULL, 'f'},
 			{ "verbose", 0, NULL, 'v' },
 			{ "help", 0, NULL, 'h' },
@@ -55,7 +58,7 @@ int processOptions(int argc, char *argv[]) {
 			{ NULL, 0, NULL, 0 }
 		};
 
-		int c = getopt_long(argc, argv, "c:b:fvhV", long_options, &option_index);
+		int c = getopt_long(argc, argv, "c:b:afvhV", long_options, &option_index);
 		if (c == -1)
 			break;
 
@@ -65,6 +68,9 @@ int processOptions(int argc, char *argv[]) {
 			break;
 		case 'b':
 			baseDir = strdup(optarg);
+			break;
+		case 'a':
+			autostart = true;
 			break;
 		case 'f':
 			foreground = true;
@@ -156,7 +162,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// run server
-	server->Start(true);
+	server->Start(autostart, true);
 
 	delete server;
 	delete config;

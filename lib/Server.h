@@ -21,7 +21,7 @@ public:
 	Server(const char *id);
 	~Server();
 	bool Init(Config *config);
-	void Start(bool wait);
+	void Start(bool autostart, bool wait);
 	void Stop();
 	void Pause();
 	void Resume();

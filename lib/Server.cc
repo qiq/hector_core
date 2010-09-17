@@ -91,12 +91,18 @@ bool Server::Init(Config *config) {
 	return true;
 }
 
-void Server::Start(bool wait) {
+void Server::Start(bool autostart, bool wait) {
+	// start processing engines (if requested, othewise they may be started using hector_client)
+	if (autostart) {
+		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
+			(*iter)->Start();
+		}
+	}
 	// start server
 	LOG_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
 	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
-		LOG_INFO(logger, "Stopping processing engined");
+		LOG_INFO(logger, "Stopping processing engines");
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
