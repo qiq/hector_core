@@ -1,7 +1,7 @@
 /**
  * Main server object
  * - store all properties
- * - store all sub-objects (processing chains, etc)
+ * - store all sub-objects (processing engines, etc)
  * - load server library
  */
 #ifndef _SERVER_H_

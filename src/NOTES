@@ -1,6 +1,6 @@
 server: univerzalni spoustec
 - spusti server na danem portu a adrese
-- nahraje obsluhu serveru, spusti server (+ processing_chain + vsechno ostatni)
+- nahraje obsluhu serveru, spusti server (+ processing_engine + vsechno ostatni)
 
 client: textovy klient, aby clovek nemusel rucne psat HTTP pozadavky
 - nastavovat a zjistovat nastaveni aby to umelo

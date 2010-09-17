@@ -57,7 +57,7 @@ bool Server::Init(Config *config) {
 	}
 	free(s);
 
-	// create processing chain(s)
+	// create processing engine(s)
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine/@id", getId());
 	v = config->getValues(buffer);
 	if (v) {
@@ -96,7 +96,7 @@ void Server::Start(bool wait) {
 	LOG_INFO(logger, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
 	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
-		LOG_INFO(logger, "Stopping processing chains");
+		LOG_INFO(logger, "Stopping processing engined");
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
@@ -105,7 +105,7 @@ void Server::Start(bool wait) {
 }
 
 void Server::Stop() {
-	LOG_INFO(logger, "Stopping processing chains");
+	LOG_INFO(logger, "Stopping processing engines");
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		(*iter)->Stop();
 	}

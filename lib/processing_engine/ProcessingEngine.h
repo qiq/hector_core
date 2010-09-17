@@ -1,9 +1,9 @@
 /**
- * Processing chain: call several modules
+ * Processing engine: call several modules
  */
 
-#ifndef _PROCESSING_CHAIN_H_
-#define _PROCESSING_CHAIN_H_
+#ifndef _PROCESSING_ENGINE_H_
+#define _PROCESSING_ENGINE_H_
 
 #include <config.h>
 

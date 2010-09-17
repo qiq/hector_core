@@ -1,5 +1,5 @@
 /**
- * Processing chain: call several modules
+ * Processing engine: call several modules
  */
 
 #include <config.h>
