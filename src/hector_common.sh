@@ -8,7 +8,7 @@ else
 fi
 
 function hector_server_start {
-	hector_server -c $1 $2
+	hector_server -c $@
 }
 
 function hector_server_shutdown {

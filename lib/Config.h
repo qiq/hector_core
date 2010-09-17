@@ -19,7 +19,7 @@ class Config {
 public:
 	Config();
 	~Config();
-	bool parseFile(const char *fileName);
+	bool parseFile(const char *fileName, std::vector<std::string> *args);
 
 	std::vector<std::string> *getValues(const char *XPath);
 	char *getFirstValue(const char *XPath);

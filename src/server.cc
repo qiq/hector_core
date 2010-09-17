@@ -7,6 +7,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
 #include "common.h"
@@ -24,14 +25,15 @@ char *serverId;
 
 void printHelp() {
 	fprintf(stderr, "\
-usage: server [options] serverId\n\
+usage: server [options] serverId [args]\n\
 options:\n\
   --config, -c		Config file path (%s)\n\
   --base, -b		Base dir (%s)\n\
   --foreground, -f	Do not fork\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
-  --version, -V		Version information\n", configFile, baseDir);
+  --version, -V		Version information\n\n\
+$1, $2, ... are substituted by args in the config file.\n", configFile, baseDir);
 	exit(EXIT_SUCCESS);
 }
 
@@ -92,6 +94,9 @@ int main(int argc, char *argv[]) {
 	if (cmdIndex >= argc)
 		printHelp();
 	serverId = argv[cmdIndex];
+	vector<string> args;
+	for (int i = cmdIndex+1; i < argc; i++)
+		args.push_back(argv[i]);
 
 	// set environment variables according to baseDir
 	char value[10240];
@@ -105,7 +110,7 @@ int main(int argc, char *argv[]) {
 
 	// load config file
 	Config *config = new Config();
-	if (!config->parseFile(configFile))
+	if (!config->parseFile(configFile, &args))
 		exit(EXIT_FAILURE);
 
 	// check that serverId does exist

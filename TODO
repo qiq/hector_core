@@ -1,3 +1,5 @@
+- autostart mod (pusti vsechny processing chainy, co ma)
+
 - obslehnout ze SWIG kod pro Python a Javu, aby se daly psat moduly i v nich
 	- Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl
 

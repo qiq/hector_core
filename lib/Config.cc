@@ -4,6 +4,7 @@
 
 #include <config.h>
 
+#include <stdio.h>
 #include <string.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
@@ -27,8 +28,74 @@ Config::~Config() {
 	xmlCleanupParser();
 }
 
-bool Config::parseFile(const char *fileName) {
-	if (!(doc = xmlParseFile(fileName))) {
+bool Config::parseFile(const char *fileName, vector<string> *args) {
+	// read entire document into memory
+	FILE *f = fopen(fileName, "r");
+	if (!f) {
+		fprintf(stderr, "%s: failed to open\n", fileName);
+		return false;
+	}
+	fseek(f, 0, SEEK_END);
+	long size = ftell(f);
+	if (size < 0) {
+		fprintf(stderr, "%s: failed to get file size\n", fileName);
+		fclose(f);
+		return false;
+	}
+	char *data = (char*)malloc(size);
+	fseek(f, 0, SEEK_SET);
+	if (fread(data, 1, size, f) != size) {
+		fprintf(stderr, "%s: failed to read file\n", fileName);
+		fclose(f);
+		return false;
+	}
+	fclose(f);
+	
+	// substitute $N by arguments
+	string s;
+	bool escape = false;
+	for (int i = 0; i < size; i++) {
+		char c = data[i];
+		switch (c) {
+		case '\\':
+			if (!escape) {
+				escape = true;
+			} else {
+				s.append("\\");
+				escape = false;
+			}
+			break;
+		case '$':
+			if (!escape) {
+				i++;
+				// collect number
+				int start = i;
+				int n = 0;
+				while (i < size && data[i] >= '0' && data[i] <= '9') {
+					n = n*10+(data[i]-'0');
+					i++;
+				}
+				if (args && i-start > 0 && n > 0 && n <= args->size()) {
+					// replace argument
+					s.append((*args)[n-1]);
+					i--;
+				} else {
+					// no number -> ignore
+					i = start-1;
+				}
+			} else {
+				s.append("$");
+			}
+			escape = false;
+			break;
+		default:
+			s.append(1, c);
+			escape = false;
+			break;
+		}
+	}
+
+	if (!(doc = xmlParseDoc((const xmlChar*)s.c_str()))) {
 		fprintf(stderr, "%s: failed to parse\n", fileName);
 		return false;
 	}
