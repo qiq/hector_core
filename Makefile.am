@@ -7,3 +7,5 @@ EXTRA_DIST = configure hector_config.dtd hector_config.xml.example hector_server
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hector_core.pc
 
+hectordatadir = $(datadir)/hector
+hectordata_DATA = hector_config.dtd

@@ -4,9 +4,9 @@
 
 <!-- common elements -->
 
-<!ELEMENT param		EMPTY >
+<!ELEMENT param		(#PCDATA) >
 <!ATTLIST param
-	name		CDATA		""
+	name		CDATA		#REQUIRED
 	value		CDATA		"" >
 
 <!ELEMENT lib		EMPTY >
