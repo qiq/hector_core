@@ -244,7 +244,7 @@ bool Processor::Init(Config *config) {
 				break;
 			case Module::OUTPUT:
 				if (i != n-1) {
-					LOG_ERROR(logger, "Output module must be last");
+					LOG_ERROR(logger, "Output module must be the last one in a Processor");
 					return false;
 				}
 				if (outputFilters.size() > 0) {
