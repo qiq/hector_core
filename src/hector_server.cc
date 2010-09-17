@@ -26,7 +26,7 @@ char *serverId;
 
 void printHelp() {
 	fprintf(stderr, "\
-usage: server [options] serverId [args]\n\
+usage: hector_server [options] serverId [args]\n\
 options:\n\
   --config, -c		Config file path (%s)\n\
   --base, -b		Base dir (%s)\n\
@@ -40,7 +40,7 @@ $1, $2, ... are substituted by args in the config file.\n", configFile, baseDir)
 }
 
 void printVersion() {
-	fprintf(stderr, "server %s(%s)\nbugreports: %s\n", PACKAGE_STRING, PACKAGE_VERSION, PACKAGE_BUGREPORT);
+	fprintf(stderr, "hector_server %s(%s)\nbugreports: %s\n", PACKAGE_STRING, PACKAGE_VERSION, PACKAGE_BUGREPORT);
 	exit(EXIT_SUCCESS);
 }
 

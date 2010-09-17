@@ -5,7 +5,7 @@ bin_PROGRAMS = hector_server
 bin_SCRIPTS = hector_client hector_common.sh
 
 hector_server_SOURCES = \
-	server.cc
+	hector_server.cc
 
 hector_server_CXXFLAGS = $(AM_CXXFLAGS)
 hector_server_LDFLAGS = $(AM_LDFLAGS)
