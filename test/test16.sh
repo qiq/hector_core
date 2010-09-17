@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. common.sh
+. test_common.sh
 
 test_init
 test_server_start

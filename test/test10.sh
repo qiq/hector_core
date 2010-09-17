@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. common.sh
+. test_common.sh
 
 test_init
 rm -f test10.data.out
