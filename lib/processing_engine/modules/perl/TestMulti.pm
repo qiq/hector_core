@@ -24,7 +24,6 @@ sub DESTROY {
 
 sub Init {
 	my ($self, $params) = @_;
-	my @a;
 	foreach my $p (@{$params}) {
 		if (exists $self->{$p->[0]}) {
 			$self->{$p->[0]} = $p->[1];
