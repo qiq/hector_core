@@ -42,10 +42,11 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 		fclose(f);
 		return false;
 	}
-	char *data = (char*)malloc(size);
 	fseek(f, 0, SEEK_SET);
+	char *data = (char*)malloc(size);
 	if (fread(data, 1, size, f) != size) {
 		fprintf(stderr, "%s: failed to read file\n", fileName);
+		free(data);
 		fclose(f);
 		return false;
 	}
@@ -94,6 +95,7 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 			break;
 		}
 	}
+	free(data);
 
 	if (!(doc = xmlParseDoc((const xmlChar*)s.c_str()))) {
 		fprintf(stderr, "%s: failed to parse\n", fileName);
