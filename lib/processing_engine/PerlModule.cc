@@ -123,10 +123,11 @@ void *convert_ptr(SV *sv, bool disown) {
 SV *PerlModule::CreatePerlResource(Resource *resource) {
 	SV *result;
 	const char *type = resource->getTypeStr();
+	const char *module = resource->getModuleStr();
 	// initialize resource type
 	if (initialized.find(type) == initialized.end()) {
 		char s[1024];
-		snprintf(s, sizeof(s), "package Hector::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", type);
+		snprintf(s, sizeof(s), "package %s::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", module, type);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR(logger, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
@@ -135,9 +136,9 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 		initialized.insert(type);
 	}
 
-	// create new instance of a resource (of given type): Hector::XXXResource->new2(0xabc)
+	// create new instance of a resource (of given type): HectorXXX::YYYResource->new2(0xabc)
 	char s[1024];
-	snprintf(s, sizeof(s), "Hector::%s", type);
+	snprintf(s, sizeof(s), "%s::%s", module, type);
 	dSP;
 	ENTER;
         PUSHMARK(SP);

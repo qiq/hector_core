@@ -22,6 +22,8 @@ public:
 	virtual int getTypeId() = 0;
 	// type string of a resource
 	virtual const char *getTypeStr() = 0;
+	// module prefix (e.g. Hector for Hector::TestResource)
+	virtual const char *getModuleStr() = 0;
 	// id should be unique across all resources
 	virtual int getId() = 0;
 	virtual void setId(int id) = 0;

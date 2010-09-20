@@ -12,6 +12,7 @@ public:
         virtual Resource *Clone() = 0;
         virtual int getTypeId() = 0;
         virtual const char *getTypeStr() = 0;
+        virtual const char *getModuleStr() = 0;
         virtual int getId() = 0;
         virtual void setId(int id) = 0;
         virtual int getStatus() = 0;

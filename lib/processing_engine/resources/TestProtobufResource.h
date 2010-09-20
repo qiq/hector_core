@@ -23,6 +23,8 @@ public:
 	int getTypeId();
 	// type string of a resource
 	const char *getTypeStr();
+	// module prefix (e.g. Hector for Hector::TestResource)
+	const char *getModuleStr();
 	// id should be unique across all resources
 	int getId();
 	void setId(int id);
@@ -57,6 +59,10 @@ inline int TestProtobufResource::getTypeId() {
 
 inline const char *TestProtobufResource::getTypeStr() {
 	return "TestProtobufResource";
+}
+
+inline const char *TestProtobufResource::getModuleStr() {
+	return "Hector";
 }
 
 inline int TestProtobufResource::getId() {

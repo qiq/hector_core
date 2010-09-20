@@ -12,6 +12,7 @@ public:
         Resource *Clone();
         int getTypeId();
         const char *getTypeStr();
+        const char *getModuleStr();
         int getId();
         void setId(int id);
         int getStatus();
