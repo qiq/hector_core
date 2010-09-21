@@ -1,7 +1,7 @@
 // This class represents one nextProcessor element
 
-#ifndef _OUTPUTFILTER_H_
-#define _OUTPUTFILTER_H_
+#ifndef _LIB_PROCESSING_ENGINE_OUTPUTFILTER_H_
+#define _LIB_PROCESSING_ENGINE_OUTPUTFILTER_H_
 
 #include "Resource.h"
 #include "SyncQueue.h"

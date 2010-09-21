@@ -2,8 +2,8 @@
  * Simple multi-threaded HTTP server. Descendant must define HandleRequest method.
  */
 
-#ifndef _SIMPLE_HTTP_SERVER_
-#define _SIMPLE_HTTP_SERVER_
+#ifndef _LIB_SERVER_SIMPLE_HTTP_SERVER_
+#define _LIB_SERVER_SIMPLE_HTTP_SERVER_
 
 #include <config.h>
 

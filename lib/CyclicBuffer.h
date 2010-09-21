@@ -2,8 +2,8 @@
  * Simple cyclic buffer implementation
  */
 
-#ifndef _CYCLICBUFFER_H_
-#define _CYCLICBUFFER_H_
+#ifndef _LIB_CYCLICBUFFER_H_
+#define _LIB_CYCLICBUFFER_H_
 
 #include <config.h>
 

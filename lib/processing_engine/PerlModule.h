@@ -2,8 +2,8 @@
  * Dummy module, does nothing.
  */
 
-#ifndef _PERL_MODULE_H_
-#define _PERL_MODULE_H_
+#ifndef _LIB_PROCESSING_ENGINE_PERL_MODULE_H_
+#define _LIB_PROCESSING_ENGINE_PERL_MODULE_H_
 
 #include <config.h>
 

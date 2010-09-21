@@ -2,8 +2,8 @@
  * Common functions, macros, etc
  */
 
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#ifndef _LIB_COMMON_H_
+#define _LIB_COMMON_H_
 
 #include <config.h>
 

@@ -2,8 +2,8 @@
  * POSIX lock wrapping class
  */
 
-#ifndef _RWLOCK_H_
-#define _RWLOCK_H_
+#ifndef _LIB_RWLOCK_H_
+#define _LIB_RWLOCK_H_
 
 #include <config.h>
 

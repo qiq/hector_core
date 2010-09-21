@@ -8,8 +8,8 @@
  * sub-queues.
  */
 
-#ifndef _SYNCQUEUE_H_
-#define _SYNCQUEUE_H_
+#ifndef _LIB_SYNCQUEUE_H_
+#define _LIB_SYNCQUEUE_H_
 
 #include <config.h>
 

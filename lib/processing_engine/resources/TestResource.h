@@ -2,8 +2,8 @@
  * Class representing queue of resources (mainly HTML pages) while processing.
  */
 
-#ifndef _TEST_RESOURCE_H_
-#define _TEST_RESOURCE_H_
+#ifndef _LIB_PROCESSING_ENGINE_RESOURCES_TEST_RESOURCE_H_
+#define _LIB_PROCESSING_ENGINE_RESOURCES_TEST_RESOURCE_H_
 
 #include <config.h>
 

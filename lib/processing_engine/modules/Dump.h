@@ -2,8 +2,8 @@
  * Dumps Resource content into log. Useful for debugging purposes.
  */
 
-#ifndef _DUMP_H_
-#define _DUMP_H_
+#ifndef _LIB_PROCESSING_ENGINE_MODULES_DUMP_H_
+#define _LIB_PROCESSING_ENGINE_MODULES_DUMP_H_
 
 #include <config.h>
 

@@ -2,8 +2,8 @@
  * Test module, does nothing.
  */
 
-#ifndef _SAVE_H_
-#define _SAVE_H_
+#ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
+#define _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
 
 #include <config.h>
 

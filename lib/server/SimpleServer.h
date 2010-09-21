@@ -2,8 +2,8 @@
  * Simple multi-threaded server
  */
 
-#ifndef _SIMPLE_SERVER_
-#define _SIMPLE_SERVER_
+#ifndef _LIB_SERVER_SIMPLE_SERVER_
+#define _LIB_SERVER_SIMPLE_SERVER_
 
 #include <config.h>
 

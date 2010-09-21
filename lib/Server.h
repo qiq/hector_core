@@ -4,8 +4,8 @@
  * - store all sub-objects (processing engines, etc)
  * - load server library
  */
-#ifndef _SERVER_H_
-#define _SERVER_H_
+#ifndef _LIB_SERVER_H_
+#define _LIB_SERVER_H_
 
 #include <config.h>
 

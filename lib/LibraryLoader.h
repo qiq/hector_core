@@ -1,5 +1,5 @@
-#ifndef _LIBRARY_LOADER_H_
-#define _LIBRARY_LOADER_H_
+#ifndef _LIB_LIBRARY_LOADER_H_
+#define _LIB_LIBRARY_LOADER_H_
 
 #include <config.h>
 

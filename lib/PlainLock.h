@@ -2,8 +2,8 @@
  * POSIX lock wrapping class
  */
 
-#ifndef _PLAINLOCK_H_
-#define _PLAINLOCK_H_
+#ifndef _LIB_PLAIN_LOCK_H_
+#define _LIB_PLAIN_LOCK_H_
 
 #include <config.h>
 

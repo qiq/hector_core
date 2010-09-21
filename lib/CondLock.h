@@ -2,8 +2,8 @@
  * POSIX lock wrapping class
  */
 
-#ifndef _COND_LOCK_H_
-#define _COND_LOCK_H_
+#ifndef _LIB_COND_LOCK_H_
+#define _LIB_COND_LOCK_H_
 
 #include <config.h>
 

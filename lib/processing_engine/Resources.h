@@ -1,7 +1,7 @@
 // List of all resource types
 
-#ifndef _RESOURCES_H_
-#define _RESOURCES_H_
+#ifndef _LIB_PROCESSING_ENGINE_RESOURCES_H_
+#define _LIB_PROCESSING_ENGINE_RESOURCES_H_
 
 #include <config.h>
 

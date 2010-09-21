@@ -2,8 +2,8 @@
  * Class representing a resource, basic item of processing.
  */
 
-#ifndef _RESOURCE_H_
-#define _RESOURCE_H_
+#ifndef _LIB_PROCESSING_ENGINE_RESOURCE_H_
+#define _LIB_PROCESSING_ENGINE_RESOURCE_H_
 
 #include <config.h>
 

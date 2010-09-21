@@ -1,5 +1,5 @@
-#ifndef _STDIO_CONNECTION_H_
-#define _STDIO_CONNECTION_H_
+#ifndef _LIB_STDIO_CONNECTION_H_
+#define _LIB_STDIO_CONNECTION_H_
 
 #include <log4cxx/logger.h>
 #include "Connection.h"

@@ -1,5 +1,5 @@
-#ifndef _PROCESS_CONNECTION_H_
-#define _PROCESS_CONNECTION_H_
+#ifndef _LIB_PROCESS_CONNECTION_H_
+#define _LIB_PROCESS_CONNECTION_H_
 
 #include <log4cxx/logger.h>
 #include <unistd.h>

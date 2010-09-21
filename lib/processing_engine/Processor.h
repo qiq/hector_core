@@ -2,8 +2,8 @@
  * Processor contains one or more modules, that actually process documents.
  */
 
-#ifndef _PROCESSOR_H_
-#define _PROCESSOR_H_
+#ifndef _LIB_PROCESSING_ENGINE_PROCESSOR_H_
+#define _LIB_PROCESSING_ENGINE_PROCESSOR_H_
 
 #include <config.h>
 

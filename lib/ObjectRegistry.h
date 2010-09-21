@@ -3,8 +3,8 @@
  * There is no need to lock registry, because values are added only during init
  * phase (single thread), later we only read the registry.
  */
-#ifndef _OBJECT_REGISTRY_H_
-#define _OBJECT_REGISTRY_H_
+#ifndef _LIB_OBJECT_REGISTRY_H_
+#define _LIB_OBJECT_REGISTRY_H_
 
 #include <config.h>
 

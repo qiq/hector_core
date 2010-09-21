@@ -1,7 +1,7 @@
 // template-based value getters/setters implementation
 
-#ifndef _OBJECT_VALUES_
-#define _OBJECT_VALUES_
+#ifndef _LIB_OBJECT_VALUES_
+#define _LIB_OBJECT_VALUES_
 
 #include <config.h>
 

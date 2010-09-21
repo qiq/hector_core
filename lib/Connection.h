@@ -1,5 +1,5 @@
-#ifndef _CONNECTION_H_
-#define _CONNECTION_H_
+#ifndef _LIB_CONNECTION_H_
+#define _LIB_CONNECTION_H_
 
 class Connection {
 public:

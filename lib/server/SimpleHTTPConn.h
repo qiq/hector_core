@@ -2,8 +2,8 @@
  * Simple HTTP server for management, one connection
  */
 
-#ifndef _SIMPLE_HTTP_CONN_
-#define _SIMPLE_HTTP_CONN_
+#ifndef _LIB_SERVER_SIMPLE_HTTP_CONN_
+#define _LIB_SERVER_SIMPLE_HTTP_CONN_
 
 #include <config.h>
 

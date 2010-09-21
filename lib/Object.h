@@ -1,8 +1,8 @@
 // basic object interface, get/set values
 
 
-#ifndef _OBJECT_H_
-#define _OBJECT_H_
+#ifndef _LIB_OBJECT_H_
+#define _LIB_OBJECT_H_
 
 #include <config.h>
 

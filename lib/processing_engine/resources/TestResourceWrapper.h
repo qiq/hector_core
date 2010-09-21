@@ -3,8 +3,8 @@
  * It uses Google Protocol Buffers to de/serialize.
  */
 
-#ifndef _TEST_RESOURCE_WRAPPER_H_
-#define _TEST_RESOURCE_WRAPPER_H_
+#ifndef _LIB_PROCESSING_ENGINE_RESOURCES_TEST_RESOURCE_WRAPPER_H_
+#define _LIB_PROCESSING_ENGINE_RESOURCES_TEST_RESOURCE_WRAPPER_H_
 
 #include <config.h>
 

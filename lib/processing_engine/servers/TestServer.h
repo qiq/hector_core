@@ -2,8 +2,8 @@
  *
  */
 
-#ifndef _TEST_SERVER_
-#define _TEST_SERVER_
+#ifndef _LIB_PROCESSING_ENGINE_SERVERS_TEST_SERVER_
+#define _LIB_PROCESSING_ENGINE_SERVERS_TEST_SERVER_
 
 #include <pthread.h>
 #include <log4cxx/logger.h>

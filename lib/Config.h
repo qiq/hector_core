@@ -2,8 +2,8 @@
  * Simple parser for configuration files based on XML
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _LIB_CONFIG_H_
+#define _LIB_CONFIG_H_
 
 #include <config.h>
 

@@ -2,8 +2,8 @@
  * Test module, does nothing.
  */
 
-#ifndef _TEST_OUTPUT_H_
-#define _TEST_OUTPUT_H_
+#ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_OUTPUT_H_
+#define _LIB_PROCESSING_ENGINE_MODULES_TEST_OUTPUT_H_
 
 #include <config.h>
 

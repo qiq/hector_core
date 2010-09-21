@@ -2,8 +2,8 @@
  * Test module, does nothing.
  */
 
-#ifndef _LOAD_H_
-#define _LOAD_H_
+#ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
+#define _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
 
 #include <config.h>
 

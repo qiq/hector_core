@@ -2,8 +2,8 @@
  * Module, pure virtual class, ancestor of all modules.
  */
 
-#ifndef _MODULE_H_
-#define _MODULE_H_
+#ifndef _LIB_PROCESSING_ENGINE_MODULE_H_
+#define _LIB_PROCESSING_ENGINE_MODULE_H_
 
 #include <config.h>
 
