@@ -94,7 +94,7 @@ inline int TestProtobufResource::getSerializedSize() {
 }
 
 inline bool TestProtobufResource::Serialize(google::protobuf::io::ZeroCopyOutputStream *output) {
-	return MessageGetSerializedSize(&r);
+	return MessageSerialize(&r, output);
 }
 
 inline bool TestProtobufResource::Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) {

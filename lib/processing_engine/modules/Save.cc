@@ -107,6 +107,7 @@ Resource *Save::Process(Resource *resource) {
 			return NULL;
 		if (!WriteToFile(serial->c_str(), size))
 			return NULL;
+		delete serial;
 	}
 
 	delete resource;
