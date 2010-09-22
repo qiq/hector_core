@@ -9,4 +9,5 @@
 DONE
 - upravit http server, aby akceptoval multi-line headers (nemelo by byt az tak
   tezke, proste klasicke zpozdene zapisovani), neni poradne otestovano(!)
-
+- nastavit loglevel pro kazdy objekt zvlast
+	- upravit Object.h, pridat jednu pseudo promennou

@@ -21,6 +21,12 @@
 #define LOG_ERROR(logger, ...) { LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__) }
 #define LOG_FATAL(logger, ...) { LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__) }
 
+#define LOG_LEVEL_TRACE 0
+#define LOG_LEVEL_DEBUG 1
+#define LOG_LEVEL_INFO 2
+#define LOG_LEVEL_ERROR 3
+#define LOG_LEVEL_FATAL 4
+
 class Object {
 public:
 	Object(ObjectRegistry *objects, const char *id);
@@ -47,6 +53,7 @@ protected:
 	ObjectRegistry *objects;
 	char *id;
 	RWLock rwlock;
+	int logLevel;
 
 	virtual char *getValueSync(const char *name);
 	virtual bool setValueSync(const char *name, const char *value);
@@ -55,12 +62,16 @@ protected:
 	virtual void SaveCheckpointSync(const char *path, const char *id);
 	virtual void RestoreCheckpointSync(const char *path, const char *id);
 
+	const char *getLogLevelStr();
+	bool setLogLevel(const char *logLevel);
+
 	static log4cxx::LoggerPtr logger;
 };
 
 inline Object::Object(ObjectRegistry *objects, const char *id) {
 	this->objects = objects;
 	this->id = strdup(id);
+	this->logLevel = LOG_LEVEL_INFO;
 	if (objects)
 		objects->registerObject(this);
 }
@@ -70,6 +81,7 @@ inline Object::Object(ObjectRegistry *objects, const char *id, int index) {
 	char s[1024];
 	snprintf(s, sizeof(s), "%s[%d]", id, index);
 	this->id = strdup(s);
+	this->logLevel = LOG_LEVEL_INFO;
 	if (objects)
 		objects->registerObject(this);
 }
@@ -102,7 +114,10 @@ inline void Object::ObjectUnlock() {
 inline char *Object::getValue(const char *name) {
 	char *result;
 	ObjectLockRead();
-	result = getValueSync(name);
+	if (!strcmp(name, "logLevel"))
+		result = strdup(this->getLogLevelStr());
+	else
+		result = getValueSync(name);
 	ObjectUnlock();
 	return result;
 }
@@ -110,7 +125,10 @@ inline char *Object::getValue(const char *name) {
 inline bool Object::setValue(const char *name, const char *value) {
 	bool result;
 	ObjectLockWrite();
-	result = setValueSync(name, value);
+	if (!strcmp(name, "logLevel"))
+		result = this->setLogLevel(value);
+	else
+		result = setValueSync(name, value);
 	ObjectUnlock();
 	return result;
 }
@@ -120,6 +138,7 @@ inline std::vector<std::string> *Object::listNames() {
 	ObjectLockRead();
 	result = listNamesSync();
 	ObjectUnlock();
+	result->push_back("logLevel");
 	return result;
 }
 
@@ -136,23 +155,28 @@ inline void Object::RestoreCheckpoint(const char *path, const char *id) {
 }
 
 inline void Object::log_trace(const char *s) {
-	LOG_TRACE(logger, s);
+	if (logLevel <= LOG_LEVEL_TRACE)
+		LOG_TRACE(logger, s);
 }
 
 inline void Object::log_debug(const char *s) {
-	LOG_DEBUG(logger, s);
+	if (logLevel <= LOG_LEVEL_DEBUG)
+		LOG_DEBUG(logger, s);
 }
 
 inline void Object::log_info(const char *s) {
-	LOG_INFO(logger, s);
+	if (logLevel <= LOG_LEVEL_INFO)
+		LOG_INFO(logger, s);
 }
 
 inline void Object::log_error(const char *s) {
-	LOG_ERROR(logger, s);
+	if (logLevel <= LOG_LEVEL_ERROR)
+		LOG_ERROR(logger, s);
 }
 
 inline void Object::log_fatal(const char *s) {
-	LOG_FATAL(logger, s);
+	if (logLevel <= LOG_LEVEL_FATAL)
+		LOG_FATAL(logger, s);
 }
 
 #endif
