@@ -9,6 +9,7 @@
 
 #include <string>
 #include <log4cxx/logger.h>
+#include "Object.h"
 
 using namespace std;
 
@@ -37,7 +38,7 @@ public:
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
-	virtual char *toString() = 0;
+	virtual char *toString(Object::LogLevel = Object::INFO) = 0;
 protected:
 	static log4cxx::LoggerPtr logger;
 };

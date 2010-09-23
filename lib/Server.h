@@ -35,8 +35,6 @@ protected:
 
 	bool waitForFinish;
 	bool isRunning;
-
-	static log4cxx::LoggerPtr logger;
 };
 
 #endif

@@ -50,8 +50,6 @@ protected:
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	std::vector<std::string> *listNamesSync();
-
-	static log4cxx::LoggerPtr logger;
 };
 
 inline void ProcessingEngine::Start() {

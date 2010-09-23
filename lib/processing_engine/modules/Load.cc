@@ -34,7 +34,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 
 Load::~Load() {
 	if (!stream->Close())
-		LOG_ERROR(logger, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
+		LOG_ERROR("Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
 	free(filename);
 	delete values;
@@ -65,15 +65,15 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	if (!values->InitValues(params))
 		return false;
 	if (maxItems)
-		LOG_INFO(logger, "Going to load " << maxItems << " resources.");
+		LOG_INFO("Going to load " << maxItems << " resources.");
 
 	if (!filename) {
-		LOG_ERROR(logger, "No filename parameter given.");
+		LOG_ERROR("No filename parameter given.");
 		return false;
 	}
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
-		LOG_ERROR(logger, "Cannot open file " << filename << ": " << strerror(errno));
+		LOG_ERROR("Cannot open file " << filename << ": " << strerror(errno));
 		return false;
 	}
 
@@ -90,9 +90,9 @@ bool Load::ReadFromFile(void *data, int size) {
 		} else {
 			ObjectLockRead();
 			if (rd < 0)
-				LOG_ERROR(logger, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
+				LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 			else
-				LOG_INFO(logger, "Input file: " << filename << " read, finishing.");
+				LOG_INFO("Input file: " << filename << " read, finishing.");
 			ObjectUnlock();
 			return false;
 		}

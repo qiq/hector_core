@@ -58,7 +58,7 @@ void TestSimple::setFlipStatus(const char *name, const char *value) {
 		flipStatus = true;
 		break;
 	default:
-		LOG_ERROR(logger, "Invalid boolean value: " << value);
+		LOG_ERROR("Invalid boolean value: " << value);
 	}
 }
 
@@ -78,7 +78,7 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 Resource *TestSimple::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
-		LOG_INFO(logger, "Processing TestResource (" << tr->getStr() << ")");
+		LOG_INFO("Processing TestResource (" << tr->getStr() << ")");
 		ObjectLockWrite();
 		bool fs = flipStatus;
 		int ss = setStatus;

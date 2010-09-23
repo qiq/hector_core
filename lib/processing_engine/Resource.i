@@ -20,5 +20,5 @@ public:
         virtual std::string *Serialize() = 0;
         virtual bool Deserialize(std::string *s) = 0;
         virtual int getSize() = 0;
-        virtual char *toString() = 0;
+        virtual char *toString(Object::LogLevel logLevel) = 0;
 };

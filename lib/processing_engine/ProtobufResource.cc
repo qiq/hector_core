@@ -8,5 +8,5 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr ProtobufResource::logger(log4cxx::Logger::getLogger("lib.processing_engine.ProtobufResource"));
+log4cxx::LoggerPtr ProtobufResource::logger(log4cxx::Logger::getLogger("resources.ProtobufResource"));
 

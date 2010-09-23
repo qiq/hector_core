@@ -10,7 +10,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr Resources::logger(log4cxx::Logger::getLogger("lib.processing_engine.Resources"));
+log4cxx::LoggerPtr Resources::logger(log4cxx::Logger::getLogger("Resources"));
 
 PlainLock Resources::lock;
 std::tr1::unordered_map<string, int> Resources::name2id;

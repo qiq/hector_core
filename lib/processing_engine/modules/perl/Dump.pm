@@ -73,7 +73,7 @@ sub RestoreCheckpoint {
 sub Process() {
 	my ($self, $resource) = @_;
 
-	$self->{'_object'}->log_debug($resource->toString());
+	$self->{'_object'}->log_debug($resource->toString($Hector::Object::INFO));
 
 	return $resource;
 }

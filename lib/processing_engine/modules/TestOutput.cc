@@ -31,13 +31,13 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 Resource *TestOutput::Process(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
-		LOG_INFO(logger, "Resource arrived (" << tr->getStr() << ")");
+		LOG_INFO("Resource arrived (" << tr->getStr() << ")");
 		ObjectLockWrite();
 		items++;
 		ObjectUnlock();
 		delete tr;
 	} else {
-		LOG_INFO(logger, "Resource arrived (" << resource->getId() << ")");
+		LOG_INFO("Resource arrived (" << resource->getId() << ")");
 		ObjectLockWrite();
 		items++;
 		ObjectUnlock();

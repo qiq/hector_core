@@ -7,7 +7,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.robot.TestServer"));
+log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.TestServer"));
 
 TestServer::TestServer(ObjectRegistry *objects) {
 	this->objects = objects;

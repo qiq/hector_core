@@ -1,11 +1,10 @@
 // 
 #include <config.h>
 
+#include <log4cxx/level.h>
 #include "Object.h"
 
 using namespace std;
-
-log4cxx::LoggerPtr Object::logger(log4cxx::Logger::getLogger("lib.Object"));
 
 char *Object::getValueSync(const char *name) {
 	return NULL;
@@ -25,41 +24,36 @@ void Object::SaveCheckpointSync(const char *path, const char *id) {
 void Object::RestoreCheckpointSync(const char *path, const char *id) {
 }
 
-const char *Object::getLogLevelStr() {
-	switch (logLevel) {
-	case LOG_LEVEL_TRACE:
+const char *Object::getLogLevelStr(log4cxx::LoggerPtr logger) {
+	log4cxx::LevelPtr level = logger->getLevel();
+	if (level == log4cxx::Level::getTrace())
 		return "TRACE";
-		break;
-	case LOG_LEVEL_DEBUG:
+	else if (level == log4cxx::Level::getDebug())
 		return "DEBUG";
-		break;
-	case LOG_LEVEL_INFO:
+	else if (level == log4cxx::Level::getInfo())
 		return "INFO";
-		break;
-	case LOG_LEVEL_ERROR:
+	else if (level == log4cxx::Level::getError())
 		return "ERROR";
-		break;
-	case LOG_LEVEL_FATAL:
+	else if (level == log4cxx::Level::getFatal())
 		return "FATAL";
-		break;
-	default:
-		return "unknown";
-	}
+	log4cxx::LoggerPtr parent = logger->getParent();
+	if (parent)
+		return getLogLevelStr(parent);
+	return "unknown";
 }
 
 bool Object::setLogLevel(const char *logLevel) {
 	if (!strcmp(logLevel, "TRACE")) {
-		this->logLevel = LOG_LEVEL_TRACE;
+		this->logger->setLevel(log4cxx::Level::getTrace());
 	} else if (!strcmp(logLevel, "DEBUG")) {
-		this->logLevel = LOG_LEVEL_DEBUG;
+		this->logger->setLevel(log4cxx::Level::getDebug());
 	} else if (!strcmp(logLevel, "INFO")) {
-		this->logLevel = LOG_LEVEL_INFO;
+		this->logger->setLevel(log4cxx::Level::getInfo());
 	} else if (!strcmp(logLevel, "ERROR")) {
-		this->logLevel = LOG_LEVEL_ERROR;
+		this->logger->setLevel(log4cxx::Level::getError());
 	} else if (!strcmp(logLevel, "FATAL")) {
-		this->logLevel = LOG_LEVEL_FATAL;
+		this->logger->setLevel(log4cxx::Level::getFatal());
 	} else {
-		this->logLevel = LOG_LEVEL_TRACE;
 		return false;
 	}
 	return true;

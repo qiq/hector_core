@@ -42,7 +42,7 @@ public:
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
-	virtual char *toString() = 0;
+	virtual char *toString(Object::LogLevel logLevel) = 0;
 protected:
 	static log4cxx::LoggerPtr logger;
 
@@ -56,7 +56,7 @@ protected:
 inline std::string *ProtobufResource::MessageSerialize(google::protobuf::Message *msg) {
 	std::string *result = new std::string();
 	if (!msg->SerializeToString(result)) {
-		LOG_ERROR(logger, "Cannot serialize Resource");
+		LOG4CXX_ERROR(logger, "Cannot serialize Resource");
 		delete result;
 		return NULL;
 	}

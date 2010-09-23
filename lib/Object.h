@@ -15,17 +15,11 @@
 #include "ObjectRegistry.h"
 #include "RWLock.h"
 
-#define LOG_TRACE(logger, ...) { LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_DEBUG(logger, ...) { LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_INFO(logger, ...) { LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_ERROR(logger, ...) { LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_FATAL(logger, ...) { LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__) }
-
-#define LOG_LEVEL_TRACE 0
-#define LOG_LEVEL_DEBUG 1
-#define LOG_LEVEL_INFO 2
-#define LOG_LEVEL_ERROR 3
-#define LOG_LEVEL_FATAL 4
+#define LOG_TRACE(...) { LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_DEBUG(...) { LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_INFO(...) { LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_ERROR(...) { LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_FATAL(...) { LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__) }
 
 class Object {
 public:
@@ -49,11 +43,18 @@ public:
 	void log_error(const char *s);
 	void log_fatal(const char *s);
 
+	enum LogLevel {
+		TRACE = 0,
+		DEBUG =  1,
+		INFO = 2,
+		ERROR = 3,
+		FATAL =  4,
+	};
+
 protected:
 	ObjectRegistry *objects;
 	char *id;
 	RWLock rwlock;
-	int logLevel;
 
 	virtual char *getValueSync(const char *name);
 	virtual bool setValueSync(const char *name, const char *value);
@@ -62,18 +63,18 @@ protected:
 	virtual void SaveCheckpointSync(const char *path, const char *id);
 	virtual void RestoreCheckpointSync(const char *path, const char *id);
 
-	const char *getLogLevelStr();
+	const char *getLogLevelStr(log4cxx::LoggerPtr logger);
 	bool setLogLevel(const char *logLevel);
 
-	static log4cxx::LoggerPtr logger;
+	log4cxx::LoggerPtr logger;
 };
 
 inline Object::Object(ObjectRegistry *objects, const char *id) {
 	this->objects = objects;
 	this->id = strdup(id);
-	this->logLevel = LOG_LEVEL_INFO;
 	if (objects)
 		objects->registerObject(this);
+	logger = log4cxx::Logger::getLogger(id);
 }
 
 inline Object::Object(ObjectRegistry *objects, const char *id, int index) {
@@ -81,9 +82,9 @@ inline Object::Object(ObjectRegistry *objects, const char *id, int index) {
 	char s[1024];
 	snprintf(s, sizeof(s), "%s[%d]", id, index);
 	this->id = strdup(s);
-	this->logLevel = LOG_LEVEL_INFO;
 	if (objects)
 		objects->registerObject(this);
+	logger = log4cxx::Logger::getLogger(id);
 }
 
 inline Object::~Object() {
@@ -115,7 +116,7 @@ inline char *Object::getValue(const char *name) {
 	char *result;
 	ObjectLockRead();
 	if (!strcmp(name, "logLevel"))
-		result = strdup(this->getLogLevelStr());
+		result = strdup(this->getLogLevelStr(this->logger));
 	else
 		result = getValueSync(name);
 	ObjectUnlock();
@@ -155,28 +156,23 @@ inline void Object::RestoreCheckpoint(const char *path, const char *id) {
 }
 
 inline void Object::log_trace(const char *s) {
-	if (logLevel <= LOG_LEVEL_TRACE)
-		LOG_TRACE(logger, s);
+	LOG_TRACE(s);
 }
 
 inline void Object::log_debug(const char *s) {
-	if (logLevel <= LOG_LEVEL_DEBUG)
-		LOG_DEBUG(logger, s);
+	LOG_DEBUG(s);
 }
 
 inline void Object::log_info(const char *s) {
-	if (logLevel <= LOG_LEVEL_INFO)
-		LOG_INFO(logger, s);
+	LOG_INFO(s);
 }
 
 inline void Object::log_error(const char *s) {
-	if (logLevel <= LOG_LEVEL_ERROR)
-		LOG_ERROR(logger, s);
+	LOG_ERROR(s);
 }
 
 inline void Object::log_fatal(const char *s) {
-	if (logLevel <= LOG_LEVEL_FATAL)
-		LOG_FATAL(logger, s);
+	LOG_FATAL(s);
 }
 
 #endif

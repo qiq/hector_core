@@ -23,7 +23,7 @@ public:
         bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
         bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
         int getSize();
-        char *toString();
+        char *toString(Object::LogLevel logLevel);
 
         void setStr(const char *str);
         const char *getStr();

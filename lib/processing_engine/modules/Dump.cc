@@ -23,7 +23,7 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 
 Resource *Dump::Process(Resource *resource) {
 	char *s = resource->toString();
-	LOG_DEBUG(logger, s);
+	LOG_DEBUG(s);
 	free(s);
 	return resource;
 }

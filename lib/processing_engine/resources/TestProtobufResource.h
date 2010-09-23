@@ -40,7 +40,7 @@ public:
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)
-	char *toString();
+	char *toString(Object::LogLevel logLevel);
 
 	void setStr(const char *s);
 	const char *getStr();

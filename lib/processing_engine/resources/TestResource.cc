@@ -5,7 +5,7 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("lib.processing_engine.TestResource"));
+log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("resources.TestResource"));
 
 TestResource::TestResource() {
 	id = 0;
@@ -42,7 +42,7 @@ bool TestResource::Deserialize(string *s) {
 	return true;
 }
 
-char *TestResource::toString() {
+char *TestResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
 	return strdup(buf);

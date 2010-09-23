@@ -43,8 +43,6 @@ protected:
 	SV *ref;
 
 	std::tr1::unordered_set<std::string> initialized;
-
-	static log4cxx::LoggerPtr logger;
 };
 
 #else

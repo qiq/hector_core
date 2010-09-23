@@ -40,6 +40,7 @@ inline void die(const char *msg, ...) {
 int writeBytes(int fd, const char *s, int length);
 int readBytes(int fd, char *s, int length);
 
+/*
 #define LOG_CONFIG_ERROR0(logger, line, column, msg) \
 { \
 	char s[1024]; \
@@ -70,7 +71,7 @@ int readBytes(int fd, char *s, int length);
 	snprintf(s, sizeof(s)-30, msg, a); \
 	snprintf(s+strlen(s), 30, " [%d, %d]", line, column); \
 	LOG4CXX_INFO(logger, s); \
-}
+}*/
 
 //uint32_t bytes2int(char (*bytes)[4]);
 //void int2bytes(uint32_t n, char (*bytes)[4]);

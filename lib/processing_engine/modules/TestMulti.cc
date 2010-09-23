@@ -65,13 +65,13 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	tv.tv_usec = 100;
 
 	if (select(1, NULL, NULL, NULL, &tv) < 0) {
-		LOG_INFO(logger, "Error in select() = " << errno);
+		LOG_INFO("Error in select() = " << errno);
 		return 0;
 	}
 	TestResource *tr = resources->front();
 	resources->pop();
 	outputResources->push(tr);
-	LOG_INFO(logger, "Processed TestResource (" << tr->getStr() << ")");
+	LOG_INFO("Processed TestResource (" << tr->getStr() << ")");
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();

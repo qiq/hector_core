@@ -30,4 +30,12 @@ public:
         void log_info(const char *s);
         void log_error(const char *s);
         void log_fatal(const char *s);
+
+        enum LogLevel {
+                TRACE = 0,
+                DEBUG =  1,
+                INFO = 2,
+                ERROR = 3,
+                FATAL =  4,
+        };
 };

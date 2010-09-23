@@ -21,7 +21,7 @@ public:
         std::string *Serialize();
         bool Deserialize(std::string *s);
         int getSize();
-        char *toString();
+        char *toString(Object::LogLevel logLevel);
 
         void setStr(const char *str);
         const char *getStr();

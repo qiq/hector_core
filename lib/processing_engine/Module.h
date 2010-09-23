@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <log4cxx/logger.h>
 #include "Object.h"
 #include "Resource.h"
 
@@ -41,8 +40,6 @@ public:
 
 protected:
 	int threadIndex;
-
-	static log4cxx::LoggerPtr logger;
 };
 
 inline int Module::getThreadIndex() {

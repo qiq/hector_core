@@ -53,8 +53,6 @@ protected:
 	bool setValueSync(const char *name, const char *value);
 	std::vector<std::string> *listNamesSync();
 
-	static log4cxx::LoggerPtr logger;
-
 	bool appendResource(Resource *r, bool sleep, int *filterIndex); // process resource and append it to other resources' queues
 };
 

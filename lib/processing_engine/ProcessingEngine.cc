@@ -11,8 +11,6 @@
 
 using namespace std;
 
-log4cxx::LoggerPtr ProcessingEngine::logger(log4cxx::Logger::getLogger("lib.processing_enging.ProcessingEngine"));
-
 ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Object(objects, id) {
 	propRun = false;
 	propPause = false;
@@ -55,7 +53,7 @@ bool ProcessingEngine::Init(Config *config) {
 		}
 		delete v;
 	} else {
-		LOG_INFO(logger, "No Processors");
+		LOG_INFO("No Processors");
 	}
 
 	return true;
@@ -134,7 +132,7 @@ void ProcessingEngine::setRun(const char *name, const char *value) {
 		StartSync();
 		break;
 	default:
-		LOG_ERROR(logger, "Invalid 'run' value: " << value);
+		LOG_ERROR("Invalid 'run' value: " << value);
 	}
 }
 
@@ -147,7 +145,7 @@ void ProcessingEngine::setPause(const char *name, const char *value) {
 		PauseSync();
 		break;
 	default:
-		LOG_ERROR(logger, "Invalid 'pause' value: " << value);
+		LOG_ERROR("Invalid 'pause' value: " << value);
 	}
 }
 

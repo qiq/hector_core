@@ -31,7 +31,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 
 Save::~Save() {
 	if (!stream->Close())
-		LOG_ERROR(logger, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
+		LOG_ERROR("Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
 	free(filename);
 	delete values;
@@ -55,12 +55,12 @@ bool Save::Init(vector<pair<string, string> > *params) {
 		return false;
 
 	if (!filename) {
-		LOG_ERROR(logger, "No filename parameter given.");
+		LOG_ERROR("No filename parameter given.");
 		return false;
 	}
 
 	if ((fd = open(filename, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) < 0) {
-		LOG_ERROR(logger, "Cannot open file " << filename << ": " << strerror(errno));
+		LOG_ERROR("Cannot open file " << filename << ": " << strerror(errno));
 		return false;
 	}
 
@@ -76,7 +76,7 @@ bool Save::WriteToFile(const void *data, int size) {
 			size -= wr;
 		} else {
 			ObjectLockRead();
-			LOG_ERROR(logger, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
+			LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 			ObjectUnlock();
 			return false;
 		}
