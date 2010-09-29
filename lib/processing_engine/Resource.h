@@ -31,6 +31,7 @@ public:
 	// status may be tested in Processor to select target queue
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
+
 	// save and restore resource
 	virtual string *Serialize() = 0;
 	virtual bool Deserialize(string *s) = 0;
@@ -39,6 +40,17 @@ public:
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual char *toString(Object::LogLevel = Object::INFO) = 0;
+
+	typedef enum {
+		UNKNOWN,
+		STRING,
+		INT,
+		LONG,
+		IP4,
+		IP6,
+		STRING2,
+	} FieldType;
+
 protected:
 	static log4cxx::LoggerPtr logger;
 };

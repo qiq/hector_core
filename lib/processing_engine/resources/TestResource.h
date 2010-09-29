@@ -29,6 +29,7 @@ public:
 	// status may be tested in Processor to select target queue
 	int getStatus();
 	void setStatus(int status);
+
 	// save and restore resource
 	std::string *Serialize();
 	bool Deserialize(std::string *s);
@@ -41,6 +42,21 @@ public:
 	const char *getStr();
 
 	static const int typeId = 1;
+
+	typedef struct {
+		Resource::FieldType type;
+		union {
+			const char *(TestResource::*s)();
+			int (TestResource::*i)();
+		} get;
+		union {
+			void (TestResource::*s)(const char *);
+			void (TestResource::*i)(int);
+		} set;
+	} TestResourceFieldInfo;
+
+	// get info about an item
+	static TestResourceFieldInfo getFieldInfo(const char *name);
 
 protected:
 	int id;

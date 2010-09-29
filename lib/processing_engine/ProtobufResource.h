@@ -32,6 +32,7 @@ public:
 	// status may be tested in Processor to select target queue
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
+
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
 	virtual bool Deserialize(std::string *s) = 0;

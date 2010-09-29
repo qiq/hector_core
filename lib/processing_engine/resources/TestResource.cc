@@ -47,3 +47,24 @@ char *TestResource::toString(Object::LogLevel logLevel) {
 	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
 	return strdup(buf);
 }
+
+TestResource::TestResourceFieldInfo TestResource::getFieldInfo(const char *name) {
+	TestResource::TestResourceFieldInfo result;
+	if (!strcmp(name, "id")) {
+		result.type = INT;
+		result.get.i = &TestResource::getId;
+		result.set.i = &TestResource::setId;
+		return result;
+	} else if (!strcmp(name, "status")) {
+		result.type = INT;
+		result.get.i = &TestResource::getStatus;
+		result.set.i = &TestResource::setStatus;
+		return result;
+	} else if (!strcmp(name, "str")) {
+		result.type = STRING;
+		result.get.s = &TestResource::getStr;
+		result.set.s = &TestResource::setStr;
+		return result;
+	}
+}
+

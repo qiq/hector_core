@@ -365,7 +365,8 @@ void Processor::runThread(int id) {
 			}
 
 			bool stop = false;
-			for (int i = 0; !stop && i < modules[id].size(); i++) {
+			bool next = false;
+			for (int i = 0; !stop && !next && i < modules[id].size(); i++) {
 				switch (moduleType[i]) {
 				case Module::INPUT:
 					resource = modules[id][i]->Process(NULL);
@@ -379,7 +380,7 @@ void Processor::runThread(int id) {
 				case Module::SIMPLE:
 					resource = modules[id][i]->Process(resource);
 					if (!resource)
-						stop = true;
+						next = true;
 					break;
 				case Module::MULTI:
 				default:

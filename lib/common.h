@@ -26,6 +26,14 @@ inline void die(const char *msg, ...) {
 	exit(EXIT_FAILURE);
 }
 
+typedef struct {
+	uint32_t addr;
+} ip4_addr_t;
+
+typedef struct {
+	uint8_t addr[16];
+} ip6_addr_t;
+
 /*void to_lowercase(string &s) {
 	for (string::iterator i = s.begin(); i != s.end(); i++)
 		*i = tolower(*i);
