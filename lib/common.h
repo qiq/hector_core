@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
 #include <pthread.h>
@@ -14,6 +15,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
@@ -33,6 +35,52 @@ typedef struct {
 typedef struct {
 	uint8_t addr[16];
 } ip6_addr_t;
+
+inline ip4_addr_t str2Ip4Addr(const char *s) {
+	uint32_t a;
+	ip4_addr_t addr;
+	if (!inet_pton(AF_INET, s, &a)) {
+		addr.addr = 0;
+		return addr;
+	}
+	addr.addr = ntohl(a);
+	return addr;
+}
+
+inline char *ip4Addr2Str(ip4_addr_t addr) {
+	char s[INET_ADDRSTRLEN];
+	uint32_t a;
+	a = htonl(addr.addr);
+	if (!inet_ntop(AF_INET, (void*)a, s, INET6_ADDRSTRLEN))
+		return NULL;
+	return strdup(s);
+}
+
+inline ip6_addr_t str2Ip6Addr(const char *s) {
+	ip6_addr_t addr;
+	if (!inet_pton(AF_INET6, s, &addr.addr)) {
+		memset(addr.addr, sizeof(addr.addr), 0);
+		return addr;
+	}
+	for (int i = 0; i < 8; i++) {
+		uint8_t tmp = addr.addr[15-i];
+		addr.addr[15-i] = addr.addr[i];
+		addr.addr[i] = tmp;
+	}
+	return addr;
+}
+
+inline char *ip6Addr2Str(ip6_addr_t addr) {
+	char s[INET6_ADDRSTRLEN];
+	for (int i = 0; i < 8; i++) {
+		uint8_t tmp = addr.addr[15-i];
+		addr.addr[15-i] = addr.addr[i];
+		addr.addr[i] = tmp;
+	}
+	if (!inet_ntop(AF_INET6, addr.addr, s, INET6_ADDRSTRLEN))
+		return NULL;
+	return strdup(s);
+}
 
 /*void to_lowercase(string &s) {
 	for (string::iterator i = s.begin(); i != s.end(); i++)
