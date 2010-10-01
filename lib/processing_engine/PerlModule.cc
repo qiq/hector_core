@@ -125,7 +125,7 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 	// initialize resource type
 	if (initialized.find(type) == initialized.end()) {
 		char s[1024];
-		snprintf(s, sizeof(s), "package %s::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", module, type);
+		snprintf(s, sizeof(s), "use %s; package %s::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", module, module, type);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR("Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
@@ -146,11 +146,11 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 	int count = call_method("new2", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling Init, module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR("Error calling new2: " << type << " (" << SvPV_nolen(ERRSV) << ")");
 		POPs;
 		result = NULL;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling new2 for " << type);
+		LOG_ERROR("Error calling new2: " << type);
 		result = NULL;
 	} else {
 		result = SvREFCNT_inc(POPs);

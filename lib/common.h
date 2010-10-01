@@ -51,7 +51,7 @@ inline char *ip4Addr2Str(ip4_addr_t addr) {
 	char s[INET_ADDRSTRLEN];
 	uint32_t a;
 	a = htonl(addr.addr);
-	if (!inet_ntop(AF_INET, (void*)a, s, INET6_ADDRSTRLEN))
+	if (!inet_ntop(AF_INET, (void*)&a, s, INET6_ADDRSTRLEN))
 		return NULL;
 	return strdup(s);
 }
