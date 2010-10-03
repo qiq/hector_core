@@ -62,20 +62,24 @@ inline ip6_addr_t str2Ip6Addr(const char *s) {
 		memset(addr.addr, sizeof(addr.addr), 0);
 		return addr;
 	}
-	for (int i = 0; i < 8; i++) {
-		uint8_t tmp = addr.addr[15-i];
-		addr.addr[15-i] = addr.addr[i];
-		addr.addr[i] = tmp;
+	if (htons(0xabcd) != 0xabcd) {
+		for (int i = 0; i < 8; i++) {
+			uint8_t tmp = addr.addr[15-i];
+			addr.addr[15-i] = addr.addr[i];
+			addr.addr[i] = tmp;
+		}
 	}
 	return addr;
 }
 
 inline char *ip6Addr2Str(ip6_addr_t addr) {
 	char s[INET6_ADDRSTRLEN];
-	for (int i = 0; i < 8; i++) {
-		uint8_t tmp = addr.addr[15-i];
-		addr.addr[15-i] = addr.addr[i];
-		addr.addr[i] = tmp;
+	if (htons(0xabcd) != 0xabcd) {
+		for (int i = 0; i < 8; i++) {
+			uint8_t tmp = addr.addr[15-i];
+			addr.addr[15-i] = addr.addr[i];
+			addr.addr[i] = tmp;
+		}
 	}
 	if (!inet_ntop(AF_INET6, addr.addr, s, INET6_ADDRSTRLEN))
 		return NULL;
