@@ -16,7 +16,7 @@ public:
 	~TestOutput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	void ProcessOutput(Resource *resource);
 
 private:
 	int items;		// guarded by ObjectLock

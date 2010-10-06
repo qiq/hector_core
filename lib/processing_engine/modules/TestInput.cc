@@ -3,7 +3,6 @@
  */
 #include <config.h>
 
-#include <assert.h>
 #include "common.h"
 #include "Resources.h"
 #include "TestInput.h"
@@ -79,13 +78,12 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestInput::Process(Resource *resource) {
+Resource *TestInput::ProcessInput(bool sleep) {
 	ObjectLockWrite();
 	if (maxItems && items >= maxItems) {
 		ObjectUnlock();
 		return NULL;
 	}
-	assert(resource == NULL);
 	Resource *r = Resources::CreateResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	TestResource *tr = dynamic_cast<TestResource*>(r);

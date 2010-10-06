@@ -21,14 +21,14 @@ public:
 	~Load();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	Resource *ProcessInput(bool sleep);
 
 private:
 	int items;		// guarded by ObjectLock
 	int maxItems;		// guarded by ObjectLock
 	char *filename;		// guarded by ObjectLock
-	int fd;			// private to Process()
-	google::protobuf::io::FileInputStream *stream;	// private to Process()
+	int fd;			// private to ProcessInput()
+	google::protobuf::io::FileInputStream *stream;	// private to ProcessInput()
 
 	ObjectValues<Load> *values;
 

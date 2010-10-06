@@ -18,7 +18,7 @@ public:
 	~Dump();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	Resource *ProcessSimple(Resource *resource);
 
 private:
 	ObjectValues<Dump> *values;

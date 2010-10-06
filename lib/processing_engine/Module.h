@@ -28,11 +28,16 @@ public:
 	virtual bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	virtual Module::Type getType();
 	int getThreadIndex();
-	// Simple/Input/Output modules does only use this interface (one resource a time)
-	virtual Resource *Process(Resource *resource);
+	// Input module: produce resource, possibly wait for input
+	virtual Resource *ProcessInput(bool sleep);
+	// Output module: consume resource
+	virtual void ProcessOutput(Resource *resource);
+	// Simple module: one resource a time
+	virtual Resource *ProcessSimple(Resource *resource);
 	// Multi modules use input/output interface: inputResources should be consumed, outputResources should be produced
 	// returns number of resources we are expecting on the input, -1 in case we should block in waiting for input resources
 	virtual int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	virtual int ProcessingResources();
 	virtual void Start();
 	virtual void Stop();
 	virtual void Pause();

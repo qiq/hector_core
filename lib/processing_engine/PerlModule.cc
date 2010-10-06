@@ -289,7 +289,95 @@ Module::Type PerlModule::getType() {
 	return result;
 }
 
-Resource *PerlModule::Process(Resource *resource) {
+Resource *PerlModule::ProcessInput(bool sleep) {
+	ObjectLockWrite();
+	PERL_SET_CONTEXT(my_perl);
+	Resource *result = NULL;
+
+	// call Process method: $module->Process($resource)
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	int count = call_method("ProcessInput", G_SCALAR|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR("Error calling ProcessInput (" << SvPV_nolen(ERRSV) << ")");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return result;
+	} else if (count != 1) {
+		LOG_ERROR("Error calling ProcessInput");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return result;
+	}
+	SV *resourceSV = SvREFCNT_inc(POPs);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	// get Resource C++ pointer & DISOWN
+	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
+
+	// delete Perl resource object
+	SvREFCNT_dec(resourceSV);
+
+	ObjectUnlock();
+	return result;
+}
+
+void PerlModule::ProcessOutput(Resource *resource) {
+	ObjectLockWrite();
+	PERL_SET_CONTEXT(my_perl);
+	SV *resourceSV;
+	if (resource) {
+		// create new instance of a resource (of given type)
+		if (!(resourceSV = CreatePerlResource(resource))) {
+			ObjectUnlock();
+			return;
+		}
+	} else {
+		resourceSV = &PL_sv_undef;
+	}
+
+	// call Process method: $module->Process($resource)
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        XPUSHs(sv_2mortal(resourceSV));
+        PUTBACK;
+	int count = call_method("ProcessOutput", G_SCALAR|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR("Error calling ProcessOutput (" << SvPV_nolen(ERRSV) << ")");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return;
+	} else if (count != 0) {
+		LOG_ERROR("Error calling ProcessOutput");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return;
+	}
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
+	ObjectUnlock();
+}
+
+Resource *PerlModule::ProcessSimple(Resource *resource) {
 	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
 	Resource *result = NULL;
@@ -311,17 +399,17 @@ Resource *PerlModule::Process(Resource *resource) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(resourceSV));
         PUTBACK;
-	int count = call_method("Process", G_SCALAR|G_EVAL);
+	int count = call_method("ProcessSimple", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling Process (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR("Error calling ProcessSimple (" << SvPV_nolen(ERRSV) << ")");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling Process");
+		LOG_ERROR("Error calling ProcessSimple");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;

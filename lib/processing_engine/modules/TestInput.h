@@ -16,7 +16,7 @@ public:
 	~TestInput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	Resource *ProcessInput(bool sleep);
 
 private:
 	int typeId;		// to create TestResource

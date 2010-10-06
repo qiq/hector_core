@@ -100,14 +100,13 @@ bool Load::ReadFromFile(void *data, int size) {
 	return true;
 }
 
-Resource *Load::Process(Resource *resource) {
+Resource *Load::ProcessInput(bool sleep) {
 	ObjectLockRead();
 	int i = items;
 	int mi = maxItems;
 	ObjectUnlock();
 	if (mi && i >= mi)
 		return NULL;
-	assert(resource == NULL);
 	uint32_t size;
 	uint8_t typeId;
 	if (!ReadFromFile(&size, sizeof(size)))

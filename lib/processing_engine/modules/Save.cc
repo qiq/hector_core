@@ -84,29 +84,29 @@ bool Save::WriteToFile(const void *data, int size) {
 	return true;
 }
 
-Resource *Save::Process(Resource *resource) {
+void Save::ProcessOutput(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
 	uint32_t size;
 	uint8_t typeId = resource->getTypeId();
 	if (pr) {
 		if (!WriteToFile(&size, sizeof(size)))
-			return NULL;
+			return;
 		if (!WriteToFile(&typeId, sizeof(typeId)))
-			return NULL;
+			return;
 		if (!pr->Serialize(stream))
-			return NULL;
+			return;
 	} else {
 		string *serial = resource->Serialize();
 		if (!serial)
-			return NULL;
+			return;
 		size = serial->length();
 		if (!WriteToFile(&size, sizeof(size)))
-			return NULL;
+			return;
 		if (!WriteToFile(&typeId, sizeof(typeId)))
-			return NULL;
+			return;
 		if (!WriteToFile(serial->c_str(), size))
-			return NULL;
+			return;
 		delete serial;
 	}
 
@@ -115,8 +115,6 @@ Resource *Save::Process(Resource *resource) {
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();
-
-	return NULL;
 }
 
 // the class factories

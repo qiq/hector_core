@@ -28,7 +28,7 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestOutput::Process(Resource *resource) {
+void TestOutput::ProcessOutput(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
 		LOG_INFO("Resource arrived (" << tr->getStr() << ")");
@@ -43,7 +43,6 @@ Resource *TestOutput::Process(Resource *resource) {
 		ObjectUnlock();
 		delete resource;
 	}
-	return NULL;
 }
 
 // the class factories

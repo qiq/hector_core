@@ -25,7 +25,9 @@ public:
 	~PerlModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	Resource *ProcessInput(bool sleep);
+	void ProcessOutput(Resource *resource);
+	Resource *ProcessSimple(Resource *resource);
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
 
 protected:

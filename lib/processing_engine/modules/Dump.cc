@@ -21,7 +21,7 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *Dump::Process(Resource *resource) {
+Resource *Dump::ProcessSimple(Resource *resource) {
 	char *s = resource->toString();
 	LOG_DEBUG(s);
 	free(s);

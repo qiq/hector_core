@@ -75,7 +75,7 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestSimple::Process(Resource *resource) {
+Resource *TestSimple::ProcessSimple(Resource *resource) {
 	TestResource *tr = dynamic_cast<TestResource*>(resource);
 	if (tr) {
 		LOG_INFO("Processing TestResource (" << tr->getStr() << ")");

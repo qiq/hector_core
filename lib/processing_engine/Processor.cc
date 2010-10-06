@@ -369,16 +369,16 @@ void Processor::runThread(int id) {
 			for (int i = 0; !stop && !next && i < modules[id].size(); i++) {
 				switch (moduleType[i]) {
 				case Module::INPUT:
-					resource = modules[id][i]->Process(NULL);
+					resource = modules[id][i]->ProcessInput(true);
 					if (!resource)
 						stop = true;
 					break;
 				case Module::OUTPUT:
-					(void)modules[id][i]->Process(resource);
+					modules[id][i]->ProcessOutput(resource);
 					resource = NULL;
 					break;
 				case Module::SIMPLE:
-					resource = modules[id][i]->Process(resource);
+					resource = modules[id][i]->ProcessSimple(resource);
 					if (!resource)
 						next = true;
 					break;

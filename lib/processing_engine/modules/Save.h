@@ -21,13 +21,13 @@ public:
 	~Save();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *Process(Resource *resource);
+	void ProcessOutput(Resource *resource);
 
 private:
 	int items;		// guarded by ObjectLock
 	char *filename;		// guarded by ObjectLock
-	int fd;			// private to Process()
-	google::protobuf::io::FileOutputStream *stream;	// private to Process()
+	int fd;			// private to ProcessOutput()
+	google::protobuf::io::FileOutputStream *stream;	// private to ProcessOutput()
 
 	ObjectValues<Save> *values;
 

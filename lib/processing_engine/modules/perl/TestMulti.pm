@@ -79,12 +79,6 @@ sub RestoreCheckpoint {
 	$self->{'_object'}->log_info("RestoreCheckpoint($path, $id)");
 }
 
-sub Process() {
-	my ($self, $resource) = @_;
-
-	$self->{'_object'}->log_error("Process() is not implemented");
-}
-
 my $MAX_RESOURCES = 100;
 sub ProcessMulti() {
 	my ($self, $inputResources, $outputResources) = @_;
