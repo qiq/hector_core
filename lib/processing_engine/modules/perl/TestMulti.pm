@@ -102,4 +102,8 @@ sub ProcessMulti() {
 	return $MAX_RESOURCES-@{$self->{'_resources'}};
 }
 
+sub ProcessingResources() {
+	return scalar @{$self->{'_resources'}};
+}
+
 1;

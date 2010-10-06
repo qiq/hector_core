@@ -22,10 +22,11 @@ public:
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	int ProcessingResources();
 
 private:
 	int items;		// guarded by ObjectLock
-	char *foo;
+	char *foo;		// guarded by ObjectLock
 	queue<TestResource*> *resources;
 
 	ObjectValues<TestMulti> *values;

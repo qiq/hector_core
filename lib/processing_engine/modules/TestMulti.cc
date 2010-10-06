@@ -79,6 +79,10 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	return MAX_RESOURCES-resources->size();
 }
 
+int TestMulti::ProcessingResources() {
+	return resources->size();
+}
+
 // factory functions
 
 extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {

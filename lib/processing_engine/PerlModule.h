@@ -29,6 +29,7 @@ public:
 	void ProcessOutput(Resource *resource);
 	Resource *ProcessSimple(Resource *resource);
 	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	int ProcessingResources();
 
 protected:
 	char *getValueSync(const char *name);

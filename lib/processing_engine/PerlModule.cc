@@ -519,6 +519,36 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	return result;
 }
 
+int PerlModule::ProcessingResources() {
+	ObjectLockWrite();
+	PERL_SET_CONTEXT(my_perl);
+	int result = 0;
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	int count = call_method("ProcessingResources", G_SCALAR|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV)) {
+		LOG_ERROR("Error calling ProcessingResources (" << SvPV_nolen(ERRSV) << ")");
+	} else if (count != 1) {
+		LOG_ERROR("Error calling ProcessingResources (no result)");
+	} else {
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG_ERROR("Error calling ProcessingResources (invalid result)");
+		} else {
+			result = SvIV(resultSV);
+		}
+	}
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	ObjectUnlock();
+	return result;
+}
+
 char *PerlModule::getValueSync(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
