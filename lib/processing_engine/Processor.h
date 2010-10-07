@@ -8,6 +8,7 @@
 #include <config.h>
 
 #include <pthread.h>
+#include <queue>
 #include <string>
 #include <vector>
 #include <log4cxx/logger.h>
@@ -38,12 +39,19 @@ public:
 	char *getInputQueueItems(const char *name);
 
 protected:
+
+	typedef struct {
+		Module *module;
+		Module::Type type;
+		std::queue<Resource*> *inputResources;
+		std::queue<Resource*> *outputResources;
+	} ModuleInfo;
+
 	int nThreads;				// properties, locked by object lock
 	pthread_t *threads;
 	bool running;
 
-	std::vector<Module*> *modules; 		// all modules; every thread has a module instance
-	std::vector<Module::Type> moduleType;	// type of processor modules (mainly due to expensive Perl calls)
+	std::vector<ModuleInfo*> *modules;	// all modules; every thread has a module instance (first dimension)
 	SyncQueue<Resource> *inputQueue;	// input queue
 	std::vector<OutputFilter*> outputFilters;	// filters of output resources
 
@@ -53,7 +61,14 @@ protected:
 	bool setValueSync(const char *name, const char *value);
 	std::vector<std::string> *listNamesSync();
 
-	bool appendResource(Resource *r, bool sleep, int *filterIndex); // process resource and append it to other resources' queues
+	// process resource and append it to other precesses' queues
+	bool QueueResource(Resource *r, bool sleep, int *filterIndex);
+	// apply simple/input/output modules to a resource
+	Resource *ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool *stop);
+	// return index of the next multi-module
+	int NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index);
+	// append resource either to multi-module input queue or processor's output queue
+	bool AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, bool sleep, int *outputFilterIndex);
 };
 
 inline SyncQueue<Resource> *Processor::getInputQueue() {

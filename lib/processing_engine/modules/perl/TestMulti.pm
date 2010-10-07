@@ -103,6 +103,7 @@ sub ProcessMulti() {
 }
 
 sub ProcessingResources() {
+	my ($self) = @_;
 	return scalar @{$self->{'_resources'}};
 }
 

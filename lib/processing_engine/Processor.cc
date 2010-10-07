@@ -27,8 +27,10 @@ Processor::~Processor() {
 	delete[] threads;
 
 	for (int i = 0; i < nThreads; ++i) {
-		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			delete *iter;
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			delete (*iter)->module;
+			delete (*iter)->inputResources;
+			delete (*iter)->outputResources;
 		}
 	}
 	delete[] modules;
@@ -55,7 +57,7 @@ bool Processor::Init(Config *config) {
 	}
 	free(s);
 
-	modules = new vector<Module*>[nThreads];
+	modules = new vector<ModuleInfo*>[nThreads];
 
 	// module(s)
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/modules/Module/@id", getId());
@@ -75,16 +77,18 @@ bool Processor::Init(Config *config) {
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
-					Module *m = (*create)(objects, mid, i);
-					modules[i].push_back(m);
+					ModuleInfo *mi = new ModuleInfo;
+					mi->module = (*create)(objects, mid, i);
+					modules[i].push_back(mi);
 				}
 				free(type);
 				free(name);
 			} else if (!strcmp(type, "perl")) {
 				// Perl module
 				for (int i = 0; i < nThreads; ++i) {
-					Module *m = new PerlModule(objects, mid, i, name);
-					modules[i].push_back(m);
+					ModuleInfo * mi = new ModuleInfo;
+					mi->module = new PerlModule(objects, mid, i, name);
+					modules[i].push_back(mi);
 				}
 				free(type);
 				free(name);
@@ -113,12 +117,19 @@ bool Processor::Init(Config *config) {
 			delete names;
 
 			for (int i = 0; i < nThreads; ++i) {
-				if (!modules[i].back()->Init(c))
+				ModuleInfo *mi = modules[i].back();
+				if (!mi->module->Init(c))
 					return false;
+				mi->type = mi->module->getType();
+				if (mi->type == Module::MULTI) {
+					mi->inputResources = new queue<Resource*>();
+					mi->outputResources = new queue<Resource*>();
+				} else {
+					mi->inputResources = NULL;
+					mi->outputResources = NULL;
+				}
 			}
 			delete c;
-
-			moduleType.push_back(modules[0].back()->getType());
 		}
 		delete v;
 	}
@@ -229,7 +240,7 @@ bool Processor::Init(Config *config) {
 	if (nThreads > 0) {
 		int n = modules[0].size();
 		for (int i = 0; i < n; i++) {
-			switch (moduleType[i]) {
+			switch (modules[0][i]->type) {
 			case Module::INPUT:
 				if (i != 0) {
 					LOG_ERROR("Input module must be first");
@@ -250,17 +261,8 @@ bool Processor::Init(Config *config) {
 					return false;
 				}
 				break;
-			case Module::MULTI:
-				if (i != 0 && n == 1) {
-					LOG_ERROR("Multi/Select module must be the only one in a Processor");
-					return false;
-				}
-				if (inputQueue->getQueuesCount() == 0 || outputFilters.size() == 0) {
-					LOG_ERROR( "No input or output queue defined");
-					return false;
-				}
-				break;
 			case Module::SIMPLE:
+			case Module::MULTI:
 				if (i == 0 && inputQueue->getQueuesCount() == 0) {
 					LOG_ERROR("No input queue defined");
 					return false;
@@ -328,8 +330,8 @@ void *run_thread(void *ptr) {
 	return NULL;
 }
 
-// returns: filterIndex or -1 (sleep and cancelled)
-bool Processor::appendResource(Resource *r, bool sleep, int *filterIndex) {
+// returns: would sleep or cancelled
+bool Processor::QueueResource(Resource *r, bool sleep, int *filterIndex) {
 	int status = r->getStatus();
 	bool appended = false;
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+*filterIndex; iter != outputFilters.end(); ++iter) {
@@ -354,59 +356,153 @@ bool Processor::appendResource(Resource *r, bool sleep, int *filterIndex) {
 	return true;
 }
 
-void Processor::runThread(int id) {
-	if (moduleType[0] != Module::MULTI) {
-		// simple processing (no parallel or select)
-		Resource *resource = NULL;
-		while (isRunning()) {
-			if (moduleType[0] != Module::INPUT) {
-				if (!(resource = inputQueue->getItem(true)))
-					break;	// cancelled
+Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool *stop) {
+	// process obtained resource through all non-multi modules
+	while (index < mis->size() && (*mis)[index]->type != Module::MULTI) {
+		ModuleInfo *minfo = (*mis)[index];
+		// apply modules
+		switch (minfo->type) {
+		case Module::INPUT:
+			assert(resource == NULL);
+			resource = minfo->module->ProcessInput(true);
+			if (!resource) {
+				*stop = true;
+				return NULL;
 			}
+			break;
+		case Module::OUTPUT:
+			minfo->module->ProcessOutput(resource);
+			resource = NULL;
+			break;
+		case Module::SIMPLE:
+			resource = minfo->module->ProcessSimple(resource);
+			if (!resource)
+				return NULL;
+			break;
+		case Module::MULTI:
+		default:
+			LOG_ERROR("Should not happen");
+			break;
+		}
+		index++;
+	}
+	return resource;
+}
 
-			bool stop = false;
-			bool next = false;
-			for (int i = 0; !stop && !next && i < modules[id].size(); i++) {
-				switch (moduleType[i]) {
-				case Module::INPUT:
-					resource = modules[id][i]->ProcessInput(true);
-					if (!resource)
-						stop = true;
-					break;
-				case Module::OUTPUT:
-					modules[id][i]->ProcessOutput(resource);
-					resource = NULL;
-					break;
-				case Module::SIMPLE:
-					resource = modules[id][i]->ProcessSimple(resource);
-					if (!resource)
-						next = true;
-					break;
-				case Module::MULTI:
-				default:
-					LOG_ERROR("Should not happen");
-					break;
+int Processor::NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index) {
+	while (index < mis->size() && (*mis)[index]->type != Module::MULTI)
+		index++;
+	return index == mis->size() ? -1 : index;
+}
+
+bool Processor::AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, bool sleep, int *outputFilterIndex) {
+	if (multiIndex >= 0) {
+		// append to next multi-module
+		(*mis)[multiIndex]->inputResources->push(resource);
+		return true;
+	}
+	// append to output queue
+	if (QueueResource(resource, sleep, outputFilterIndex)) {
+		*outputFilterIndex = 0;
+		return true;
+	}
+	// cancelled or no space avaliable
+	return false;
+}
+
+void Processor::runThread(int threadId) {
+	vector<ModuleInfo*> *mis = &this->modules[threadId];
+	// number of resources to read from input module/input queue
+	int readMax = 1;
+	// output filter (used when resource cannot be fully queued into the output queue)
+	int outputFilterIndex = 0;
+	// resource waiting to be queued-in
+	Resource *outputFilterResource = NULL;
+	// no resources and no module is doing anything -> finish
+	bool stop = false;
+	// block while reading/writing resources from/to a queue?
+	bool block = true;
+	while (isRunning() && !(stop && block)) {
+		int multiIndex = this->NextMultiModuleIndex(mis, 0);
+		int resourcesRead = 0;
+		while (resourcesRead < readMax && !stop) {
+			Resource *resource = NULL;
+			if ((*mis)[0]->type != Module::INPUT) {
+				// get resource from input queue
+				resource = inputQueue->getItem(block && resourcesRead == 0);
+				if (!resource) {
+					if (block && resourcesRead == 0)
+						return; // cancelled
+					else
+						break; // no more resources available
 				}
+				resourcesRead++;
 			}
-			if (stop) {
-				LOG_ERROR("No resource, thread " << id << " terminated");
-				break;
-			}
+			resource = this->ApplyModules(mis, resource, 0, &stop);
 			if (resource) {
-				int filterIndex = 0;
-				if (!appendResource(resource, true, &filterIndex))
-					break;	// cancelled
-				resource = NULL;
+				int x = 0; // ignored
+				if (!AppendResource(mis, resource, multiIndex, true, &x))
+					return; // cancelled
 			}
 		}
-		delete resource;
-	} else {
-		// parallel processing: read items from input queue, process them and put items into output queue
-		queue<Resource*> *inputResources = new queue<Resource*>();
-		queue<Resource*> *outputResources = new queue<Resource*>();
-		int outputFilterIndex = 0;
+		block = true;
+		// n = number of resources the multi-module is still able to accept
+		int minN = multiIndex >= 0 ? 10000 : 1;
+		bool queueFull = false;
+		int resourcesQueued;
+		while (multiIndex >= 0) {
+			// call multi module
+			ModuleInfo *minfo = (*mis)[multiIndex];
+			int n = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources);
+			n -= minfo->inputResources->size();
+			if (n < minN)
+				minN = n;
+			if (minfo->module->ProcessingResources() > 0)
+				block = false;
+			// set-up info for the next iteration
+			int nextMultiIndex = this->NextMultiModuleIndex(mis, multiIndex+1);
 
-		Module *module = modules[id].front();
+			resourcesQueued = 0;
+			if (outputFilterResource) {
+				if (AppendResource(mis, outputFilterResource, nextMultiIndex, block && resourcesQueued == 0, &outputFilterIndex)) {
+					// NOT cancelled or no space available
+					resourcesQueued++;
+					outputFilterResource = NULL;
+				}
+			}
+			while (!outputFilterResource && minfo->outputResources->size() > 0) {
+				Resource *resource = this->ApplyModules(mis, minfo->outputResources->front(), multiIndex+1, &stop);
+				minfo->outputResources->pop();
+				if (resource) {
+					if (!AppendResource(mis, resource, nextMultiIndex, block && resourcesQueued == 0, &outputFilterIndex)) {
+						outputFilterResource = resource;
+						break; // cancelled or no space available
+					}
+					resourcesQueued++;
+				}
+			}
+			if (minfo->outputResources->size() > 0) {
+				if (block && resourcesQueued == 0)
+					return; // cancelled
+				// no more space available in the output queue
+				queueFull = true;
+				assert(multiIndex == -1); // we are putting into the output queue
+			}
+			multiIndex = nextMultiIndex;
+		}
+		// in next round read resources so that no multi-module is over-loaded
+		readMax = minN;
+		// with the exception that output queue is full: allow only replacement of queued resources then
+		if (queueFull && resourcesQueued < readMax)
+			readMax = resourcesQueued;
+	}
+	if (stop)
+		LOG_ERROR("No resource, thread " << id << " terminated");
+}
+
+/*
+	vector<ModuleInfo*>::iterator iter 
+	Module *module = modules[id].front();
 		int n;
 		while (isRunning()) {
 			n = module->ProcessMulti(inputResources, outputResources);
@@ -449,7 +545,7 @@ void Processor::runThread(int id) {
 				break;	// cancelled
 		}
 	}
-}
+*/
 
 void Processor::Start() {
 	ObjectLockWrite();
@@ -458,8 +554,8 @@ void Processor::Start() {
 
 	inputQueue->Start();
 	for (int i = 0; i < nThreads; i++) {
-		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->Start();
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->Start();
 		}
 	}
 
@@ -488,8 +584,8 @@ void Processor::Stop() {
 	// cancel all threads waiting in input queues + multi module queues
 	inputQueue->Stop();
 	for (int i = 0; i < nThreads; i++) {
-		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->Stop();
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->Stop();
 		}
 	}
 
@@ -504,8 +600,8 @@ void Processor::Stop() {
 void Processor::Pause() {
 	inputQueue->Pause();
 	for (int i = 0; i < nThreads; i++) {
-		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->Pause();
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->Pause();
 		}
 	}
 }
@@ -513,8 +609,8 @@ void Processor::Pause() {
 void Processor::Resume() {
 	inputQueue->Resume();
 	for (int i = 0; i < nThreads; i++) {
-		for (vector<Module*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->Resume();
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->Resume();
 		}
 	}
 }
