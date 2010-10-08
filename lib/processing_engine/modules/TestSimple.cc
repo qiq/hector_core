@@ -14,8 +14,8 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	foo = NULL;
 	flipStatus = false;
 	setStatus = -1;
-	values = new ObjectValues<TestSimple>(this);
 
+	values = new ObjectValues<TestSimple>(this);
 	values->addGetter("items", &TestSimple::getItems);
 	values->addGetter("foo", &TestSimple::getFoo);
 	values->addSetter("foo", &TestSimple::setFoo);

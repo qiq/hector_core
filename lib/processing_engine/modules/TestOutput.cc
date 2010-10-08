@@ -10,8 +10,8 @@ using namespace std;
 
 TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
-	values = new ObjectValues<TestOutput>(this);
 
+	values = new ObjectValues<TestOutput>(this);
 	values->addGetter("items", &TestOutput::getItems);
 }
 

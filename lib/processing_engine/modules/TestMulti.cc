@@ -16,7 +16,6 @@ TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): 
 	resources = new queue<TestResource*>();
 
 	values = new ObjectValues<TestMulti>(this);
-
 	values->addGetter("items", &TestMulti::getItems);
 	values->addGetter("foo", &TestMulti::getFoo);
 	values->addSetter("foo", &TestMulti::setFoo);

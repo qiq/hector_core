@@ -15,8 +15,8 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	maxItems = 0;
 	idPrefix = NULL;
 	resourceType = NULL;
-	values = new ObjectValues<TestInput>(this);
 
+	values = new ObjectValues<TestInput>(this);
 	values->addGetter("items", &TestInput::getItems);
 	values->addGetter("maxItems", &TestInput::getMaxItems);
 	values->addSetter("maxItems", &TestInput::setMaxItems);

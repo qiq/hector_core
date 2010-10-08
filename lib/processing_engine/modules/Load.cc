@@ -23,8 +23,8 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	maxItems = 0;
 	filename = NULL;
 	fd = -1;
-	values = new ObjectValues<Load>(this);
 
+	values = new ObjectValues<Load>(this);
 	values->addGetter("items", &Load::getItems);
 	values->addGetter("maxItems", &Load::getMaxItems);
 	values->addSetter("maxItems", &Load::setMaxItems);
