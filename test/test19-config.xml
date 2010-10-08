@@ -24,7 +24,11 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 			<Processor id="P_multi">
 				<threads>1</threads>
 				<modules>
-					<Module id="M_multi" type="perl" lib="TestMulti.pm"/>
+					<Module id="M_dump1" type="perl" lib="Dump.pm"/>
+					<Module id="M_multi1" type="perl" lib="TestMulti.pm"/>
+					<Module id="M_dump2" type="perl" lib="Dump.pm"/>
+					<Module id="M_multi2" type="perl" lib="TestMulti.pm"/>
+					<Module id="M_dump3" type="perl" lib="Dump.pm"/>
 				</modules>
 				<input>
 					<queue/>
@@ -36,6 +40,7 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 			<Processor id="P_output">
 				<threads>1</threads>
 				<modules>
+					<Module id="M_dump4" type="perl" lib="Dump.pm"/>
 					<Module id="M_output" type="perl" lib="TestOutput.pm"/>
 				</modules>
 				<input>
