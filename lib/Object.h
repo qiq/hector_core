@@ -58,6 +58,7 @@ protected:
 
 	virtual char *getValueSync(const char *name);
 	virtual bool setValueSync(const char *name, const char *value);
+	virtual bool isInitOnly(const char *name);
 	virtual std::vector<std::string> *listNamesSync();
 
 	virtual void SaveCheckpointSync(const char *path, const char *id);
@@ -113,23 +114,26 @@ inline void Object::ObjectUnlock() {
 }
 
 inline char *Object::getValue(const char *name) {
+	if (!strcmp(name, "logLevel"))
+		return strdup(this->getLogLevelStr(this->logger));
+	// no need to lock
+	if (isInitOnly(name))
+		return getValueSync(name);
 	char *result;
 	ObjectLockRead();
-	if (!strcmp(name, "logLevel"))
-		result = strdup(this->getLogLevelStr(this->logger));
-	else
-		result = getValueSync(name);
+	result = getValueSync(name);
 	ObjectUnlock();
 	return result;
 }
 
 inline bool Object::setValue(const char *name, const char *value) {
-	bool result;
-	ObjectLockWrite();
 	if (!strcmp(name, "logLevel"))
-		result = this->setLogLevel(value);
-	else
-		result = setValueSync(name, value);
+		return this->setLogLevel(value);
+	bool result;
+	if (isInitOnly(name))
+		return false;
+	ObjectLockWrite();
+	result = setValueSync(name, value);
 	ObjectUnlock();
 	return result;
 }

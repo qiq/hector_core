@@ -24,9 +24,9 @@ public:
 	Resource *ProcessInput(bool sleep);
 
 private:
-	int items;		// guarded by ObjectLock
-	int maxItems;		// guarded by ObjectLock
-	char *filename;		// guarded by ObjectLock
+	int items;		// ObjectLock
+	int maxItems;		// initOnly
+	char *filename;		// initOnly
 	int fd;			// private to ProcessInput()
 	google::protobuf::io::FileInputStream *stream;	// private to ProcessInput()
 
@@ -40,6 +40,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
 	bool ReadFromFile(void *data, int size);
@@ -55,6 +56,10 @@ inline char *Load::getValueSync(const char *name) {
 
 inline bool Load::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool Load::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *Load::listNamesSync() {

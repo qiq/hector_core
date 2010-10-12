@@ -49,6 +49,7 @@ protected:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 

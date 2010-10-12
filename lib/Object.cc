@@ -14,6 +14,10 @@ bool Object::setValueSync(const char *name, const char *value) {
 	return false;
 }
 
+bool Object::isInitOnly(const char *name) {
+	return false;
+}
+
 vector<string> *Object::listNamesSync() {
 	return new vector<string>();
 }

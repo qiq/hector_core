@@ -27,9 +27,9 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values = new ObjectValues<Load>(this);
 	values->addGetter("items", &Load::getItems);
 	values->addGetter("maxItems", &Load::getMaxItems);
-	values->addSetter("maxItems", &Load::setMaxItems);
+	values->addSetter("maxItems", &Load::setMaxItems, true);
 	values->addGetter("filename", &Load::getFilename);
-	values->addSetter("filename", &Load::setFilename);
+	values->addSetter("filename", &Load::setFilename, true);
 }
 
 Load::~Load() {
@@ -103,9 +103,8 @@ bool Load::ReadFromFile(void *data, int size) {
 Resource *Load::ProcessInput(bool sleep) {
 	ObjectLockRead();
 	int i = items;
-	int mi = maxItems;
 	ObjectUnlock();
-	if (mi && i >= mi)
+	if (maxItems && i >= maxItems)
 		return NULL;
 	uint32_t size;
 	uint8_t typeId;

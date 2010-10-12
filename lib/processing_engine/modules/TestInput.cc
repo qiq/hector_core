@@ -19,7 +19,7 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	values = new ObjectValues<TestInput>(this);
 	values->addGetter("items", &TestInput::getItems);
 	values->addGetter("maxItems", &TestInput::getMaxItems);
-	values->addSetter("maxItems", &TestInput::setMaxItems);
+	values->addSetter("maxItems", &TestInput::setMaxItems, true);
 	values->addGetter("idPrefix", &TestInput::getIdPrefix);
 	values->addSetter("idPrefix", &TestInput::setIdPrefix);
 	values->addGetter("resourceType", &TestInput::getResourceType);
@@ -79,11 +79,12 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestInput::ProcessInput(bool sleep) {
-	ObjectLockWrite();
-	if (maxItems && items >= maxItems) {
-		ObjectUnlock();
+	ObjectLockRead();
+	int i = items;
+	ObjectUnlock();
+	if (maxItems && i >= maxItems)
 		return NULL;
-	}
+	ObjectLockWrite();
 	Resource *r = Resources::CreateResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	TestResource *tr = dynamic_cast<TestResource*>(r);

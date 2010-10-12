@@ -21,10 +21,10 @@ public:
 private:
 	int typeId;		// to create TestResource
 
-	int items;		// guarded by ObjectLock
-	int maxItems;		// guarded by ObjectLock
-	char *idPrefix;		// guarded by ObjectLock
-	char *resourceType;	// guarded by ObjectLock
+	int items;		// ObjectLock
+	int maxItems;		// initOnly
+	char *idPrefix;		// ObjectLock
+	char *resourceType;	// ObjectLock
 
 	ObjectValues<TestInput> *values;
 
@@ -38,6 +38,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 
@@ -51,6 +52,10 @@ inline char *TestInput::getValueSync(const char *name) {
 
 inline bool TestInput::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool TestInput::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *TestInput::listNamesSync() {

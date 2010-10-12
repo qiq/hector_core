@@ -34,6 +34,7 @@ public:
 protected:
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
 	void SaveCheckpointSync(const char *path, const char *id);
@@ -47,6 +48,10 @@ protected:
 
 	std::tr1::unordered_set<std::string> initialized;
 };
+
+inline bool PerlModule::isInitOnly(const char *name) {
+	return false;
+}
 
 #else
 

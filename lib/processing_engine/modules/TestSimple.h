@@ -22,10 +22,10 @@ public:
 	Resource *ProcessSimple(Resource *resource);
 
 private:
-	int items;		// guarded by ObjectLock
-	char *foo;		// guarded by ObjectLock
-	bool flipStatus;	// guarded by ObjectLock
-	int setStatus;		// guarded by ObjectLock
+	int items;		// ObjectLock
+	char *foo;		// ObjectLock
+	bool flipStatus;	// ObjectLock
+	int setStatus;		// ObjectLock
 
 	ObjectValues<TestSimple> *values;
 
@@ -39,6 +39,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 
@@ -52,6 +53,10 @@ inline char *TestSimple::getValueSync(const char *name) {
 
 inline bool TestSimple::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool TestSimple::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *TestSimple::listNamesSync() {

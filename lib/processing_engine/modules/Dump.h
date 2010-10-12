@@ -25,6 +25,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 
@@ -38,6 +39,10 @@ inline char *Dump::getValueSync(const char *name) {
 
 inline bool Dump::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool Dump::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *Dump::listNamesSync() {

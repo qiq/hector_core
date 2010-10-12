@@ -25,9 +25,9 @@ public:
 	int ProcessingResources();
 
 private:
-	int items;		// guarded by ObjectLock
-	char *foo;		// guarded by ObjectLock
-	queue<TestResource*> *resources;
+	int items;		// ObjectLock
+	char *foo;		// ObjectLock
+	queue<TestResource*> *resources; // private to Process* (+ProcessingResources)
 
 	ObjectValues<TestMulti> *values;
 
@@ -37,6 +37,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 
@@ -50,6 +51,10 @@ inline char *TestMulti::getValueSync(const char *name) {
 
 inline bool TestMulti::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool TestMulti::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *TestMulti::listNamesSync() {

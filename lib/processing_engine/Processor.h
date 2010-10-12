@@ -59,6 +59,7 @@ protected:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
 	// process resource and append it to other precesses' queues
@@ -81,6 +82,10 @@ inline char *Processor::getValueSync(const char *name) {
 
 inline bool Processor::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool Processor::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *Processor::listNamesSync() {

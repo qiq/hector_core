@@ -19,7 +19,7 @@ public:
 	void ProcessOutput(Resource *resource);
 
 private:
-	int items;		// guarded by ObjectLock
+	int items;		// ObjectLock
 
 	ObjectValues<TestOutput> *values;
 
@@ -27,6 +27,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 };
 
@@ -40,6 +41,10 @@ inline char *TestOutput::getValueSync(const char *name) {
 
 inline bool TestOutput::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool TestOutput::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *TestOutput::listNamesSync() {

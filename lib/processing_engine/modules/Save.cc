@@ -26,7 +26,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values = new ObjectValues<Save>(this);
 	values->addGetter("items", &Save::getItems);
 	values->addGetter("filename", &Save::getFilename);
-	values->addSetter("filename", &Save::setFilename);
+	values->addSetter("filename", &Save::setFilename, true);
 }
 
 Save::~Save() {
@@ -75,9 +75,7 @@ bool Save::WriteToFile(const void *data, int size) {
 		if (wr > 0) {
 			size -= wr;
 		} else {
-			ObjectLockRead();
 			LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
-			ObjectUnlock();
 			return false;
 		}
 	}

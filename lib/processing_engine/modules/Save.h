@@ -24,8 +24,8 @@ public:
 	void ProcessOutput(Resource *resource);
 
 private:
-	int items;		// guarded by ObjectLock
-	char *filename;		// guarded by ObjectLock
+	int items;		// ObjectLock
+	char *filename;		// initOnly
 	int fd;			// private to ProcessOutput()
 	google::protobuf::io::FileOutputStream *stream;	// private to ProcessOutput()
 
@@ -37,6 +37,7 @@ private:
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
 	bool WriteToFile(const void *data, int size);
@@ -52,6 +53,10 @@ inline char *Save::getValueSync(const char *name) {
 
 inline bool Save::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
+}
+
+inline bool Save::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
 }
 
 inline std::vector<std::string> *Save::listNamesSync() {

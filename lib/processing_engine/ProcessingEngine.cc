@@ -111,6 +111,10 @@ bool ProcessingEngine::setValueSync(const char *name, const char *value) {
 	return values->setValueSync(name, value);
 }
 
+bool ProcessingEngine::isInitOnly(const char *name) {
+	return values->isInitOnly(name);
+}
+
 vector<string> *ProcessingEngine::listNamesSync() {
 	return values->listNamesSync();
 }

@@ -1,4 +1,8 @@
-// template-based value getters/setters implementation
+/* template-based value getters/setters implementation
+ *
+ * N.B.: properties must be locked when accessed from Process* methods. Anyway,
+ * init-only properties that are not changed outside Init() need not to be locked.
+ */
 
 #ifndef _LIB_OBJECT_VALUES_
 #define _LIB_OBJECT_VALUES_
@@ -7,6 +11,7 @@
 
 #include <string>
 #include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #include <vector>
 #include <log4cxx/logger.h>
 
@@ -17,12 +22,13 @@ public:
 	~ObjectValues() {};
 
 	void addGetter(const char *name, char *(T::*f)(const char*));
-	void addSetter(const char *name, void (T::*f)(const char*, const char*));
+	void addSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly = false);
 	bool InitValues(std::vector<std::pair<std::string, std::string> > *params);
 	bool InitValue(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
+	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
 private:
@@ -30,12 +36,12 @@ private:
 
 	std::tr1::unordered_map<std::string, char *(T::*)(const char*)> getters;
 	std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)> setters;
+	std::tr1::unordered_set<std::string> initOnly;
 
 	static log4cxx::LoggerPtr logger;
 };
 
 template <class T> log4cxx::LoggerPtr ObjectValues<T>::logger(log4cxx::Logger::getLogger("lib.ObjectValues"));
-
 
 template<class T>
 bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string> > *params) {
@@ -68,9 +74,12 @@ void ObjectValues<T>::addGetter(const char *name, char *(T::*f)(const char*)) {
 	getters[name] = f;
 }
 
+// initOnly: cannot set value outside of InitValue()/InitValues() -- does not require locking at all
 template<class T>
-void ObjectValues<T>::addSetter(const char *name, void (T::*f)(const char*, const char*)) {
+void ObjectValues<T>::addSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly) {
 	setters[name] = f;
+	if (initOnly)
+		this->initOnly.insert(name);
 }
 
 template<class T>
@@ -89,6 +98,12 @@ bool ObjectValues<T>::setValueSync(const char *name, const char *value) {
 		return true;
 	}
 	return false;
+}
+
+template<class T>
+bool ObjectValues<T>::isInitOnly(const char *name) {
+	typename std::tr1::unordered_set<std::string>::iterator iter = initOnly.find(name);
+	return iter != initOnly.end();
 }
 
 template<class T>
