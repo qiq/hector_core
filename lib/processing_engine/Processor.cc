@@ -31,6 +31,7 @@ Processor::~Processor() {
 			delete (*iter)->module;
 			delete (*iter)->inputResources;
 			delete (*iter)->outputResources;
+			delete *iter;
 		}
 	}
 	delete[] modules;

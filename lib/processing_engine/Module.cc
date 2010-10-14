@@ -17,26 +17,26 @@ Module::Type Module::getType() {
 }
 
 Resource *Module::ProcessInput(bool sleep) {
-	LOG_ERROR("Unimplemented resource processing " << getId() << " (ProcessInput)");
+	LOG_ERROR("Unimplemented resource processing (ProcessInput)");
 	return NULL;
 }
 
 void Module::ProcessOutput(Resource *resource) {
-	LOG_ERROR("Unimplemented resource processing " << getId() << " (ProcessOutput)");
+	LOG_ERROR("Unimplemented resource processing (ProcessOutput)");
 }
 
 Resource *Module::ProcessSimple(Resource *resource) {
-	LOG_ERROR("Unimplemented resource processing " << getId() << " (ProcessSimple)");
+	LOG_ERROR("Unimplemented resource processing (ProcessSimple)");
 	return NULL;
 }
 
 int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
-	LOG_ERROR("Unimplemented resource processing " << getId() << " (ProcessMulti)");
+	LOG_ERROR("Unimplemented resource processing (ProcessMulti)");
 	return 0;
 }
 
 int Module::ProcessingResources() {
-	LOG_ERROR("Unimplemented resource processing " << getId() << " (ProcessingResources");
+	LOG_ERROR("Unimplemented resource processing (ProcessingResources)");
 	return 0;
 }
 
