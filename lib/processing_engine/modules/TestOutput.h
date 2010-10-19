@@ -12,7 +12,7 @@
 
 class TestOutput : public Module {
 public:
-	TestOutput(ObjectRegistry *objects, const char *id, int threadIndex);
+	TestOutput(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
 	~TestOutput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();

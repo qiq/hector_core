@@ -12,13 +12,12 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "common.h"
 #include "ProtobufResource.h"
-#include "Resources.h"
 #include "Save.h"
 #include "TestResource.h"
 
 using namespace std;
 
-Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+Save::Save(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	filename = NULL;
 	fd = -1;
 	items = 0;
@@ -117,6 +116,6 @@ void Save::ProcessOutput(Resource *resource) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new Save(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return (Module*)new Save(objects, engine, id, threadIndex);
 }

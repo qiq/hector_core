@@ -14,7 +14,7 @@
 
 class Dump : public Module {
 public:
-	Dump(ObjectRegistry *objects, const char *id, int threadIndex);
+	Dump(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
 	~Dump();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();

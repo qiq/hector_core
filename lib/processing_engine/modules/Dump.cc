@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Dump::Dump(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+Dump::Dump(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	values = new ObjectValues<Dump>(this);
 }
 
@@ -30,6 +30,6 @@ Resource *Dump::ProcessSimple(Resource *resource) {
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return new Dump(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return new Dump(objects, engine, id, threadIndex);
 }

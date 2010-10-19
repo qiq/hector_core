@@ -11,14 +11,14 @@
 #include <fcntl.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "common.h"
+#include "ProcessingEngine.h"
 #include "ProtobufResource.h"
-#include "Resources.h"
 #include "Load.h"
 #include "TestResource.h"
 
 using namespace std;
 
-Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+Load::Load(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 	maxItems = 0;
 	filename = NULL;
@@ -113,7 +113,7 @@ Resource *Load::ProcessInput(bool sleep) {
 	if (!ReadFromFile(&typeId, sizeof(typeId)))
 		return NULL;
 
-	Resource *r = Resources::CreateResource(typeId);
+	Resource *r = engine->CreateResource(typeId);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(r);
 	if (pr) {
 		if (!pr->Deserialize(stream, (int)size))
@@ -143,6 +143,6 @@ Resource *Load::ProcessInput(bool sleep) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new Load(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return (Module*)new Load(objects, engine, id, threadIndex);
 }

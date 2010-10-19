@@ -16,6 +16,8 @@
 #include "ObjectRegistry.h"
 #include "Processor.h"
 
+class Config;
+
 class ProcessingEngine : public Object {
 public:
 	ProcessingEngine(ObjectRegistry *objects, const char *id);
@@ -26,8 +28,29 @@ public:
 	void Pause();
 	void Resume();
 
+	// process resource using the processing engine
+	bool PutResource(Resource *resource, bool sleep);
+	// get processed resource from the processing engine, NULL: deleted/not available
+	Resource *GetResource(int id, bool sleep);
+
+	// helper methods to create resources
+	int ResourceNameToId(const char *name);
+	Resource *CreateResource(int id);
+	void DeleteResource(Resource *resource);
+
+	// helper method for Processor::Connect()
+	SyncQueue<Resource> *getOutputQueue();
+
 protected:
 	std::vector<Processor*> processors;
+	SyncQueue<Resource> *inputQueue;	// just a reference
+	SyncQueue<Resource> *outputQueue;	// we own this queue
+	CondLock finishedLock;
+	bool waitingInQueue;
+	std::tr1::unordered_map<int, Resource*> finishedResources;	// resources waiting for consumption
+	PlainLock pauseLock;
+	int waiting;
+	bool cancel;
 
 	bool propRun;
 	bool propPause;
@@ -75,6 +98,15 @@ inline void ProcessingEngine::Resume() {
 	ObjectLockWrite();
 	ResumeSync();
 	ObjectUnlock();
+}
+
+inline SyncQueue<Resource> *ProcessingEngine::getOutputQueue() {
+	if (!outputQueue) {
+		outputQueue = new SyncQueue<Resource>();
+		outputQueue->addQueue(0, 0, 0);
+	}
+
+        return outputQueue;
 }
 
 #endif

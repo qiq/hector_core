@@ -9,7 +9,7 @@
 
 using namespace std;
 
-TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+TestSimple::TestSimple(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 	foo = NULL;
 	flipStatus = false;
@@ -94,6 +94,6 @@ Resource *TestSimple::ProcessSimple(Resource *resource) {
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return new TestSimple(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return new TestSimple(objects, engine, id, threadIndex);
 }

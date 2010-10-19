@@ -8,7 +8,7 @@
 
 using namespace std;
 
-TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+TestOutput::TestOutput(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 
 	values = new ObjectValues<TestOutput>(this);
@@ -47,6 +47,6 @@ void TestOutput::ProcessOutput(Resource *resource) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new TestOutput(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return (Module*)new TestOutput(objects, engine, id, threadIndex);
 }

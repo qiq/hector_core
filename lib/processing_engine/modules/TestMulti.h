@@ -17,7 +17,7 @@
 
 class TestMulti : public Module {
 public:
-	TestMulti(ObjectRegistry *objects, const char *id, int threadIndex);
+	TestMulti(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
 	~TestMulti();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();

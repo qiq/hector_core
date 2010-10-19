@@ -10,7 +10,7 @@
 
 using namespace std;
 
-TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+TestMulti::TestMulti(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 	foo = NULL;
 	resources = new queue<TestResource*>();
@@ -84,6 +84,6 @@ int TestMulti::ProcessingResources() {
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return new TestMulti(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return new TestMulti(objects, engine, id, threadIndex);
 }

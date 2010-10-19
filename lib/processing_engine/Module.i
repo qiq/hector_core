@@ -12,4 +12,8 @@ public:
                 SIMPLE = 3,
                 MULTI =  4,
         };
+
+        static void ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource);
+        static Resource *ResourceQueuePop(std::queue<Resource*> *queue);
+        static int ResourceQueueSize(std::queue<Resource*> *queue);
 };

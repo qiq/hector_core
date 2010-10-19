@@ -6,8 +6,8 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h Resources.h \
-	Resource.i Resources.i ProtobufResource.i Module.i
+hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h \
+	Resource.i ProtobufResource.i Module.i
 
 BUILT_SOURCES =
 

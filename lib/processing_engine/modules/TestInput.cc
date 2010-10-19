@@ -4,13 +4,13 @@
 #include <config.h>
 
 #include "common.h"
-#include "Resources.h"
+#include "ProcessingEngine.h"
 #include "TestInput.h"
 #include "TestResource.h"
 
 using namespace std;
 
-TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+TestInput::TestInput(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 	maxItems = 0;
 	idPrefix = NULL;
@@ -70,7 +70,7 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 		resourceType = strdup("TestResource");
 	if (maxItems)
 		LOG_INFO("Going to produce " << maxItems << " resources of type " << resourceType << ".");
-	typeId = Resources::Name2Id(resourceType);
+	typeId = engine->ResourceNameToId(resourceType);
 	if (typeId < 0) {
 		LOG_ERROR("Cannot load " << resourceType << " library");
 		return false;
@@ -85,7 +85,7 @@ Resource *TestInput::ProcessInput(bool sleep) {
 	if (maxItems && i >= maxItems)
 		return NULL;
 	ObjectLockWrite();
-	Resource *r = Resources::CreateResource(typeId);
+	Resource *r = engine->CreateResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	TestResource *tr = dynamic_cast<TestResource*>(r);
 	if (tr) {
@@ -103,6 +103,6 @@ Resource *TestInput::ProcessInput(bool sleep) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
-	return (Module*)new TestInput(objects, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
+	return (Module*)new TestInput(objects, engine, id, threadIndex);
 }

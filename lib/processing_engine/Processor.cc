@@ -10,13 +10,16 @@
 #include <string.h>
 #include <ltdl.h>
 #include "common.h"
+#include "Config.h"
 #include "PerlModule.h"
+#include "ProcessingEngine.h"
 #include "Processor.h"
 #include "LibraryLoader.h"
 
 using namespace std;
 
-Processor::Processor(ObjectRegistry *objects, const char *id): Object(objects, id) {
+Processor::Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id): Object(objects, id) {
+	this->engine = engine;
 	threads = NULL;
 	running = false;
 
@@ -72,14 +75,14 @@ bool Processor::Init(Config *config) {
 			char *type = config->getFirstValue(buffer);
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
-				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(name, "create");
+				Module *(*create)(ObjectRegistry*, ProcessingEngine *engine, const char*, int) = (Module*(*)(ObjectRegistry*, ProcessingEngine *engine, const char*, int))LibraryLoader::loadLibrary(name, "create");
 				if (!create) {
 					LOG_ERROR("Module/lib not found: " << name);
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
 					ModuleInfo *mi = new ModuleInfo;
-					mi->module = (*create)(objects, mid, i);
+					mi->module = (*create)(objects, engine, mid, i);
 					modules[i].push_back(mi);
 				}
 				free(type);
@@ -88,7 +91,7 @@ bool Processor::Init(Config *config) {
 				// Perl module
 				for (int i = 0; i < nThreads; ++i) {
 					ModuleInfo * mi = new ModuleInfo;
-					mi->module = new PerlModule(objects, mid, i, name);
+					mi->module = new PerlModule(objects, engine, mid, i, name);
 					modules[i].push_back(mi);
 				}
 				free(type);
@@ -288,20 +291,26 @@ bool Processor::Connect() {
 		int priority = (*iter)->getPriority();
 		const char *ref = (*iter)->getProcessor();
 		assert(ref != NULL);
+		SyncQueue<Resource> *q;
 		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
-		if (!p) {
-			LOG_ERROR("Processor not found: " << ref);
-			return false;
+		if (p) {
+			q = p->getInputQueue();
+		} else {
+			ProcessingEngine *pe = dynamic_cast<ProcessingEngine*>(objects->getObject(ref));
+			if (!pe) {
+				LOG_ERROR("Processor or ProcessingEngine not found: " << ref);
+				return false;
+			}
+			q = pe->getOutputQueue();
 		}
 
-		SyncQueue<Resource> *q = p->getInputQueue();
 		if (!q) {
-			LOG_ERROR("No input queue defined for processor: " << ref);
+			LOG_ERROR("No input queue defined for Processor/ProcessingEngine: " << ref);
 			return false;
 		}
 
 		if (!q->hasQueue(priority)) {
-			LOG_ERROR("No input queue with priority " << priority << " for processor: " << ref);
+			LOG_ERROR("No input queue with priority " << priority << " for Processor/ProcessingEngine: " << ref);
 			return false;
 		}
 		(*iter)->setQueue(q);
@@ -429,7 +438,7 @@ void Processor::runThread(int threadId) {
 		while (resourcesRead < readMax && !stop) {
 			Resource *resource = NULL;
 			if ((*mis)[0]->type != Module::INPUT) {
-				// get resource from input queue
+				// get resource from the input queue
 				resource = inputQueue->getItem(block && resourcesRead == 0);
 				if (!resource) {
 					if (block && resourcesRead == 0)

@@ -6,6 +6,7 @@
 #define SWIG_FILE_WITH_INIT // for Python
 %}
 
+%include common.i
 %include Connection.i
 %include StdioConnection.i
 %include Object.i
@@ -13,6 +14,5 @@
 %include Module.i
 %include Resource.i
 %include ProtobufResource.i
-%include Resources.i
 %include TestResource.i
 %include TestProtobufResource.i

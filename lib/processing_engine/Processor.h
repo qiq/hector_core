@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 #include <log4cxx/logger.h>
-#include "Config.h"
 #include "Object.h"
 #include "ObjectRegistry.h"
 #include "Module.h"
@@ -21,9 +20,12 @@
 #include "Resource.h"
 #include "SyncQueue.h"
 
+class Config;
+class ProcessingEngine;
+
 class Processor : public Object {
 public:
-	Processor(ObjectRegistry *objects, const char *id);
+	Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id);
 	~Processor();
 	bool Init(Config *config);
 	bool Connect(); // connect processors to other processors
@@ -51,6 +53,7 @@ protected:
 	pthread_t *threads;
 	bool running;
 
+	ProcessingEngine *engine;
 	std::vector<ModuleInfo*> *modules;	// all modules; every thread has a module instance (first dimension)
 	SyncQueue<Resource> *inputQueue;	// input queue
 	std::vector<OutputFilter*> outputFilters;	// filters of output resources

@@ -59,10 +59,12 @@ Resource *Resources::CreateResource(int id) {
 		iter = id2create.find(id);
 		assert(iter != id2create.end());
 	}
-	return (*iter->second)();
+	Resource *result = (*iter->second)();
+	lock.Unlock();
+	return result;
 }
 
-int Resources::Name2Id(const char *name) {
+int Resources::NameToId(const char *name) {
 	lock.Lock();
 	std::tr1::unordered_map<string, int>::iterator iter = name2id.find(name);
 	if (iter != name2id.end()) {
@@ -76,7 +78,7 @@ int Resources::Name2Id(const char *name) {
 	}
 	iter = name2id.find(name);
 	assert(iter != name2id.end());
+	int result = iter->second;
 	lock.Unlock();
-
-	return iter->second;
+	return result;
 }
