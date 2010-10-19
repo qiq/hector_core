@@ -16,11 +16,11 @@
 #include "ObjectRegistry.h"
 #include "Module.h"
 #include "ObjectValues.h"
-#include "OutputFilter.h"
 #include "Resource.h"
 #include "SyncQueue.h"
 
 class Config;
+class OutputFilter;
 class ProcessingEngine;
 
 class Processor : public Object {

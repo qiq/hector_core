@@ -11,6 +11,7 @@
 #include <ltdl.h>
 #include "common.h"
 #include "Config.h"
+#include "OutputFilter.h"
 #include "PerlModule.h"
 #include "ProcessingEngine.h"
 #include "Processor.h"
