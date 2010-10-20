@@ -26,7 +26,7 @@ class TestServer : public SimpleHTTPServer {
 public:
 	TestServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engines);
 	~TestServer();
-	bool Init(Config *config);
+	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	bool HandleRequest(SimpleHTTPConn *conn);
 };
 

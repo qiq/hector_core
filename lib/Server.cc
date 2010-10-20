@@ -69,7 +69,7 @@ bool Server::Init(Config *config) {
 		delete v;
 	}
 
-	// library
+	// server library
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", getId());
 	s = config->getFirstValue(buffer);
 	if (!s) {
@@ -77,7 +77,7 @@ bool Server::Init(Config *config) {
 		return false;
 	}
 	
-	// load library
+	// load server library
 	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::loadLibrary(s, "create");
 	if (!create) {
 		LOG_ERROR("Invalid library: " << s);
@@ -85,7 +85,9 @@ bool Server::Init(Config *config) {
 	}
 	free(s);
 	simpleHTTPServer = (*create)(objects, &processingEngines);
-	if (!simpleHTTPServer->Init(config))
+	// TODO: really parse parameters, dummy for now
+	vector<pair<string, string> > params;
+	if (!simpleHTTPServer->Init(&params))
 		return false;
 
 	return true;

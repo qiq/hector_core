@@ -3,7 +3,6 @@
  */
 
 #include <assert.h>
-#include "Config.h"
 #include "TestServer.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
@@ -17,7 +16,7 @@ TestServer::TestServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engin
 	this->engines = engines;
 }
 
-bool TestServer::Init(Config *config) {
+bool TestServer::Init(std::vector<std::pair<std::string, std::string> > *params) {
 	if (engines->size() == 0) {
 		LOG4CXX_ERROR(logger, "No processing engine in a server");
 		return false;

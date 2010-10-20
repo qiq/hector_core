@@ -35,6 +35,6 @@ endif
 
 
 # SWIG interface
-EXTRA_DIST = Resource.i ProtobufResource.i Resources.i Module.i
+EXTRA_DIST = Resource.i ProtobufResource.i Module.i
 
 CLEANFILES = $(BUILT_SOURCES)
