@@ -9,7 +9,7 @@ test4: multithreaded intermediate (simple): reader(5), one simple intermediate(5
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="test_processing_engine">
+		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>5</threads>
 				<modules>

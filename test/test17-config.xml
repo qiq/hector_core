@@ -9,7 +9,7 @@ test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="test_processing_engine">
+		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>1</threads>
 				<modules>

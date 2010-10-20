@@ -4,7 +4,7 @@
 
 test_init
 test_server_start
-hector_client_set test_processing_engine.run 1
+hector_client_set PE_test.run 1
 hector_client_wait M_output1[0].items 1000
 hector_client_wait M_output2[0].items 2000
 hector_server_shutdown

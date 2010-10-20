@@ -9,7 +9,7 @@ test6: sort according to status: two readers(1), connected to two intermediates(
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="test_processing_engine">
+		<ProcessingEngine id="PE_test">
 			<Processor id="P_input1">
 				<threads>1</threads>
 				<modules>

@@ -10,7 +10,7 @@ Also testing another parameter value usage.
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="test_processing_engine">
+		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>5</threads>
 				<modules>

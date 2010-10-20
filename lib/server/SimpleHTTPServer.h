@@ -10,10 +10,13 @@
 #include "SimpleHTTPConn.h"
 #include "SimpleServer.h"
 
+class Config;
+
 class SimpleHTTPServer : public SimpleServer {
 public:
 	SimpleHTTPServer() {};
 	~SimpleHTTPServer() {};
+	virtual bool Init(Config *config) = 0;
 
 	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
 

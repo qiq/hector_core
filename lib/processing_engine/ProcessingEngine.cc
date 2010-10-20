@@ -87,13 +87,16 @@ bool ProcessingEngine::Init(Config *config) {
 
 // process resource using the processing engine
 bool ProcessingEngine::PutResource(Resource *resource, bool sleep) {
+	if (!inputQueue)
+		return false;
 	return inputQueue->putItem(resource, sleep, 0);
 }
 
 // get processed resource from the processing engine, NULL: deleted/not available (also cancelled)
 Resource *ProcessingEngine::GetResource(int id, bool sleep) {
+	if (!outputQueue)
+		return NULL;
 	Resource *resource;
-	assert(outputQueue != NULL);
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	finishedLock.Lock();

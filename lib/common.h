@@ -28,6 +28,9 @@ inline void die(const char *msg, ...) {
 	exit(EXIT_FAILURE);
 }
 
+void skipWs(std::string *data);
+void chomp(std::string *data);
+
 typedef struct {
 	uint32_t addr;
 } ip4_addr_t;

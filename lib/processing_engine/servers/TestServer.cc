@@ -2,15 +2,30 @@
  *
  */
 
+#include <assert.h>
+#include "Config.h"
 #include "TestServer.h"
 #include "Object.h"
+#include "ProcessingEngine.h"
 
 using namespace std;
 
 log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.TestServer"));
 
-TestServer::TestServer(ObjectRegistry *objects) {
+TestServer::TestServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
 	this->objects = objects;
+	this->engines = engines;
+}
+
+bool TestServer::Init(Config *config) {
+	if (engines->size() == 0) {
+		LOG4CXX_ERROR(logger, "No processing engine in a server");
+		return false;
+	}
+	for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
+		name2engine[(*iter)->getId()] = *iter;
+	}
+	this->resourceId = (*engines)[0]->ResourceNameToId("TestResource");
 }
 
 bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
@@ -68,7 +83,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 				string object = args.substr(0, dot);
 				string property = args.substr(dot+1);
 				string body = conn->getRequestBody();
-				size_t eoln = args.find_first_of("\r\n");
+				size_t eoln = body.find_first_of("\r\n");
 				string value = eoln != string::npos ? body.substr(0, eoln): body;
 				if (objects->setObjectValue(object.c_str(), property.c_str(), value.c_str())) {
 					conn->setResponseCode(200, "OK");
@@ -80,6 +95,58 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			// error: no object.property given
 			conn->ErrorResponse(400, "No object.property argument given", "");
 		}
+		return true;
+	} else if (method == "PROCESS") {
+		LOG4CXX_INFO(logger, "PROCESS " << args);
+		skipWs(&args);
+		chomp(&args);
+		tr1::unordered_map<string, ProcessingEngine*>::iterator iter = name2engine.find(args);
+		if (iter == name2engine.end()) {
+			LOG4CXX_ERROR(logger, "ProcessingEngine " << args << " not found");
+			conn->setResponseCode(500, "ProcessorEngine not found");
+			return true;
+		}
+		ProcessingEngine *engine = iter->second;
+		// create all resources
+		string body = conn->getRequestBody();
+		skipWs(&body);
+		vector<int> resourceIds;
+		while (body.length() > 0) {
+			size_t eoln = body.find_first_of("\r\n");
+			string line = eoln != string::npos ? body.substr(0, eoln): body;
+			if (line.length() > 0) {
+				int n = atoi(line.c_str());
+				TestResource *tr = dynamic_cast<TestResource*>(engine->CreateResource(resourceId));
+				assert(tr != NULL);
+				tr->setId(n);
+				tr->setStr(line.c_str());
+				if (!engine->PutResource(tr, true))
+					break;
+				resourceIds.push_back(n);
+			}
+			body = body.substr(eoln);
+			skipWs(&body);
+		}
+		if (body.length() > 0) {
+			conn->setResponseCode(500, "Error passing data to ProcessingEngine");
+			return true;
+		}
+			
+		// wait for result
+		int i = 0;
+		while (i < resourceIds.size()) {
+			TestResource *tr = dynamic_cast<TestResource*>(engine->GetResource(resourceIds[i], true));
+			if (!tr)
+				break;
+			char s[1024];
+			snprintf(s, sizeof(s), "%d %s\r\n", tr->getId(), tr->getStr());
+			conn->appendResponseBody(s);
+			i++;
+		}
+		if (i == resourceIds.size())
+			conn->setResponseCode(200, "OK");
+		else
+			conn->setResponseCode(500, "Error getting data from ProcessingEngine");
 		return true;
 	} else if (method == "SHUTDOWN") {
 		LOG4CXX_INFO(logger, "SHUTDOWN");
@@ -97,6 +164,6 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 
 // factory functions
 
-extern "C" SimpleHTTPServer* create(ObjectRegistry *objects) {
-	return new TestServer(objects);
+extern "C" SimpleHTTPServer* create(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
+	return new TestServer(objects, engines);
 }

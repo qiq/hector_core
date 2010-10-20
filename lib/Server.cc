@@ -78,13 +78,15 @@ bool Server::Init(Config *config) {
 	}
 	
 	// load library
-	SimpleHTTPServer *(*create)(ObjectRegistry*) = (SimpleHTTPServer*(*)(ObjectRegistry*))LibraryLoader::loadLibrary(s, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::loadLibrary(s, "create");
 	if (!create) {
 		LOG_ERROR("Invalid library: " << s);
 		return false;
 	}
-	simpleHTTPServer = (*create)(objects);
 	free(s);
+	simpleHTTPServer = (*create)(objects, &processingEngines);
+	if (!simpleHTTPServer->Init(config))
+		return false;
 
 	return true;
 }

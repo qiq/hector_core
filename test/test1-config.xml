@@ -5,11 +5,11 @@ test1: read-write: one reader(1), one writer(1)
 -->
 <Config>
 	<Server id="test" lib="TestServer.la">
-		<threads>1</threads>
+		<threads>2</threads>
 		<serverHost>*</serverHost>
 		<serverPort>1100</serverPort>
 		<logConfig>test.log.props</logConfig>
-		<ProcessingEngine id="test_processing_engine">
+		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>1</threads>
 				<modules>

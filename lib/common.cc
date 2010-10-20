@@ -10,6 +10,25 @@
 #include <ltdl.h>
 #include "common.h"
 
+using namespace std;
+
+void skipWs(string *data) {
+	size_t offset = data->find_first_not_of(" \t\n\r");
+	if (offset != string::npos)
+		data->erase(0, offset);
+	else
+		data->clear();
+}
+
+void chomp(string *data) {
+	size_t offset = data->find_last_not_of(" \t\n\r");
+	if (offset != string::npos)
+		data->erase(offset+1);
+	else
+		data->clear();
+	
+}
+
 int writeBytes(int fd, const char *s, int length) {
 	int written = 0;
 	while (length - written > 0) {

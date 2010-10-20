@@ -17,11 +17,13 @@ my $propertyNames;
 my %commands = (
 	"get" => 1,
 	"set" => 1,
+	"process" => 1,
 	"shutdown" => 1,
 	"quit" => 1
 );
 
 my $interactive = 0;
+my $command = undef;
 my $verbose = 0;
 my $help = 0;
 my $version = 0;
@@ -31,6 +33,7 @@ sub printHelp() {
 usage: client.pl [options] [server[:port]]
 options:
   --interactive, -i		Run interactive "shell"
+  --command=cmd, -c		Run one command and exit
   --verbose, -v                 Be verbose
   --help, -h                    This help
   --version, -V                 Version information
@@ -73,6 +76,15 @@ sub setProperty {
 	my $res = $ua->request($req);
 	die("Server error: ".$res->message()) if ($res->code >= 500);
 	return $res->is_success ? 1 : 0;
+}
+
+sub doProcess {
+	my ($peName, $data) = @_;
+	my $req = HTTP::Request->new(PROCESS => "http://$server:$port/$peName");
+	$req->content($data);
+	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
+	return $res->is_success ? $res->content : undef;
 }
 
 sub saveHistory {
@@ -174,6 +186,7 @@ $ua->agent("HectorClient");
 # parse command line
 GetOptions(
 	"interactive|i" => \$interactive,
+	"command|c=s" => \$command,
 	"verbose|v" => \$verbose,
 	"help|h" => \$help,
 	"version|V" => \$version
@@ -194,6 +207,7 @@ if (@ARGV > 0) {
 # main-loop
 
 # commands:
+# process processing_engine_name (data is read/written using stdin/stdout)
 # get object.property
 # set object.property = xxx
 # shutdown
@@ -205,7 +219,17 @@ my $file = "$homeDir/.hector_history";
 &loadHistory($file) if ($interactive);
 
 my $last_command = '';
-while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
+my $finished = 0;
+while (!$finished) {
+	if ($interactive) {
+		$_ = $term->readline("$server> ");
+	} elsif (not defined $command) {
+		$_ = <STDIN>;
+	} else {
+		$_ = $command;
+		$finished = 1;
+	}
+	last if (not defined $_);
 	chomp;
 	s/^\s*//;
 	s/\s*$//;
@@ -284,6 +308,21 @@ while ($_ = $interactive ? $_ = $term->readline("$server> ") : <STDIN>) {
 				}
 			} else {
 				print STDERR "No object.property given\n";
+			}
+		} elsif ($cmd eq 'process') {
+			if ($l =~ /\S/) {
+				my $data = '';
+				while (<STDIN>) {
+					$data .= $_;
+				}
+				$data = doProcess($l, $data);
+				if (not defined $data) {
+					print STDERR "Cannot process resources\n";
+				} else {
+					print $data;
+				}
+			} else {
+				print STDERR "No ProcessingEngine name given\n";
 			}
 		} elsif ($cmd eq 'shutdown') {
 			if (&shutdown()) {

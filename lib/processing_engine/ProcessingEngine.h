@@ -36,6 +36,7 @@ public:
 	// helper methods to create resources
 	int ResourceNameToId(const char *name);
 	Resource *CreateResource(int id);
+	// this must be called from modules in case resource is to be deleted
 	void DeleteResource(Resource *resource);
 
 	// helper method for Processor::Connect()
