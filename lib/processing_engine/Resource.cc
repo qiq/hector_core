@@ -6,66 +6,61 @@
 
 using namespace std;
 
-const char *getString(Resource *resource) {
+const char *ResourceInfo::getString(Resource *resource) {
 	return NULL;
 }
 
-int getInt(Resource *resource) {
+int ResourceInfo::getInt(Resource *resource) {
 	return -1;
 }
 
-long getLong(Resource *resource) {
+long ResourceInfo::getLong(Resource *resource) {
 	return -1;
 }
 
-ip4_addr_t getIp4Addr(Resource *resource) {
-	ip4_addr_t addr;
-	addr.addr = 0;
-	return addr;
+ip4_addr_t ResourceInfo::getIp4Addr(Resource *resource) {
+	return ip4_addr_empty;
 }
 
-ip6_addr_t getIp6Addr(Resource *resource) {
-	ip6_addr_t addr;
-	for (int i = 0; i < 16; i++)
-		addr.addr[i] = 0;
-	return addr;
+ip6_addr_t ResourceInfo::getIp6Addr(Resource *resource) {
+	return ip6_addr_empty;
 }
 
-const char *getString2(Resource *resource, const char *name) {
+const char *ResourceInfo::getString2(Resource *resource, const char *name) {
 	return NULL;
 }
 
-const char *getStringN(Resource *resource, int index) {
+const char *ResourceInfo::getStringN(Resource *resource, int index) {
 	return NULL;
 }
 
-void setString(Resource *resource, const char *name) {
+void ResourceInfo::setString(Resource *resource, const char *name) {
 }
 
-void setInt(Resource *resource, int value) {
+void ResourceInfo::setInt(Resource *resource, int value) {
 }
 
-void setLong(Resource *resource, long value) {
+void ResourceInfo::setLong(Resource *resource, long value) {
 }
 
-void setIp4Addr(Resource *resource, ip4_addr_t value) {
+void ResourceInfo::setIp4Addr(Resource *resource, ip4_addr_t value) {
 }
 
-void setIp6Addr(Resource *resource, ip6_addr_t value) {
+void ResourceInfo::setIp6Addr(Resource *resource, ip6_addr_t value) {
 }
 
-void setString2(Resource *resource, const char *name, const char *value) {
+void ResourceInfo::setString2(Resource *resource, const char *name, const char *value) {
 }
 
-void setStringN(Resource *resource, int index, const char *value) {
+void ResourceInfo::setStringN(Resource *resource, int index, const char *value) {
 }
 
-void clear(Resource *resource) {
+void ResourceInfo::clear(Resource *resource) {
 }
 
-void clearString2(Resource *resource, const char *name) {
+void ResourceInfo::clearString2(Resource *resource, const char *name) {
 }
 
-void clearStringN(Resource *resource, int index) {
+void ResourceInfo::clearStringN(Resource *resource, int index) {
 }
 

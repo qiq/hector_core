@@ -35,17 +35,19 @@ typedef struct {
 	uint32_t addr;
 } ip4_addr_t;
 
+static ip4_addr_t ip4_addr_empty = { 0 };
+
 typedef struct {
 	uint8_t addr[16];
 } ip6_addr_t;
 
+static ip6_addr_t ip6_addr_empty = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+
 inline ip4_addr_t str2Ip4Addr(const char *s) {
 	uint32_t a;
 	ip4_addr_t addr;
-	if (!inet_pton(AF_INET, s, &a)) {
-		addr.addr = 0;
-		return addr;
-	}
+	if (!inet_pton(AF_INET, s, &a))
+		return ip4_addr_empty;
 	addr.addr = ntohl(a);
 	return addr;
 }
@@ -61,10 +63,8 @@ inline char *ip4Addr2Str(ip4_addr_t addr) {
 
 inline ip6_addr_t str2Ip6Addr(const char *s) {
 	ip6_addr_t addr;
-	if (!inet_pton(AF_INET6, s, &addr.addr)) {
-		memset(addr.addr, sizeof(addr.addr), 0);
-		return addr;
-	}
+	if (!inet_pton(AF_INET6, s, &addr.addr))
+		return ip6_addr_empty;
 	if (htons(0xabcd) != 0xabcd) {
 		for (int i = 0; i < 8; i++) {
 			uint8_t tmp = addr.addr[15-i];
