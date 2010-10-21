@@ -26,22 +26,49 @@ char *TestProtobufResource::toString(Object::LogLevel logLevel) {
 	return strdup(buf);
 }
 
-TestProtobufResource::TestProtobufResourceFieldInfo TestProtobufResource::getFieldInfo(const char *name) {
-	TestProtobufResource::TestProtobufResourceFieldInfo result;
+TestProtobufResourceInfo::TestProtobufResourceInfo(const char *name) {
 	if (!strcmp(name, "id")) {
-		result.type = INT;
-		result.get.i = &TestProtobufResource::getId;
-		result.set.i = &TestProtobufResource::setId;
-		return result;
+		type = INT;
+		get_u.i = &TestProtobufResource::getId;
+		set_u.i = &TestProtobufResource::setId;
+		clear_u.c = NULL;
 	} else if (!strcmp(name, "status")) {
-		result.type = INT;
-		result.get.i = &TestProtobufResource::getStatus;
-		result.set.i = &TestProtobufResource::setStatus;
-		return result;
+		type = INT;
+		get_u.i = &TestProtobufResource::getStatus;
+		set_u.i = &TestProtobufResource::setStatus;
+		clear_u.c = NULL;
 	} else if (!strcmp(name, "str")) {
-		result.type = STRING;
-		result.get.s = &TestProtobufResource::getStr;
-		result.set.s = &TestProtobufResource::setStr;
-		return result;
+		type = STRING;
+		get_u.s = &TestProtobufResource::getStr;
+		set_u.s = &TestProtobufResource::setStr;
+		clear_u.c = NULL;
 	}
+}
+
+const char *TestProtobufResourceInfo::getString(Resource *resource) {
+	assert(resource->getTypeId() == TestProtobufResource::typeId);
+	return get_u.s ? (static_cast<TestProtobufResource*>(resource)->*get_u.s)() : NULL;
+}
+
+int TestProtobufResourceInfo::getInt(Resource *resource) {
+	assert(resource->getTypeId() == TestProtobufResource::typeId);
+	return get_u.i ? (static_cast<TestProtobufResource*>(resource)->*get_u.i)() : -1;
+}
+
+void TestProtobufResourceInfo::setString(Resource *resource, const char *value) {
+	assert(resource->getTypeId() == TestProtobufResource::typeId);
+	if (set_u.s)
+		(static_cast<TestProtobufResource*>(resource)->*set_u.s)(value);
+}
+
+void TestProtobufResourceInfo::setInt(Resource *resource, int value) {
+	assert(resource->getTypeId() == TestProtobufResource::typeId);
+	if (set_u.i)
+		(static_cast<TestProtobufResource*>(resource)->*set_u.i)(value);
+}
+
+void TestProtobufResourceInfo::clear(Resource *resource) {
+	assert(resource->getTypeId() == TestProtobufResource::typeId);
+	if (clear_u.c)
+		(static_cast<TestProtobufResource*>(resource)->*clear_u.c)();
 }

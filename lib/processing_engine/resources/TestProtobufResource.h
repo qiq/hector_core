@@ -47,21 +47,6 @@ public:
 
 	static const int typeId = 2;
 
-	typedef struct {
-		Resource::FieldType type;
-		union {
-			const char *(TestProtobufResource::*s)();
-			int (TestProtobufResource::*i)();
-		} get;
-		union {
-			void (TestProtobufResource::*s)(const char *);
-			void (TestProtobufResource::*i)(int);
-		} set;
-	} TestProtobufResourceFieldInfo;
-
-	// get info about an item
-	static TestProtobufResourceFieldInfo getFieldInfo(const char *name);
-
 protected:
 	hector::resources::TestProtobufResource r;
 
@@ -123,5 +108,32 @@ inline void TestProtobufResource::setStr(const char *str) {
 inline const char *TestProtobufResource::getStr() {
 	return r.str().c_str();
 }
+
+class TestProtobufResourceInfo : ResourceInfo {
+public:
+	TestProtobufResourceInfo(const char *name);
+	~TestProtobufResourceInfo();
+
+	const char *getString(Resource*);
+	int getInt(Resource*);
+
+	void setString(Resource*, const char*);
+	void setInt(Resource*, int);
+
+	void clear(Resource*);
+
+private:
+	union {
+		const char *(TestProtobufResource::*s)();
+		int (TestProtobufResource::*i)();
+	} get_u;
+	union {
+		void (TestProtobufResource::*s)(const char *);
+		void (TestProtobufResource::*i)(int);
+	} set_u;
+	union {
+		void (TestProtobufResource::*c)();
+	} clear_u;
+};
 
 #endif

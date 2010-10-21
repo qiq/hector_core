@@ -43,21 +43,6 @@ public:
 
 	static const int typeId = 1;
 
-	typedef struct {
-		Resource::FieldType type;
-		union {
-			const char *(TestResource::*s)();
-			int (TestResource::*i)();
-		} get;
-		union {
-			void (TestResource::*s)(const char *);
-			void (TestResource::*i)(int);
-		} set;
-	} TestResourceFieldInfo;
-
-	// get info about an item
-	static TestResourceFieldInfo getFieldInfo(const char *name);
-
 protected:
 	int id;
 	int status;
@@ -101,5 +86,32 @@ inline const char *TestResource::getStr() {
 inline void TestResource::setStr(const char *str) {
 	this->str = str;
 }
+
+class TestResourceInfo : ResourceInfo {
+public:
+	TestResourceInfo(const char *name);
+	~TestResourceInfo();
+
+	const char *getString(Resource*);
+	int getInt(Resource*);
+
+	void setString(Resource*, const char*);
+	void setInt(Resource*, int);
+
+	void clear(Resource*);
+
+private:
+	union {
+		const char *(TestResource::*s)();
+		int (TestResource::*i)();
+	} get_u;
+	union {
+		void (TestResource::*s)(const char *);
+		void (TestResource::*i)(int);
+	} set_u;
+	union {
+		void (TestResource::*c)();
+	} clear_u;
+};
 
 #endif

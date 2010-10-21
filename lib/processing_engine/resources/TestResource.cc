@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include "TestResource.h"
@@ -48,23 +49,49 @@ char *TestResource::toString(Object::LogLevel logLevel) {
 	return strdup(buf);
 }
 
-TestResource::TestResourceFieldInfo TestResource::getFieldInfo(const char *name) {
-	TestResource::TestResourceFieldInfo result;
+TestResourceInfo::TestResourceInfo(const char *name) {
 	if (!strcmp(name, "id")) {
-		result.type = INT;
-		result.get.i = &TestResource::getId;
-		result.set.i = &TestResource::setId;
-		return result;
+		type = INT;
+		get_u.i = &TestResource::getId;
+		set_u.i = &TestResource::setId;
+		clear_u.c = NULL;
 	} else if (!strcmp(name, "status")) {
-		result.type = INT;
-		result.get.i = &TestResource::getStatus;
-		result.set.i = &TestResource::setStatus;
-		return result;
+		type = INT;
+		get_u.i = &TestResource::getStatus;
+		set_u.i = &TestResource::setStatus;
+		clear_u.c = NULL;
 	} else if (!strcmp(name, "str")) {
-		result.type = STRING;
-		result.get.s = &TestResource::getStr;
-		result.set.s = &TestResource::setStr;
-		return result;
+		type = STRING;
+		get_u.s = &TestResource::getStr;
+		set_u.s = &TestResource::setStr;
+		clear_u.c = NULL;
 	}
 }
 
+const char *TestResourceInfo::getString(Resource *resource) {
+	assert(resource->getTypeId() == TestResource::typeId);
+	return get_u.s ? (static_cast<TestResource*>(resource)->*get_u.s)() : NULL;
+}
+
+int TestResourceInfo::getInt(Resource *resource) {
+	assert(resource->getTypeId() == TestResource::typeId);
+	return get_u.i ? (static_cast<TestResource*>(resource)->*get_u.i)() : -1;
+}
+
+void TestResourceInfo::setString(Resource *resource, const char *value) {
+	assert(resource->getTypeId() == TestResource::typeId);
+	if (set_u.s)
+		(static_cast<TestResource*>(resource)->*set_u.s)(value);
+}
+
+void TestResourceInfo::setInt(Resource *resource, int value) {
+	assert(resource->getTypeId() == TestResource::typeId);
+	if (set_u.i)
+		(static_cast<TestResource*>(resource)->*set_u.i)(value);
+}
+
+void TestResourceInfo::clear(Resource *resource) {
+	assert(resource->getTypeId() == TestResource::typeId);
+	if (clear_u.c)
+		(static_cast<TestResource*>(resource)->*clear_u.c)();
+}
