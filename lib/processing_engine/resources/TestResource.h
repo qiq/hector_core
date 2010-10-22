@@ -17,6 +17,8 @@ public:
 	~TestResource() {};
 	// create copy of a resource
 	Resource *Clone();
+	// return ResourceInfo describing one field
+	ResourceFieldInfo *getFieldInfo(const char *name);
 	// type id of a resource (to be used by Resources::CreateResource(typeid))
 	int getTypeId();
 	// type string of a resource
@@ -50,6 +52,37 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
+
+class TestResourceFieldInfo : public ResourceFieldInfo {
+public:
+	TestResourceFieldInfo(const char *name);
+	~TestResourceFieldInfo();
+
+	const char *getString(Resource*);
+	int getInt(Resource*);
+
+	void setString(Resource*, const char*);
+	void setInt(Resource*, int);
+
+	void clear(Resource*);
+
+private:
+	union {
+		const char *(TestResource::*s)();
+		int (TestResource::*i)();
+	} get_u;
+	union {
+		void (TestResource::*s)(const char *);
+		void (TestResource::*i)(int);
+	} set_u;
+	union {
+		void (TestResource::*c)();
+	} clear_u;
+};
+
+inline ResourceFieldInfo *TestResource::getFieldInfo(const char *name) {
+	return new TestResourceFieldInfo(name);
+}
 
 inline int TestResource::getTypeId() {
 	return typeId;
@@ -86,32 +119,5 @@ inline const char *TestResource::getStr() {
 inline void TestResource::setStr(const char *str) {
 	this->str = str;
 }
-
-class TestResourceInfo : ResourceInfo {
-public:
-	TestResourceInfo(const char *name);
-	~TestResourceInfo();
-
-	const char *getString(Resource*);
-	int getInt(Resource*);
-
-	void setString(Resource*, const char*);
-	void setInt(Resource*, int);
-
-	void clear(Resource*);
-
-private:
-	union {
-		const char *(TestResource::*s)();
-		int (TestResource::*i)();
-	} get_u;
-	union {
-		void (TestResource::*s)(const char *);
-		void (TestResource::*i)(int);
-	} set_u;
-	union {
-		void (TestResource::*c)();
-	} clear_u;
-};
 
 #endif

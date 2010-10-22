@@ -13,12 +13,16 @@
 
 using namespace std;
 
+class ResourceFieldInfo;
+
 class Resource {
 public:
 	Resource() {};
 	virtual ~Resource() {};
 	// create copy of a resource
 	virtual Resource *Clone() = 0;
+	// get info about a resource field
+	virtual ResourceFieldInfo *getFieldInfo(const char *name) = 0;
 	// type id of a resource (to be used by Resources::CreateResource(typeid))
 	virtual int getTypeId() = 0;
 	// type string of a resource
@@ -45,7 +49,7 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-class ResourceInfo {
+class ResourceFieldInfo {
 public:
 	typedef enum {
 		UNKNOWN,
@@ -58,8 +62,8 @@ public:
 		STRINGN,	// [string]
 	} FieldType;
 
-	ResourceInfo() {};
-	~ResourceInfo() {};
+	ResourceFieldInfo() {};
+	~ResourceFieldInfo() {};
 
 	FieldType getType();
 
@@ -84,7 +88,7 @@ public:
 	virtual void clearStringN(Resource*, int);
 
 protected:
-	ResourceInfo::FieldType type;
+	ResourceFieldInfo::FieldType type;
 	union {
 		const char *(Resource::*s)();
 		int (Resource::*i)();
@@ -110,7 +114,8 @@ protected:
 	} clear_u;
 };
 
-inline ResourceInfo::FieldType ResourceInfo::getType() {
+inline ResourceFieldInfo::FieldType ResourceFieldInfo::getType() {
 	return type;
 }
+
 #endif

@@ -6,61 +6,61 @@
 
 using namespace std;
 
-const char *ResourceInfo::getString(Resource *resource) {
+const char *ResourceFieldInfo::getString(Resource *resource) {
 	return NULL;
 }
 
-int ResourceInfo::getInt(Resource *resource) {
+int ResourceFieldInfo::getInt(Resource *resource) {
 	return -1;
 }
 
-long ResourceInfo::getLong(Resource *resource) {
+long ResourceFieldInfo::getLong(Resource *resource) {
 	return -1;
 }
 
-ip4_addr_t ResourceInfo::getIp4Addr(Resource *resource) {
+ip4_addr_t ResourceFieldInfo::getIp4Addr(Resource *resource) {
 	return ip4_addr_empty;
 }
 
-ip6_addr_t ResourceInfo::getIp6Addr(Resource *resource) {
+ip6_addr_t ResourceFieldInfo::getIp6Addr(Resource *resource) {
 	return ip6_addr_empty;
 }
 
-const char *ResourceInfo::getString2(Resource *resource, const char *name) {
+const char *ResourceFieldInfo::getString2(Resource *resource, const char *name) {
 	return NULL;
 }
 
-const char *ResourceInfo::getStringN(Resource *resource, int index) {
+const char *ResourceFieldInfo::getStringN(Resource *resource, int index) {
 	return NULL;
 }
 
-void ResourceInfo::setString(Resource *resource, const char *name) {
+void ResourceFieldInfo::setString(Resource *resource, const char *name) {
 }
 
-void ResourceInfo::setInt(Resource *resource, int value) {
+void ResourceFieldInfo::setInt(Resource *resource, int value) {
 }
 
-void ResourceInfo::setLong(Resource *resource, long value) {
+void ResourceFieldInfo::setLong(Resource *resource, long value) {
 }
 
-void ResourceInfo::setIp4Addr(Resource *resource, ip4_addr_t value) {
+void ResourceFieldInfo::setIp4Addr(Resource *resource, ip4_addr_t value) {
 }
 
-void ResourceInfo::setIp6Addr(Resource *resource, ip6_addr_t value) {
+void ResourceFieldInfo::setIp6Addr(Resource *resource, ip6_addr_t value) {
 }
 
-void ResourceInfo::setString2(Resource *resource, const char *name, const char *value) {
+void ResourceFieldInfo::setString2(Resource *resource, const char *name, const char *value) {
 }
 
-void ResourceInfo::setStringN(Resource *resource, int index, const char *value) {
+void ResourceFieldInfo::setStringN(Resource *resource, int index, const char *value) {
 }
 
-void ResourceInfo::clear(Resource *resource) {
+void ResourceFieldInfo::clear(Resource *resource) {
 }
 
-void ResourceInfo::clearString2(Resource *resource, const char *name) {
+void ResourceFieldInfo::clearString2(Resource *resource, const char *name) {
 }
 
-void ResourceInfo::clearStringN(Resource *resource, int index) {
+void ResourceFieldInfo::clearStringN(Resource *resource, int index) {
 }
 

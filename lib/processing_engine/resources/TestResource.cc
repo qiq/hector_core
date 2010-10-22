@@ -49,7 +49,7 @@ char *TestResource::toString(Object::LogLevel logLevel) {
 	return strdup(buf);
 }
 
-TestResourceInfo::TestResourceInfo(const char *name) {
+TestResourceFieldInfo::TestResourceFieldInfo(const char *name) {
 	if (!strcmp(name, "id")) {
 		type = INT;
 		get_u.i = &TestResource::getId;
@@ -68,29 +68,29 @@ TestResourceInfo::TestResourceInfo(const char *name) {
 	}
 }
 
-const char *TestResourceInfo::getString(Resource *resource) {
+const char *TestResourceFieldInfo::getString(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	return get_u.s ? (static_cast<TestResource*>(resource)->*get_u.s)() : NULL;
 }
 
-int TestResourceInfo::getInt(Resource *resource) {
+int TestResourceFieldInfo::getInt(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	return get_u.i ? (static_cast<TestResource*>(resource)->*get_u.i)() : -1;
 }
 
-void TestResourceInfo::setString(Resource *resource, const char *value) {
+void TestResourceFieldInfo::setString(Resource *resource, const char *value) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	if (set_u.s)
 		(static_cast<TestResource*>(resource)->*set_u.s)(value);
 }
 
-void TestResourceInfo::setInt(Resource *resource, int value) {
+void TestResourceFieldInfo::setInt(Resource *resource, int value) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	if (set_u.i)
 		(static_cast<TestResource*>(resource)->*set_u.i)(value);
 }
 
-void TestResourceInfo::clear(Resource *resource) {
+void TestResourceFieldInfo::clear(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	if (clear_u.c)
 		(static_cast<TestResource*>(resource)->*clear_u.c)();
