@@ -42,10 +42,10 @@ public:
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)
-	char *toString(Object::LogLevel logLevel);
+	std::string *toString(Object::LogLevel logLevel);
 
-	void setStr(const char *s);
-	const char *getStr();
+	void setStr(const std::string &s);
+	const std::string &getStr();
 
 	static const int typeId = 2;
 
@@ -57,24 +57,24 @@ protected:
 
 class TestProtobufResourceFieldInfo : public ResourceFieldInfo {
 public:
-	TestProtobufResourceFieldInfo(const char *name);
+	TestProtobufResourceFieldInfo(const std::string &name);
 	~TestProtobufResourceFieldInfo();
 
-	const char *getString(Resource*);
+	const std::string &getString(Resource*);
 	int getInt(Resource*);
 
-	void setString(Resource*, const char*);
+	void setString(Resource*, const std::string&);
 	void setInt(Resource*, int);
 
 	void clear(Resource*);
 
 private:
 	union {
-		const char *(TestProtobufResource::*s)();
+		const std::string &(TestProtobufResource::*s)();
 		int (TestProtobufResource::*i)();
 	} get_u;
 	union {
-		void (TestProtobufResource::*s)(const char *);
+		void (TestProtobufResource::*s)(const std::string&);
 		void (TestProtobufResource::*i)(int);
 	} set_u;
 	union {
@@ -134,12 +134,12 @@ inline bool TestProtobufResource::Deserialize(google::protobuf::io::ZeroCopyInpu
 	return MessageDeserialize(&r, input, size);
 }
 
-inline void TestProtobufResource::setStr(const char *str) {
+inline void TestProtobufResource::setStr(const std::string &str) {
 	r.set_str(str);
 }
 
-inline const char *TestProtobufResource::getStr() {
-	return r.str().c_str();
+inline const std::string &TestProtobufResource::getStr() {
+	return r.str();
 }
 
 #endif

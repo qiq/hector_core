@@ -38,10 +38,10 @@ public:
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)
-	char *toString(Object::LogLevel logLevel);
+	std::string *toString(Object::LogLevel logLevel);
 
-	void setStr(const char *s);
-	const char *getStr();
+	void setStr(const std::string &s);
+	const std::string &getStr();
 
 	static const int typeId = 1;
 
@@ -55,24 +55,24 @@ protected:
 
 class TestResourceFieldInfo : public ResourceFieldInfo {
 public:
-	TestResourceFieldInfo(const char *name);
+	TestResourceFieldInfo(const std::string &name);
 	~TestResourceFieldInfo();
 
-	const char *getString(Resource*);
+	const std::string &getString(Resource*);
 	int getInt(Resource*);
 
-	void setString(Resource*, const char*);
+	void setString(Resource*, const std::string&);
 	void setInt(Resource*, int);
 
 	void clear(Resource*);
 
 private:
 	union {
-		const char *(TestResource::*s)();
+		const std::string &(TestResource::*s)();
 		int (TestResource::*i)();
 	} get_u;
 	union {
-		void (TestResource::*s)(const char *);
+		void (TestResource::*s)(const std::string&);
 		void (TestResource::*i)(int);
 	} set_u;
 	union {
@@ -112,11 +112,11 @@ inline void TestResource::setStatus(int status) {
 	this->status = status;
 }
 
-inline const char *TestResource::getStr() {
-	return str.c_str();
+inline const std::string &TestResource::getStr() {
+	return str;
 }
 
-inline void TestResource::setStr(const char *str) {
+inline void TestResource::setStr(const std::string &str) {
 	this->str = str;
 }
 

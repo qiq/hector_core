@@ -87,8 +87,8 @@ Resource *TestInput::ProcessInput(bool sleep) {
 	ObjectLockWrite();
 	Resource *r = engine->CreateResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
-	TestResource *tr = dynamic_cast<TestResource*>(r);
-	if (tr) {
+	if (typeId == TestResource::typeId) {
+		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
 		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items);
 		tr->setStr(s);

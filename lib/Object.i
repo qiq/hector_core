@@ -26,10 +26,15 @@ public:
         void RestoreCheckpoint(const char *path, const char *id);
 
         void log_trace(const char *s);
+        void log_trace(const std::string &s);
         void log_debug(const char *s);
+        void log_debug(const std::string &s);
         void log_info(const char *s);
+        void log_info(const std::string &s);
         void log_error(const char *s);
+        void log_error(const std::string &s);
         void log_fatal(const char *s);
+        void log_fatal(const std::string &s);
 
         enum LogLevel {
                 TRACE = 0,

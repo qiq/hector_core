@@ -43,7 +43,7 @@ public:
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
-	virtual char *toString(Object::LogLevel = Object::INFO) = 0;
+	virtual std::string *toString(Object::LogLevel = Object::INFO) = 0;
 
 protected:
 	static log4cxx::LoggerPtr logger;
@@ -67,24 +67,24 @@ public:
 
 	FieldType getType();
 
-	virtual const char *getString(Resource*);
+	virtual const std::string &getString(Resource*);
 	virtual int getInt(Resource*);
 	virtual long getLong(Resource*);
 	virtual ip4_addr_t getIp4Addr(Resource*);
 	virtual ip6_addr_t getIp6Addr(Resource*);
-	virtual const char *getString2(Resource*, const char*);
-	virtual const char *getStringN(Resource*, int);
+	virtual const std::string &getString2(Resource*, const std::string&);
+	virtual const std::string &getStringN(Resource*, int);
 
-	virtual void setString(Resource*, const char*);
+	virtual void setString(Resource*, const std::string&);
 	virtual void setInt(Resource*, int);
 	virtual void setLong(Resource*, long);
 	virtual void setIp4Addr(Resource*, ip4_addr_t);
 	virtual void setIp6Addr(Resource*, ip6_addr_t);
-	virtual void setString2(Resource*, const char*, const char*);
-	virtual void setStringN(Resource*, int, const char*);
+	virtual void setString2(Resource*, const std::string&, const std::string&);
+	virtual void setStringN(Resource*, int, const std::string&);
 
 	virtual void clear(Resource*);
-	virtual void clearString2(Resource*, const char*);
+	virtual void clearString2(Resource*, const std::string&);
 	virtual void clearStringN(Resource*, int);
 
 protected:
@@ -95,8 +95,8 @@ protected:
 		long (Resource::*l)();
 		ip4_addr_t (Resource::*a4)();
 		ip6_addr_t (Resource::*a6)();
-		const char *(Resource::*s2)(const char*);
-		const char *(Resource::*sn)(int);
+		const std::string &(Resource::*s2)(const std::string&);
+		const std::string &(Resource::*sn)(int);
 	} get_u;
 	union {
 		void (Resource::*s)(const char *);
@@ -104,12 +104,12 @@ protected:
 		void (Resource::*l)(long);
 		void (Resource::*a4)(ip4_addr_t);
 		void (Resource::*a6)(ip6_addr_t);
-		void (Resource::*s2)(const char*, const char*);
-		void (Resource::*sn)(int, const char*);
+		void (Resource::*s2)(const std::string&, const std::string&);
+		void (Resource::*sn)(int, const std::string&);
 	} set_u;
 	union {
 		void (Resource::*c)();
-		void (Resource::*s2)(const char*);
+		void (Resource::*s2)(const std::string&);
 		void (Resource::*sn)(int);
 	} clear_u;
 };

@@ -38,10 +38,15 @@ public:
 	void RestoreCheckpoint(const char *path, const char *id);
 
 	void log_trace(const char *s);
+	void log_trace(const std::string &s);
 	void log_debug(const char *s);
+	void log_debug(const std::string &s);
 	void log_info(const char *s);
+	void log_info(const std::string &s);
 	void log_error(const char *s);
+	void log_error(const std::string &s);
 	void log_fatal(const char *s);
+	void log_fatal(const std::string &s);
 
 	enum LogLevel {
 		TRACE = 0,
@@ -163,7 +168,15 @@ inline void Object::log_trace(const char *s) {
 	LOG_TRACE(s);
 }
 
+inline void Object::log_trace(const std::string &s) {
+	LOG_TRACE(s);
+}
+
 inline void Object::log_debug(const char *s) {
+	LOG_DEBUG(s);
+}
+
+inline void Object::log_debug(const std::string &s) {
 	LOG_DEBUG(s);
 }
 
@@ -171,11 +184,23 @@ inline void Object::log_info(const char *s) {
 	LOG_INFO(s);
 }
 
+inline void Object::log_info(const std::string &s) {
+	LOG_INFO(s);
+}
+
 inline void Object::log_error(const char *s) {
 	LOG_ERROR(s);
 }
 
+inline void Object::log_error(const std::string &s) {
+	LOG_ERROR(s);
+}
+
 inline void Object::log_fatal(const char *s) {
+	LOG_FATAL(s);
+}
+
+inline void Object::log_fatal(const std::string &s) {
 	LOG_FATAL(s);
 }
 

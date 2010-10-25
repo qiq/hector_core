@@ -50,9 +50,9 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 #define MAX_RESOURCES 100
 int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
 	while (inputResources->size() > 0 && resources->size() <= MAX_RESOURCES) {
-		TestResource *tr = dynamic_cast<TestResource*>(inputResources->front());
-		if (tr)
-			resources->push(tr);
+		Resource *r = inputResources->front();
+		if (r->getTypeId() == TestResource::typeId)
+			resources->push(static_cast<TestResource*>(r));
 		inputResources->pop();
 	}
 

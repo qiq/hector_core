@@ -1,3 +1,5 @@
+%include "std_string.i"
+
 %newobject TestResource::Serialize();
 %newobject TestResource::toString();
 
@@ -21,8 +23,8 @@ public:
         std::string *Serialize();
         bool Deserialize(std::string *s);
         int getSize();
-        char *toString(Object::LogLevel logLevel);
+        std::string *toString(Object::LogLevel logLevel);
 
-        void setStr(const char *str);
-        const char *getStr();
+        void setStr(const std::string &str);
+        const std::string &getStr();
 };

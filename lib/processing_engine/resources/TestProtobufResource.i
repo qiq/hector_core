@@ -1,3 +1,5 @@
+%include "std_string.i"
+
 %newobject TestProtobufResource::Serialize();
 %newobject TestProtobufResource::toString();
 
@@ -23,9 +25,9 @@ public:
         bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
         bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
         int getSize();
-        char *toString(Object::LogLevel logLevel);
+        std::string *toString(Object::LogLevel logLevel);
 
-        void setStr(const char *str);
-        const char *getStr();
+        void setStr(const std::string &str);
+        const std::string &getStr();
 
 };

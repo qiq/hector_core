@@ -43,24 +43,24 @@ bool TestResource::Deserialize(string *s) {
 	return true;
 }
 
-char *TestResource::toString(Object::LogLevel logLevel) {
+string *TestResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
-	return strdup(buf);
+	return new string(buf);
 }
 
-TestResourceFieldInfo::TestResourceFieldInfo(const char *name) {
-	if (!strcmp(name, "id")) {
+TestResourceFieldInfo::TestResourceFieldInfo(const string &name) {
+	if (name == "id") {
 		type = INT;
 		get_u.i = &TestResource::getId;
 		set_u.i = &TestResource::setId;
 		clear_u.c = NULL;
-	} else if (!strcmp(name, "status")) {
+	} else if (name == "status") {
 		type = INT;
 		get_u.i = &TestResource::getStatus;
 		set_u.i = &TestResource::setStatus;
 		clear_u.c = NULL;
-	} else if (!strcmp(name, "str")) {
+	} else if (name == "str") {
 		type = STRING;
 		get_u.s = &TestResource::getStr;
 		set_u.s = &TestResource::setStr;
@@ -68,17 +68,17 @@ TestResourceFieldInfo::TestResourceFieldInfo(const char *name) {
 	}
 }
 
-const char *TestResourceFieldInfo::getString(Resource *resource) {
+const std::string &TestResourceFieldInfo::getString(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
-	return get_u.s ? (static_cast<TestResource*>(resource)->*get_u.s)() : NULL;
+	return (static_cast<TestResource*>(resource)->*get_u.s)();
 }
 
 int TestResourceFieldInfo::getInt(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
-	return get_u.i ? (static_cast<TestResource*>(resource)->*get_u.i)() : -1;
+	return (static_cast<TestResource*>(resource)->*get_u.i)();
 }
 
-void TestResourceFieldInfo::setString(Resource *resource, const char *value) {
+void TestResourceFieldInfo::setString(Resource *resource, const std::string &value) {
 	assert(resource->getTypeId() == TestResource::typeId);
 	if (set_u.s)
 		(static_cast<TestResource*>(resource)->*set_u.s)(value);

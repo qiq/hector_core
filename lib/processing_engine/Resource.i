@@ -1,3 +1,5 @@
+%include "std_string.i"
+
 %newobject Resource::toString();
 %newobject Resource::Serialize();
 
@@ -20,5 +22,5 @@ public:
         virtual std::string *Serialize() = 0;
         virtual bool Deserialize(std::string *s) = 0;
         virtual int getSize() = 0;
-        virtual char *toString(Object::LogLevel logLevel) = 0;
+        virtual std::string *toString(Object::LogLevel logLevel) = 0;
 };

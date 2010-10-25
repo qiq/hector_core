@@ -138,7 +138,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			if (!tr)
 				break;
 			char s[1024];
-			snprintf(s, sizeof(s), "%d %s\r\n", tr->getId(), tr->getStr());
+			snprintf(s, sizeof(s), "%d %s\r\n", tr->getId(), tr->getStr().c_str());
 			conn->appendResponseBody(s);
 			i++;
 		}

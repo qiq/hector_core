@@ -143,5 +143,7 @@ int str2bool(const char *value);
 char *bool2str(bool value);
 int str2int(const char *value);
 char *int2str(int value);
+long str2long(const char *value);
+char *long2str(long value);
 
 #endif

@@ -29,8 +29,8 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 }
 
 void TestOutput::ProcessOutput(Resource *resource) {
-	TestResource *tr = dynamic_cast<TestResource*>(resource);
-	if (tr) {
+	if (resource->getTypeId() == TestResource::typeId) {
+		TestResource *tr = static_cast<TestResource*>(resource);
 		LOG_INFO("Resource arrived (" << tr->getStr() << ")");
 		ObjectLockWrite();
 		items++;

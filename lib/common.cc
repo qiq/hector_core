@@ -94,3 +94,13 @@ char *int2str(int value) {
 	snprintf(s, sizeof(s), "%d", value);
 	return strdup(s);
 }
+
+long str2long(const char *value) {
+	return atoi(value);
+}
+
+char *long2str(long value) {
+	char s[1024];
+	snprintf(s, sizeof(s), "%ld", value);
+	return strdup(s);
+}

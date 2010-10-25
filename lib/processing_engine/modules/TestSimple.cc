@@ -76,19 +76,19 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestSimple::ProcessSimple(Resource *resource) {
-	TestResource *tr = dynamic_cast<TestResource*>(resource);
-	if (tr) {
-		LOG_INFO("Processing TestResource (" << tr->getStr() << ")");
-		ObjectLockWrite();
-		bool fs = flipStatus;
-		int ss = setStatus;
-		++items;
-		ObjectUnlock();
-		if (fs)
-			tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
-		if (ss >= 0)
-			tr->setStatus(ss);
-	}
+	if (resource->getTypeId() != TestResource::typeId)
+		return resource;
+	TestResource *tr = static_cast<TestResource*>(resource);
+	LOG_INFO("Processing TestResource (" << tr->getStr() << ")");
+	ObjectLockWrite();
+	bool fs = flipStatus;
+	int ss = setStatus;
+	++items;
+	ObjectUnlock();
+	if (fs)
+		tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
+	if (ss >= 0)
+		tr->setStatus(ss);
 	return resource;
 }
 

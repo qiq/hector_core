@@ -22,9 +22,9 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *Dump::ProcessSimple(Resource *resource) {
-	char *s = resource->toString();
+	string *s = resource->toString();
 	LOG_DEBUG(s);
-	free(s);
+	delete s;
 	return resource;
 }
 

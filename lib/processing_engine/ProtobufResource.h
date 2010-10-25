@@ -43,7 +43,7 @@ public:
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
-	virtual char *toString(Object::LogLevel logLevel) = 0;
+	virtual std::string *toString(Object::LogLevel logLevel) = 0;
 protected:
 	static log4cxx::LoggerPtr logger;
 

@@ -20,24 +20,24 @@ int TestProtobufResource::getSize() {
 	return 1;
 }
 
-char *TestProtobufResource::toString(Object::LogLevel logLevel) {
+string *TestProtobufResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "TestProtobufResource [%d, %d]: %s", this->getId(), this->getStatus(), this->getStr());
-	return strdup(buf);
+	snprintf(buf, sizeof(buf), "TestProtobufResource [%d, %d]: %s", this->getId(), this->getStatus(), this->getStr().c_str());
+	return new string(buf);
 }
 
-TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const char *name) {
-	if (!strcmp(name, "id")) {
+TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const string &name) {
+	if (name == "id") {
 		type = INT;
 		get_u.i = &TestProtobufResource::getId;
 		set_u.i = &TestProtobufResource::setId;
 		clear_u.c = NULL;
-	} else if (!strcmp(name, "status")) {
+	} else if (name == "status") {
 		type = INT;
 		get_u.i = &TestProtobufResource::getStatus;
 		set_u.i = &TestProtobufResource::setStatus;
 		clear_u.c = NULL;
-	} else if (!strcmp(name, "str")) {
+	} else if (name == "str") {
 		type = STRING;
 		get_u.s = &TestProtobufResource::getStr;
 		set_u.s = &TestProtobufResource::setStr;
@@ -45,17 +45,17 @@ TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const char *name) {
 	}
 }
 
-const char *TestProtobufResourceFieldInfo::getString(Resource *resource) {
+const string &TestProtobufResourceFieldInfo::getString(Resource *resource) {
 	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return get_u.s ? (static_cast<TestProtobufResource*>(resource)->*get_u.s)() : NULL;
+	return (static_cast<TestProtobufResource*>(resource)->*get_u.s)();
 }
 
 int TestProtobufResourceFieldInfo::getInt(Resource *resource) {
 	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return get_u.i ? (static_cast<TestProtobufResource*>(resource)->*get_u.i)() : -1;
+	return (static_cast<TestProtobufResource*>(resource)->*get_u.i)();
 }
 
-void TestProtobufResourceFieldInfo::setString(Resource *resource, const char *value) {
+void TestProtobufResourceFieldInfo::setString(Resource *resource, const string &value) {
 	assert(resource->getTypeId() == TestProtobufResource::typeId);
 	if (set_u.s)
 		(static_cast<TestProtobufResource*>(resource)->*set_u.s)(value);
