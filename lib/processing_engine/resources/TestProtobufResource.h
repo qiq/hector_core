@@ -10,6 +10,7 @@
 
 #include <string>
 #include <log4cxx/logger.h>
+#include "common.h"
 #include "ProtobufResource.h"
 #include "TestProtobufResource.pb.h"
 
@@ -35,7 +36,7 @@ public:
 	void setStatus(int status);
 	// save and restore resource
 	std::string *Serialize();
-	bool Deserialize(std::string *s);
+	bool Deserialize(const char *data, int size);
 	int getSerializedSize();
 	bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
 	bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
@@ -118,8 +119,8 @@ inline std::string *TestProtobufResource::Serialize() {
 	return MessageSerialize(&r);
 }
 
-inline bool TestProtobufResource::Deserialize(std::string *s) {
-	return MessageDeserialize(&r, s);
+inline bool TestProtobufResource::Deserialize(const char *data, int size) {
+	return MessageDeserialize(&r, data, size);
 }
 
 inline int TestProtobufResource::getSerializedSize() {

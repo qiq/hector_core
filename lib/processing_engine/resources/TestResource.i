@@ -21,7 +21,7 @@ public:
         void setStatus(int status);
 
         std::string *Serialize();
-        bool Deserialize(std::string *s);
+        bool Deserialize(const char *data, int size);
         int getSize();
         std::string *toString(Object::LogLevel logLevel);
 

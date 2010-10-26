@@ -38,7 +38,8 @@ public:
 
 	// save and restore resource
 	virtual string *Serialize() = 0;
-	virtual bool Deserialize(string *s) = 0;
+	// data need not be nul-terminated
+	virtual bool Deserialize(const char *data, int size) = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int getSize() = 0;

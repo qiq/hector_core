@@ -34,7 +34,7 @@ public:
 
 	// save and restore resource
 	std::string *Serialize();
-	bool Deserialize(std::string *s);
+	bool Deserialize(const char *data, int size);
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)

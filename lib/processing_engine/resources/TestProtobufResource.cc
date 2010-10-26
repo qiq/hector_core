@@ -47,12 +47,12 @@ TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const string &name)
 
 const string &TestProtobufResourceFieldInfo::getString(Resource *resource) {
 	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return (static_cast<TestProtobufResource*>(resource)->*get_u.s)();
+	return get_u.s ? (static_cast<TestProtobufResource*>(resource)->*get_u.s)() : empty_string;
 }
 
 int TestProtobufResourceFieldInfo::getInt(Resource *resource) {
 	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return (static_cast<TestProtobufResource*>(resource)->*get_u.i)();
+	return get_u.i ? (static_cast<TestProtobufResource*>(resource)->*get_u.i)() : -1;
 }
 
 void TestProtobufResourceFieldInfo::setString(Resource *resource, const string &value) {

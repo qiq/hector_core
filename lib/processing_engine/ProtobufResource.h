@@ -35,7 +35,7 @@ public:
 
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
-	virtual bool Deserialize(std::string *s) = 0;
+	virtual bool Deserialize(const char *data, int size) = 0;
 	virtual int getSerializedSize() = 0;
 	virtual bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
 	virtual bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) = 0;
@@ -48,7 +48,7 @@ protected:
 	static log4cxx::LoggerPtr logger;
 
 	std::string *MessageSerialize(google::protobuf::Message *msg);
-	bool MessageDeserialize(google::protobuf::Message *msg, std::string *s);
+	bool MessageDeserialize(google::protobuf::Message *msg, const char *data, int size);
 	bool MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	int MessageGetSerializedSize(google::protobuf::Message *msg);
 	bool MessageDeserialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyInputStream *input, int size);
@@ -64,8 +64,8 @@ inline std::string *ProtobufResource::MessageSerialize(google::protobuf::Message
 	return result;
 }
 
-inline bool ProtobufResource::MessageDeserialize(google::protobuf::Message *msg, std::string *s) {
-	return msg->ParseFromString(*s);
+inline bool ProtobufResource::MessageDeserialize(google::protobuf::Message *msg, const char *data, int size) {
+	return msg->ParseFromArray((void*)data, size);
 }
 
 inline bool ProtobufResource::MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output) {

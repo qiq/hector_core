@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include "common.h"
 #include "TestResource.h"
 
 using namespace std;
@@ -33,9 +34,12 @@ string *TestResource::Serialize() {
 	return new string(s);
 }
 
-bool TestResource::Deserialize(string *s) {
+bool TestResource::Deserialize(const char *data, int size) {
+	char s[1024+1];
+	strncpy(s, data, size > 1024 ? 1024 : size);
+	s[1024] = '\0';
 	char buf[1024];
-	if (sscanf(s->c_str(), "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
+	if (sscanf(s, "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
 		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
 		return false;
 	}
@@ -70,12 +74,12 @@ TestResourceFieldInfo::TestResourceFieldInfo(const string &name) {
 
 const std::string &TestResourceFieldInfo::getString(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
-	return (static_cast<TestResource*>(resource)->*get_u.s)();
+	return get_u.s ? (static_cast<TestResource*>(resource)->*get_u.s)() : empty_string;
 }
 
 int TestResourceFieldInfo::getInt(Resource *resource) {
 	assert(resource->getTypeId() == TestResource::typeId);
-	return (static_cast<TestResource*>(resource)->*get_u.i)();
+	return get_u.i ? (static_cast<TestResource*>(resource)->*get_u.i)() : -1;
 }
 
 void TestResourceFieldInfo::setString(Resource *resource, const std::string &value) {

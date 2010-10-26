@@ -125,14 +125,11 @@ Resource *Load::ProcessInput(bool sleep) {
 			delete r;
 			return NULL;
 		}
-		string *s = new string((char*)data, size);
-		if (!r->Deserialize(s)) {
-			delete s;
+		if (!r->Deserialize((char*)data, size)) {
 			free(data);
 			delete r;
 			return NULL;
 		}
-		delete s;
 		free(data);
 	}
 	ObjectLockWrite();

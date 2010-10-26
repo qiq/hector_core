@@ -20,7 +20,7 @@ public:
         int getStatus();
         void setStatus(int status);
         std::string *Serialize();
-        bool Deserialize(std::string *s);
+        bool Deserialize(const char *data, int size);
         int getSerializedSize();
         bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
         bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);

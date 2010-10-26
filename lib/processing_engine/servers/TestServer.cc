@@ -105,41 +105,52 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			conn->setResponseCode(500, "ProcessorEngine not found");
 			return true;
 		}
+		
 		ProcessingEngine *engine = iter->second;
 		// create all resources
-		string body = conn->getRequestBody();
-		skipWs(&body);
 		vector<int> resourceIds;
-		while (body.length() > 0) {
-			size_t eoln = body.find_first_of("\r\n");
-			string line = eoln != string::npos ? body.substr(0, eoln): body;
-			if (line.length() > 0) {
-				int n = atoi(line.c_str());
-				TestResource *tr = dynamic_cast<TestResource*>(engine->CreateResource(resourceId));
-				assert(tr != NULL);
-				tr->setId(n);
-				tr->setStr(line.c_str());
-				if (!engine->PutResource(tr, true))
-					break;
-				resourceIds.push_back(n);
+		string body = conn->getRequestBody();
+		const char *data = body.data();
+		int i = 0;
+		while (body.length() > 5 && i < body.length()) {
+			uint32_t size = *(uint32_t*)(data+i);
+			i += 4;
+			uint8_t typeId = *(uint8_t*)(data+i);
+			i++;
+			Resource *r = engine->CreateResource(typeId);
+			if (!r) {
+				char buf[1024];
+				snprintf(buf, sizeof(buf), "Cannot create resource of type %d", typeId);
+				conn->setResponseCode(500, buf);
+				return true;
 			}
-			body = body.substr(eoln);
-			skipWs(&body);
+			if (!r->Deserialize(data+i, size))
+				return true;
+			i+= size;
+			int id = r->getId();
+			if (!engine->PutResource(r, true))
+				break;
+			resourceIds.push_back(id);
 		}
-		if (body.length() > 0) {
+
+		if (i < body.length()) {
 			conn->setResponseCode(500, "Error passing data to ProcessingEngine");
 			return true;
 		}
 			
 		// wait for result
-		int i = 0;
+		i = 0;
 		while (i < resourceIds.size()) {
-			TestResource *tr = dynamic_cast<TestResource*>(engine->GetResource(resourceIds[i], true));
-			if (!tr)
+			Resource *r = engine->GetResource(resourceIds[i], true);
+			if (!r)
 				break;
-			char s[1024];
-			snprintf(s, sizeof(s), "%d %s\r\n", tr->getId(), tr->getStr().c_str());
-			conn->appendResponseBody(s);
+			string *s = r->Serialize();
+			uint32_t size = s->length();
+			conn->appendResponseBody((char*)&size, 4);
+			uint8_t type = r->getTypeId();
+			conn->appendResponseBody((char*)&type, 1);
+			conn->appendResponseBody(*s);
+			delete s;
 			i++;
 		}
 		if (i == resourceIds.size())

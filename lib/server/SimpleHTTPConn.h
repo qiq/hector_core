@@ -61,8 +61,12 @@ public:
 
 	void ErrorResponse(int code, const char *description, const char *message);
 	void setResponseCode(int code, const char *description);
-	void appendResponseHeader(const char *s, bool clear = false);
-	void appendResponseBody(const char *s, bool clear = false);
+	void clearResponseHeader();
+	void appendResponseHeader(const std::string &s);
+	void appendResponseHeader(const char *s, int size);
+	void clearResponseBody();
+	void appendResponseBody(const std::string &s);
+	void appendResponseBody(const char *s, int size);
 };
 
 #endif

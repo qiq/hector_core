@@ -3,14 +3,19 @@
 . test_common.sh
 
 test_init
+rm -f test21.data.out
+ln -s $base/test/test21.data.in . 2>/dev/null
 test_server_start
 hector_client_set PE_test.run 1
-echo -ne "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"|hector_client -c "PROCESS PE_test" >/dev/null
-hector_client_wait M_simple[0].items 10 
+hector_client -c "PROCESS PE_test" <test21.data.in >test21.data.out
+hector_client_wait M_simple[0].items 1000
 hector_client_set PE_test.run 0
 hector_server_shutdown
 
-grep "Processing TestResource " test.log|sed -e 's|M_simple\[[0-9]\+\]: Processing TestResource (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.test
+md5sum <test21.data.out >$id.log.test
+if [ -L test21.data.in ]; then
+	rm test21.data.in
+fi
 test_finish
 test_compare_result
 exit $?

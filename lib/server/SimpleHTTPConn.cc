@@ -209,8 +209,7 @@ bool SimpleHTTPConn::ReadRequest() {
 			LOG4CXX_ERROR(logger, "Error reading from socket: " << strerror(errno));
 			break;
 		}
-		buffer[r] = '\0';
-		request_buffer += buffer;
+		request_buffer.append(buffer, r);
 
 		request_ready_t	status = RequestReady();
 		if (status == PARSED)
@@ -250,7 +249,8 @@ void SimpleHTTPConn::ErrorResponse(int code, const char *description, const char
 	setResponseCode(code, description);
 	char s[1000];
 	snprintf(s, sizeof(s), "<html><head><title>%d - %s</title></head><body>%s</body></html>\r\n", code, description, message);
-	appendResponseBody(s, true);
+	clearResponseBody();
+	appendResponseBody(s, strlen(s));
 }
 
 void SimpleHTTPConn::setResponseCode(int code, const char *description) {
@@ -258,17 +258,30 @@ void SimpleHTTPConn::setResponseCode(int code, const char *description) {
 	response_str = description;
 }
 
-void SimpleHTTPConn::appendResponseHeader(const char *s, bool clear) {
-	if (clear)
-		response_header.clear();
+void SimpleHTTPConn::clearResponseHeader() {
+	response_header.clear();
+}
+
+void SimpleHTTPConn::appendResponseHeader(const std::string &s) {
 	response_header.append(s);
 	response_header.append("\r\n");
 }
 
-void SimpleHTTPConn::appendResponseBody(const char *s, bool clear) {
-	if (clear)
-		response_body.clear();
+void SimpleHTTPConn::appendResponseHeader(const char *s, int size) {
+	response_header.append(s, size);
+	response_header.append("\r\n");
+}
+
+void SimpleHTTPConn::clearResponseBody() {
+	response_body.clear();
+}
+
+void SimpleHTTPConn::appendResponseBody(const std::string &s) {
 	response_body.append(s);
+}
+
+void SimpleHTTPConn::appendResponseBody(const char *s, int size) {
+	response_body.append(s, size);
 }
 
 
