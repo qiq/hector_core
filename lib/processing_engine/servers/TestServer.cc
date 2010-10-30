@@ -25,6 +25,7 @@ bool TestServer::Init(std::vector<std::pair<std::string, std::string> > *params)
 		name2engine[(*iter)->getId()] = *iter;
 	}
 	this->resourceId = (*engines)[0]->ResourceNameToId("TestResource");
+	return true;
 }
 
 bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
@@ -111,6 +112,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 		vector<int> resourceIds;
 		string body = conn->getRequestBody();
 		const char *data = body.data();
+		struct timeval timeout = { 0, 0 };
 		int i = 0;
 		while (body.length() > 5 && i < body.length()) {
 			uint32_t size = *(uint32_t*)(data+i);
@@ -128,7 +130,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 				return true;
 			i+= size;
 			int id = r->getId();
-			if (!engine->PutResource(r, true))
+			if (!engine->PutResource(r, &timeout))
 				break;
 			resourceIds.push_back(id);
 		}
@@ -141,7 +143,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 		// wait for result
 		i = 0;
 		while (i < resourceIds.size()) {
-			Resource *r = engine->GetResource(resourceIds[i], true);
+			Resource *r = engine->GetResource(resourceIds[i], &timeout);
 			if (!r)
 				break;
 			string *s = r->Serialize();
@@ -151,6 +153,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			conn->appendResponseBody((char*)&type, 1);
 			conn->appendResponseBody(*s);
 			delete s;
+			delete r;
 			i++;
 		}
 		if (i == resourceIds.size())

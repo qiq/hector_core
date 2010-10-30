@@ -28,7 +28,7 @@ public:
 	void setCopy(bool copy);
 	SyncQueue<Resource> *getQueue();
 	void setQueue(SyncQueue<Resource> *queue);
-	bool processResource(Resource *r, bool sleep);
+	bool processResource(Resource *r, struct timeval *timeout);
 };
 
 inline OutputFilter::OutputFilter() {
@@ -89,8 +89,8 @@ inline void OutputFilter::setQueue(SyncQueue<Resource> *queue) {
 	this->queue = queue;
 }
 
-inline bool OutputFilter::processResource(Resource *r, bool sleep) {
-	return queue->putItem(r, sleep, priority);
+inline bool OutputFilter::processResource(Resource *r, struct timeval *timeout) {
+	return queue->putItem(r, timeout, priority);
 }
 
 #endif

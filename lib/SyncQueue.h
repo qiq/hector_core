@@ -6,6 +6,8 @@
  * sub-queues according to priority (int) values, default priority is 0.
  * Sub-queues are sorted according to priorities, the lock is shared among all
  * sub-queues.
+ *
+ * timeout arguments are specified in useconds, < 0 = do not sleep, 0 = sleep forever
  */
 
 #ifndef _LIB_SYNCQUEUE_H_
@@ -157,11 +159,11 @@ public:
 	void Resume();
 
 	bool isSpace(T *r, int priority = 0);
-	bool putItem(T *r, bool sleep, int priority = 0);
-	int putItems(T **r, int size, bool sleep, int priority = 0);
+	bool putItem(T *r, struct timeval *timeout, int priority = 0);
+	int putItems(T **r, int size, struct timeval *timeout, int priority = 0);
 	bool isReady();
-	T *getItem(bool sleep);
-	int getItems(T **r, int size, bool sleep);
+	T *getItem(struct timeval *timeout);
+	int getItems(T **r, int size, struct timeval *timeout);
 	int queueItems(int priority = 0);
 
 	int firstNonEmptyQueueIndex();
@@ -272,7 +274,7 @@ bool SyncQueue<T>::isSpace(T *r, int priority) {
 
 // returns false if canceled
 template <class T>
-bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
+bool SyncQueue<T>::putItem(T *r, struct timeval *timeout, int priority) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -285,14 +287,14 @@ bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 	SimpleQueue<T> *q = iter->second;
 	int itemSize = r->getSize();
 	while (!q->isSpaceFor(itemSize)) {
-		if (!sleep) {
+		if (!timeout) {
 			queueLock.Unlock();
 			return false;
 		}
 		waitingWriters++;
-		queueLock.WaitSend();
+		bool timedOut = !queueLock.WaitSend(timeout);
 		waitingWriters--;
-		if (cancel) {
+		if (cancel || timedOut) {
 			queueLock.Unlock();
 			return false;
 		}
@@ -306,7 +308,7 @@ bool SyncQueue<T>::putItem(T *r, bool sleep, int priority) {
 }
 
 template <class T>
-int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
+int SyncQueue<T>::putItems(T **r, int size, struct timeval *timeout , int priority) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -319,14 +321,14 @@ int SyncQueue<T>::putItems(T **r, int size, bool sleep, int priority) {
 	SimpleQueue<T> *q = *iter;
 	int itemSize = r[0]->getSize();
 	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize()))  {
-		if (!sleep) {
+		if (!timeout) {
 			queueLock.Unlock();
 			return 0;
 		}
 		waitingWriters++;
-		queueLock.WaitSend();
+		bool timedOut = !queueLock.WaitSend(timeout);
 		waitingWriters--;
-		if (cancel) {
+		if (cancel || timedOut) {
 			queueLock.Unlock();
 			return 0;
 		}
@@ -357,7 +359,7 @@ bool SyncQueue<T>::isReady() {
 }
 
 template <class T>
-T *SyncQueue<T>::getItem(bool sleep) {
+T *SyncQueue<T>::getItem(struct timeval *timeout) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -367,14 +369,14 @@ T *SyncQueue<T>::getItem(bool sleep) {
 	}
 
 	while (firstNonEmptyQueueIndex() < 0) {
-		if (!sleep) {
+		if (!timeout) {
 			queueLock.Unlock();
 			return NULL;
 		}
 		waitingReaders++;
-		queueLock.WaitRecv();
+		bool timedOut = !queueLock.WaitRecv(timeout);
 		waitingReaders--;
-		if (cancel) {
+		if (cancel || timedOut) {
 			queueLock.Unlock();
 			return NULL;
 		}
@@ -389,7 +391,7 @@ T *SyncQueue<T>::getItem(bool sleep) {
 }
 
 template <class T>
-int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
+int SyncQueue<T>::getItems(T **r, int size, struct timeval *timeout) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -398,14 +400,14 @@ int SyncQueue<T>::getItems(T **r, int size, bool sleep) {
 		return 0;
 	}
 	while (firstNonEmptyQueueIndex() < 0) {
-		if (!sleep) {
+		if (!timeout) {
 			queueLock.Unlock();
 			return 0;
 		}
 		waitingReaders++;
-		queueLock.WaitRecv();
+		bool timedOut = !queueLock.WaitRecv(timeout);
 		waitingReaders--;
-		if (cancel) {
+		if (cancel || timedOut) {
 			queueLock.Unlock();
 			return 0;
 		}

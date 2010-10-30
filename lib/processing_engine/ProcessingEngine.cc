@@ -86,46 +86,49 @@ bool ProcessingEngine::Init(Config *config) {
 }
 
 // process resource using the processing engine
-bool ProcessingEngine::PutResource(Resource *resource, bool sleep) {
+bool ProcessingEngine::PutResource(Resource *resource, struct timeval *timeout) {
 	if (!inputQueue)
 		return false;
-	return inputQueue->putItem(resource, sleep, 0);
+	return inputQueue->putItem(resource, timeout, 0);
 }
 
 // get processed resource from the processing engine, NULL: deleted/not available (also cancelled)
-Resource *ProcessingEngine::GetResource(int id, bool sleep) {
+Resource *ProcessingEngine::GetResource(int id, struct timeval *timeout) {
 	if (!outputQueue)
 		return NULL;
+
 	Resource *resource;
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	finishedLock.Lock();
 	tr1::unordered_map<int, Resource*>::iterator iter;
 	while ((iter = finishedResources.find(id)) == finishedResources.end()) {
+		if (!timeout) {
+			finishedLock.Unlock();
+			return NULL;
+		}
 		if (waitingInQueue) {
 			waiting++;
-			finishedLock.WaitSend();
+			bool timedOut = !finishedLock.WaitSend(timeout);
 			waiting--;
-			if (cancel) {
+			if (cancel || timedOut) {
 				finishedLock.Unlock();
 				return NULL;
 			}
 		} else {
 			waitingInQueue = true;
 			finishedLock.Unlock();
-			resource = outputQueue->getItem(true);
+			resource = outputQueue->getItem(timeout);
 			finishedLock.Lock();
 			waitingInQueue = false;
-			if (!resource) {	// cancelled
-				finishedLock.Unlock();
-				return NULL;
-			}
-			if (resource->getId() == id) {
-				finishedLock.Unlock();
-				return resource;
-			}
-			finishedResources[resource->getId()] = resource;
+			if (resource)
+				finishedResources[resource->getId()] = resource;
 			finishedLock.SignalSend();
+			finishedLock.Unlock();
+			if (!resource)	// cancelled or timeout
+				return NULL;
+			if (resource->getId() == id)
+				return resource;
 			finishedLock.Unlock();
 			sched_yield();
 			finishedLock.Lock();

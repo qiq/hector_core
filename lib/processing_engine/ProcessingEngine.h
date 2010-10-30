@@ -29,9 +29,9 @@ public:
 	void Resume();
 
 	// process resource using the processing engine
-	bool PutResource(Resource *resource, bool sleep);
+	bool PutResource(Resource *resource, struct timeval *timeout);
 	// get processed resource from the processing engine, NULL: deleted/not available
-	Resource *GetResource(int id, bool sleep);
+	Resource *GetResource(int id, struct timeval *timeout);
 
 	// helper methods to create resources
 	int ResourceNameToId(const char *name);

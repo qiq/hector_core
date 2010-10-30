@@ -341,15 +341,15 @@ void *run_thread(void *ptr) {
 	return NULL;
 }
 
-// returns: would sleep or cancelled
-bool Processor::QueueResource(Resource *r, bool sleep, int *filterIndex) {
+// returns: false if would sleep or cancelled
+bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterIndex) {
 	int status = r->getStatus();
 	bool appended = false;
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+*filterIndex; iter != outputFilters.end(); ++iter) {
 		OutputFilter *f = *iter;
 		if (f->isEmptyFilter() || f->getFilter() == status) {
 			Resource *copy = (*iter)->getCopy() ? r->Clone() : NULL;
-			if (!f->processResource(r, sleep))
+			if (!f->processResource(r, timeout))
 				return false;	// cancelled or no space available
 			*filterIndex++;
 			if (!copy) {
@@ -406,14 +406,14 @@ int Processor::NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index) {
 	return index == mis->size() ? -1 : index;
 }
 
-bool Processor::AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, bool sleep, int *outputFilterIndex) {
+bool Processor::AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, struct timeval *timeout, int *outputFilterIndex) {
 	if (multiIndex >= 0) {
 		// append to next multi-module
 		(*mis)[multiIndex]->inputResources->push(resource);
 		return true;
 	}
 	// append to output queue
-	if (QueueResource(resource, sleep, outputFilterIndex)) {
+	if (QueueResource(resource, timeout, outputFilterIndex)) {
 		*outputFilterIndex = 0;
 		return true;
 	}
@@ -433,6 +433,7 @@ void Processor::runThread(int threadId) {
 	bool stop = false;
 	// block while reading/writing resources from/to a queue?
 	bool block = true;
+	struct timeval timeout = { 0, 0 };
 	while (isRunning() && !(stop && block)) {
 		int multiIndex = this->NextMultiModuleIndex(mis, 0);
 		int resourcesRead = 0;
@@ -440,7 +441,7 @@ void Processor::runThread(int threadId) {
 			Resource *resource = NULL;
 			if ((*mis)[0]->type != Module::INPUT) {
 				// get resource from the input queue
-				resource = inputQueue->getItem(block && resourcesRead == 0);
+				resource = inputQueue->getItem((block && resourcesRead == 0) ? &timeout : NULL);
 				if (!resource) {
 					if (block && resourcesRead == 0)
 						return; // cancelled
@@ -452,7 +453,7 @@ void Processor::runThread(int threadId) {
 			resource = this->ApplyModules(mis, resource, 0, &stop);
 			if (resource) {
 				int x = 0; // ignored
-				if (!AppendResource(mis, resource, multiIndex, true, &x))
+				if (!AppendResource(mis, resource, multiIndex, &timeout, &x))
 					return; // cancelled
 			}
 		}
@@ -475,7 +476,7 @@ void Processor::runThread(int threadId) {
 
 			resourcesQueued = 0;
 			if (outputFilterResource) {
-				if (AppendResource(mis, outputFilterResource, nextMultiIndex, block && resourcesQueued == 0, &outputFilterIndex)) {
+				if (AppendResource(mis, outputFilterResource, nextMultiIndex, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex)) {
 					// NOT cancelled or no space available
 					resourcesQueued++;
 					outputFilterResource = NULL;
@@ -485,7 +486,7 @@ void Processor::runThread(int threadId) {
 				Resource *resource = this->ApplyModules(mis, minfo->outputResources->front(), multiIndex+1, &stop);
 				minfo->outputResources->pop();
 				if (resource) {
-					if (!AppendResource(mis, resource, nextMultiIndex, block && resourcesQueued == 0, &outputFilterIndex)) {
+					if (!AppendResource(mis, resource, nextMultiIndex, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex)) {
 						outputFilterResource = resource;
 						break; // cancelled or no space available
 					}

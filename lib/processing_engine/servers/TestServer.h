@@ -5,9 +5,10 @@
 #ifndef _LIB_PROCESSING_ENGINE_SERVERS_TEST_SERVER_
 #define _LIB_PROCESSING_ENGINE_SERVERS_TEST_SERVER_
 
-#include <pthread.h>
+#include "config.h"
+
 #include <vector>
-#include <log4cxx/logger.h>
+#include <tr1/unordered_map>
 #include "ObjectRegistry.h"
 #include "SimpleHTTPServer.h"
 #include "SimpleHTTPConn.h"

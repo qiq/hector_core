@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <sys/time.h>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 
@@ -147,5 +148,7 @@ int str2int(const char *value);
 char *int2str(int value);
 long str2long(const char *value);
 char *long2str(long value);
+
+struct timeval ConstructTimeout(int usec);
 
 #endif

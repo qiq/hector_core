@@ -66,13 +66,13 @@ protected:
 	std::vector<std::string> *listNamesSync();
 
 	// process resource and append it to other precesses' queues
-	bool QueueResource(Resource *r, bool sleep, int *filterIndex);
+	bool QueueResource(Resource *r, struct timeval *timeout, int *filterIndex);
 	// apply simple/input/output modules to a resource
 	Resource *ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool *stop);
 	// return index of the next multi-module
 	int NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index);
 	// append resource either to multi-module input queue or processor's output queue
-	bool AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, bool sleep, int *outputFilterIndex);
+	bool AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, struct timeval *timeout, int *outputFilterIndex);
 };
 
 inline SyncQueue<Resource> *Processor::getInputQueue() {

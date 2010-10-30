@@ -63,8 +63,9 @@ void *http_service_thread(void *ptr) {
 }
 
 void SimpleServer::ServiceThread() {
+	struct timeval timeout = { 0, 0 };
 	while (getRunning()) {
-		FileDescriptor *fd = queue->getItem(true);
+		FileDescriptor *fd = queue->getItem(&timeout);
 		if (!fd)
 			break; // cancelled
 		Request(fd->fd);
@@ -111,6 +112,7 @@ void SimpleServer::MainThread() {
 		return;
 	}
 
+	struct timeval timeout = { 0, 0 };
 	while (getRunning()) {
 		sockaddr_in client_addr;
 		socklen_t client_addrlen = sizeof(client_addr);
@@ -140,7 +142,7 @@ void SimpleServer::MainThread() {
 		// put request into the queue, it will be serviced as soon as
 		// there is a free thread available
 		FileDescriptor *pfd = new FileDescriptor(fd);
-		if (!queue->putItem(pfd, true)) {
+		if (!queue->putItem(pfd, &timeout)) {
 			delete pfd;
 			break;	// canceled
 		}

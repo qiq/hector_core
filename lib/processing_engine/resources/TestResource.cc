@@ -37,8 +37,8 @@ string *TestResource::Serialize() {
 bool TestResource::Deserialize(const char *data, int size) {
 	char s[1024+1];
 	strncpy(s, data, size > 1024 ? 1024 : size);
-	s[1024] = '\0';
-	char buf[1024];
+	s[size] = '\0';
+	char buf[size > 1024 ? 1024 : size];
 	if (sscanf(s, "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
 		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
 		return false;

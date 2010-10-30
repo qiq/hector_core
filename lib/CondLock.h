@@ -8,6 +8,7 @@
 #include <config.h>
 
 #include <pthread.h>
+#include <sys/time.h>
 #include "PlainLock.h"
 
 class CondLock: public PlainLock {
@@ -17,10 +18,10 @@ public:
 	CondLock();
 	~CondLock();
 
-	void WaitSend() { pthread_cond_wait(condSend, mutex); }
-	void SignalSend() { pthread_cond_broadcast(condSend); }
-	void WaitRecv() { pthread_cond_wait(condRecv, mutex); }
-	void SignalRecv() { pthread_cond_broadcast(condRecv); }
+	bool WaitSend(struct timeval *timeout);
+	void SignalSend();
+	bool WaitRecv(struct timeval *timeout);
+	void SignalRecv();
 };
 
 inline CondLock::CondLock() {
@@ -37,4 +38,35 @@ inline CondLock::~CondLock() {
 	delete condRecv;
 }
 
+// returns false if error/timeout occured
+inline bool CondLock::WaitSend(struct timeval *timeout) {
+	if (!timeout || timeout->tv_sec == 0) {
+		return (pthread_cond_wait(condSend, mutex) == 0);
+	} else {
+		struct timespec ts;
+		ts.tv_sec = timeout->tv_sec;
+		ts.tv_nsec = timeout->tv_usec * 1000;
+		return (pthread_cond_timedwait(condSend, mutex, &ts) == 0);
+	}
+}
+
+inline void CondLock::SignalSend() {
+	pthread_cond_broadcast(condSend);
+}
+
+// returns false if error/timeout occured
+inline bool CondLock::WaitRecv(struct timeval *timeout) {
+	if (!timeout || timeout->tv_sec == 0) {
+		return (pthread_cond_wait(condRecv, mutex) == 0);
+	} else {
+		struct timespec ts;
+		ts.tv_sec = timeout->tv_sec;
+		ts.tv_nsec = timeout->tv_usec * 1000;
+		return (pthread_cond_timedwait(condRecv, mutex, &ts) == 0);
+	}
+}
+
+inline void CondLock::SignalRecv() {
+	pthread_cond_broadcast(condRecv);
+}
 #endif

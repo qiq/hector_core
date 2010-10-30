@@ -104,3 +104,15 @@ char *long2str(long value) {
 	snprintf(s, sizeof(s), "%ld", value);
 	return strdup(s);
 }
+
+struct timeval ConstructTimeout(int usec) {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	tv.tv_sec += usec / 1000000;
+	tv.tv_usec += usec % 1000000;
+	if (tv.tv_usec > 1000000) {
+		tv.tv_usec -= 1000000;
+		tv.tv_sec++;
+	}
+	return tv;
+}
