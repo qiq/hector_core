@@ -14,7 +14,7 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 				<threads>1</threads>
 				<modules>
 					<Module id="M_input" lib="TestInput.la">
-						<param name="maxItems" value="1000"/>
+						<param name="maxItems" value="100"/>
 					</Module>
 				</modules>
 				<output>
@@ -25,9 +25,13 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 				<threads>1</threads>
 				<modules>
 					<Module id="M_dump1" lib="Dump.la"/>
-					<Module id="M_multi1" lib="TestMulti.la"/>
+					<Module id="M_multi1" lib="TestMulti.la">
+						<param name="timeTick" value="100"/>
+					</Module>
 					<module id="m_dump2" lib="dump.la"/>
-					<Module id="M_multi2" lib="TestMulti.la"/>
+					<Module id="M_multi2" lib="TestMulti.la">
+						<param name="timeTick" value="100"/>
+					</Module>
 					<Module id="M_dump3" lib="Dump.la"/>
 				</modules>
 				<input>

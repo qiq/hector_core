@@ -23,7 +23,7 @@ TestInput::TestInput(ObjectRegistry *objects, ProcessingEngine *engine, const ch
 	values->addGetter("idPrefix", &TestInput::getIdPrefix);
 	values->addSetter("idPrefix", &TestInput::setIdPrefix);
 	values->addGetter("resourceType", &TestInput::getResourceType);
-	values->addSetter("resourceType", &TestInput::setResourceType);
+	values->addSetter("resourceType", &TestInput::setResourceType, true);
 }
 
 TestInput::~TestInput() {

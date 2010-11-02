@@ -130,7 +130,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 				return true;
 			i+= size;
 			int id = r->getId();
-			if (!engine->PutResource(r, &timeout))
+			if (!engine->ProcessResource(r, &timeout))
 				break;
 			resourceIds.push_back(id);
 		}
@@ -143,8 +143,8 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 		// wait for result
 		i = 0;
 		while (i < resourceIds.size()) {
-			Resource *r = engine->GetResource(resourceIds[i], &timeout);
-			if (!r)
+			Resource *r;
+			if (!engine->GetProcessedResource(resourceIds[i], &r, &timeout))
 				break;
 			string *s = r->Serialize();
 			uint32_t size = s->length();

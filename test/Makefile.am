@@ -86,4 +86,8 @@ CLEANFILES += test20.log.test test20.data.out
 
 TESTS += test21.sh
 EXTRA_DIST += test21.sh test21-config.xml test21.log.correct
-CLEANFILES += test21.log.test
+CLEANFILES += test21.log.test test21.data.out
+
+TESTS += test22.sh
+EXTRA_DIST += test22.sh test22-config.xml test22.log.correct
+CLEANFILES += test22.log.test

@@ -5,7 +5,7 @@ AM_LDFLAGS = @LOG4CXX_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 modulesdir = $(libdir)/hector/modules
-modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la Load.la Save.la Dump.la
+modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la Load.la Save.la Dump.la TestCall.la
 
 TestInput_la_SOURCES = TestInput.h TestInput.cc
 TestInput_la_LIBADD = ../resources/libTestResource.la
@@ -28,3 +28,6 @@ Save_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
 Save_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
 
 Dump_la_SOURCES = Dump.h Dump.cc
+
+TestCall_la_SOURCES = TestCall.h TestCall.cc
+TestCall_la_LIBADD = ../resources/libTestResource.la

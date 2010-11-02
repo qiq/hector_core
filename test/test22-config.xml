@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test22: call a processing engine from within another
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1100</serverPort>
+		<logConfig>test.log.props</logConfig>
+
+		<ProcessingEngine id="PE_second">
+			<inputProcessor ref="P_simple"/>
+			<Processor id="P_simple">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_simple" lib="TestSimple.la"/>
+					<Module id="M_dump2" lib="Dump.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+				<output>
+					<nextProcessor ref="PE_second"/>
+				</output>
+			</Processor>
+		</ProcessingEngine>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_input" lib="TestInput.la">
+						<param name="maxItems">1000</param>
+					</Module>
+					<Module id="M_dump1" lib="Dump.la"/>
+					<Module id="M_call" lib="TestCall.la">
+						<param name="targetEngine" value="PE_second"/>
+						<param name="resourceType" value="TestResource"/>
+					</Module>
+					<Module id="M_dump3" lib="Dump.la"/>
+					<Module id="M_output" lib="TestOutput.la"/>
+				</modules>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

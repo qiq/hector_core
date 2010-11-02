@@ -80,15 +80,17 @@ Resource *TestSimple::ProcessSimple(Resource *resource) {
 		return resource;
 	TestResource *tr = static_cast<TestResource*>(resource);
 	LOG_INFO("Processing TestResource (" << tr->getStr() << ")");
-	ObjectLockWrite();
+	ObjectLockRead();
 	bool fs = flipStatus;
 	int ss = setStatus;
-	++items;
 	ObjectUnlock();
 	if (fs)
 		tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
 	if (ss >= 0)
 		tr->setStatus(ss);
+	ObjectLockWrite();
+	++items;
+	ObjectUnlock();
 	return resource;
 }
 

@@ -23,8 +23,8 @@ public:
 
 	void addGetter(const char *name, char *(T::*f)(const char*));
 	void addSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly = false);
-	bool InitValues(std::vector<std::pair<std::string, std::string> > *params);
-	bool InitValue(const char *name, const char *value);
+	bool InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown = false);
+	bool InitValue(const char *name, const char *value, bool ignoreUnknown = false);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -44,12 +44,12 @@ private:
 template <class T> log4cxx::LoggerPtr ObjectValues<T>::logger(log4cxx::Logger::getLogger("lib.ObjectValues"));
 
 template<class T>
-bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string> > *params) {
+bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown) {
 	for (std::vector<pair<std::string, std::string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
 		typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
 		if (iter2 != setters.end()) {
 			(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
-		} else {
+		} else if (!ignoreUnknown) {
 			LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
 			return false;
 		}
@@ -58,12 +58,12 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 }
 
 template<class T>
-bool ObjectValues<T>::InitValue(const char *name, const char *value) {
+bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignoreUnknown) {
 	typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(module->*iter->second)(iter->first, iter->second);
 		return true;
-	} else {
+	} else if (!ignoreUnknown) {
 		LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
 		return false;
 	}

@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h \
-	Resource.i ProtobufResource.i Module.i
+	Resource.i ProtobufResource.i Module.i CallProcessingEngineModule.h
 
 BUILT_SOURCES =
 
@@ -18,7 +18,8 @@ libhector_processing_engine_la_SOURCES = \
 	OutputFilter.h \
 	Resource.h Resource.cc ProtobufResource.h ProtobufResource.cc \
 	Resources.h Resources.cc \
-	PerlModule.h
+	PerlModule.h \
+	CallProcessingEngineModule.h CallProcessingEngineModule.cc
 
 libhector_processing_engine_la_CXXFLAGS = $(AM_CXXFLAGS)
 libhector_processing_engine_la_LDFLAGS = $(AM_LDFLAGS)

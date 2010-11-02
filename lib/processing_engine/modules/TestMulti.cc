@@ -10,10 +10,12 @@
 
 using namespace std;
 
+#define MAX_RESOURCES 100
+#define DEFAULT_TIMETICK 100*1000
 TestMulti::TestMulti(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
 	items = 0;
 	foo = NULL;
-	resources = new queue<TestResource*>();
+	timeTick = DEFAULT_TIMETICK;
 
 	values = new ObjectValues<TestMulti>(this);
 	values->addGetter("items", &TestMulti::getItems);
@@ -21,12 +23,13 @@ TestMulti::TestMulti(ObjectRegistry *objects, ProcessingEngine *engine, const ch
 	values->addSetter("foo", &TestMulti::setFoo);
 	values->addGetter("alias", &TestMulti::getFoo);
 	values->addSetter("alias", &TestMulti::setFoo);
+	values->addGetter("timeTick", &TestMulti::getTimeTick);
+	values->addSetter("timeTick", &TestMulti::setTimeTick);
 }
 
 TestMulti::~TestMulti() {
 	delete values;
 	free(foo);
-	delete resources;
 }
 
 char *TestMulti::getItems(const char *name) {
@@ -42,44 +45,53 @@ void TestMulti::setFoo(const char *name, const char *value) {
 	foo = strdup(value);
 }
 
+char *TestMulti::getTimeTick(const char *name) {
+	return int2str(timeTick);
+}
+
+void TestMulti::setTimeTick(const char *name, const char *value) {
+	timeTick = str2int(value);
+}
+
 bool TestMulti::Init(vector<pair<string, string> > *params) {
 	values->InitValues(params);
 	return true;
 }
 
-#define MAX_RESOURCES 100
 int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
-	while (inputResources->size() > 0 && resources->size() <= MAX_RESOURCES) {
+	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
 		if (r->getTypeId() == TestResource::typeId)
-			resources->push(static_cast<TestResource*>(r));
+			resources.push(static_cast<TestResource*>(r));
 		inputResources->pop();
 	}
 
-	if (resources->size() == 0)
+	if (resources.size() == 0)
 		return -1;
 
 	struct timeval tv;
-	tv.tv_sec = 0;
-	tv.tv_usec = 100;
+	ObjectLockRead();
+	tv.tv_sec = timeTick / 1000000;
+	tv.tv_usec = timeTick % 1000000;
+	ObjectUnlock();
 
 	if (select(1, NULL, NULL, NULL, &tv) < 0) {
 		LOG_INFO("Error in select() = " << errno);
 		return 0;
 	}
-	TestResource *tr = resources->front();
-	resources->pop();
+	TestResource *tr = resources.front();
+	resources.pop();
 	outputResources->push(tr);
 	LOG_INFO("Processed TestResource (" << tr->getStr() << ")");
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();
 	
-	return MAX_RESOURCES-resources->size();
+	return MAX_RESOURCES-resources.size();
 }
 
 int TestMulti::ProcessingResources() {
-	return resources->size();
+	return resources.size();
 }
 
 // factory functions

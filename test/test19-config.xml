@@ -14,7 +14,7 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 				<threads>1</threads>
 				<modules>
 					<Module id="M_input" type="perl" lib="TestInput.pm">
-						<param name="maxItems" value="1000"/>
+						<param name="maxItems" value="100"/>
 					</Module>
 				</modules>
 				<output>

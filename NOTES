@@ -1,3 +1,5 @@
+- vytvareni/mazani resource jen pres rozhrani ProcessingEngine
+
 Obecne:
 - system pro pousteni modulu na resources
 - server se sklada z processing_engines

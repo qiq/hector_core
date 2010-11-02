@@ -459,7 +459,7 @@ void Processor::runThread(int threadId) {
 		}
 		block = true;
 		// n = number of resources the multi-module is still able to accept
-		int minN = multiIndex >= 0 ? 10000 : 1;
+		int minN = multiIndex >= 0 ? 1000000 : 1;
 		bool queueFull = false;
 		int resourcesQueued;
 		while (multiIndex >= 0) {

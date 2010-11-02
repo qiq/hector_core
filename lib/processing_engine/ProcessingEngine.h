@@ -29,15 +29,16 @@ public:
 	void Resume();
 
 	// process resource using the processing engine
-	bool PutResource(Resource *resource, struct timeval *timeout);
-	// get processed resource from the processing engine, NULL: deleted/not available
-	Resource *GetResource(int id, struct timeval *timeout);
+	bool ProcessResource(Resource *resource, struct timeval *timeout);
+	// get processed resource from the processing engine, result: available/not available, resource: NULL == deleted
+	bool GetProcessedResource(int id, Resource **resource, struct timeval *timeout);
 
 	// helper methods to create resources
 	int ResourceNameToId(const char *name);
 	Resource *CreateResource(int id);
-	// this must be called from modules in case resource is to be deleted
-	void DeleteResource(Resource *resource);
+	// This must be called in module when resource is to be deleted, so
+	// that processing engine know that it will never arrive.
+	void MarkResourceDeleted(Resource *resource);
 
 	// helper method for Processor::Connect()
 	SyncQueue<Resource> *getOutputQueue();

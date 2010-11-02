@@ -27,13 +27,16 @@ public:
 private:
 	int items;		// ObjectLock
 	char *foo;		// ObjectLock
-	queue<TestResource*> *resources; // private to Process* (+ProcessingResources)
+	int timeTick;		// ObjectLock
+	queue<TestResource*> resources; // private to Process* (+ProcessingResources)
 
 	ObjectValues<TestMulti> *values;
 
 	char *getItems(const char *name);
 	char *getFoo(const char *name);
 	void setFoo(const char *name, const char *value);
+	char *getTimeTick(const char *name);
+	void setTimeTick(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
