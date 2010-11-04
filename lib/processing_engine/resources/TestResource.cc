@@ -53,7 +53,8 @@ string *TestResource::toString(Object::LogLevel logLevel) {
 	return new string(buf);
 }
 
-TestResourceFieldInfo::TestResourceFieldInfo(const string &name) {
+template<class T>
+ResourceFieldInfoT<T>::ResourceFieldInfoT(const std::string &name) {
 	if (name == "id") {
 		type = INT;
 		get_u.i = &TestResource::getId;
@@ -72,30 +73,3 @@ TestResourceFieldInfo::TestResourceFieldInfo(const string &name) {
 	}
 }
 
-const std::string &TestResourceFieldInfo::getString(Resource *resource) {
-	assert(resource->getTypeId() == TestResource::typeId);
-	return get_u.s ? (static_cast<TestResource*>(resource)->*get_u.s)() : empty_string;
-}
-
-int TestResourceFieldInfo::getInt(Resource *resource) {
-	assert(resource->getTypeId() == TestResource::typeId);
-	return get_u.i ? (static_cast<TestResource*>(resource)->*get_u.i)() : -1;
-}
-
-void TestResourceFieldInfo::setString(Resource *resource, const std::string &value) {
-	assert(resource->getTypeId() == TestResource::typeId);
-	if (set_u.s)
-		(static_cast<TestResource*>(resource)->*set_u.s)(value);
-}
-
-void TestResourceFieldInfo::setInt(Resource *resource, int value) {
-	assert(resource->getTypeId() == TestResource::typeId);
-	if (set_u.i)
-		(static_cast<TestResource*>(resource)->*set_u.i)(value);
-}
-
-void TestResourceFieldInfo::clear(Resource *resource) {
-	assert(resource->getTypeId() == TestResource::typeId);
-	if (clear_u.c)
-		(static_cast<TestResource*>(resource)->*clear_u.c)();
-}

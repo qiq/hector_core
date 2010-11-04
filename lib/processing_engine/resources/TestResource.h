@@ -10,6 +10,7 @@
 #include <string>
 #include <log4cxx/logger.h>
 #include "Resource.h"
+#include "ResourceFieldInfo.h"
 
 class TestResource : public Resource {
 public:
@@ -53,35 +54,8 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-class TestResourceFieldInfo : public ResourceFieldInfo {
-public:
-	TestResourceFieldInfo(const std::string &name);
-	~TestResourceFieldInfo();
-
-	const std::string &getString(Resource*);
-	int getInt(Resource*);
-
-	void setString(Resource*, const std::string&);
-	void setInt(Resource*, int);
-
-	void clear(Resource*);
-
-private:
-	union {
-		const std::string &(TestResource::*s)();
-		int (TestResource::*i)();
-	} get_u;
-	union {
-		void (TestResource::*s)(const std::string&);
-		void (TestResource::*i)(int);
-	} set_u;
-	union {
-		void (TestResource::*c)();
-	} clear_u;
-};
-
 inline ResourceFieldInfo *TestResource::getFieldInfo(const char *name) {
-	return new TestResourceFieldInfo(name);
+	return new ResourceFieldInfoT<TestResource>(name);
 }
 
 inline int TestResource::getTypeId() {

@@ -26,7 +26,8 @@ string *TestProtobufResource::toString(Object::LogLevel logLevel) {
 	return new string(buf);
 }
 
-TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const string &name) {
+template <class T>
+ResourceFieldInfoT<T>::ResourceFieldInfoT(const string &name) {
 	if (name == "id") {
 		type = INT;
 		get_u.i = &TestProtobufResource::getId;
@@ -43,32 +44,4 @@ TestProtobufResourceFieldInfo::TestProtobufResourceFieldInfo(const string &name)
 		set_u.s = &TestProtobufResource::setStr;
 		clear_u.c = NULL;
 	}
-}
-
-const string &TestProtobufResourceFieldInfo::getString(Resource *resource) {
-	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return get_u.s ? (static_cast<TestProtobufResource*>(resource)->*get_u.s)() : empty_string;
-}
-
-int TestProtobufResourceFieldInfo::getInt(Resource *resource) {
-	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	return get_u.i ? (static_cast<TestProtobufResource*>(resource)->*get_u.i)() : -1;
-}
-
-void TestProtobufResourceFieldInfo::setString(Resource *resource, const string &value) {
-	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	if (set_u.s)
-		(static_cast<TestProtobufResource*>(resource)->*set_u.s)(value);
-}
-
-void TestProtobufResourceFieldInfo::setInt(Resource *resource, int value) {
-	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	if (set_u.i)
-		(static_cast<TestProtobufResource*>(resource)->*set_u.i)(value);
-}
-
-void TestProtobufResourceFieldInfo::clear(Resource *resource) {
-	assert(resource->getTypeId() == TestProtobufResource::typeId);
-	if (clear_u.c)
-		(static_cast<TestProtobufResource*>(resource)->*clear_u.c)();
 }

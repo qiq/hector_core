@@ -12,6 +12,7 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "ProtobufResource.h"
+#include "ResourceFieldInfo.h"
 #include "TestProtobufResource.pb.h"
 
 class TestProtobufResource : public ProtobufResource {
@@ -56,35 +57,8 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-class TestProtobufResourceFieldInfo : public ResourceFieldInfo {
-public:
-	TestProtobufResourceFieldInfo(const std::string &name);
-	~TestProtobufResourceFieldInfo();
-
-	const std::string &getString(Resource*);
-	int getInt(Resource*);
-
-	void setString(Resource*, const std::string&);
-	void setInt(Resource*, int);
-
-	void clear(Resource*);
-
-private:
-	union {
-		const std::string &(TestProtobufResource::*s)();
-		int (TestProtobufResource::*i)();
-	} get_u;
-	union {
-		void (TestProtobufResource::*s)(const std::string&);
-		void (TestProtobufResource::*i)(int);
-	} set_u;
-	union {
-		void (TestProtobufResource::*c)();
-	} clear_u;
-};
-
 inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
-	return new TestProtobufResourceFieldInfo(name);
+	return new ResourceFieldInfoT<TestProtobufResource>(name);
 }
 
 inline int TestProtobufResource::getTypeId() {
