@@ -25,7 +25,7 @@ public:
 	~CallProcessingEngineModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
 	int ProcessingResources();
 
 protected:
@@ -56,7 +56,7 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	bool ReadWrite(queue<Resource*> *inputResources, queue<Resource*> *outputResources, struct timeval *tv);
+	bool ReadWrite(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, struct timeval *tv);
 };
 
 inline Module::Type CallProcessingEngineModule::getType() {

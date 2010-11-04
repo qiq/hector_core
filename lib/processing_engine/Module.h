@@ -38,7 +38,7 @@ public:
 	virtual Resource *ProcessSimple(Resource *resource);
 	// Multi modules use input/output interface: inputResources should be consumed, outputResources should be produced
 	// returns number of resources we are expecting on the input, -1 in case we should block in waiting for input resources
-	virtual int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	virtual int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
 	// Returns number of currently processing resources (in ProcessMulti)
 	// called exclusively outside of ProcessMulti(), so there is no need to lock
 	virtual int ProcessingResources();
