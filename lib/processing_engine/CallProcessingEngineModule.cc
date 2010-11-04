@@ -174,11 +174,9 @@ int CallProcessingEngineModule::ProcessMulti(queue<Resource*> *inputResources, q
 	// do not block
 	while (ReadWrite(inputResources, outputResources, NULL))
 		;
-
 	// nothing to process
 	if (running.size() == 0)
 		return maxRequests;
-
 	// block in read (once)
 	ReadWrite(inputResources, outputResources, &tv);
 	// do not block

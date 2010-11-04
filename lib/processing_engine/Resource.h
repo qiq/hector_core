@@ -11,8 +11,6 @@
 #include <log4cxx/logger.h>
 #include "Object.h"
 
-using namespace std;
-
 class ResourceFieldInfo;
 
 class Resource {
@@ -37,7 +35,7 @@ public:
 	virtual void setStatus(int status) = 0;
 
 	// save and restore resource
-	virtual string *Serialize() = 0;
+	virtual std::string *Serialize() = 0;
 	// data need not be nul-terminated
 	virtual bool Deserialize(const char *data, int size) = 0;
 	// used by queues in case there is limit on queue size, this size may

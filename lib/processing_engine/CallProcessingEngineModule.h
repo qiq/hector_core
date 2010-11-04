@@ -1,6 +1,6 @@
 /**
  * CallProcessingEngine: call another processing engine module template. Module
- * needs to implement PrepareResource and FinishResource methods.
+ * needs to implement PrepareResource and FinishResource methods and call ReadWrite() as appropriate
  */
 
 #ifndef _LIB_PROCESSING_ENGINE_CALL_PROCESSING_ENGINE_MODULE_H_
