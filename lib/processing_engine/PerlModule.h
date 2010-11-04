@@ -28,7 +28,7 @@ public:
 	Resource *ProcessInput(bool sleep);
 	void ProcessOutput(Resource *resource);
 	Resource *ProcessSimple(Resource *resource);
-	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
 	int ProcessingResources();
 
 protected:
