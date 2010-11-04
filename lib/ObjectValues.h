@@ -12,6 +12,7 @@
 #include <string>
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
+#include <utility>
 #include <vector>
 #include <log4cxx/logger.h>
 
@@ -45,7 +46,7 @@ template <class T> log4cxx::LoggerPtr ObjectValues<T>::logger(log4cxx::Logger::g
 
 template<class T>
 bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown) {
-	for (std::vector<pair<std::string, std::string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
+	for (std::vector<std::pair<std::string, std::string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
 		typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
 		if (iter2 != setters.end()) {
 			(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
