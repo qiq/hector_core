@@ -71,41 +71,45 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 
 	if (request_header_offset < 0) {
 		// at least one line read?
-		size_t second_line_a = request_buffer.find("\r\n");
-		size_t second_line_b = request_buffer.find("\n");
+		size_t eol = request_buffer.find("\n");
 		// header not complete
-		if (second_line_a == string::npos && second_line_b == string::npos)
+		if (eol == string::npos)
 			return INCOMPLETE;
-		size_t eol = second_line_a < second_line_b ? second_line_a : second_line_b;
-		request_header_offset = second_line_a < second_line_b ? second_line_a + 2 : second_line_b + 1;
+		request_header_offset = eol+1;
+		if (eol > 0 && request_buffer.at(eol-1) == '\r')
+			eol--;
 
 		// parse first line
 		size_t sp1 = request_buffer.find(" ", 0);
-		if ((int)sp1 >= request_header_offset)
+		if (sp1 > eol)
 			sp1 = string::npos;
 		if (sp1 == string::npos) {
 			request_method = request_buffer.substr(0, eol);
 		} else {
 			request_method = request_buffer.substr(0, sp1);
 			size_t sp2 = request_buffer.find(" ", sp1+1);
-			if ((int)sp2 >= request_header_offset)
+			if (sp2 > eol)
 				sp2 = string::npos;
 			if (sp2 == string::npos) {
 				request_args = request_buffer.substr(sp1+1, eol-(sp1+1));
 			} else {
 				request_args = request_buffer.substr(sp1+1, sp2-(sp1+1));
-				request_protocol = request_buffer.substr(sp2+1, eol-(sp1+1));
+				request_protocol = request_buffer.substr(sp2+1, eol-(sp2+1));
 			}
 		}
 	}
 
 	// header complete?
-	size_t body_offset_a = request_buffer.find("\r\n\r\n", request_header_offset-2);
-	size_t body_offset_b = request_buffer.find("\n\n", request_header_offset-1);
-	// header not complete
-	if (body_offset_a == string::npos && body_offset_b == string::npos)
-		return INCOMPLETE;
-	request_body_offset = body_offset_a < body_offset_b ? body_offset_a + 4 : body_offset_b + 2;
+	size_t body_offset = request_buffer.find("\r\n\r\n", request_header_offset-2);
+	if (body_offset == string::npos) {
+		body_offset = request_buffer.find("\n\n", request_header_offset-1);
+		// header not complete
+		if (body_offset == string::npos)
+			return INCOMPLETE;
+		request_body_offset = body_offset + 2;
+	} else {
+		request_body_offset = body_offset + 4;
+	}
 
 	// parse header fields
 	header_fields = new std::tr1::unordered_map<string, string>();
@@ -113,16 +117,19 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 	string var;
 	string val;
 	while (offset < request_body_offset) {
-		size_t nl_a = request_buffer.find("\r\n", offset);
-		size_t nl_b = request_buffer.find("\n", offset);
-		if (nl_a == string::npos && nl_b == string::npos)
+		size_t nl = request_buffer.find("\n", offset);
+		if (nl == string::npos)
 			return FAILED;		// should not happen
-		size_t nl = nl_a < nl_b ? nl_a : nl_b;
+		int nl_size = 1;
+		if (nl > 0 && request_buffer.at(nl-1) == '\r') {
+			nl--;
+			nl_size++;
+		}
 		// empty line: we are finished
 		if (nl - offset == 0)
 			break;
 		string field = request_buffer.substr(offset, nl-offset);
-		offset = nl + (nl_a < nl_b ? 2 : 1);
+		offset = nl + nl_size;
 		int i = 0;
 		bool cont = false;
 		while (field[i] == ' ' || field[i] == '\t') {
@@ -130,11 +137,12 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 			i++;
 		}
 		if (!cont) {
-			(*header_fields)[var] = val;
+			if (!var.empty())
+				(*header_fields)[var] = val;
 			size_t col = field.find(": ");
 			if (col == string::npos) {
-				var = "";
-				val = "";
+				var.clear();
+				val.clear();
 				continue;		// invalid line
 			}
 			var = field.substr(0, col);
@@ -148,19 +156,17 @@ request_ready_t SimpleHTTPConn::ParseRequestHeader() {
 
 	// get length of the request body
 	std::tr1::unordered_map<string, string>::iterator iter = header_fields->find("Content-Length");
-	if (iter != header_fields->end()) {
+	if (iter != header_fields->end())
 		request_body_length = atol(iter->second.c_str());
-	}
 
 	// disable Connection: keep-alive when there is no Content-Length
 	std::tr1::unordered_map<string, string>::iterator iter2 = header_fields->find("Connection");
 	if (iter2 != header_fields->end()) {
 		if (!strcasecmp(iter2->second.c_str(), "keep-alive")) {
-			if (request_body_length >=  0) {
+			if (request_body_length >=  0)
 				keep_alive = true;
-			} else {
+			else
 				header_fields->erase("Connection");
-			}
 		}
 	}
 	return PARSED;
