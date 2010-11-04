@@ -67,7 +67,7 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	}
 
 	if (resources.size() == 0)
-		return -1;
+		return MAX_RESOURCES;
 
 	struct timeval tv;
 	ObjectLockRead();

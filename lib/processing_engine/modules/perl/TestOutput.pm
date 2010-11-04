@@ -75,13 +75,12 @@ sub RestoreCheckpoint {
 sub ProcessOutput() {
 	my ($self, $resource) = @_;
 
-	if (not defined $resource) {
-		
+	if (not defined $resource or $resource->getTypeStr() ne 'TestResource') {
+		$self->{'_object'}->log_error("Invalid resource: ".$resource->getTypeStr());
 	} else {
 		$self->{'_object'}->log_info("Resource arrived (".$resource->getStr().")");
 		$self->{'items'}++;
 	}
-	return undef;
 }
 
 1;

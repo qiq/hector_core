@@ -32,17 +32,14 @@ void TestOutput::ProcessOutput(Resource *resource) {
 	if (resource->getTypeId() == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(resource);
 		LOG_INFO("Resource arrived (" << tr->getStr() << ")");
-		ObjectLockWrite();
-		items++;
-		ObjectUnlock();
 		delete tr;
 	} else {
 		LOG_INFO("Resource arrived (" << resource->getId() << ")");
-		ObjectLockWrite();
-		items++;
-		ObjectUnlock();
 		delete resource;
 	}
+	ObjectLockWrite();
+	items++;
+	ObjectUnlock();
 }
 
 // the class factories

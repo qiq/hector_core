@@ -88,10 +88,14 @@ sub ProcessMulti() {
 
 	while (@{$inputResources} > 0 and @{$self->{'_resources'}} <= $MAX_RESOURCES) {
 		my $resource = shift(@{$inputResources});
-		push(@{$self->{'_resources'}}, $resource) if ($resource->getTypeStr() eq 'TestResource');
+		if ($resource->getTypeStr() eq 'TestResource') {
+			push(@{$self->{'_resources'}}, $resource);
+		} else {
+			push(@{$outputResources}, $resource);
+		}
 	}
 
-	return -1 if (@{$self->{'_resources'}} == 0);
+	return 0 if (@{$self->{'_resources'}} == 0);
 
 	select(undef, undef, undef, 0.0001);
 

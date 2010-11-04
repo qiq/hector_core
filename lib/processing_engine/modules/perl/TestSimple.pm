@@ -89,9 +89,9 @@ sub ProcessSimple() {
 		return $resource;
 	}
 	$self->{'_object'}->log_info("Processing TestResource (".$resource->getStr().")");
-	$self->{'items'}++;
 	$resource->setStatus($resource->getStatus() == 0 ? 1 : 0) if ($self->{'flipStatus'});
 	$resource->setStatus($self->{'setStatus'}) if ($self->{'setStatus'} >= 0);
+	$self->{'items'}++;
 
 	return $resource;
 }

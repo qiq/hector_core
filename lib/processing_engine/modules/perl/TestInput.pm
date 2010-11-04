@@ -84,8 +84,9 @@ sub ProcessInput() {
 	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
 	$resource = Hector::TestResource->new();
 	$resource->setId($self->{'_threadIndex'}*10000+$self->{'items'});
-	$resource->setStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}++));
+	$resource->setStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}));
 	$self->{'_object'}->log_info("Loading resource (".$resource->getStr().")");
+	$self->{'items'}++;
 
 	return $resource;
 }
