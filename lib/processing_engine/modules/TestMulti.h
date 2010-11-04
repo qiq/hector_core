@@ -21,14 +21,14 @@ public:
 	~TestMulti();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	int ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources);
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
 	int ProcessingResources();
 
 private:
 	int items;		// ObjectLock
 	char *foo;		// ObjectLock
 	int timeTick;		// ObjectLock
-	queue<TestResource*> resources; // private to Process* (+ProcessingResources)
+	std::queue<TestResource*> resources; // private to Process* (+ProcessingResources)
 
 	ObjectValues<TestMulti> *values;
 
