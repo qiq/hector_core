@@ -1,4 +1,16 @@
+- predelat callprocesingenginemodule na
+	- ne modul (aby jich slo udelat vic)
+	- aby umel PROCESS i PASS
+	- aby umel i HTTP clienta (s keep-alive a automatickym obnovenim spojeni)
+
+//- spatne resene delete: proste se smazat nesmi -- nastavit status na nejakou
+//  magic hodnotu nebo tak neco a processor to preda na konec processing engine
+	- uz to je OK, akorat je potreba zmenit Filter.cc, aby nastavil spravny status :)
+//	- jeste vlastne zkontrolovat PE, ze pracuje spravne se smazanymi resources, uz nebudou NULL, ale zustanou present, dokud se nevyzvednou z fronty
+
+Coding style: 
 - jmena metod na velka pismena (krome getteru/setteru)
+- dokumentace ala doxygen
 
 - obslehnout ze SWIG kod pro Python a Javu, aby se daly psat moduly i v nich
 	- Python & Java: PythonModule.cc + JavaModule.cc, implementovat, podobne jako pro Perl
@@ -9,7 +21,12 @@
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- udelat shared resource, ktery bude zamykat uzivani -- muze si udelat kazdy resource zvlast
+	- pridat zamek do websiteresource
+- predelat resource field info na template
 - upravit http server, aby akceptoval multi-line headers (nemelo by byt az tak
   tezke, proste klasicke zpozdene zapisovani), neni poradne otestovano(!)
 - nastavit loglevel pro kazdy objekt zvlast
 	- upravit Object.h, pridat jednu pseudo promennou
+- podivat se na Clone(), jestli funguje spravne ve vsech resources
+	- aby delal deep-copy

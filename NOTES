@@ -1,4 +1,8 @@
-- vytvareni/mazani resource jen pres rozhrani ProcessingEngine
+- bezny resource zpracovava vzdycky prave jedno vlakno
+	- ale muze byt tzv. shared resource, ktery musi pouzivat mutex pro
+	  pristup ke svym datum, pak ho muze pouzivat vice modulu najednou
+- vytvareni resource jen pres rozhrani ProcessingEngine (CreateResource), mazani pomoci specialni hodnoty status
+- items property rika, kolik resources bylo uspesne zpracovano (nepocitaji se tam resources, ktere se nezpracovaly)
 
 Obecne:
 - system pro pousteni modulu na resources

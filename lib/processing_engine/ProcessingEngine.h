@@ -30,15 +30,14 @@ public:
 
 	// process resource using the processing engine
 	bool ProcessResource(Resource *resource, struct timeval *timeout);
-	// get processed resource from the processing engine, result: available/not available, resource: NULL == deleted
-	bool GetProcessedResource(int id, Resource **resource, struct timeval *timeout);
+	// get processed resource from the processing engine, result: available/not available
+	Resource *GetProcessedResource(int id, struct timeval *timeout);
 
 	// helper methods to create resources
 	int ResourceNameToId(const char *name);
 	Resource *CreateResource(int id);
-	// This must be called in module when resource is to be deleted, so
-	// that processing engine know that it will never arrive.
-	void MarkResourceDeleted(Resource *resource);
+	// This is called by Processor if resource is detected to be deleted.
+	bool AppendToOutputQueue(Resource *resource);
 
 	// helper method for Processor::Connect()
 	SyncQueue<Resource> *getOutputQueue();

@@ -45,6 +45,11 @@ Processor::~Processor() {
 	}
 	delete inputQueue;
 
+	while (deletedResources.size() > 0) {
+		delete deletedResources.front();
+		deletedResources.pop();
+	}
+
 	delete values;
 }
 
@@ -345,13 +350,14 @@ void *run_thread(void *ptr) {
 bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterIndex) {
 	int status = r->getStatus();
 	bool appended = false;
-	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+*filterIndex; iter != outputFilters.end(); ++iter) {
+	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+(filterIndex ? *filterIndex : 0); iter != outputFilters.end(); ++iter) {
 		OutputFilter *f = *iter;
 		if (f->isEmptyFilter() || f->getFilter() == status) {
 			Resource *copy = (*iter)->getCopy() ? r->Clone() : NULL;
 			if (!f->processResource(r, timeout))
 				return false;	// cancelled or no space available
-			*filterIndex++;
+			if (filterIndex)
+				*filterIndex++;
 			if (!copy) {
 				appended = true;
 				break;
@@ -377,7 +383,8 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			assert(resource == NULL);
 			resource = minfo->module->ProcessInput(true);
 			if (!resource) {
-				*stop = true;
+				if (stop)
+					*stop = true;
 				return NULL;
 			}
 			break;
@@ -387,8 +394,11 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			break;
 		case Module::SIMPLE:
 			resource = minfo->module->ProcessSimple(resource);
-			if (!resource)
+			if (resource->isStatusDeleted()) {
+				// deleted resource
+				deletedResources.push(resource);
 				return NULL;
+			}
 			break;
 		case Module::MULTI:
 		default:
@@ -404,21 +414,6 @@ int Processor::NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index) {
 	while (index < mis->size() && (*mis)[index]->type != Module::MULTI)
 		index++;
 	return index == mis->size() ? -1 : index;
-}
-
-bool Processor::AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, struct timeval *timeout, int *outputFilterIndex) {
-	if (multiIndex >= 0) {
-		// append to next multi-module
-		(*mis)[multiIndex]->inputResources->push(resource);
-		return true;
-	}
-	// append to output queue
-	if (QueueResource(resource, timeout, outputFilterIndex)) {
-		*outputFilterIndex = 0;
-		return true;
-	}
-	// cancelled or no space avaliable
-	return false;
 }
 
 void Processor::runThread(int threadId) {
@@ -452,9 +447,15 @@ void Processor::runThread(int threadId) {
 			}
 			resource = this->ApplyModules(mis, resource, 0, &stop);
 			if (resource) {
-				int x = 0; // ignored
-				if (!AppendResource(mis, resource, multiIndex, &timeout, &x))
-					return; // cancelled
+				if (multiIndex >= 0) {
+					// next multi module
+					(*mis)[multiIndex]->inputResources->push(resource);
+				} else {
+					// append to output queue (we do not have any multi modules => wait forever)
+					if (!QueueResource(resource, &timeout, NULL))
+						return;		// cancelled
+					outputFilterIndex = 0;
+				}
 			}
 		}
 		block = true;
@@ -475,22 +476,33 @@ void Processor::runThread(int threadId) {
 			int nextMultiIndex = this->NextMultiModuleIndex(mis, multiIndex+1);
 
 			resourcesQueued = 0;
-			if (outputFilterResource) {
-				if (AppendResource(mis, outputFilterResource, nextMultiIndex, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex)) {
-					// NOT cancelled or no space available
-					resourcesQueued++;
-					outputFilterResource = NULL;
-				}
-			}
-			while (!outputFilterResource && minfo->outputResources->size() > 0) {
-				Resource *resource = this->ApplyModules(mis, minfo->outputResources->front(), multiIndex+1, &stop);
+			while (minfo->outputResources->size() > 0) {
+				Resource *resource = minfo->outputResources->front();
 				minfo->outputResources->pop();
+				if (resource->isStatusDeleted()) {
+					// deleted resource: do not process it any more
+					deletedResources.push(resource);
+					continue;
+				}
+				resource = this->ApplyModules(mis, resource, multiIndex+1, NULL);
 				if (resource) {
-					if (!AppendResource(mis, resource, nextMultiIndex, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex)) {
-						outputFilterResource = resource;
-						break; // cancelled or no space available
+					if (nextMultiIndex >= 0) {
+						// next multi module
+						(*mis)[nextMultiIndex]->inputResources->push(resource);
+					} else {
+						if (outputFilterResource) {
+							if (!QueueResource(outputFilterResource, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex))
+								break;	// cancelled or no space available
+							outputFilterIndex = 0;
+							resourcesQueued++;
+							outputFilterResource = NULL;
+						}
+						if (!QueueResource(resource, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex)) {
+							outputFilterResource = resource;
+							break; // cancelled or no space available
+						}
+						resourcesQueued++;
 					}
-					resourcesQueued++;
 				}
 			}
 			if (minfo->outputResources->size() > 0) {
@@ -504,60 +516,24 @@ void Processor::runThread(int threadId) {
 		}
 		// in next round read resources so that no multi-module is over-loaded
 		readMax = minN;
-		// with the exception that output queue is full: allow only replacement of queued resources then
+		// with the exception that output queue is full: allow only
+		// replacement of queued resources then
 		if (queueFull && resourcesQueued < readMax)
 			readMax = resourcesQueued;
+		// another exception: if there are deleted resources still to
+		// be appended to the engine's output queue, we do not accept
+		// any more resources
+		while (deletedResources.size() > 0) {
+			if (!engine->AppendToOutputQueue(deletedResources.front())) {
+				readMax = 0;
+				break;
+			}
+			deletedResources.pop();
+		}
 	}
 	if (stop)
 		LOG_ERROR("No resource, thread " << id << " terminated");
 }
-
-/*
-	vector<ModuleInfo*>::iterator iter 
-	Module *module = modules[id].front();
-		int n;
-		while (isRunning()) {
-			n = module->ProcessMulti(inputResources, outputResources);
-			// n >= 0: at least one resource is being processed, do not block
-			// n < 0: no resources are being processed, wait for input resources
-			// m = number of output resources appended to output queue (may be less than outputResources->size())
-
-			// n >= 0: get upto min(n, m) input resources, but do not wait for them
-			// n < 0: get upto min(-n, m) input resources, wait for at least one input resource, if output queue is full, wait for it to be ready
-
-			// append queue resources to output queue, m is number of resources appended
-			bool block = n < 0;
-			n = block ? -n : n;
-			int m = 0;
-			while (outputResources->size() > 0) {
-				if (!appendResource(outputResources->front(), block && m == 0, &outputFilterIndex))
-					break;	// cancelled or no space available
-				outputResources->pop();
-				m++;
-			}
-			int readMax = n;
-			if (outputResources->size() > 0) {
-				if (block && m == 0)
-					break;	// cancelled
-				// output queue is full: only allow to read m resources from the input queue
-				readMax = m;
-			}
-
-			// get upto readMax resources from the input queue	
-			readMax -= inputResources->size();
-			int i = 0;
-			while (i < readMax) {
-				Resource *resource = inputQueue->getItem(block && i == 0);
-				if (!resource)
-					break; // cancelled or no resources
-				inputResources->push(resource);
-				i++;
-			}
-			if (block && i == 0)
-				break;	// cancelled
-		}
-	}
-*/
 
 void Processor::Start() {
 	ObjectLockWrite();

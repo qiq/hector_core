@@ -143,8 +143,8 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 		// wait for result
 		i = 0;
 		while (i < resourceIds.size()) {
-			Resource *r;
-			if (!engine->GetProcessedResource(resourceIds[i], &r, &timeout))
+			Resource *r = engine->GetProcessedResource(resourceIds[i], &timeout);
+			if (!r)
 				break;
 			string *s = r->Serialize();
 			uint32_t size = s->length();

@@ -7,7 +7,6 @@
 
 #include <config.h>
 
-#include <limits.h>
 #include <string>
 #include <vector>
 #include <libxml/parser.h>

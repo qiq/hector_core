@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <limits>
 #include <string>
 #include <log4cxx/logger.h>
 #include "Object.h"
@@ -33,6 +34,8 @@ public:
 	// status may be tested in Processor to select target queue
 	virtual int getStatus() = 0;
 	virtual void setStatus(int status) = 0;
+	void setStatusDeleted();
+	bool isStatusDeleted();
 
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
@@ -44,8 +47,18 @@ public:
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string *toString(Object::LogLevel = Object::INFO) = 0;
 
+	static const int RESOURCE_DELETED;
+
 protected:
 	static log4cxx::LoggerPtr logger;
 };
+
+inline void Resource::setStatusDeleted() {
+	setStatus(RESOURCE_DELETED);
+}
+
+inline bool Resource::isStatusDeleted() {
+	return getStatus() == RESOURCE_DELETED;
+}
 
 #endif

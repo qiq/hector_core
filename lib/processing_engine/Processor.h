@@ -11,7 +11,6 @@
 #include <queue>
 #include <string>
 #include <vector>
-#include <log4cxx/logger.h>
 #include "Object.h"
 #include "ObjectRegistry.h"
 #include "Module.h"
@@ -57,6 +56,7 @@ protected:
 	std::vector<ModuleInfo*> *modules;	// all modules; every thread has a module instance (first dimension)
 	SyncQueue<Resource> *inputQueue;	// input queue
 	std::vector<OutputFilter*> outputFilters;	// filters of output resources
+	std::queue<Resource*> deletedResources;	// deleted resources to be appended to the engine's output queue
 
 	ObjectValues<Processor> *values;
 

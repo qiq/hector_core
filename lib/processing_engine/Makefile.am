@@ -6,8 +6,8 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h \
-	Resource.i ProtobufResource.i Module.i CallProcessingEngineModule.h
+hectorinclude_HEADERS = ProcessingEngine.h Processor.h Module.h Resource.h ProtobufResource.h ResourceFieldInfo.h \
+	Resource.i ProtobufResource.i Module.i CallProcessingEngine.h
 
 BUILT_SOURCES =
 
@@ -16,11 +16,11 @@ libhector_processing_engine_la_SOURCES = \
 	Processor.h Processor.cc \
 	Module.h Module.cc \
 	OutputFilter.h \
-	Resource.h ProtobufResource.h ProtobufResource.cc \
+	Resource.h Resource.cc ProtobufResource.h ProtobufResource.cc \
 	ResourceFieldInfo.h \
 	Resources.h Resources.cc \
 	PerlModule.h \
-	CallProcessingEngineModule.h CallProcessingEngineModule.cc
+	CallProcessingEngine.h CallProcessingEngine.cc
 
 libhector_processing_engine_la_CXXFLAGS = $(AM_CXXFLAGS)
 libhector_processing_engine_la_LDFLAGS = $(AM_LDFLAGS)
