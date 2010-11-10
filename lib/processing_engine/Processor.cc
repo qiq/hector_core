@@ -81,14 +81,14 @@ bool Processor::Init(Config *config) {
 			char *type = config->getFirstValue(buffer);
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
-				Module *(*create)(ObjectRegistry*, ProcessingEngine *engine, const char*, int) = (Module*(*)(ObjectRegistry*, ProcessingEngine *engine, const char*, int))LibraryLoader::loadLibrary(name, "create");
+				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(name, "create");
 				if (!create) {
 					LOG_ERROR("Module/lib not found: " << name);
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
 					ModuleInfo *mi = new ModuleInfo;
-					mi->module = (*create)(objects, engine, mid, i);
+					mi->module = (*create)(objects, mid, i);
 					modules[i].push_back(mi);
 				}
 				free(type);
@@ -97,7 +97,7 @@ bool Processor::Init(Config *config) {
 				// Perl module
 				for (int i = 0; i < nThreads; ++i) {
 					ModuleInfo * mi = new ModuleInfo;
-					mi->module = new PerlModule(objects, engine, mid, i, name);
+					mi->module = new PerlModule(objects, mid, i, name);
 					modules[i].push_back(mi);
 				}
 				free(type);
@@ -308,6 +308,8 @@ bool Processor::Connect() {
 				return false;
 			}
 			q = pe->getOutputQueue();
+			if (!q)
+				q = pe->CreateOutputQueue();
 		}
 
 		if (!q) {

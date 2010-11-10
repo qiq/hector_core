@@ -9,7 +9,6 @@
 #include "Config.h"
 #include "ProcessingEngine.h"
 #include "Processor.h"
-#include "Resources.h"
 
 using namespace std;
 
@@ -144,14 +143,6 @@ Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout
 	finishedResources.erase(id);
 	finishedLock.Unlock();
 	return iter->second;
-}
-
-int ProcessingEngine::ResourceNameToId(const char *name) {
-	return Resources::NameToId(name);
-}
-
-Resource *ProcessingEngine::CreateResource(int id) {
-	return Resources::CreateResource(id);
 }
 
 bool ProcessingEngine::AppendToOutputQueue(Resource *resource) {

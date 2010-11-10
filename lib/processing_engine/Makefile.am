@@ -18,7 +18,6 @@ libhector_processing_engine_la_SOURCES = \
 	OutputFilter.h \
 	Resource.h Resource.cc ProtobufResource.h ProtobufResource.cc \
 	ResourceFieldInfo.h \
-	Resources.h Resources.cc \
 	PerlModule.h \
 	CallProcessingEngine.h CallProcessingEngine.cc
 

@@ -24,7 +24,7 @@ bool TestServer::Init(std::vector<std::pair<std::string, std::string> > *params)
 	for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
 		name2engine[(*iter)->getId()] = *iter;
 	}
-	this->resourceId = (*engines)[0]->ResourceNameToId("TestResource");
+	this->resourceId = Resource::NameToId("TestResource");
 	return true;
 }
 
@@ -96,8 +96,9 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			conn->ErrorResponse(400, "No object.property argument given", "");
 		}
 		return true;
-	} else if (method == "PROCESS") {
-		LOG4CXX_INFO(logger, "PROCESS " << args);
+	} else if (method == "PROCESS" || method == "PASS") {
+		bool process = method == "PROCESS" ? true : false;
+		LOG4CXX_INFO(logger, method << " " << args);
 		skipWs(&args);
 		chomp(&args);
 		tr1::unordered_map<string, ProcessingEngine*>::iterator iter = name2engine.find(args);
@@ -108,6 +109,14 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 		}
 		
 		ProcessingEngine *engine = iter->second;
+
+		// check that PROCESS/PASS is correct for given PE
+		if ((process && !engine->getOutputQueue()) || !process && engine->getOutputQueue()) {
+			LOG4CXX_ERROR(logger, "Invalid method for ProcessingEngine: " << method);
+			conn->setResponseCode(500, "Invalid method for ProcessorEngine");
+			return true;
+		}
+
 		// create all resources
 		vector<int> resourceIds;
 		string body = conn->getRequestBody();
@@ -119,7 +128,7 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			i += 4;
 			uint8_t typeId = *(uint8_t*)(data+i);
 			i++;
-			Resource *r = engine->CreateResource(typeId);
+			Resource *r = Resource::CreateResource(typeId);
 			if (!r) {
 				char buf[1024];
 				snprintf(buf, sizeof(buf), "Cannot create resource of type %d", typeId);
@@ -139,27 +148,31 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 			conn->setResponseCode(500, "Error passing data to ProcessingEngine");
 			return true;
 		}
-			
-		// wait for result
-		i = 0;
-		while (i < resourceIds.size()) {
-			Resource *r = engine->GetProcessedResource(resourceIds[i], &timeout);
-			if (!r)
-				break;
-			string *s = r->Serialize();
-			uint32_t size = s->length();
-			conn->appendResponseBody((char*)&size, 4);
-			uint8_t type = r->getTypeId();
-			conn->appendResponseBody((char*)&type, 1);
-			conn->appendResponseBody(*s);
-			delete s;
-			delete r;
-			i++;
-		}
-		if (i == resourceIds.size())
+
+		if (process) {
+			// wait for result
+			i = 0;
+			while (i < resourceIds.size()) {
+				Resource *r = engine->GetProcessedResource(resourceIds[i], &timeout);
+				if (!r)
+					break;
+				string *s = r->Serialize();
+				uint32_t size = s->length();
+				conn->appendResponseBody((char*)&size, 4);
+				uint8_t type = r->getTypeId();
+				conn->appendResponseBody((char*)&type, 1);
+				conn->appendResponseBody(*s);
+				delete s;
+				delete r;
+				i++;
+			}
+			if (i == resourceIds.size())
+				conn->setResponseCode(200, "OK");
+			else
+				conn->setResponseCode(500, "Error getting data from ProcessingEngine");
+		} else {
 			conn->setResponseCode(200, "OK");
-		else
-			conn->setResponseCode(500, "Error getting data from ProcessingEngine");
+		}
 		return true;
 	} else if (method == "SHUTDOWN") {
 		LOG4CXX_INFO(logger, "SHUTDOWN");

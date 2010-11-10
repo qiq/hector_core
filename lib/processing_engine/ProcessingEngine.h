@@ -33,13 +33,11 @@ public:
 	// get processed resource from the processing engine, result: available/not available
 	Resource *GetProcessedResource(int id, struct timeval *timeout);
 
-	// helper methods to create resources
-	int ResourceNameToId(const char *name);
-	Resource *CreateResource(int id);
 	// This is called by Processor if resource is detected to be deleted.
 	bool AppendToOutputQueue(Resource *resource);
 
-	// helper method for Processor::Connect()
+	// helper methods for Processor::Connect()
+	SyncQueue<Resource> *CreateOutputQueue();
 	SyncQueue<Resource> *getOutputQueue();
 
 protected:
@@ -102,11 +100,14 @@ inline void ProcessingEngine::Resume() {
 }
 
 inline SyncQueue<Resource> *ProcessingEngine::getOutputQueue() {
+	return outputQueue;
+}
+
+inline SyncQueue<Resource> *ProcessingEngine::CreateOutputQueue() {
 	if (!outputQueue) {
 		outputQueue = new SyncQueue<Resource>();
 		outputQueue->addQueue(0, 0, 0);
 	}
-
         return outputQueue;
 }
 

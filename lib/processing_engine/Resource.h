@@ -11,6 +11,7 @@
 #include <string>
 #include <log4cxx/logger.h>
 #include "Object.h"
+#include "PlainLock.h"
 
 class ResourceFieldInfo;
 
@@ -47,9 +48,16 @@ public:
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string *toString(Object::LogLevel = Object::INFO) = 0;
 
+	static Resource *CreateResource(int id);
+	static int NameToId(const char *name);
 	static const int RESOURCE_DELETED;
 
 protected:
+	static int LoadResourceLibrary(const char *name, int id);
+
+	static PlainLock lock;
+	static std::tr1::unordered_map<std::string, int> name2id;
+	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
 	static log4cxx::LoggerPtr logger;
 };
 

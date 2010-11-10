@@ -17,7 +17,7 @@
 
 class Save : public Module {
 public:
-	Save(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
+	Save(ObjectRegistry *objects, const char *id, int threadIndex);
 	~Save();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();

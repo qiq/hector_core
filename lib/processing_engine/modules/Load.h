@@ -17,7 +17,7 @@
 
 class Load : public Module {
 public:
-	Load(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
+	Load(ObjectRegistry *objects, const char *id, int threadIndex);
 	~Load();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();

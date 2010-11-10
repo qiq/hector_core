@@ -13,8 +13,6 @@
 #include "Object.h"
 #include "Resource.h"
 
-class ProcessingEngine;
-
 class Module : public Object {
 public:
 	enum Type {
@@ -25,7 +23,7 @@ public:
 		MULTI =  4,
 	};
 
-	Module(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Object(objects, id, threadIndex), engine(engine), threadIndex(threadIndex) {};
+	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id, threadIndex), threadIndex(threadIndex) {};
 	virtual ~Module() {};
 	virtual bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	virtual Module::Type getType();
@@ -54,7 +52,6 @@ public:
         static int ResourceQueueSize(std::queue<Resource*> *queue);
 
 protected:
-	ProcessingEngine *engine;
 	int threadIndex;
 };
 

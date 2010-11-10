@@ -1,12 +1,7 @@
-- predelat callprocesingenginemodule na
-	- ne modul (aby jich slo udelat vic)
-	- aby umel PROCESS i PASS
-	- aby umel i HTTP clienta (s keep-alive a automatickym obnovenim spojeni)
-
-//- spatne resene delete: proste se smazat nesmi -- nastavit status na nejakou
-//  magic hodnotu nebo tak neco a processor to preda na konec processing engine
-	- uz to je OK, akorat je potreba zmenit Filter.cc, aby nastavil spravny status :)
-//	- jeste vlastne zkontrolovat PE, ze pracuje spravne se smazanymi resources, uz nebudou NULL, ale zustanou present, dokud se nevyzvednou z fronty
+- save/restore state 
+- modul nesmi mit pristupk processing-engine (primo), kvuli vlaknum
+	- stejne tak processor, tam se to musi osetrit
+- deleted vysledek v process -- jak predat na vystup?
 
 Coding style: 
 - jmena metod na velka pismena (krome getteru/setteru)
@@ -21,6 +16,16 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+// - predelat callprocesingenginemodule na
+//	- ne modul (aby jich slo udelat vic)
+//	- aby umel PROCESS i PASS
+	- aby umel i HTTP clienta (s keep-alive a automatickym obnovenim spojeni)
+//- spatne resene delete: proste se smazat nesmi -- nastavit status na nejakou
+//  magic hodnotu nebo tak neco a processor to preda na konec processing engine
+	- uz to je OK, akorat je potreba zmenit Filter.cc, aby nastavil spravny status :)
+//	- jeste vlastne zkontrolovat PE, ze pracuje spravne se smazanymi resources, uz nebudou NULL, ale zustanou present, dokud se nevyzvednou z fronty
+
+
 - udelat shared resource, ktery bude zamykat uzivani -- muze si udelat kazdy resource zvlast
 	- pridat zamek do websiteresource
 - predelat resource field info na template

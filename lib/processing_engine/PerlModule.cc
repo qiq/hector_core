@@ -6,7 +6,6 @@
 #include <string.h>
 #include "../common.h"
 #include "PerlModule.h"
-#include "ProcessingEngine.h"
 
 EXTERN_C void xs_init (pTHX);
 
@@ -163,13 +162,12 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 	return result;
 }
 
-PerlModule::PerlModule(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex, const char *name): Module(objects, engine, id, threadIndex) {
+PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {
 	this->name = strdup(name);
 	// remove .pm at the end of module name
 	char *dot = strrchr(this->name, '.');
 	if (dot)
 		*dot = '\0';
-	this->engine = engine;
 	this->threadIndex = threadIndex;
 	my_perl = perl_alloc();
 	perl_construct(my_perl);
@@ -208,23 +206,8 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		return false;
 	}
 
-	// create Hector::ProcessingEngine::new2()
-	eval_pv("package Hector::ProcessingEngine; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error initialize Hector::ProcessingEngine (new2) (" << SvPV_nolen(ERRSV) << ")");
-		return false;
-	}
-
-	// call Hector::ProcessingEngine->new2()
-	snprintf(s, sizeof(s), "use Hector; $_engine = Hector::ProcessingEngine->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<ProcessingEngine*>(engine));
-	eval_pv(s , FALSE);
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error initialize Hector::ProcessingEngine (" << SvPV_nolen(ERRSV) << ")");
-		return false;
-	}
-
 	// create Perl module
-	snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, $_engine, '%s', %d);", name, name, getId(), threadIndex);
+	snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR("Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");

@@ -12,7 +12,8 @@ using namespace std;
 
 #define MAX_RESOURCES 100
 #define DEFAULT_TIMETICK 100*1000
-TestMulti::TestMulti(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex): Module(objects, engine, id, threadIndex) {
+
+TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 	foo = NULL;
 	timeTick = DEFAULT_TIMETICK;
@@ -96,6 +97,6 @@ int TestMulti::ProcessingResources() {
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex) {
-	return new TestMulti(objects, engine, id, threadIndex);
+extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+	return new TestMulti(objects, id, threadIndex);
 }

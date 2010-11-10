@@ -3,6 +3,7 @@
  */
 #include <config.h>
 
+#include <assert.h>
 #include <string.h>
 #include "CallProcessingEngine.h"
 
@@ -10,10 +11,9 @@ using namespace std;
 
 log4cxx::LoggerPtr CallProcessingEngine::logger(log4cxx::Logger::getLogger("CallProcessingEngine"));
 
-CallProcessingEngine::CallProcessingEngine(int maxRequests, int timeTick, ProcessingEngine *engine) {
-	this->maxRequests = maxRequests;
-	this->timeTick = timeTick;
+CallProcessingEngine::CallProcessingEngine(ProcessingEngine *engine, int maxRequests) {
 	this->engine = engine;
+	this->maxRequests = maxRequests;
 	tmpInputResource = NULL;
 
 	for (int i = 0; i < maxRequests; i++) {
@@ -72,7 +72,7 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 		return changed;
 
 	// read resources in non-blocking mode
-	bool processOutput = true;
+	bool processOutput = outputResources ? true : false;
 	while (processOutput && running.size() > 0) {
 		for (std::tr1::unordered_map<int, CallResourceInfo*>::iterator iter = running.begin(); iter != running.end(); ++iter) {
 			int id = iter->second->tmp->getId();
@@ -99,7 +99,8 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	return changed;
 }
 
-int CallProcessingEngine::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int timeTick) {
+	assert(engine->getOutputQueue() != NULL);
 	struct timeval tv = ConstructTimeout(timeTick);
 
 	// do not block
@@ -116,6 +117,13 @@ int CallProcessingEngine::ProcessMulti(queue<Resource*> *inputResources, queue<R
 
 	// finished resources are already appended to the outputResources queue
 	return maxRequests-running.size()-(tmpInputResource ? 1 : 0);
+}
+
+void CallProcessingEngine::Pass(queue<Resource*> *inputResources, int timeTick) {
+	assert(engine->getOutputQueue() == NULL);
+	struct timeval tv = ConstructTimeout(timeTick);
+
+	ReadWrite(inputResources, NULL, &tv);
 }
 
 int CallProcessingEngine::ProcessingResources() {

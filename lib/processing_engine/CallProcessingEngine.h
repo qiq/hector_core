@@ -22,10 +22,11 @@ public:
 		Resource *tmp;	// calling processing engine with this resource
 	} CallResourceInfo;
 
-	// maxRequests: number of concurrent requests; timeTick: max time to spend in ProcessMulti()
-	CallProcessingEngine(int maxRequests, int timeTick, ProcessingEngine *engine);
+	// maxRequests: number of concurrent requests
+	CallProcessingEngine(ProcessingEngine *engine, int maxRequests);
 	~CallProcessingEngine();
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
+	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int timeTick);
+	void Pass(std::queue<Resource*> *inputResources, int timeTick);
 	int ProcessingResources();
 
 	// may be called instead of ProcessMulti()
@@ -37,7 +38,6 @@ protected:
 	virtual void FinishResource(Resource *src, Resource *tmp) = 0;
 
 	int maxRequests;
-	int timeTick;
 	ProcessingEngine *engine;
 	CallResourceInfo *tmpInputResource;
 	std::vector<CallResourceInfo*> unused;

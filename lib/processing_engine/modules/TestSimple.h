@@ -15,7 +15,7 @@
 
 class TestSimple : public Module {
 public:
-	TestSimple(ObjectRegistry *objects, ProcessingEngine *engine, const char *id, int threadIndex);
+	TestSimple(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestSimple();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
