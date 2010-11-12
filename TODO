@@ -1,11 +1,6 @@
-- save/restore state 
-	- dodelat save/restore do vsech modulu (kde je to potreba)
-		- input/output, nektere multi?
-- kazdy server bude podporovat zakladni nastroje PE, bude mozne rozsireni prikazu
-	- takze PROCESS/PASS/GET/SET/SHUTDOWN, se nebudou replikovat...
-	- pridat CHECKPOINT_SAVE, CHECKPOINT_RESTORE
-
 - deleted vysledek v process -- jak predat na vystup?
+- dodelat save/restore do vsech modulu (kde je to potreba)
+	- input/output, nektere multi?
 
 Coding style: 
 - jmena metod na velka pismena (krome getteru/setteru)
@@ -20,6 +15,9 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- kazdy server bude podporovat zakladni nastroje PE, bude mozne rozsireni prikazu
+	- takze PROCESS/PASS/GET/SET/SHUTDOWN, se nebudou replikovat...
+
 - fixnout PE's resourceCount + commit: castecne hotovo, je potreba, aby PE vedel, kolik se prave procesi resources
 // - predelat callprocesingenginemodule na
 //	- ne modul (aby jich slo udelat vic)
@@ -30,7 +28,8 @@ DONE
 	- uz to je OK, akorat je potreba zmenit Filter.cc, aby nastavil spravny status :)
 //	- jeste vlastne zkontrolovat PE, ze pracuje spravne se smazanymi resources, uz nebudou NULL, ale zustanou present, dokud se nevyzvednou z fronty
 
-
+- save/restore state 
+	- pridat CHECKPOINT_SAVE, CHECKPOINT_RESTORE do serveru
 - udelat shared resource, ktery bude zamykat uzivani -- muze si udelat kazdy resource zvlast
 	- pridat zamek do websiteresource
 - predelat resource field info na template

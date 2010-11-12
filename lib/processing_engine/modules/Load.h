@@ -22,6 +22,8 @@ public:
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
 	Resource *ProcessInput(bool sleep);
+//	void SaveCheckpointSync(const char *path, const char *id);
+//	void RestoreCheckpointSync(const char *path, const char *id);
 
 private:
 	int items;		// ObjectLock

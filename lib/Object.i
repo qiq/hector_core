@@ -22,8 +22,8 @@ public:
         char *getValue(const char *name);
         bool setValue(const char *name, const char *value);
         std::vector<std::string> *listNames();
-        void SaveCheckpoint(const char *path, const char *id);
-        void RestoreCheckpoint(const char *path, const char *id);
+        void SaveCheckpoint(const char *path);
+        void RestoreCheckpoint(const char *path);
 
         void log_trace(const char *s);
         void log_trace(const std::string &s);

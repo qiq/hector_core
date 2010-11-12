@@ -200,12 +200,17 @@ void ProcessingEngine::ResumeSync() {
 	}
 }
 
-//void ProcessingEngine::createCheckpoint() {
-	// for all modules try to create a checkpoint
-//	for (unsigned i = 0; i < processors.size(); i++) {
-		//TODO processors[i]->createCheckpoint();
-//	}
-//}
+void ProcessingEngine::SaveCheckpointSync(const char *path) {
+	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
+		(*iter)->SaveCheckpoint(path);
+	}
+}
+
+void ProcessingEngine::RestoreCheckpointSync(const char *path) {
+	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
+		(*iter)->RestoreCheckpoint(path);
+	}
+}
 
 char *ProcessingEngine::getValueSync(const char *name) {
 	return values->getValueSync(name);

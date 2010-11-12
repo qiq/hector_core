@@ -34,8 +34,8 @@ public:
 	char *getValue(const char *name);
 	bool setValue(const char *name, const char *value);
 	std::vector<std::string> *listNames();
-	void SaveCheckpoint(const char *path, const char *id);
-	void RestoreCheckpoint(const char *path, const char *id);
+	void SaveCheckpoint(const char *path);
+	void RestoreCheckpoint(const char *path);
 
 	void log_trace(const char *s);
 	void log_trace(const std::string &s);
@@ -66,8 +66,8 @@ protected:
 	virtual bool isInitOnly(const char *name);
 	virtual std::vector<std::string> *listNamesSync();
 
-	virtual void SaveCheckpointSync(const char *path, const char *id);
-	virtual void RestoreCheckpointSync(const char *path, const char *id);
+	virtual void SaveCheckpointSync(const char *path);
+	virtual void RestoreCheckpointSync(const char *path);
 
 	const char *getLogLevelStr(log4cxx::LoggerPtr logger);
 	bool setLogLevel(const char *logLevel);
@@ -152,15 +152,15 @@ inline std::vector<std::string> *Object::listNames() {
 	return result;
 }
 
-inline void Object::SaveCheckpoint(const char *path, const char *id) {
+inline void Object::SaveCheckpoint(const char *path) {
 	ObjectLockWrite();
-	SaveCheckpointSync(path, id);
+	SaveCheckpointSync(path);
 	ObjectUnlock();
 }
 
-inline void Object::RestoreCheckpoint(const char *path, const char *id) {
+inline void Object::RestoreCheckpoint(const char *path) {
 	ObjectLockWrite();
-	RestoreCheckpointSync(path, id);
+	RestoreCheckpointSync(path);
 	ObjectUnlock();
 }
 

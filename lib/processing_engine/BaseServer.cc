@@ -174,6 +174,16 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			conn->setResponseCode(200, "OK");
 		}
 		return true;
+	} else if (method == "SAVE_CHECKPOINT") {
+		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
+			(*iter)->SaveCheckpoint(args.c_str());
+		}
+		return true;
+	} else if (method == "RESTORE_CHECKPOINT") {
+		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
+			(*iter)->RestoreCheckpoint(args.c_str());
+		}
+		return true;
 	} else if (method == "SHUTDOWN") {
 		LOG4CXX_INFO(logger, "SHUTDOWN");
 		conn->setResponseCode(200, "OK");

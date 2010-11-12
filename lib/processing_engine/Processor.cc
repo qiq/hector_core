@@ -659,6 +659,22 @@ void Processor::Resume() {
 	}
 }
 
+void Processor::SaveCheckpointSync(const char *path) {
+	for (int i = 0; i < nThreads; i++) {
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->SaveCheckpoint(path);
+		}
+	}
+}
+
+void Processor::RestoreCheckpointSync(const char *path) {
+	for (int i = 0; i < nThreads; i++) {
+		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+			(*iter)->module->RestoreCheckpoint(path);
+		}
+	}
+}
+
 char *Processor::getInputQueueItems(const char *name) {
 	// get queue priority first
 	string n(name);

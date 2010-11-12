@@ -41,8 +41,8 @@ public:
 	// used to detect, whether Processor's queue is PE's input queue. This
 	// method is thread-safe.
 	SyncQueue<Resource> *getInputQueue();
-
-	// This method is thread-safe.
+	// Update number of resources processed in a PE. This method is
+	// thread-safe.
 	void UpdateResourceCount(int n);
 
 protected:
@@ -56,11 +56,11 @@ protected:
 	int waiting;
 	bool cancel;
 
+	ObjectValues<ProcessingEngine> *values;
+
 	bool propRun;		// ObjectLock
 	bool propPause;		// ObjectLock
 	int resourceCount;	// ObjectLock
-
-	ObjectValues<ProcessingEngine> *values;
 
 	char *getRun(const char *name);
 	void setRun(const char *name, const char *value);
@@ -80,6 +80,9 @@ protected:
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	void SaveCheckpointSync(const char *path);
+	void RestoreCheckpointSync(const char *path);
 };
 
 inline void ProcessingEngine::Start() {

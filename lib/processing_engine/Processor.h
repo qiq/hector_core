@@ -70,6 +70,9 @@ protected:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
+	void SaveCheckpointSync(const char *path);
+	void RestoreCheckpointSync(const char *path);
+
 	// process resource and append it to other precesses' queues
 	bool QueueResource(Resource *r, struct timeval *timeout, int *filterIndex);
 	// apply simple/input/output modules to a resource

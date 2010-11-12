@@ -22,10 +22,10 @@ vector<string> *Object::listNamesSync() {
 	return new vector<string>();
 }
 
-void Object::SaveCheckpointSync(const char *path, const char *id) {
+void Object::SaveCheckpointSync(const char *path) {
 }
 
-void Object::RestoreCheckpointSync(const char *path, const char *id) {
+void Object::RestoreCheckpointSync(const char *path) {
 }
 
 const char *Object::getLogLevelStr(log4cxx::LoggerPtr logger) {
