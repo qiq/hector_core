@@ -7,7 +7,7 @@
 
 #include <config.h>
 
-#include <std::vector>
+#include <vector>
 #include "common.h"
 #include "PlainLock.h"
 
@@ -49,7 +49,7 @@ T *MemoryPool<T>::alloc() {
 	}
 	int index = used++;
 	lock.Unlock();
-	return &(*chunks.back())[index];
+	return &chunks.back()[index];
 }
 
 template <class T>
