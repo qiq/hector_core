@@ -353,7 +353,7 @@ void PerlModule::ProcessOutput(Resource *resource) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(resourceSV));
         PUTBACK;
-	int count = call_method("ProcessOutput", G_SCALAR|G_EVAL);
+	int count = call_method("ProcessOutput", G_VOID|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR("Error calling ProcessOutput (" << SvPV_nolen(ERRSV) << ")");
