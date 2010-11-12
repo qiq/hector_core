@@ -3,20 +3,20 @@
  */
 
 #include <assert.h>
-#include "TestServer.h"
+#include "BaseServer.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
 
 using namespace std;
 
-log4cxx::LoggerPtr TestServer::logger(log4cxx::Logger::getLogger("servers.TestServer"));
+log4cxx::LoggerPtr BaseServer::logger(log4cxx::Logger::getLogger("servers.BaseServer"));
 
-TestServer::TestServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
+BaseServer::BaseServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
 	this->objects = objects;
 	this->engines = engines;
 }
 
-bool TestServer::Init(std::vector<std::pair<std::string, std::string> > *params) {
+bool BaseServer::Init(std::vector<std::pair<std::string, std::string> > *params) {
 	if (engines->size() == 0) {
 		LOG4CXX_ERROR(logger, "No processing engine in a server");
 		return false;
@@ -28,7 +28,7 @@ bool TestServer::Init(std::vector<std::pair<std::string, std::string> > *params)
 	return true;
 }
 
-bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
+bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	string method = conn->getRequestMethod();
 	string args = conn->getRequestArgs();
 	if (args.substr(0, 1) == "/")
@@ -183,13 +183,17 @@ bool TestServer::HandleRequest(SimpleHTTPConn *conn) {
 
 		this->setRunning(false);
 		return true;
+	} else {
+		return HandleExtension(conn);
 	}
+}
 
+bool BaseServer::HandleExtension(SimpleHTTPConn *conn) {
 	return false;
 }
 
 // factory functions
 
 extern "C" SimpleHTTPServer* create(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
-	return new TestServer(objects, engines);
+	return new BaseServer(objects, engines);
 }

@@ -1,4 +1,3 @@
-- perl output module does produce strange error -- check when this happened
 - save/restore state 
 	- dodelat save/restore do vsech modulu (kde je to potreba)
 		- input/output, nektere multi?
