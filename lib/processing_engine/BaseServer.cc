@@ -24,7 +24,6 @@ bool BaseServer::Init(std::vector<std::pair<std::string, std::string> > *params)
 	for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
 		name2engine[(*iter)->getId()] = *iter;
 	}
-	this->resourceId = Resource::NameToId("TestResource");
 	return true;
 }
 

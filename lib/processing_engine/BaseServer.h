@@ -28,7 +28,6 @@ protected:
 	ObjectRegistry *objects;
 	vector<ProcessingEngine*> *engines;
 	std::tr1::unordered_map<string, ProcessingEngine*> name2engine;
-	int resourceId;
 
 	static log4cxx::LoggerPtr logger;
 };
