@@ -18,6 +18,9 @@ my %commands = (
 	"get" => 1,
 	"set" => 1,
 	"process" => 1,
+	"pass" => 1,
+	"save_checkpoint" => 1,
+	"restore_checkpoint" => 1,
 	"shutdown" => 1,
 	"quit" => 1
 );
@@ -85,6 +88,31 @@ sub doProcess {
 	my $res = $ua->request($req);
 	die("Server error: ".$res->message()) if ($res->code >= 500);
 	return $res->is_success ? $res->content : undef;
+}
+
+sub doPass {
+	my ($peName, $data) = @_;
+	my $req = HTTP::Request->new(PASS => "http://$server:$port/$peName");
+	$req->content($data);
+	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
+	return $res->is_success ? 1 : 0;
+}
+
+sub doSaveCheckpoint {
+	my ($path) = @_;
+	my $req = HTTP::Request->new(SAVE_CHECKPOINT => "http://$server:$port/$path");
+	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
+	return $res->is_success ? 1 : 0;
+}
+
+sub doRestoreCheckpoint {
+	my ($path) = @_;
+	my $req = HTTP::Request->new(RESTORE_CHECKPOINT => "http://$server:$port/$path");
+	my $res = $ua->request($req);
+	die("Server error: ".$res->message()) if ($res->code >= 500);
+	return $res->is_success ? 1 : 0;
 }
 
 sub saveHistory {
@@ -323,6 +351,40 @@ while (!$finished) {
 				}
 			} else {
 				print STDERR "No ProcessingEngine name given\n";
+			}
+		} elsif ($cmd eq 'pass') {
+			if ($l =~ /\S/) {
+				my $data = '';
+				while (<STDIN>) {
+					$data .= $_;
+				}
+				if (doPass($l, $data)) {
+					$term->addhistory($_) if ($interactive and $_ ne $last_command);
+				} else {
+					print STDERR "Cannot pass resources\n";
+				}
+			} else {
+				print STDERR "No ProcessingEngine name given\n";
+			}
+		} elsif ($cmd eq 'save_checkpoint') {
+			if ($l =~ /\S/) {
+				if (doSaveCheckpoint($l)) {
+					$term->addhistory($_) if ($interactive and $_ ne $last_command);
+				} else {
+					print STDERR "Cannot save checkpoint\n";
+				}
+			} else {
+				print STDERR "No file name given\n";
+			}
+		} elsif ($cmd eq 'restore_checkpoint') {
+			if ($l =~ /\S/) {
+				if (doRestoreCheckpoint($l)) {
+					$term->addhistory($_) if ($interactive and $_ ne $last_command);
+				} else {
+					print STDERR "Cannot restore checkpoint\n";
+				}
+			} else {
+				print STDERR "No file name given\n";
 			}
 		} elsif ($cmd eq 'shutdown') {
 			if (&shutdown()) {

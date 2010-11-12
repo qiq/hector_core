@@ -175,14 +175,24 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		}
 		return true;
 	} else if (method == "SAVE_CHECKPOINT") {
+		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			(*iter)->SaveCheckpoint(args.c_str());
+			if (!(*iter)->SaveCheckpoint(args.c_str())) {
+				conn->setResponseCode(500, "Error saving checkpoint");
+				return true;
+			}
 		}
+		conn->setResponseCode(200, "OK");
 		return true;
 	} else if (method == "RESTORE_CHECKPOINT") {
+		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			(*iter)->RestoreCheckpoint(args.c_str());
+			if (!(*iter)->RestoreCheckpoint(args.c_str())) {
+				conn->setResponseCode(500, "Error restoring checkpoint");
+				return true;
+			}
 		}
+		conn->setResponseCode(200, "OK");
 		return true;
 	} else if (method == "SHUTDOWN") {
 		LOG4CXX_INFO(logger, "SHUTDOWN");

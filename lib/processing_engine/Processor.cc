@@ -57,14 +57,22 @@ Processor::~Processor() {
 }
 
 char *Processor::getPauseInput(const char *name) {
+	ObjectUnlock();
+	pauseInputCond.Lock();
 	return bool2str(pauseInput);
+	pauseInputCond.Unlock();
+	ObjectLockRead();		// so that Object can release ObjectLock
 }
 
 void Processor::setPauseInput(const char *name, const char *value) {
+	ObjectUnlock();
+	pauseInputCond.Lock();
 	bool old = pauseInput;
 	pauseInput = str2bool(value);
 	if (old && !pauseInput)
 		pauseInputCond.SignalSend();
+	pauseInputCond.Unlock();
+	ObjectLockRead();		// so that Object can release ObjectLock
 }
 
 bool Processor::Init(Config *config) {
@@ -472,19 +480,24 @@ void Processor::runThread(int threadId) {
 				resourcesRead++;
 			} else {
 				// no resources to be processed: wait until pauseInput is cleared
-				ObjectLockRead();
-				bool pi = pauseInput;
-				if (pi) {
+				pauseInputCond.Lock();
+				if (pauseInput) {
 					if (!block) {
-						ObjectUnlock();
+						pauseInputCond.Unlock();
 						break;	// some resources are still being processed
 					}
 					// we should wait until input is un-paused
-					ObjectLockRead();
-					while (pauseInput)
+					LOG_DEBUG("Processor input pause");
+					while (pauseInput) {
 						pauseInputCond.WaitSend(NULL);
+						pauseInputCond.Unlock();
+						if (!isRunning())
+							return;	// cancelled
+						pauseInputCond.Lock();
+					}
+					LOG_DEBUG("Processor input continue");
 				}
-				ObjectUnlock();
+				pauseInputCond.Unlock();
 			}
 	
 			bool stop = false;
@@ -627,6 +640,9 @@ void Processor::Stop() {
 
 	// cancel all threads waiting in input queues + multi module queues
 	inputQueue->Stop();
+	pauseInputCond.Lock();
+	pauseInputCond.SignalSend();
+	pauseInputCond.Unlock();
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
 			(*iter)->module->Stop();
@@ -659,20 +675,24 @@ void Processor::Resume() {
 	}
 }
 
-void Processor::SaveCheckpointSync(const char *path) {
+bool Processor::SaveCheckpointSync(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->module->SaveCheckpoint(path);
+			if (!(*iter)->module->SaveCheckpoint(path))
+				return false;
 		}
 	}
+	return true;
 }
 
-void Processor::RestoreCheckpointSync(const char *path) {
+bool Processor::RestoreCheckpointSync(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			(*iter)->module->RestoreCheckpoint(path);
+			if (!(*iter)->module->RestoreCheckpoint(path))
+				return false;
 		}
 	}
+	return true;
 }
 
 char *Processor::getInputQueueItems(const char *name) {

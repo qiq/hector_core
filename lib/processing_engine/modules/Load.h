@@ -12,6 +12,7 @@
 #include <string.h>
 #include <google/protobuf/message.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
+#include "CondLock.h"
 #include "Module.h"
 #include "ObjectValues.h"
 
@@ -22,15 +23,20 @@ public:
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
 	Resource *ProcessInput(bool sleep);
-//	void SaveCheckpointSync(const char *path, const char *id);
-//	void RestoreCheckpointSync(const char *path, const char *id);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
+
+	void Start();
+	void Stop();
 
 private:
 	int items;		// ObjectLock
-	int maxItems;		// initOnly
-	char *filename;		// initOnly
-	int fd;			// private to ProcessInput()
-	google::protobuf::io::FileInputStream *stream;	// private to ProcessInput()
+	int maxItems;		// ObjectLock
+	char *filename;		// ObjectLock
+	int fd;			// ObjectLock
+	bool cancel;		// ObjectLock
+	google::protobuf::io::FileInputStream *stream;	// ObjectLock
+	CondLock fileCond;	// for pause when source file is exhausted
 
 	ObjectValues<Load> *values;
 
@@ -45,7 +51,7 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	bool ReadFromFile(void *data, int size);
+	bool ReadFromFile(void *data, int size, bool sleep);
 };
 
 inline Module::Type Load::getType() {

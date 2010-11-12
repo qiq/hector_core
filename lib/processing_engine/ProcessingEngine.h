@@ -81,8 +81,8 @@ protected:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	void SaveCheckpointSync(const char *path);
-	void RestoreCheckpointSync(const char *path);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
 };
 
 inline void ProcessingEngine::Start() {

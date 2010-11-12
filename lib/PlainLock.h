@@ -10,14 +10,14 @@
 #include <pthread.h>
 
 class PlainLock {
-protected:
-	pthread_mutex_t *mutex;
-
 public:
 	PlainLock();
 	~PlainLock();
 	void Lock();
 	void Unlock();
+
+protected:
+	pthread_mutex_t *mutex;
 };
 
 inline PlainLock::PlainLock() {

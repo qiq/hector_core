@@ -50,8 +50,8 @@ protected:
 	int nThreads;				// properties, guarded by object lock
 	pthread_t *threads;
 	bool running;
-	bool pauseInput;			// guarded by ObjectLock
-	CondLock pauseInputCond;		// only used as a condition variable
+	bool pauseInput;			// guarded by ObjectLock and pauseInputCond
+	CondLock pauseInputCond;		// here we wait if pauseInput == true
 
 	ProcessingEngine *engine;		// parent, beware you call only thread-safe methods!
 	std::vector<ModuleInfo*> *modules;	// all modules; every thread has a module instance (first dimension)
@@ -70,8 +70,8 @@ protected:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	void SaveCheckpointSync(const char *path);
-	void RestoreCheckpointSync(const char *path);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
 
 	// process resource and append it to other precesses' queues
 	bool QueueResource(Resource *r, struct timeval *timeout, int *filterIndex);

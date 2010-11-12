@@ -200,16 +200,20 @@ void ProcessingEngine::ResumeSync() {
 	}
 }
 
-void ProcessingEngine::SaveCheckpointSync(const char *path) {
+bool ProcessingEngine::SaveCheckpointSync(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		(*iter)->SaveCheckpoint(path);
+		if (!(*iter)->SaveCheckpoint(path))
+			return false;
 	}
+	return true;
 }
 
-void ProcessingEngine::RestoreCheckpointSync(const char *path) {
+bool ProcessingEngine::RestoreCheckpointSync(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		(*iter)->RestoreCheckpoint(path);
+		if (!(*iter)->RestoreCheckpoint(path))
+			return false;
 	}
+	return true;
 }
 
 char *ProcessingEngine::getValueSync(const char *name) {
