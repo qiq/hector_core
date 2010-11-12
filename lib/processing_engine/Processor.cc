@@ -23,8 +23,11 @@ Processor::Processor(ObjectRegistry *objects, ProcessingEngine *engine, const ch
 	this->engine = engine;
 	threads = NULL;
 	running = false;
+	pauseInput = false;
 
 	values = new ObjectValues<Processor>(this);
+	values->addGetter("pauseInput", &Processor::getPauseInput);
+	values->addSetter("pauseInput", &Processor::setPauseInput);
 }
 
 Processor::~Processor() {
@@ -51,6 +54,17 @@ Processor::~Processor() {
 	}
 
 	delete values;
+}
+
+char *Processor::getPauseInput(const char *name) {
+	return bool2str(pauseInput);
+}
+
+void Processor::setPauseInput(const char *name, const char *value) {
+	bool old = pauseInput;
+	pauseInput = str2bool(value);
+	if (old && !pauseInput)
+		pauseInputCond.SignalSend();
 }
 
 bool Processor::Init(Config *config) {
@@ -323,6 +337,10 @@ bool Processor::Connect() {
 		}
 		(*iter)->setQueue(q);
 	}
+
+	// either PE's outputQueue or NULL
+	engineOutputQueue = engine->getOutputQueue();
+
 	return true;
 }
 
@@ -356,26 +374,29 @@ bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterI
 		OutputFilter *f = *iter;
 		if (f->isEmptyFilter() || f->getFilter() == status) {
 			Resource *copy = (*iter)->getCopy() ? r->Clone() : NULL;
-			if (!f->processResource(r, timeout))
+			if (!f->processResource(copy ? copy : r, timeout))
 				return false;	// cancelled or no space available
 			if (filterIndex)
 				*filterIndex++;
 			if (!copy) {
 				appended = true;
+				if (f->getQueue() == engineOutputQueue)
+					engine->UpdateResourceCount(-1);
 				break;
 			}
-			r = copy;
+			engine->UpdateResourceCount(1);
 		}
 	}
 	if (!appended) {
 		LOG_ERROR("Lost resource (id: " << r->getId() << ")");
 		delete r;
+		engine->UpdateResourceCount(-1);
 	}
 
 	return true;
 }
 
-Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool *stop) {
+Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool sleep, bool *stop) {
 	// process obtained resource through all non-multi modules
 	while (index < mis->size() && (*mis)[index]->type != Module::MULTI) {
 		ModuleInfo *minfo = (*mis)[index];
@@ -383,15 +404,17 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 		switch (minfo->type) {
 		case Module::INPUT:
 			assert(resource == NULL);
-			resource = minfo->module->ProcessInput(true);
+			resource = minfo->module->ProcessInput(sleep);
 			if (!resource) {
 				if (stop)
 					*stop = true;
 				return NULL;
 			}
+			engine->UpdateResourceCount(1);
 			break;
 		case Module::OUTPUT:
 			minfo->module->ProcessOutput(resource);
+			engine->UpdateResourceCount(-1);
 			resource = NULL;
 			break;
 		case Module::SIMPLE:
@@ -426,15 +449,14 @@ void Processor::runThread(int threadId) {
 	int outputFilterIndex = 0;
 	// resource waiting to be queued-in
 	Resource *outputFilterResource = NULL;
-	// no resources and no module is doing anything -> finish
-	bool stop = false;
 	// block while reading/writing resources from/to a queue?
-	bool block = true;
+	bool block = true;	
 	struct timeval timeout = { 0, 0 };
-	while (isRunning() && !(stop && block)) {
+	while (isRunning()) {
+		// process modules up-to first multi module
 		int multiIndex = this->NextMultiModuleIndex(mis, 0);
 		int resourcesRead = 0;
-		while (resourcesRead < readMax && !stop) {
+		while (resourcesRead < readMax) {
 			Resource *resource = NULL;
 			if ((*mis)[0]->type != Module::INPUT) {
 				// get resource from the input queue
@@ -445,9 +467,28 @@ void Processor::runThread(int threadId) {
 					else
 						break; // no more resources available
 				}
+				if (inputQueue == engine->getInputQueue())
+					engine->UpdateResourceCount(1);
 				resourcesRead++;
+			} else {
+				// no resources to be processed: wait until pauseInput is cleared
+				ObjectLockRead();
+				bool pi = pauseInput;
+				if (pi) {
+					if (!block) {
+						ObjectUnlock();
+						break;	// some resources are still being processed
+					}
+					// we should wait until input is un-paused
+					ObjectLockRead();
+					while (pauseInput)
+						pauseInputCond.WaitSend(NULL);
+				}
+				ObjectUnlock();
 			}
-			resource = this->ApplyModules(mis, resource, 0, &stop);
+	
+			bool stop = false;
+			resource = this->ApplyModules(mis, resource, 0, block && resourcesRead == 0, &stop);
 			if (resource) {
 				if (multiIndex >= 0) {
 					// next multi module
@@ -458,8 +499,15 @@ void Processor::runThread(int threadId) {
 						return;		// cancelled
 					outputFilterIndex = 0;
 				}
+				resourcesRead++;
+			} else {
+				if (block && resourcesRead == 0 && stop)
+					return;	// cancelled
+				else
+					break;	// no more resources available (or resource was deleted)
 			}
 		}
+		// call multi-module, and subsequent (multi-)modules
 		block = true;
 		// n = number of resources the multi-module is still able to accept
 		int minN = multiIndex >= 0 ? 1000000 : 1;
@@ -486,7 +534,7 @@ void Processor::runThread(int threadId) {
 					deletedResources.push(resource);
 					continue;
 				}
-				resource = this->ApplyModules(mis, resource, multiIndex+1, NULL);
+				resource = this->ApplyModules(mis, resource, multiIndex+1, false, NULL);
 				if (resource) {
 					if (nextMultiIndex >= 0) {
 						// next multi module
@@ -526,15 +574,21 @@ void Processor::runThread(int threadId) {
 		// be appended to the engine's output queue, we do not accept
 		// any more resources
 		while (deletedResources.size() > 0) {
-			if (!engine->AppendToOutputQueue(deletedResources.front())) {
-				readMax = 0;
-				break;
+			if (engineOutputQueue) {
+				if (!engineOutputQueue->putItem(deletedResources.front(), NULL, 0)) {
+					readMax = 0;
+					break;
+				}
+				engine->UpdateResourceCount(-1);
+			} else {
+				// no output queue => no need to store anything, we just
+				// discard the resource (and notify PE)
+				delete deletedResources.front();
+				engine->UpdateResourceCount(-1);
 			}
 			deletedResources.pop();
 		}
 	}
-	if (stop)
-		LOG_ERROR("No resource, thread " << id << " terminated");
 }
 
 void Processor::Start() {

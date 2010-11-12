@@ -27,6 +27,7 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Obj
 	values->addSetter("run", &ProcessingEngine::setRun);
 	values->addGetter("pause", &ProcessingEngine::getPause);
 	values->addSetter("pause", &ProcessingEngine::setPause);
+	values->addGetter("resourceCount", &ProcessingEngine::getResourceCount);
 }
 
 ProcessingEngine::~ProcessingEngine() {
@@ -145,19 +146,10 @@ Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout
 	return iter->second;
 }
 
-bool ProcessingEngine::AppendToOutputQueue(Resource *resource) {
-	if (!outputQueue) {
-		// no output queue => no need to store anything, we just
-		// discard resource
-		delete resource;
-		return true;
-	}
-	return outputQueue->putItem(resource, NULL, 0);
-}
-
 void ProcessingEngine::StartSync() {
 	if (!propRun) {
 		cancel = false;
+		resourceCount = 0;
 		if (outputQueue)
 			outputQueue->Start();
 		for (unsigned i = 0; i < processors.size(); i++) {
@@ -235,10 +227,6 @@ char *ProcessingEngine::getRun(const char *name) {
 	return bool2str(propRun);
 }
 
-char *ProcessingEngine::getPause(const char *name) {
-	return bool2str(propPause);
-}
-
 void ProcessingEngine::setRun(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
@@ -252,6 +240,10 @@ void ProcessingEngine::setRun(const char *name, const char *value) {
 	}
 }
 
+char *ProcessingEngine::getPause(const char *name) {
+	return bool2str(propPause);
+}
+
 void ProcessingEngine::setPause(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
@@ -263,6 +255,10 @@ void ProcessingEngine::setPause(const char *name, const char *value) {
 	default:
 		LOG_ERROR("Invalid 'pause' value: " << value);
 	}
+}
+
+char *ProcessingEngine::getResourceCount(const char *name) {
+	return int2str(resourceCount);
 }
 
 void ProcessingEngine::doPause() {

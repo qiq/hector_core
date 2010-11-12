@@ -33,12 +33,17 @@ public:
 	// get processed resource from the processing engine, result: available/not available
 	Resource *GetProcessedResource(int id, struct timeval *timeout);
 
-	// This is called by Processor if resource is detected to be deleted.
-	bool AppendToOutputQueue(Resource *resource);
-
 	// helper methods for Processor::Connect()
 	SyncQueue<Resource> *CreateOutputQueue();
+	// used by Processor::Connect and by Processor when resource is
+	// detected to be deleted. This method is thread-safe.
 	SyncQueue<Resource> *getOutputQueue();
+	// used to detect, whether Processor's queue is PE's input queue. This
+	// method is thread-safe.
+	SyncQueue<Resource> *getInputQueue();
+
+	// This method is thread-safe.
+	void UpdateResourceCount(int n);
 
 protected:
 	std::vector<Processor*> processors;
@@ -51,8 +56,9 @@ protected:
 	int waiting;
 	bool cancel;
 
-	bool propRun;
-	bool propPause;
+	bool propRun;		// ObjectLock
+	bool propPause;		// ObjectLock
+	int resourceCount;	// ObjectLock
 
 	ObjectValues<ProcessingEngine> *values;
 
@@ -60,6 +66,7 @@ protected:
 	void setRun(const char *name, const char *value);
 	char *getPause(const char *name);
 	void setPause(const char *name, const char *value);
+	char *getResourceCount(const char *name);
 
 	void StartSync();
 	void StopSync();
@@ -99,16 +106,26 @@ inline void ProcessingEngine::Resume() {
 	ObjectUnlock();
 }
 
-inline SyncQueue<Resource> *ProcessingEngine::getOutputQueue() {
-	return outputQueue;
-}
-
 inline SyncQueue<Resource> *ProcessingEngine::CreateOutputQueue() {
 	if (!outputQueue) {
 		outputQueue = new SyncQueue<Resource>();
 		outputQueue->addQueue(0, 0, 0);
 	}
         return outputQueue;
+}
+
+inline SyncQueue<Resource> *ProcessingEngine::getOutputQueue() {
+	return outputQueue;
+}
+
+inline SyncQueue<Resource> *ProcessingEngine::getInputQueue() {
+	return inputQueue;
+}
+
+inline void ProcessingEngine::UpdateResourceCount(int n) {
+	ObjectLockWrite();
+	resourceCount += n;
+	ObjectUnlock();
 }
 
 #endif

@@ -40,7 +40,6 @@ public:
 	char *getInputQueueItems(const char *name);
 
 protected:
-
 	typedef struct {
 		Module *module;
 		Module::Type type;
@@ -48,17 +47,23 @@ protected:
 		std::queue<Resource*> *outputResources;
 	} ModuleInfo;
 
-	int nThreads;				// properties, locked by object lock
+	int nThreads;				// properties, guarded by object lock
 	pthread_t *threads;
 	bool running;
+	bool pauseInput;			// guarded by ObjectLock
+	CondLock pauseInputCond;		// only used as a condition variable
 
-	ProcessingEngine *engine;
+	ProcessingEngine *engine;		// parent, beware you call only thread-safe methods!
 	std::vector<ModuleInfo*> *modules;	// all modules; every thread has a module instance (first dimension)
 	SyncQueue<Resource> *inputQueue;	// input queue
 	std::vector<OutputFilter*> outputFilters;	// filters of output resources
 	std::queue<Resource*> deletedResources;	// deleted resources to be appended to the engine's output queue
+	SyncQueue<Resource> *engineOutputQueue;	// used only for appending deleted resources to engine's output queue
 
 	ObjectValues<Processor> *values;
+
+	char *getPauseInput(const char *name);
+	void setPauseInput(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
@@ -68,7 +73,7 @@ protected:
 	// process resource and append it to other precesses' queues
 	bool QueueResource(Resource *r, struct timeval *timeout, int *filterIndex);
 	// apply simple/input/output modules to a resource
-	Resource *ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool *stop);
+	Resource *ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool sleep, bool *stop);
 	// return index of the next multi-module
 	int NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index);
 	// append resource either to multi-module input queue or processor's output queue

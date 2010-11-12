@@ -1,6 +1,11 @@
+- perl output module does produce strange error -- check when this happened
 - save/restore state 
-- modul nesmi mit pristupk processing-engine (primo), kvuli vlaknum
-	- stejne tak processor, tam se to musi osetrit
+	- dodelat save/restore do vsech modulu (kde je to potreba)
+		- input/output, nektere multi?
+- kazdy server bude podporovat zakladni nastroje PE, bude mozne rozsireni prikazu
+	- takze PROCESS/PASS/GET/SET/SHUTDOWN, se nebudou replikovat...
+	- pridat CHECKPOINT_SAVE, CHECKPOINT_RESTORE
+
 - deleted vysledek v process -- jak predat na vystup?
 
 Coding style: 
@@ -16,6 +21,7 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- fixnout PE's resourceCount + commit: castecne hotovo, je potreba, aby PE vedel, kolik se prave procesi resources
 // - predelat callprocesingenginemodule na
 //	- ne modul (aby jich slo udelat vic)
 //	- aby umel PROCESS i PASS
@@ -35,3 +41,5 @@ DONE
 	- upravit Object.h, pridat jednu pseudo promennou
 - podivat se na Clone(), jestli funguje spravne ve vsech resources
 	- aby delal deep-copy
+- modul nesmi mit pristup processing-engine (primo), kvuli vlaknum
+	- stejne tak processor, tam se to musi osetrit
