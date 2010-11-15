@@ -8,7 +8,7 @@
 
 #include <config.h>
 
-#include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Module.h"
@@ -17,11 +17,6 @@
 
 class CallProcessingEngine {
 public:
-	typedef struct CallResourceInfo_ {
-		Resource *src;	// currently processed resource
-		Resource *tmp;	// calling processing engine with this resource
-	} CallResourceInfo;
-
 	// maxRequests: number of concurrent requests
 	CallProcessingEngine(ProcessingEngine *engine, int maxRequests);
 	~CallProcessingEngine();
@@ -35,13 +30,12 @@ public:
 protected:
 	// returns NULL in case src resource cannot be processed (e.g. is incompatible)
 	virtual Resource *PrepareResource(Resource *src) = 0;
-	virtual void FinishResource(Resource *src, Resource *tmp) = 0;
+	virtual Resource *FinishResource(Resource *tmp) = 0;
 
 	int maxRequests;
 	ProcessingEngine *engine;
-	CallResourceInfo *tmpInputResource;
-	std::vector<CallResourceInfo*> unused;
-	std::tr1::unordered_map<int, CallResourceInfo*> running;
+	Resource *tmpInputResource;
+	std::tr1::unordered_set<int> running;
 
 	static log4cxx::LoggerPtr logger;
 };

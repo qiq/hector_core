@@ -15,16 +15,9 @@ CallProcessingEngine::CallProcessingEngine(ProcessingEngine *engine, int maxRequ
 	this->engine = engine;
 	this->maxRequests = maxRequests;
 	tmpInputResource = NULL;
-
-	for (int i = 0; i < maxRequests; i++) {
-		CallResourceInfo *ri = new CallResourceInfo();
-		unused.push_back(ri);
-	}
 }
 
 CallProcessingEngine::~CallProcessingEngine() {
-	for (vector<CallResourceInfo*>::iterator iter = unused.begin(); iter != unused.end(); ++iter)
-		delete *iter;
 }
 
 bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Resource*> *outputResources, struct timeval *tv) {
@@ -34,8 +27,8 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	// stored input resource
 	bool processInput = true;
 	if (tmpInputResource && running.size() <= maxRequests) {
-		if (engine->ProcessResource(tmpInputResource->tmp, running.size() == 0 ? tv : NULL)) {
-			running[tmpInputResource->tmp->getId()] = tmpInputResource;
+		if (engine->ProcessResource(tmpInputResource, running.size() == 0 ? tv : NULL)) {
+			running.insert(tmpInputResource->getId());
 			tmpInputResource = NULL;
 			changed = true;
 		} else {
@@ -49,12 +42,8 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 		Resource *src = inputResources->front();
 		Resource *tmp = PrepareResource(src);
 		if (tmp) {
-			tmpInputResource = unused.back();
-			unused.pop_back();
-			tmpInputResource->src = src;
-			tmpInputResource->tmp = tmp;
 			if (engine->ProcessResource(tmp, running.size() == 0 ? tv : NULL)) {
-				running[tmp->getId()] = tmpInputResource;
+				running.insert(tmp->getId());
 				tmpInputResource = NULL;
 				changed = true;
 			} else {
@@ -74,19 +63,12 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	// read resources in non-blocking mode
 	bool processOutput = outputResources ? true : false;
 	while (processOutput && running.size() > 0) {
-		for (std::tr1::unordered_map<int, CallResourceInfo*>::iterator iter = running.begin(); iter != running.end(); ++iter) {
-			int id = iter->second->tmp->getId();
-			Resource *r = engine->GetProcessedResource(id, tv);
+		for (std::tr1::unordered_set<int>::iterator iter = running.begin(); iter != running.end(); ++iter) {
+			Resource *r = engine->GetProcessedResource(*iter, tv);
 			if (r) {
 				// finish processed resource
-				std::tr1::unordered_map<int, CallResourceInfo*>::iterator iter = running.find(id);
-				assert(iter != running.end());
-				CallResourceInfo *ri = iter->second;
-				FinishResource(ri->src, r);
-				outputResources->push(ri->src);
-				delete r;
-				unused.push_back(iter->second);
-				running.erase(id);
+				outputResources->push(FinishResource(r));
+				running.erase(*iter);
 
 				changed = true;
 			} else {

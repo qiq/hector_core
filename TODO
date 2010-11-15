@@ -1,6 +1,6 @@
 - deleted vysledek v process -- jak predat na vystup?
-- dodelat save/restore do vsech modulu (kde je to potreba)
-	- input/output, nektere multi?
+- dodelat save/restore checkpoint do vsech modulu (kde je to potreba)
+	- Save.la -- aby se prepsala cast souboru, co se udelala od posledniho checkpointu
 
 Coding style: 
 - jmena metod na velka pismena (krome getteru/setteru)

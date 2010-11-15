@@ -17,7 +17,7 @@ class ResourceFieldInfo;
 
 class Resource {
 public:
-	Resource() {};
+	Resource() : attachedResource(NULL) {};
 	virtual ~Resource() {};
 	// create copy of a resource
 	virtual Resource *Clone() = 0;
@@ -37,6 +37,10 @@ public:
 	virtual void setStatus(int status) = 0;
 	void setStatusDeleted();
 	bool isStatusDeleted();
+	// resource may contain link to other resource, it is only kept only in the memory
+	Resource *getAttachedResource();
+	void setAttachedResource(Resource *attachedResource);
+	void clearAttachedResource();
 
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
@@ -53,6 +57,8 @@ public:
 	static const int RESOURCE_DELETED;
 
 protected:
+	Resource *attachedResource;
+
 	static int LoadResourceLibrary(const char *name, int id);
 
 	static PlainLock lock;
@@ -67,6 +73,18 @@ inline void Resource::setStatusDeleted() {
 
 inline bool Resource::isStatusDeleted() {
 	return getStatus() == RESOURCE_DELETED;
+}
+
+inline void Resource::setAttachedResource(Resource *attachedResource) {
+	this->attachedResource = attachedResource;
+}
+
+inline Resource *Resource::getAttachedResource() {
+	return attachedResource;
+}
+
+inline void Resource::clearAttachedResource() {
+	attachedResource = NULL;
 }
 
 #endif
