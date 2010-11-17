@@ -37,6 +37,22 @@ inline int FileDescriptor::getSize() {
 }
 
 class SimpleServer {
+public:
+	SimpleServer();
+	virtual ~SimpleServer();
+	bool getRunning();
+	void setRunning(bool running);
+	void RestrictAccess(const char *addr);
+	void Start(const char *addr, int port, int maxThreads, bool wait);
+	void ProcessRequests();
+	void Stop();
+
+	void ServiceThread();
+	void MainThread();
+
+	virtual void Request(int fd) = 0;
+
+private:
 	struct in_addr server_addr;
 	int server_port;
 
@@ -52,20 +68,6 @@ class SimpleServer {
 	std::tr1::unordered_set<string> allowed_client;
 
 	static log4cxx::LoggerPtr logger;
-public:
-	SimpleServer();
-	~SimpleServer();
-	bool getRunning();
-	void setRunning(bool running);
-	void RestrictAccess(const char *addr);
-	void Start(const char *addr, int port, int maxThreads, bool wait);
-	void ProcessRequests();
-	void Stop();
-
-	void ServiceThread();
-	void MainThread();
-
-	virtual void Request(int fd) = 0;
 };
 
 #endif

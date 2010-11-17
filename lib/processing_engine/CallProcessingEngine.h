@@ -19,7 +19,7 @@ class CallProcessingEngine {
 public:
 	// maxRequests: number of concurrent requests
 	CallProcessingEngine(ProcessingEngine *engine, int maxRequests);
-	~CallProcessingEngine();
+	virtual ~CallProcessingEngine();
 	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int timeTick);
 	void Pass(std::queue<Resource*> *inputResources, int timeTick);
 	int ProcessingResources();

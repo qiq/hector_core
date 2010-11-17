@@ -19,7 +19,7 @@ class ProcessingEngine;
 class BaseServer : public SimpleHTTPServer {
 public:
 	BaseServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engines);
-	~BaseServer();
+	virtual ~BaseServer();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	bool HandleRequest(SimpleHTTPConn *conn);
 	virtual bool HandleExtension(SimpleHTTPConn *conn);

@@ -25,7 +25,7 @@ public:
 	} FieldType;
 
 	ResourceFieldInfo() {};
-	~ResourceFieldInfo() {};
+	virtual ~ResourceFieldInfo() {};
 	FieldType getType();
 
 	virtual const std::string &getString(Resource*) = 0;

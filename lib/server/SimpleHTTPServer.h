@@ -15,7 +15,7 @@ class Config;
 class SimpleHTTPServer : public SimpleServer {
 public:
 	SimpleHTTPServer() {};
-	~SimpleHTTPServer() {};
+	virtual ~SimpleHTTPServer() {};
 	virtual bool Init(std::vector<std::pair<std::string, std::string> > *params) = 0;
 	virtual bool HandleRequest(SimpleHTTPConn *conn) = 0;
 

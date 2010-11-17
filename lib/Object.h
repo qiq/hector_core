@@ -25,7 +25,7 @@ class Object {
 public:
 	Object(ObjectRegistry *objects, const char *id);
 	Object(ObjectRegistry *objects, const char *id, int index);
-	~Object();
+	virtual ~Object();
 	ObjectRegistry *getObjectRegistry();
 	void ObjectLockRead();
 	void ObjectLockWrite();
