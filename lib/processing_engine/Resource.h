@@ -17,7 +17,8 @@ class ResourceFieldInfo;
 
 class Resource {
 public:
-	Resource() : attachedResource(NULL) {};
+	Resource();
+	Resource(Resource &r);
 	virtual ~Resource() {};
 	// create copy of a resource
 	virtual Resource *Clone() = 0;
@@ -29,12 +30,12 @@ public:
 	virtual const char *getTypeStr() = 0;
 	// module prefix (e.g. Hector for Hector::TestResource)
 	virtual const char *getModuleStr() = 0;
-	// id should be unique across all resources
-	virtual int getId() = 0;
-	virtual void setId(int id) = 0;
+	// id should be unique across all in-memory resources
+	int getId();
+	void setId(int id);
 	// status may be tested in Processor to select target queue
-	virtual int getStatus() = 0;
-	virtual void setStatus(int status) = 0;
+	int getStatus();
+	void setStatus(int status);
 	void setStatusDeleted();
 	bool isStatusDeleted();
 	// resource may contain link to other resource, it is only kept only in the memory
@@ -57,6 +58,11 @@ public:
 	static const int RESOURCE_DELETED;
 
 protected:
+	// these are memory-only, some resources may decide to keep them
+	// on-disk too
+	// N.B.: id should not be overwritten in Deserialize()
+	int id;
+	int status;
 	Resource *attachedResource;
 
 	static int LoadResourceLibrary(const char *name, int id);
@@ -64,6 +70,9 @@ protected:
 	static PlainLock lock;
 	static std::tr1::unordered_map<std::string, int> name2id;
 	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
+	static PlainLock idLock;
+	static int nextId;
+
 	static log4cxx::LoggerPtr logger;
 };
 
@@ -73,6 +82,22 @@ inline void Resource::setStatusDeleted() {
 
 inline bool Resource::isStatusDeleted() {
 	return getStatus() == RESOURCE_DELETED;
+}
+
+inline int Resource::getId() {
+	return id;
+}
+
+inline void Resource::setId(int id) {
+	this->id = id;
+}
+
+inline int Resource::getStatus() {
+	return status;
+}
+
+inline void Resource::setStatus(int status) {
+	this->status = status;
 }
 
 inline void Resource::setAttachedResource(Resource *attachedResource) {

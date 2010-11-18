@@ -2,6 +2,8 @@
 - bezny resource zpracovava vzdycky prave jedno vlakno
 	- ale muze byt tzv. shared resource, ktery musi pouzivat mutex pro
 	  pristup ke svym datum, pak ho muze pouzivat vice modulu najednou
+- the Resource's id is unique (in memory) across all Resources
+
 - aby bylo unikatni id pro resource, je potreba, aby se pouzivalo:
 	- vytvareni resource pres rozhrani Resources (CreateResource), 
 	- nebo aspon ziskani aktualni hodnoty resourceId z Resources

@@ -26,12 +26,6 @@ public:
 	virtual const char *getTypeStr() = 0;
 	// module prefix (e.g. Hector for Hector::TestResource)
 	virtual const char *getModuleStr() = 0;
-	// id should be unique across all resources
-	virtual int getId() = 0;
-	virtual void setId(int id) = 0;
-	// status may be tested in Processor to select target queue
-	virtual int getStatus() = 0;
-	virtual void setStatus(int status) = 0;
 
 	// save and restore resource
 	virtual std::string *Serialize() = 0;

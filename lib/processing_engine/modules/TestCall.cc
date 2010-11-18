@@ -50,6 +50,7 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	maxRequests = 1000;
 	timeTick = DEFAULT_TIME_TICK;
 	resourceType = NULL;
+	targetEngine = NULL;
 
 	values = new ObjectValues<TestCall>(this);
 	values->addGetter("items", &TestCall::getItems);
@@ -60,6 +61,7 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	values->addGetter("resourceType", &TestCall::getResourceType);
 	values->addSetter("resourceType", &TestCall::setResourceType, true);
 	values->addGetter("targetEngine", &TestCall::getTargetEngine);
+	values->addSetter("targetEngine", &TestCall::setTargetEngine);
 }
 
 TestCall::~TestCall() {
@@ -101,8 +103,13 @@ char *TestCall::getTargetEngine(const char *name) {
 	return targetEngine ? strdup(targetEngine) : NULL;
 }
 
+void TestCall::setTargetEngine(const char *name, const char *value) {
+	free(targetEngine);
+	targetEngine = strdup(value);
+}
+
 bool TestCall::Init(vector<pair<string, string> > *params) {
-	if (!values->InitValues(params, true))
+	if (!values->InitValues(params))
 		return false;
 
 	if (maxRequests <= 0) {

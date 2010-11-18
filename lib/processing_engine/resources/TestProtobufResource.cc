@@ -8,7 +8,6 @@ using namespace std;
 log4cxx::LoggerPtr TestProtobufResource::logger(log4cxx::Logger::getLogger("resources.TestProtobufResource"));
 
 TestProtobufResource::TestProtobufResource() {
-	r.set_id(0);
 	r.set_status(0);
 }
 

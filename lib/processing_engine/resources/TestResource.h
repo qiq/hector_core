@@ -26,12 +26,6 @@ public:
 	const char *getTypeStr();
 	// module prefix (e.g. Hector for Hector::TestResource)
 	const char *getModuleStr();
-	// id should be unique across all resources
-	int getId();
-	void setId(int id);
-	// status may be tested in Processor to select target queue
-	int getStatus();
-	void setStatus(int status);
 
 	// save and restore resource
 	std::string *Serialize();
@@ -47,8 +41,6 @@ public:
 	static const int typeId = 1;
 
 protected:
-	int id;
-	int status;
 	std::string str;
 
 	static log4cxx::LoggerPtr logger;
@@ -68,22 +60,6 @@ inline const char *TestResource::getTypeStr() {
 
 inline const char *TestResource::getModuleStr() {
 	return "Hector";
-}
-
-inline int TestResource::getId() {
-	return id;
-}
-
-inline void TestResource::setId(int id) {
-	this->id = id;
-}
-
-inline int TestResource::getStatus() {
-	return status;
-}
-
-inline void TestResource::setStatus(int status) {
-	this->status = status;
 }
 
 inline const std::string &TestResource::getStr() {

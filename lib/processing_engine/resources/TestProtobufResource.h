@@ -29,12 +29,7 @@ public:
 	const char *getTypeStr();
 	// module prefix (e.g. Hector for Hector::TestResource)
 	const char *getModuleStr();
-	// id should be unique across all resources
-	int getId();
-	void setId(int id);
-	// status may be tested in Processor to select target queue
-	int getStatus();
-	void setStatus(int status);
+
 	// save and restore resource
 	std::string *Serialize();
 	bool Deserialize(const char *data, int size);
@@ -74,44 +69,41 @@ inline const char *TestProtobufResource::getModuleStr() {
 	return "Hector";
 }
 
-inline int TestProtobufResource::getId() {
-	return r.id();
-}
-
-inline void TestProtobufResource::setId(int id) {
-	r.set_id(id);
-}
-
-inline int TestProtobufResource::getStatus() {
-	return r.status();
-}
-
-inline void TestProtobufResource::setStatus(int status) {
-	r.set_status(status);
-}
-
 inline std::string *TestProtobufResource::Serialize() {
+	r.set_id(id);
+	r.set_status(status);
 	return MessageSerialize(&r);
 }
 
 inline bool TestProtobufResource::Deserialize(const char *data, int size) {
-	return MessageDeserialize(&r, data, size);
+	bool result = MessageDeserialize(&r, data, size);
+	// we keep id
+	setStatus(r.status());
+	return result;
 }
 
 inline int TestProtobufResource::getSerializedSize() {
+	r.set_id(getId());
+	r.set_status(getStatus());
 	return MessageGetSerializedSize(&r);
 }
 
 inline bool TestProtobufResource::Serialize(google::protobuf::io::ZeroCopyOutputStream *output) {
+	r.set_id(getId());
+	r.set_status(getStatus());
 	return MessageSerialize(&r, output);
 }
 
 inline bool TestProtobufResource::SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output) {
+	// r.id and r.status were set in getSerializedSize() already
 	return MessageSerializeWithCachedSizes(&r, output);
 }
 
 inline bool TestProtobufResource::Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) {
-	return MessageDeserialize(&r, input, size);
+	bool result = MessageDeserialize(&r, input, size);
+	// we keep id
+	setStatus(r.status());
+	return result;
 }
 
 inline void TestProtobufResource::setStr(const std::string &str) {

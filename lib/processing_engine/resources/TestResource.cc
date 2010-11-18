@@ -10,7 +10,6 @@ using namespace std;
 log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("resources.TestResource"));
 
 TestResource::TestResource() {
-	id = 0;
 	status = 0;
 }
 
@@ -39,7 +38,8 @@ bool TestResource::Deserialize(const char *data, int size) {
 	strncpy(s, data, size > 1024 ? 1024 : size);
 	s[size] = '\0';
 	char buf[size > 1024 ? 1024 : size];
-	if (sscanf(s, "%d\n%d\n%1023s\n", &id, &status, (char*)&buf) != 3) {
+	int notused;	// do not load (change) resource id
+	if (sscanf(s, "%d\n%d\n%1023s\n", &notused, &status, (char*)&buf) != 3) {
 		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
 		return false;
 	}

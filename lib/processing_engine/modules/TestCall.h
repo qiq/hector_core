@@ -55,6 +55,7 @@ private:
 	char *getResourceType(const char *name);
 	void setResourceType(const char *name, const char *value);
 	char *getTargetEngine(const char *name);
+	void setTargetEngine(const char *name, const char *value);
 
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);

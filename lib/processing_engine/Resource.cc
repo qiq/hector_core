@@ -10,10 +10,29 @@ using namespace std;
 log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 
 PlainLock Resource::lock;
-std::tr1::unordered_map<string, int> Resource::name2id;
-std::tr1::unordered_map<int, Resource *(*)()> Resource::id2create;
+tr1::unordered_map<string, int> Resource::name2id;
+tr1::unordered_map<int, Resource *(*)()> Resource::id2create;
+
+PlainLock Resource::idLock;
+int Resource::nextId = 0;
 
 const int Resource::RESOURCE_DELETED = std::numeric_limits<int>::max();
+
+Resource::Resource() {
+	attachedResource = NULL;
+	idLock.Lock();
+	setId(nextId++);
+	idLock.Unlock();
+	status = 0;
+}
+
+Resource::Resource(Resource &r) {
+	attachedResource = r.attachedResource;
+	idLock.Lock();
+	setId(nextId++);
+	idLock.Unlock();
+	status = r.status;
+}
 
 // Must be called with lock locked
 // Either name or id must be non-NULL/0
@@ -49,15 +68,14 @@ Resource *Resource::CreateResource(int id) {
 		return NULL;
 	lock.Lock();
 	std::tr1::unordered_map<int, Resource *(*)()>::iterator iter = id2create.find(id);
-	lock.Unlock();
 	if (iter == id2create.end()) {
 		if (!Resource::LoadResourceLibrary(NULL, id))
 			return NULL;
 		iter = id2create.find(id);
 		assert(iter != id2create.end());
 	}
-	Resource *result = (*iter->second)();
 	lock.Unlock();
+	Resource *result = (*iter->second)();
 	return result;
 }
 
