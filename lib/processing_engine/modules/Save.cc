@@ -68,15 +68,15 @@ bool Save::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool Save::WriteToFile(const void *data, int size) {
-	while (size > 0) {
-		ssize_t wr = write(fd, data, size);
-		if (wr > 0) {
-			size -= wr;
-		} else {
-			LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
-			return false;
-		}
+bool Save::WriteToFile(const char *data, int size) {
+	ObjectLockRead();
+	int f = fd;
+	ObjectUnlock();
+	if (WriteBytes(f, data, size) != size) {
+		ObjectLockRead();
+		LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
+		ObjectUnlock();
+		return false;
 	}
 	return true;
 }
@@ -84,25 +84,22 @@ bool Save::WriteToFile(const void *data, int size) {
 void Save::ProcessOutput(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
-	uint32_t size;
-	uint8_t typeId = resource->getTypeId();
+	char buffer[5];
+	*(uint8_t*)(buffer+4) = resource->getTypeId();
 	if (pr) {
-		if (!WriteToFile(&size, sizeof(size)))
+		*(uint32_t*)buffer = pr->getSerializedSize();
+		if (!WriteToFile(buffer, 5))
 			return;
-		if (!WriteToFile(&typeId, sizeof(typeId)))
-			return;
-		if (!pr->Serialize(stream))
+		if (!pr->SerializeWithCachedSizes(stream))
 			return;
 	} else {
 		string *serial = resource->Serialize();
 		if (!serial)
 			return;
-		size = serial->length();
-		if (!WriteToFile(&size, sizeof(size)))
+		*(uint32_t*)buffer = serial->length();
+		if (!WriteToFile(buffer, 5))
 			return;
-		if (!WriteToFile(&typeId, sizeof(typeId)))
-			return;
-		if (!WriteToFile(serial->c_str(), size))
+		if (!WriteToFile(serial->data(), *(uint32_t*)buffer))
 			return;
 		delete serial;
 	}

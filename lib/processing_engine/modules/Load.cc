@@ -81,20 +81,21 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool Load::ReadFromFile(void *data, int size, bool sleep) {
+bool Load::ReadFromFile(char *data, int size, bool sleep) {
+	ObjectLockRead();
+	int f = fd;
+	ObjectUnlock();
+	int offset = 0;
 	while (size > 0) {
-		ObjectLockRead();
-		ssize_t rd = read(fd, data, size);
-		ObjectUnlock();
-		if (rd > 0) {
-			size -= rd;
-		} else {
-			if (rd < 0) {
+		int count = ReadBytes(fd, data+offset, size);
+		if (count < 0) {
+			if (count < 0) {
 				ObjectLockRead();
 				LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 				ObjectUnlock();
 				return false;
 			}
+		} else if (count == 0) {
 			// no more data to be read from this file
 			if (!sleep)
 				return false;
@@ -106,6 +107,9 @@ bool Load::ReadFromFile(void *data, int size, bool sleep) {
 			ObjectUnlock();
 			if (c)
 				return false;
+		} else {
+			size -= count;
+			offset += count;
 		}
 	}
 	return true;
@@ -117,12 +121,11 @@ Resource *Load::ProcessInput(bool sleep) {
 	ObjectUnlock();
 	if (maxItems && i >= maxItems)
 		return NULL;
-	uint32_t size;
-	uint8_t typeId;
-	if (!ReadFromFile(&size, sizeof(size), sleep))
+	char buffer[5];
+	if (!ReadFromFile(buffer, 5, sleep))
 		return NULL;
-	if (!ReadFromFile(&typeId, sizeof(typeId), false))
-		return NULL;
+	uint32_t size = *(uint32_t*)buffer;
+	uint8_t typeId = *(uint8_t*)(buffer+4);
 
 	Resource *r = Resource::CreateResource(typeId);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(r);
@@ -133,13 +136,13 @@ Resource *Load::ProcessInput(bool sleep) {
 		if (!result)
 			return NULL;
 	} else {
-		void *data = malloc(size);
+		char *data = (char*)malloc(size);
 		if (!ReadFromFile(data, size, false)) {
 			free(data);
 			delete r;
 			return NULL;
 		}
-		if (!r->Deserialize((char*)data, size)) {
+		if (!r->Deserialize(data, size)) {
 			free(data);
 			delete r;
 			return NULL;

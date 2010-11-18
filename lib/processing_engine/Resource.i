@@ -23,4 +23,7 @@ public:
         virtual bool Deserialize(const char *data, int size) = 0;
         virtual int getSize() = 0;
         virtual std::string *toString(Object::LogLevel logLevel) = 0;
+        Resource *getAttachedResource();
+        void setAttachedResource(Resource *attachedResource);
+        void clearAttachedResource();
 };

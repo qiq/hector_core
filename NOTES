@@ -2,7 +2,11 @@
 - bezny resource zpracovava vzdycky prave jedno vlakno
 	- ale muze byt tzv. shared resource, ktery musi pouzivat mutex pro
 	  pristup ke svym datum, pak ho muze pouzivat vice modulu najednou
-- vytvareni resource jen pres rozhrani ProcessingEngine (CreateResource), mazani pomoci specialni hodnoty status
+- aby bylo unikatni id pro resource, je potreba, aby se pouzivalo:
+	- vytvareni resource pres rozhrani Resources (CreateResource), 
+	- nebo aspon ziskani aktualni hodnoty resourceId z Resources
+	- mazani pomoci specialni hodnoty status
+
 - items property rika, kolik resources bylo uspesne zpracovano (nepocitaji se tam resources, ktere se nezpracovaly)
 
 Obecne:

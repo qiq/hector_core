@@ -40,7 +40,7 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	bool WriteToFile(const void *data, int size);
+	bool WriteToFile(const char *data, int size);
 };
 
 inline Module::Type Save::getType() {

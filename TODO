@@ -1,3 +1,6 @@
+- nejak doresit unikatni resource id, asi se hodi, aby bylo vzdycky unikatni v
+  ramci beziciho hectora
+
 - deleted vysledek v process -- jak predat na vystup?
 - dodelat save/restore checkpoint do vsech modulu (kde je to potreba)
 	- Save.la -- aby se prepsala cast souboru, co se udelala od posledniho checkpointu

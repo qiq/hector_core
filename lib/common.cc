@@ -29,34 +29,38 @@ void chomp(string *data) {
 	
 }
 
-int writeBytes(int fd, const char *s, int length) {
-	int written = 0;
-	while (length - written > 0) {
-		int w = write(fd, s + written, length - written);
-		if (w < 0) {
+int WriteBytes(int fd, const char *data, int size) {
+	int offset = 0;
+	while (size > 0) {
+		ssize_t wr = write(fd, (void*)(data+offset), size);
+		if (wr < 0) {
 			if (errno == EINTR)
 				continue;
 			return -1;
+		} else if (wr == 0) {
+			return false;
 		}
-		written += w;
+		size -= wr;
+		offset += wr;
 	}
-	return written;
+	return offset;
 }
 
-int readBytes(int fd, char *s, int length) {
-	int rd = 0;
-	while (length - rd > 0) {
-		int r = read(fd, (void*)(s + rd), length - rd);
-		if (r < 0) {
+int ReadBytes(int fd, char *data, int size) {
+	int offset = 0;
+	while (size > 0) {
+		ssize_t rd = read(fd, (void*)(data + offset), size);
+		if (rd < 0) {
 			if (errno == EINTR)
 				continue;
 			return -1;
+		} else if (rd == 0) {
+			return offset;
 		}
-		if (r == 0)
-			return rd;
-		rd += r;
+		size -= rd;
+		offset += rd;
 	}
-	return rd;
+	return offset;
 }
 
 /*

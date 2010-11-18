@@ -51,7 +51,7 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	bool ReadFromFile(void *data, int size, bool sleep);
+	bool ReadFromFile(char *data, int size, bool sleep);
 };
 
 inline Module::Type Load::getType() {

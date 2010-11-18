@@ -38,6 +38,7 @@ public:
 	virtual bool Deserialize(const char *data, int size) = 0;
 	virtual int getSerializedSize() = 0;
 	virtual bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
+	virtual bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
 	virtual bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
@@ -51,6 +52,7 @@ protected:
 	bool MessageDeserialize(google::protobuf::Message *msg, const char *data, int size);
 	bool MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	int MessageGetSerializedSize(google::protobuf::Message *msg);
+	bool MessageSerializeWithCachedSizes(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	bool MessageDeserialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyInputStream *input, int size);
 };
 
@@ -70,6 +72,12 @@ inline bool ProtobufResource::MessageDeserialize(google::protobuf::Message *msg,
 
 inline bool ProtobufResource::MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output) {
 	return msg->SerializeToZeroCopyStream(output);
+}
+
+inline bool ProtobufResource::MessageSerializeWithCachedSizes(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output) {
+	google::protobuf::io::CodedOutputStream encoder(output);
+	msg->SerializeWithCachedSizes(&encoder);
+	return true;
 }
 
 inline int ProtobufResource::MessageGetSerializedSize(google::protobuf::Message *msg) {

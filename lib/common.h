@@ -103,8 +103,8 @@ inline char *ip6Addr2Str(ip6_addr_t addr) {
 	}
 };*/
 
-int writeBytes(int fd, const char *s, int length);
-int readBytes(int fd, char *s, int length);
+int WriteBytes(int fd, const char *data, int size);
+int ReadBytes(int fd, char *data, int size);
 
 /*
 #define LOG_CONFIG_ERROR0(logger, line, column, msg) \
