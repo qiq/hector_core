@@ -17,10 +17,6 @@ Resource *TestResource::Clone() {
 	return new TestResource(*this);
 }
 
-int TestResource::getSize() {
-	return 1;
-}
-
 string *TestResource::Serialize() {
 	string *strcopy = new string(str);
 	size_t idx;
@@ -45,6 +41,10 @@ bool TestResource::Deserialize(const char *data, int size) {
 	}
 	str.assign(buf);
 	return true;
+}
+
+int TestResource::getSize() {
+	return 1;
 }
 
 string *TestResource::toString(Object::LogLevel logLevel) {

@@ -1,26 +1,26 @@
 %include "std_string.i"
 
-%newobject Resource::toString();
-%newobject Resource::Serialize();
+%newobject Resource::MessageSerialize();
 
 %{
 #include "ProtobufResource.h"
 %}
 
-class ProtobufResource {
+class ProtobufResource : Resource {
 public:
         ProtobufResource();
         virtual ~ProtobufResource();
-        virtual ProtobufResource *Clone() = 0;
-        virtual int getTypeId() = 0;
-        virtual const char *getTypeStr() = 0;
-        virtual const char *getModuleStr() = 0;
-        virtual int getId() = 0;
-        virtual void setId(int id) = 0;
-        virtual int getStatus() = 0;
-        virtual void setStatus(int status) = 0;
-        virtual std::string *Serialize() = 0;
-        virtual bool Deserialize(const char *data, int size) = 0;
-        virtual int getSize() = 0;
-        virtual std::string *toString(Object::LogLevel logLevel) = 0;
+
+        virtual int getSerializedSize() = 0;
+        virtual bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
+        virtual bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
+        virtual bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) = 0;
+protected:
+        // helper methods for (de)serialization
+        std::string *MessageSerialize(google::protobuf::Message *msg);
+        bool MessageDeserialize(google::protobuf::Message *msg, const char *data, int size);
+        bool MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
+        int MessageGetSerializedSize(google::protobuf::Message *msg);
+        bool MessageSerializeWithCachedSizes(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
+        bool MessageDeserialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyInputStream *input, int size);
 };

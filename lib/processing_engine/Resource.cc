@@ -9,7 +9,7 @@ using namespace std;
 
 log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 
-PlainLock Resource::lock;
+PlainLock Resource::translateLock;
 tr1::unordered_map<string, int> Resource::name2id;
 tr1::unordered_map<int, Resource *(*)()> Resource::id2create;
 
@@ -66,7 +66,7 @@ int Resource::LoadResourceLibrary(const char *name, int id) {
 Resource *Resource::CreateResource(int id) {
 	if (id < 0)
 		return NULL;
-	lock.Lock();
+	translateLock.Lock();
 	std::tr1::unordered_map<int, Resource *(*)()>::iterator iter = id2create.find(id);
 	if (iter == id2create.end()) {
 		if (!Resource::LoadResourceLibrary(NULL, id))
@@ -74,26 +74,26 @@ Resource *Resource::CreateResource(int id) {
 		iter = id2create.find(id);
 		assert(iter != id2create.end());
 	}
-	lock.Unlock();
+	translateLock.Unlock();
 	Resource *result = (*iter->second)();
 	return result;
 }
 
 int Resource::NameToId(const char *name) {
-	lock.Lock();
+	translateLock.Lock();
 	std::tr1::unordered_map<string, int>::iterator iter = name2id.find(name);
 	if (iter != name2id.end()) {
-		lock.Unlock();
+		translateLock.Unlock();
 		return iter->second;
 	}
 	if (!Resource::LoadResourceLibrary(name, -1)) {
-		lock.Unlock();
+		translateLock.Unlock();
 		LOG4CXX_ERROR(logger, "Invalid Resource name: " << name);
 		return -1;
 	}
 	iter = name2id.find(name);
 	assert(iter != name2id.end());
 	int result = iter->second;
-	lock.Unlock();
+	translateLock.Unlock();
 	return result;
 }

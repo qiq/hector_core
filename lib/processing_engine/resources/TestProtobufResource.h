@@ -21,6 +21,14 @@ public:
 	~TestProtobufResource() {};
 	// create copy of a resource
 	ProtobufResource *Clone();
+	// save and restore resource
+	std::string *Serialize();
+	bool Deserialize(const char *data, int size);
+	int getSerializedSize();
+	bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
+	bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output);
+	bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
+
 	// return ResourceInfo describing one field
 	ResourceFieldInfo *getFieldInfo(const char *name);
 	// type id of a resource (to be used by Resources::CreateResource(typeid))
@@ -29,14 +37,6 @@ public:
 	const char *getTypeStr();
 	// module prefix (e.g. Hector for Hector::TestResource)
 	const char *getModuleStr();
-
-	// save and restore resource
-	std::string *Serialize();
-	bool Deserialize(const char *data, int size);
-	int getSerializedSize();
-	bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
-	bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output);
-	bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)
@@ -52,22 +52,6 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
-
-inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
-	return new ResourceFieldInfoT<TestProtobufResource>(name);
-}
-
-inline int TestProtobufResource::getTypeId() {
-	return typeId;
-}
-
-inline const char *TestProtobufResource::getTypeStr() {
-	return "TestProtobufResource";
-}
-
-inline const char *TestProtobufResource::getModuleStr() {
-	return "Hector";
-}
 
 inline std::string *TestProtobufResource::Serialize() {
 	r.set_id(id);
@@ -104,6 +88,22 @@ inline bool TestProtobufResource::Deserialize(google::protobuf::io::ZeroCopyInpu
 	// we keep id
 	setStatus(r.status());
 	return result;
+}
+
+inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
+	return new ResourceFieldInfoT<TestProtobufResource>(name);
+}
+
+inline int TestProtobufResource::getTypeId() {
+	return typeId;
+}
+
+inline const char *TestProtobufResource::getTypeStr() {
+	return "TestProtobufResource";
+}
+
+inline const char *TestProtobufResource::getModuleStr() {
+	return "Hector";
 }
 
 inline void TestProtobufResource::setStr(const std::string &str) {

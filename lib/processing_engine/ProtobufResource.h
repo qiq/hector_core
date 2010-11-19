@@ -18,36 +18,25 @@ class ProtobufResource : public Resource {
 public:
 	ProtobufResource() {};
 	virtual ~ProtobufResource() {};
-	// create copy of a resource
-	virtual ProtobufResource *Clone() = 0;
-	// type id of a resource (to be used by Resources::CreateResource(typeid))
-	virtual int getTypeId() = 0;
-	// type string of a resource
-	virtual const char *getTypeStr() = 0;
-	// module prefix (e.g. Hector for Hector::TestResource)
-	virtual const char *getModuleStr() = 0;
 
 	// save and restore resource
-	virtual std::string *Serialize() = 0;
-	virtual bool Deserialize(const char *data, int size) = 0;
 	virtual int getSerializedSize() = 0;
 	virtual bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
 	virtual bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output) = 0;
 	virtual bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) = 0;
-	// used by queues in case there is limit on queue size, this size may
-	// be somewhat arbitrary
-	virtual int getSize() = 0;
-	// return string representation of the resource (e.g. for debugging purposes)
-	virtual std::string *toString(Object::LogLevel logLevel) = 0;
-protected:
-	static log4cxx::LoggerPtr logger;
 
+protected:
+	// helper methods for (de)serialization
 	std::string *MessageSerialize(google::protobuf::Message *msg);
 	bool MessageDeserialize(google::protobuf::Message *msg, const char *data, int size);
 	bool MessageSerialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	int MessageGetSerializedSize(google::protobuf::Message *msg);
 	bool MessageSerializeWithCachedSizes(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyOutputStream *output);
 	bool MessageDeserialize(google::protobuf::Message *msg, google::protobuf::io::ZeroCopyInputStream *input, int size);
+
+private:
+	static log4cxx::LoggerPtr logger;
+
 };
 
 inline std::string *ProtobufResource::MessageSerialize(google::protobuf::Message *msg) {

@@ -18,6 +18,9 @@ public:
 	~TestResource() {};
 	// create copy of a resource
 	Resource *Clone();
+	// save and restore resource
+	std::string *Serialize();
+	bool Deserialize(const char *data, int size);
 	// return ResourceInfo describing one field
 	ResourceFieldInfo *getFieldInfo(const char *name);
 	// type id of a resource (to be used by Resources::CreateResource(typeid))
@@ -26,10 +29,6 @@ public:
 	const char *getTypeStr();
 	// module prefix (e.g. Hector for Hector::TestResource)
 	const char *getModuleStr();
-
-	// save and restore resource
-	std::string *Serialize();
-	bool Deserialize(const char *data, int size);
 	// used by queues in case there is limit on queue size
 	int getSize();
 	// return string representation of the resource (e.g. for debugging purposes)

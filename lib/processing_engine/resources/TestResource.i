@@ -12,6 +12,8 @@ public:
         TestResource();
         ~TestResource();
         Resource *Clone();
+        std::string *Serialize();
+        bool Deserialize(const char *data, int size);
         int getTypeId();
         const char *getTypeStr();
         const char *getModuleStr();
@@ -19,9 +21,6 @@ public:
         void setId(int id);
         int getStatus();
         void setStatus(int status);
-
-        std::string *Serialize();
-        bool Deserialize(const char *data, int size);
         int getSize();
         std::string *toString(Object::LogLevel logLevel);
 
