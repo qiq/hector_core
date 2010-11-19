@@ -14,7 +14,7 @@
 
 class TestResource : public Resource {
 public:
-	TestResource();
+	TestResource() {};
 	~TestResource() {};
 	// create copy of a resource
 	Resource *Clone();

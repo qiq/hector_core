@@ -18,7 +18,7 @@ class ResourceFieldInfo;
 class Resource {
 public:
 	Resource();
-	Resource(Resource &r);
+	Resource(const Resource &r);
 	virtual ~Resource() {};
 	// create copy of a resource
 	virtual Resource *Clone() = 0;

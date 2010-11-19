@@ -7,10 +7,6 @@ using namespace std;
 
 log4cxx::LoggerPtr TestProtobufResource::logger(log4cxx::Logger::getLogger("resources.TestProtobufResource"));
 
-TestProtobufResource::TestProtobufResource() {
-	r.set_status(0);
-}
-
 ProtobufResource *TestProtobufResource::Clone() {
 	return new TestProtobufResource(*this);
 }

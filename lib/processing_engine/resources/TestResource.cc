@@ -9,10 +9,6 @@ using namespace std;
 
 log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("resources.TestResource"));
 
-TestResource::TestResource() {
-	status = 0;
-}
-
 Resource *TestResource::Clone() {
 	return new TestResource(*this);
 }

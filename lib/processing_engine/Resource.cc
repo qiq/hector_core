@@ -19,19 +19,17 @@ int Resource::nextId = 0;
 const int Resource::RESOURCE_DELETED = std::numeric_limits<int>::max();
 
 Resource::Resource() {
-	attachedResource = NULL;
 	idLock.Lock();
 	setId(nextId++);
 	idLock.Unlock();
 	status = 0;
+	attachedResource = NULL;
 }
 
-Resource::Resource(Resource &r) {
-	attachedResource = r.attachedResource;
+Resource::Resource(const Resource &r) : status(r.status), attachedResource(r.attachedResource) {
 	idLock.Lock();
 	setId(nextId++);
 	idLock.Unlock();
-	status = r.status;
 }
 
 // Must be called with lock locked

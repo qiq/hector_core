@@ -17,7 +17,7 @@
 
 class TestProtobufResource : public ProtobufResource {
 public:
-	TestProtobufResource();
+	TestProtobufResource() {};
 	~TestProtobufResource() {};
 	// create copy of a resource
 	ProtobufResource *Clone();
@@ -54,8 +54,8 @@ protected:
 };
 
 inline std::string *TestProtobufResource::Serialize() {
-	r.set_id(id);
-	r.set_status(status);
+	r.set_id(getId());
+	r.set_status(getStatus());
 	return MessageSerialize(&r);
 }
 
