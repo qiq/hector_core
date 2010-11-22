@@ -16,7 +16,7 @@
 
 class Call : public CallProcessingEngine {
 public:
-	Call(ProcessingEngine *engine, int maxResources, int typeId);
+	Call(int maxResources, int typeId);
 	~Call() {};
 
 protected:	

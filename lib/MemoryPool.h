@@ -43,7 +43,7 @@ template <class T>
 T *MemoryPool<T>::alloc() {
 	lock.Lock();
 	if (used >= chunkSize) {
-		T *chunk = new T[chunkSize];
+		T *chunk = new T[chunkSize]();
 		chunks.push_back(chunk);
 		used = 0;
 	}

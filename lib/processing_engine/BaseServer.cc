@@ -17,6 +17,10 @@ BaseServer::BaseServer(ObjectRegistry *objects, vector<ProcessingEngine*> *engin
 }
 
 bool BaseServer::Init(std::vector<std::pair<std::string, std::string> > *params) {
+	// second stage?
+	if (!params)
+		return true;
+
 	if (engines->size() == 0) {
 		LOG4CXX_ERROR(logger, "No processing engine in a server");
 		return false;

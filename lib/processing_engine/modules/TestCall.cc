@@ -14,7 +14,7 @@ using namespace std;
 // sleep TIME_TICK useconds waiting for socket changes
 #define DEFAULT_TIME_TICK 100*1000
 
-Call::Call(ProcessingEngine *engine, int maxResources, int typeId) : CallProcessingEngine(engine, maxResources) {
+Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources) {
 	this->typeId = typeId;
 }
 
@@ -109,6 +109,17 @@ void TestCall::setTargetEngine(const char *name, const char *value) {
 }
 
 bool TestCall::Init(vector<pair<string, string> > *params) {
+	// second stage?
+	if (!params) {
+		ProcessingEngine *engine = dynamic_cast<ProcessingEngine*>(objects->getObject(targetEngine));
+		if (!engine) {
+			LOG_ERROR("Invalid targetEngine parameter" << targetEngine);
+			return false;
+		}
+		call->setProcessingEngine(engine);
+		return true;
+	}
+
 	if (!values->InitValues(params))
 		return false;
 
@@ -119,11 +130,6 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 
 	if (!targetEngine || strlen(targetEngine) == 0) {
 		LOG_ERROR("targetEngine parameter missing");
-		return false;
-	}
-	ProcessingEngine *engine = dynamic_cast<ProcessingEngine*>(objects->getObject(targetEngine));
-	if (!engine) {
-		LOG_ERROR("Invalid targetEngine parameter" << targetEngine);
 		return false;
 	}
 
@@ -137,7 +143,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	call = new Call(engine, maxRequests, typeId);
+	call = new Call(maxRequests, typeId);
 
 	return true;
 }

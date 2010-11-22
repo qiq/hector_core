@@ -11,8 +11,7 @@ using namespace std;
 
 log4cxx::LoggerPtr CallProcessingEngine::logger(log4cxx::Logger::getLogger("CallProcessingEngine"));
 
-CallProcessingEngine::CallProcessingEngine(ProcessingEngine *engine, int maxRequests) {
-	this->engine = engine;
+CallProcessingEngine::CallProcessingEngine(int maxRequests) {
 	this->maxRequests = maxRequests;
 	tmpInputResource = NULL;
 }

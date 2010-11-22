@@ -40,6 +40,15 @@ ProcessingEngine::~ProcessingEngine() {
 }
 
 bool ProcessingEngine::Init(Config *config) {
+	// second stage?
+	if (!config) {
+		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
+			if (!(*iter)->Init(NULL))
+				return false;
+		}
+		return true;
+	}
+
 	char buffer[1024];
 	vector<string> *v;
 
@@ -54,11 +63,6 @@ bool ProcessingEngine::Init(Config *config) {
 			if (!p->Init(config))
 				return false;
 			processors.push_back(p);
-		}
-		// connect Processors to other Processors
-		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-			if (!(*iter)->Connect())
-				return false;
 		}
 		delete v;
 	} else {

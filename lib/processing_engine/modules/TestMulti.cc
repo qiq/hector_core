@@ -55,6 +55,10 @@ void TestMulti::setTimeTick(const char *name, const char *value) {
 }
 
 bool TestMulti::Init(vector<pair<string, string> > *params) {
+	// second stage?
+	if (!params)
+		return true;
+
 	values->InitValues(params);
 	return true;
 }

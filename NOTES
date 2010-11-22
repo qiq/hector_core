@@ -1,3 +1,6 @@
+- Init() is called twice -- first time with arguments, second time with NULL,
+  reason is that first time own objects should be created, second time all
+  other objects are created
 - checkpoint: pauseInput, pockat, az budou vsude zpracovavane resources == 0, pak save_checkpoint
 - bezny resource zpracovava vzdycky prave jedno vlakno
 	- ale muze byt tzv. shared resource, ktery musi pouzivat mutex pro

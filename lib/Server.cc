@@ -90,6 +90,13 @@ bool Server::Init(Config *config) {
 	if (!simpleHTTPServer->Init(&params))
 		return false;
 
+	// second stage
+	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
+		if (!(*iter)->Init(NULL))
+			return false;
+	}
+	if (!simpleHTTPServer->Init(NULL))
+		return false;
 	return true;
 }
 

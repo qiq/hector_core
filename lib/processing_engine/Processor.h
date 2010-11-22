@@ -27,7 +27,6 @@ public:
 	Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id);
 	~Processor();
 	bool Init(Config *config);
-	bool Connect(); // connect processors to other processors
 	bool isRunning();
 	void runThread(int id);
 	void Start();
@@ -73,6 +72,8 @@ protected:
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);
 
+	// connect processors to other processors
+	bool Connect();
 	// process resource and append it to other precesses' queues
 	bool QueueResource(Resource *r, struct timeval *timeout, int *filterIndex);
 	// apply simple/input/output modules to a resource

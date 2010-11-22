@@ -17,6 +17,10 @@ Dump::~Dump() {
 }
 
 bool Dump::Init(vector<pair<string, string> > *params) {
+	// second stage?
+	if (!params)
+		return true;
+
 	values->InitValues(params);
 	return true;
 }

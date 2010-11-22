@@ -76,6 +76,17 @@ void Processor::setPauseInput(const char *name, const char *value) {
 }
 
 bool Processor::Init(Config *config) {
+	// second stage?
+	if (!config) {
+		for (int i = 0; i < nThreads; ++i) {
+			for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
+				if (!(*iter)->module->Init(NULL))
+					return false;
+			}
+		}
+		return this->Connect();
+	}
+
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
@@ -427,6 +438,10 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			break;
 		case Module::SIMPLE:
 			resource = minfo->module->ProcessSimple(resource);
+			if (!resource) {
+				LOG_ERROR("Resource lost");
+				return NULL;
+			}
 			if (resource->isStatusDeleted()) {
 				// deleted resource
 				deletedResources.push(resource);

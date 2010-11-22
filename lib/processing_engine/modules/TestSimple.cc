@@ -71,6 +71,10 @@ void TestSimple::setSetStatus(const char *name, const char *value) {
 }
 
 bool TestSimple::Init(vector<pair<string, string> > *params) {
+	// second stage?
+	if (!params)
+		return true;
+
 	values->InitValues(params);
 	return true;
 }

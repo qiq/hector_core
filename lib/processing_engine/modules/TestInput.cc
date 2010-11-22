@@ -64,6 +64,10 @@ void TestInput::setResourceType(const char *name, const char *value) {
 }
 
 bool TestInput::Init(vector<pair<string, string> > *params) {
+	// second stage?
+	if (!params)
+		return true;
+
 	if (!values->InitValues(params))
 		return false;
 	if (!resourceType)

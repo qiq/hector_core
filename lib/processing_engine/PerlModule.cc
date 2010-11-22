@@ -181,53 +181,57 @@ PerlModule::~PerlModule() {
 }
 
 bool PerlModule::Init(vector<pair<string, string> > *c) {
-	// run Perl
-	const char *embedding[] = { "", "-e", "0" };
-	perl_parse(my_perl, xs_init, 3, (char **)embedding, NULL);
-	PERL_SET_CONTEXT(my_perl);
-	perl_run(my_perl);
+	SV *sv = &PL_sv_undef;
+	// first stage?
+	if (c) {
+		// run Perl
+		const char *embedding[] = { "", "-e", "0" };
+		perl_parse(my_perl, xs_init, 3, (char **)embedding, NULL);
+		PERL_SET_CONTEXT(my_perl);
+		perl_run(my_perl);
 
-	// init SWIG extension (_new_Any)
-	newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
+		// init SWIG extension (_new_Any)
+		newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
 
-	// create Hector::Object::new2()
-	eval_pv("package Hector::Object; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
-		return false;
+		// create Hector::Object::new2()
+		eval_pv("package Hector::Object; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
+		if (SvTRUE(ERRSV)) {
+			LOG_ERROR("Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
+			return false;
+		}
+
+		// call Hector::Object->new2()
+		char s[1024];
+		snprintf(s, sizeof(s), "use Hector; $_object = Hector::Object->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<Object*>(this));
+		eval_pv(s , FALSE);
+		if (SvTRUE(ERRSV)) {
+			LOG_ERROR("Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
+			return false;
+		}
+
+		// create Perl module
+		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
+		eval_pv(s, FALSE);
+		if (SvTRUE(ERRSV)) {
+			LOG_ERROR("Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+			return false;
+		}
+		ref = get_sv("_module", 0);
+		if (!SvOK(ref)) {
+			LOG_ERROR("Error initialize module " << name);
+			return false;
+		}
+
+		AV *table = newAV();
+		for (vector<pair<string, string> >::iterator iter = c->begin(); iter != c->end(); ++iter) {
+			AV *row = newAV();
+			av_push(row, newSVpv(iter->first.c_str(), 0));
+			av_push(row, newSVpv(iter->second.c_str(), 0));
+			av_push(table, newRV_noinc((SV*)row ));
+		}
+		sv = newRV_noinc((SV*)table);
 	}
-
-	// call Hector::Object->new2()
-	char s[1024];
-	snprintf(s, sizeof(s), "use Hector; $_object = Hector::Object->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<Object*>(this));
-	eval_pv(s , FALSE);
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
-		return false;
-	}
-
-	// create Perl module
-	snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
-	eval_pv(s, FALSE);
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
-		return false;
-	}
-	ref = get_sv("_module", 0);
-	if (!SvOK(ref)) {
-		LOG_ERROR("Error initialize module " << name);
-		return false;
-	}
-
 	// call Init()
-	AV *table = newAV();
-	for (vector<pair<string, string> >::iterator iter = c->begin(); iter != c->end(); ++iter) {
-		AV *row = newAV();
-		av_push(row, newSVpv(iter->first.c_str(), 0));
-		av_push(row, newSVpv(iter->second.c_str(), 0));
-		av_push(table, newRV_noinc((SV*)row ));
-	}
-	SV *sv = newRV_noinc((SV*)table);
 	bool result = false;
 	dSP;
 	ENTER;
