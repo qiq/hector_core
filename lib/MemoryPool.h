@@ -28,7 +28,7 @@ private:
 template <class T>
 MemoryPool<T>::MemoryPool(int chunkSize) {
 	this->chunkSize = chunkSize;
-	this->used = 0;
+	this->used = chunkSize;
 }
 
 template <class T>
