@@ -20,8 +20,8 @@ libhector_la_SOURCES = \
 		Server.h Server.cc \
 		Connection.h ProcessConnection.h ProcessConnection.cc StdioConnection.h StdioConnection.cc
 libhector_la_CXXFLAGS = $(AM_CXXFLAGS)
-libhector_la_LIBADD = server/libhector_server.la processing_engine/libhector_processing_engine.la
-libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS) -lltdl
+libhector_la_LIBADD = server/libhector_server.la processing_engine/libhector_processing_engine.la -lltdl
+libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS)
 
 # SWIG interface
 EXTRA_DIST = Connection.i StdioConnection.i Hector.i Object.i ObjectRegistry.i
