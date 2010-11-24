@@ -43,10 +43,10 @@ int TestResource::getSize() {
 	return 1;
 }
 
-string *TestResource::toString(Object::LogLevel logLevel) {
+string TestResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
-	return new string(buf);
+	return buf;
 }
 
 template<class T>

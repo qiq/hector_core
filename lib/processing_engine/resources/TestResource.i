@@ -1,7 +1,6 @@
 %include "std_string.i"
 
 %newobject TestResource::Serialize();
-%newobject TestResource::toString();
 
 %{
 #include "TestResource.h"
@@ -22,7 +21,7 @@ public:
         int getStatus();
         void setStatus(int status);
         int getSize();
-        std::string *toString(Object::LogLevel logLevel);
+        std::string toString(Object::LogLevel logLevel);
 
         void setStr(const std::string &str);
         const std::string &getStr();

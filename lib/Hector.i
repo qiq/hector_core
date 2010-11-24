@@ -6,6 +6,10 @@
 #define SWIG_FILE_WITH_INIT // for Python
 %}
 
+%include "std_vector.i"
+%include "std_string.i"
+%template(StringVector_hector) std::vector<std::string>;
+
 %include common.i
 %include Connection.i
 %include StdioConnection.i

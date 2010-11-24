@@ -2,7 +2,6 @@
 %include "std_vector.i"
 %include "std_string.i"
 
-%template(StringVector) std::vector<std::string>;
 %newobject Object::getValue(const char *name);
 
 %{
@@ -25,15 +24,10 @@ public:
         void SaveCheckpoint(const char *path);
         void RestoreCheckpoint(const char *path);
 
-        void log_trace(const char *s);
         void log_trace(const std::string &s);
-        void log_debug(const char *s);
         void log_debug(const std::string &s);
-        void log_info(const char *s);
         void log_info(const std::string &s);
-        void log_error(const char *s);
         void log_error(const std::string &s);
-        void log_fatal(const char *s);
         void log_fatal(const std::string &s);
 
         enum LogLevel {

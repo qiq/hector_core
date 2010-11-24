@@ -6,7 +6,7 @@
 #include "ProtobufResource.h"
 %}
 
-class ProtobufResource : Resource {
+class ProtobufResource : public Resource {
 public:
         ProtobufResource();
         virtual ~ProtobufResource();

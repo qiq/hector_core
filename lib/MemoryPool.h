@@ -35,7 +35,7 @@ template <class T>
 MemoryPool<T>::~MemoryPool() {
 	lock.Lock();
 	for (typename std::vector<T*>::iterator iter = chunks.begin(); iter != chunks.end(); ++iter)
-		delete (*iter);
+		delete[] (*iter);
 	lock.Unlock();
 }
 

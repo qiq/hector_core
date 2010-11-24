@@ -15,10 +15,10 @@ int TestProtobufResource::getSize() {
 	return 1;
 }
 
-string *TestProtobufResource::toString(Object::LogLevel logLevel) {
+string TestProtobufResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "TestProtobufResource [%d, %d]: %s", this->getId(), this->getStatus(), this->getStr().c_str());
-	return new string(buf);
+	return buf;
 }
 
 template <class T>

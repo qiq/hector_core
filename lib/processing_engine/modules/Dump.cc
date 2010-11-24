@@ -26,9 +26,8 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *Dump::ProcessSimple(Resource *resource) {
-	string *s = resource->toString();
-	LOG_DEBUG(*s);
-	delete s;
+	string s = resource->toString();
+	LOG_DEBUG(s);
 	return resource;
 }
 

@@ -1,6 +1,5 @@
 %include "std_string.i"
 
-%newobject Resource::toString();
 %newobject Resource::Serialize();
 
 %{
@@ -24,7 +23,7 @@ public:
         void setStatusDeleted();
         bool isStatusDeleted();
         virtual int getSize() = 0;
-        virtual std::string *toString(Object::LogLevel logLevel) = 0;
+        virtual std::string toString(Object::LogLevel logLevel) = 0;
         Resource *getAttachedResource();
         void setAttachedResource(Resource *attachedResource);
         void clearAttachedResource();

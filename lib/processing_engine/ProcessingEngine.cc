@@ -145,9 +145,10 @@ Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout
 			finishedLock.Lock();
 		}
 	}
+	Resource *result = iter->second;
 	finishedResources.erase(id);
 	finishedLock.Unlock();
-	return iter->second;
+	return result;
 }
 
 void ProcessingEngine::StartSync() {

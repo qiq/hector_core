@@ -50,7 +50,7 @@ public:
 	// be somewhat arbitrary
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
-	virtual std::string *toString(Object::LogLevel = Object::INFO) = 0;
+	virtual std::string toString(Object::LogLevel = Object::INFO) = 0;
 
 	// static methods common to all Resources
 	static Resource *CreateResource(int id);
