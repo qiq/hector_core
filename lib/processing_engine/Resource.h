@@ -13,6 +13,20 @@
 #include "Object.h"
 #include "PlainLock.h"
 
+// logger helper macros (print short info about the resource)
+
+#define LOG4CXX_TRACE_R(logger, r, ...) { LOG4CXX_TRACE(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG4CXX_DEBUG_R(logger, r, ...) { LOG4CXX_DEBUG(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG4CXX_INFO_R(logger, r, ...) { LOG4CXX_INFO(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+
+#define LOG_TRACE_R(r, ...) { LOG4CXX_TRACE(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_DEBUG_R(r, ...) { LOG4CXX_DEBUG(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_INFO_R(r, ...) { LOG4CXX_INFO(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_ERROR_R(r, ...) { LOG4CXX_ERROR(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_FATAL_R(r, ...) { LOG4CXX_FATAL(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+
 class ResourceFieldInfo;
 
 class Resource {
@@ -32,6 +46,7 @@ public:
 	virtual int getTypeId() = 0;
 	// type string of a resource
 	virtual const char *getTypeStr() = 0;
+	virtual const char *getTypeStrShort() = 0;
 	// module prefix (e.g. Hector for Hector::TestResource)
 	virtual const char *getModuleStr() = 0;
 	// id should be unique across all in-memory resources
@@ -51,6 +66,7 @@ public:
 	virtual int getSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string toString(Object::LogLevel = Object::INFO) = 0;
+	std::string toStringShort();
 
 	// static methods common to all Resources
 	static Resource *CreateResource(int id);
@@ -110,6 +126,12 @@ inline Resource *Resource::getAttachedResource() {
 
 inline void Resource::clearAttachedResource() {
 	attachedResource = NULL;
+}
+
+inline std::string Resource::toStringShort() {
+	char buffer[1024];
+	snprintf(buffer, sizeof(buffer), "[%s %d %d]", getTypeStrShort(), getId(), isStatusDeleted() ? -1 : getStatus());
+	return buffer;
 }
 
 #endif

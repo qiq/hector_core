@@ -27,6 +27,7 @@ public:
 	int getTypeId();
 	// type string of a resource
 	const char *getTypeStr();
+	const char *getTypeStrShort();
 	// module prefix (e.g. Hector for Hector::TestResource)
 	const char *getModuleStr();
 	// used by queues in case there is limit on queue size
@@ -55,6 +56,10 @@ inline int TestResource::getTypeId() {
 
 inline const char *TestResource::getTypeStr() {
 	return "TestResource";
+}
+
+inline const char *TestResource::getTypeStrShort() {
+	return "TR";
 }
 
 inline const char *TestResource::getModuleStr() {

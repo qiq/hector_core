@@ -104,7 +104,7 @@ sub ProcessMulti() {
 
 	my $resource = shift(@{$self->{'_resources'}});
 	push(@{$outputResources}, $resource);
-	$self->{'_object'}->log_info("Processed TestResource (".$resource->getStr().")");
+	$self->{'_object'}->log_info($resource->toStringShort()." Processed (".$resource->getStr().")");
 	$self->{'items'}++;
 
 	return $MAX_RESOURCES-@{$self->{'_resources'}};

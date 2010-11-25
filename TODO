@@ -1,8 +1,5 @@
-- nejak doresit unikatni resource id, asi se hodi, aby bylo vzdycky unikatni v
-  ramci beziciho hectora
-	- pozor na clone(!)
-
 - deleted vysledek v process -- jak predat na vystup?
+	- nechat tak -- da se to otestovat :)
 - dodelat save/restore checkpoint do vsech modulu (kde je to potreba)
 	- Save.la -- aby se prepsala cast souboru, co se udelala od posledniho checkpointu
 
@@ -19,6 +16,9 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- nejak doresit unikatni resource id, asi se hodi, aby bylo vzdycky unikatni v
+  ramci beziciho hectora
+	- pozor na clone(!)
 - kazdy server bude podporovat zakladni nastroje PE, bude mozne rozsireni prikazu
 	- takze PROCESS/PASS/GET/SET/SHUTDOWN, se nebudou replikovat...
 

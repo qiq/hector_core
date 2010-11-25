@@ -78,7 +78,7 @@ bool Save::WriteToFile(const char *data, int size) {
 	ObjectUnlock();
 	if (WriteBytes(f, data, size) != size) {
 		ObjectLockRead();
-		LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
+		LOG_ERROR("Cannot write to file: " << filename << " (" << strerror(errno) << "), giving up.")
 		ObjectUnlock();
 		return false;
 	}

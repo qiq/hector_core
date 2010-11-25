@@ -87,7 +87,7 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	TestResource *tr = resources.front();
 	resources.pop();
 	outputResources->push(tr);
-	LOG_INFO("Processed TestResource (" << tr->getStr() << ")");
+	LOG_INFO_R(tr, "Processed TestResource (" << tr->getStr() << ")");
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();

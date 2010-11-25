@@ -32,7 +32,7 @@ bool TestResource::Deserialize(const char *data, int size) {
 	char buf[size > 1024 ? 1024 : size];
 	int notused;	// do not load (change) resource id
 	if (sscanf(s, "%d\n%d\n%1023s\n", &notused, &status, (char*)&buf) != 3) {
-		LOG4CXX_ERROR(logger, "Cannot deserialize TestResource: " << s);
+		LOG4CXX_ERROR_R(logger, this, "Cannot deserialize TestResource: " << s);
 		return false;
 	}
 	str.assign(buf);
@@ -45,7 +45,7 @@ int TestResource::getSize() {
 
 string TestResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "TestResource [%d, %d]: %s", id, status, str.c_str());
+	snprintf(buf, sizeof(buf), "TestResource %d %d: %s", id, isStatusDeleted() ? -1 : status, str.c_str());
 	return buf;
 }
 

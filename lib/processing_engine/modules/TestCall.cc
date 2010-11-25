@@ -22,7 +22,7 @@ Resource *Call::PrepareResource(Resource *src) {
 	src->setStatus(1);
 	Resource *r = Resource::CreateResource(typeId);
 	if (!r) {
-		LOG4CXX_ERROR(logger, "Cannot generate resource of type: " << typeId);
+		LOG4CXX_ERROR_R(logger, r, "Cannot generate resource of type: " << typeId);
 		return NULL;
 	}
 	r->setId(src->getId()+10000);

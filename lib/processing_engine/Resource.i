@@ -24,6 +24,7 @@ public:
         bool isStatusDeleted();
         virtual int getSize() = 0;
         virtual std::string toString(Object::LogLevel logLevel) = 0;
+        std::string toStringShort();
         Resource *getAttachedResource();
         void setAttachedResource(Resource *attachedResource);
         void clearAttachedResource();

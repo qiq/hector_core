@@ -35,10 +35,10 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 void TestOutput::ProcessOutput(Resource *resource) {
 	if (resource->getTypeId() == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(resource);
-		LOG_INFO("Resource arrived (" << tr->getStr() << ")");
+		LOG_INFO_R(tr, "Resource arrived (" << tr->getStr() << ")");
 		delete tr;
 	} else {
-		LOG_INFO("Resource arrived (" << resource->getId() << ")");
+		LOG_INFO_R(resource, "Resource arrived");
 		delete resource;
 	}
 	ObjectLockWrite();

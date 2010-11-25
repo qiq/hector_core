@@ -83,7 +83,7 @@ Resource *TestSimple::ProcessSimple(Resource *resource) {
 	if (resource->getTypeId() != TestResource::typeId)
 		return resource;
 	TestResource *tr = static_cast<TestResource*>(resource);
-	LOG_INFO("Processing TestResource (" << tr->getStr() << ")");
+	LOG_DEBUG_R(tr, "Processing (" << tr->getStr() << ")");
 	ObjectLockRead();
 	bool fs = flipStatus;
 	int ss = setStatus;

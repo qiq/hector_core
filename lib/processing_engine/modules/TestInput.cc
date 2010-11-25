@@ -96,9 +96,9 @@ Resource *TestInput::ProcessInput(bool sleep) {
 		char s[1024];
 		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items);
 		tr->setStr(s);
-		LOG_INFO("Creating resource (" << tr->getStr() << ")");
+		LOG_INFO_R(tr, "Creating TestResource (" << tr->getStr() << ")");
 	} else {
-		LOG_INFO("Creating resource (" << r->getId() << ")");
+		LOG_INFO_R(r, "Creating resource");
 	}
 	items++;
 	ObjectUnlock();

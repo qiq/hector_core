@@ -91,7 +91,7 @@ sub ProcessSimple() {
 		$self->{'_object'}->log_error("Invalid resource: ".$resource->getTypeStr());
 		return $resource;
 	}
-	$self->{'_object'}->log_info("Processing TestResource (".$resource->getStr().")");
+	$self->{'_object'}->log_info($resource->toStringShort()." Processing (".$resource->getStr().")");
 	$resource->setStatus($resource->getStatus() == 0 ? 1 : 0) if ($self->{'flipStatus'});
 	$resource->setStatus($self->{'setStatus'}) if ($self->{'setStatus'} >= 0);
 	$self->{'items'}++;

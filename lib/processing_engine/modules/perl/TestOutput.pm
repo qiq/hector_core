@@ -81,7 +81,7 @@ sub ProcessOutput() {
 	if (not defined $resource or $resource->getTypeStr() ne 'TestResource') {
 		$self->{'_object'}->log_error("Invalid resource: ".$resource->getTypeStr());
 	} else {
-		$self->{'_object'}->log_info("Resource arrived (".$resource->getStr().")");
+		$self->{'_object'}->log_info($resource->toStringShort()." Resource arrived (".$resource->getStr().")");
 		$self->{'items'}++;
 	}
 }
