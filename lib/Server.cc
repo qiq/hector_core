@@ -33,7 +33,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &threads) != 1) {
-		LOG_ERROR("Invalid number of threads, using 1 thread");
+		LOG_ERROR(this, "Invalid number of threads, using 1 thread");
 		threads = 1;
 	}
 	free(s);
@@ -42,7 +42,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverHost", getId());
 	serverHost = config->getFirstValue(buffer);
 	if (!serverHost) {
-		LOG_ERROR("Server/serverHost not found");
+		LOG_ERROR(this, "Server/serverHost not found");
 		return false;
 	}
 
@@ -50,7 +50,7 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverPort", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &serverPort) != 1) {
-		LOG_ERROR("Server/serverPort not found");
+		LOG_ERROR(this, "Server/serverPort not found");
 		return false;
 	}
 	free(s);
@@ -73,14 +73,14 @@ bool Server::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", getId());
 	s = config->getFirstValue(buffer);
 	if (!s) {
-		LOG_ERROR("Server/lib not found");
+		LOG_ERROR(this, "Server/lib not found");
 		return false;
 	}
 	
 	// load server library
 	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::loadLibrary(s, "create");
 	if (!create) {
-		LOG_ERROR("Invalid library: " << s);
+		LOG_ERROR(this, "Invalid library: " << s);
 		return false;
 	}
 	free(s);
@@ -108,23 +108,23 @@ void Server::Start(bool autostart, bool wait) {
 		}
 	}
 	// start server
-	LOG_INFO("Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
+	LOG_INFO(this, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
 	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
-		LOG_INFO("Stopping processing engines");
+		LOG_INFO(this, "Stopping processing engines");
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
-		LOG_INFO("Stopping server");
+		LOG_INFO(this, "Stopping server");
 	}
 }
 
 void Server::Stop() {
-	LOG_INFO("Stopping processing engines");
+	LOG_INFO(this, "Stopping processing engines");
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		(*iter)->Stop();
 	}
-	LOG_INFO("Stopping server");
+	LOG_INFO(this, "Stopping server");
 	simpleHTTPServer->Stop();
 }
 

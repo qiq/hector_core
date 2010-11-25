@@ -113,7 +113,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 	if (!params) {
 		ProcessingEngine *engine = dynamic_cast<ProcessingEngine*>(objects->getObject(targetEngine));
 		if (!engine) {
-			LOG_ERROR("Invalid targetEngine parameter" << targetEngine);
+			LOG_ERROR(this, "Invalid targetEngine parameter" << targetEngine);
 			return false;
 		}
 		call->setProcessingEngine(engine);
@@ -124,22 +124,22 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 		return false;
 
 	if (maxRequests <= 0) {
-		LOG_ERROR("Invalid maxRequests value: " << maxRequests);
+		LOG_ERROR(this, "Invalid maxRequests value: " << maxRequests);
 		return false;
 	}
 
 	if (!targetEngine || strlen(targetEngine) == 0) {
-		LOG_ERROR("targetEngine parameter missing");
+		LOG_ERROR(this, "targetEngine parameter missing");
 		return false;
 	}
 
 	if (!resourceType) {
-		LOG_ERROR("resourceType is not defined");
+		LOG_ERROR(this, "resourceType is not defined");
 		return false;
 	}
 	int typeId = Resource::NameToId(resourceType);
 	if (typeId < 0) {
-		LOG_ERROR("Cannot load " << resourceType << " library");
+		LOG_ERROR(this, "Cannot load " << resourceType << " library");
 		return false;
 	}
 

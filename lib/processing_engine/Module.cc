@@ -7,36 +7,36 @@
 using namespace std;
 
 bool Module::Init(vector<pair<string, string> > *args) {
-	LOG_ERROR("Unimplemented module " << getId() << " (Init)");
+	LOG_ERROR(this, "Unimplemented module " << getId() << " (Init)");
 	return false;
 }
 
 Module::Type Module::getType() {
-	LOG_ERROR("Unimplemented module " << getId() << " (getType)");
+	LOG_ERROR(this, "Unimplemented module " << getId() << " (getType)");
 	return Module::INVALID;
 }
 
 Resource *Module::ProcessInput(bool sleep) {
-	LOG_ERROR("Unimplemented resource processing (ProcessInput)");
+	LOG_ERROR(this, "Unimplemented resource processing (ProcessInput)");
 	return NULL;
 }
 
 void Module::ProcessOutput(Resource *resource) {
-	LOG_ERROR("Unimplemented resource processing (ProcessOutput)");
+	LOG_ERROR(this, "Unimplemented resource processing (ProcessOutput)");
 }
 
 Resource *Module::ProcessSimple(Resource *resource) {
-	LOG_ERROR("Unimplemented resource processing (ProcessSimple)");
+	LOG_ERROR(this, "Unimplemented resource processing (ProcessSimple)");
 	return NULL;
 }
 
 int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
-	LOG_ERROR("Unimplemented resource processing (ProcessMulti)");
+	LOG_ERROR(this, "Unimplemented resource processing (ProcessMulti)");
 	return 0;
 }
 
 int Module::ProcessingResources() {
-	LOG_ERROR("Unimplemented resource processing (ProcessingResources)");
+	LOG_ERROR(this, "Unimplemented resource processing (ProcessingResources)");
 	return 0;
 }
 

@@ -21,11 +21,11 @@
 #define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
 #define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
 
-#define LOG_TRACE_R(r, ...) { LOG4CXX_TRACE(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_DEBUG_R(r, ...) { LOG4CXX_DEBUG(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_INFO_R(r, ...) { LOG4CXX_INFO(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_ERROR_R(r, ...) { LOG4CXX_ERROR(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_FATAL_R(r, ...) { LOG4CXX_FATAL(logger, getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_TRACE_R(o, r, ...) { LOG4CXX_TRACE(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_DEBUG_R(o, r, ...) { LOG4CXX_DEBUG(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_INFO_R(o, r, ...) { LOG4CXX_INFO(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_ERROR_R(o, r, ...) { LOG4CXX_ERROR(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_FATAL_R(o, r, ...) { LOG4CXX_FATAL(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isStatusDeleted() ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
 
 class ResourceFieldInfo;
 

@@ -66,7 +66,7 @@ bool ProcessingEngine::Init(Config *config) {
 		}
 		delete v;
 	} else {
-		LOG_INFO("No Processors");
+		LOG_INFO(this, "No Processors");
 	}
 
 	// input queue(s)
@@ -75,12 +75,12 @@ bool ProcessingEngine::Init(Config *config) {
 	if (ref) {
 		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
 		if (!p) {
-			LOG_ERROR("Processor not found: " << ref);
+			LOG_ERROR(this, "Processor not found: " << ref);
 			return false;
 		}
 		inputQueue = p->getInputQueue();
 		if (!inputQueue) {
-			LOG_ERROR("No input queue defined for processor: " << ref);
+			LOG_ERROR(this, "No input queue defined for processor: " << ref);
 			return false;
 		}
 		free(ref);
@@ -250,7 +250,7 @@ void ProcessingEngine::setRun(const char *name, const char *value) {
 		StartSync();
 		break;
 	default:
-		LOG_ERROR("Invalid 'run' value: " << value);
+		LOG_ERROR(this, "Invalid 'run' value: " << value);
 	}
 }
 
@@ -267,7 +267,7 @@ void ProcessingEngine::setPause(const char *name, const char *value) {
 		PauseSync();
 		break;
 	default:
-		LOG_ERROR("Invalid 'pause' value: " << value);
+		LOG_ERROR(this, "Invalid 'pause' value: " << value);
 	}
 }
 

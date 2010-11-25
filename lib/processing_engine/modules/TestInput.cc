@@ -73,10 +73,10 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 	if (!resourceType)
 		resourceType = strdup("TestResource");
 	if (maxItems)
-		LOG_INFO("Going to produce " << maxItems << " resources of type " << resourceType << ".");
+		LOG_INFO(this, "Going to produce " << maxItems << " resources of type " << resourceType << ".");
 	typeId = Resource::NameToId(resourceType);
 	if (typeId < 0) {
-		LOG_ERROR("Cannot load " << resourceType << " library");
+		LOG_ERROR(this, "Cannot load " << resourceType << " library");
 		return false;
 	}
 	return true;
@@ -96,9 +96,9 @@ Resource *TestInput::ProcessInput(bool sleep) {
 		char s[1024];
 		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items);
 		tr->setStr(s);
-		LOG_INFO_R(tr, "Creating TestResource (" << tr->getStr() << ")");
+		LOG_INFO_R(this, tr, "Creating TestResource (" << tr->getStr() << ")");
 	} else {
-		LOG_INFO_R(r, "Creating resource");
+		LOG_INFO_R(this, r, "Creating resource");
 	}
 	items++;
 	ObjectUnlock();

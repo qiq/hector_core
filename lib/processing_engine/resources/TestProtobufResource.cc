@@ -17,7 +17,7 @@ int TestProtobufResource::getSize() {
 
 string TestProtobufResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "TestProtobufResource %d %d: %s", getId(), isStatusDeleted() ? -1 : getStatus(), getStr().c_str());
+	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", getId(), isStatusDeleted() ? -1 : getStatus(), getStr().c_str());
 	return buf;
 }
 

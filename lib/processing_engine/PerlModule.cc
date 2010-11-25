@@ -128,7 +128,7 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 		snprintf(s, sizeof(s), "use %s; package %s::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", module, module, type);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
-			LOG_ERROR("Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
+			LOG_ERROR(this, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
 			return NULL;
 		}
 		initialized.insert(type);
@@ -146,11 +146,11 @@ SV *PerlModule::CreatePerlResource(Resource *resource) {
 	int count = call_method("new2", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling new2: " << type << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling new2: " << type << " (" << SvPV_nolen(ERRSV) << ")");
 		POPs;
 		result = NULL;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling new2: " << type);
+		LOG_ERROR(this, "Error calling new2: " << type);
 		result = NULL;
 	} else {
 		result = SvREFCNT_inc(POPs);
@@ -196,7 +196,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		// create Hector::Object::new2()
 		eval_pv("package Hector::Object; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
 		if (SvTRUE(ERRSV)) {
-			LOG_ERROR("Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
+			LOG_ERROR(this, "Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
 			return false;
 		}
 
@@ -205,7 +205,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		snprintf(s, sizeof(s), "use Hector; $_object = Hector::Object->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<Object*>(this));
 		eval_pv(s , FALSE);
 		if (SvTRUE(ERRSV)) {
-			LOG_ERROR("Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
+			LOG_ERROR(this, "Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
 			return false;
 		}
 
@@ -213,12 +213,12 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
-			LOG_ERROR("Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+			LOG_ERROR(this, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
 			return false;
 		}
 		ref = get_sv("_module", 0);
 		if (!SvOK(ref)) {
-			LOG_ERROR("Error initialize module " << name);
+			LOG_ERROR(this, "Error initialize module " << name);
 			return false;
 		}
 
@@ -242,16 +242,16 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	int count = call_method("Init", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling Init (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling Init (" << SvPV_nolen(ERRSV) << ")");
 		POPs;
 		result = false;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling Init (no result)");
+		LOG_ERROR(this, "Error calling Init (no result)");
 		result = false;
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR("Error calling Init (invalid result)");
+			LOG_ERROR(this, "Error calling Init (invalid result)");
 			result = false;
 		} else {
 			result = (SvIV(resultSV) != 0);
@@ -275,13 +275,13 @@ Module::Type PerlModule::getType() {
 	int count = call_method("getType", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling getType (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling getType (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR("Error calling getType (no result)");
+		LOG_ERROR(this, "Error calling getType (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR("Error calling getType (invalid result)");
+			LOG_ERROR(this, "Error calling getType (invalid result)");
 		} else {
 			result = (Module::Type)SvIV(resultSV);
 		}
@@ -307,14 +307,14 @@ Resource *PerlModule::ProcessInput(bool sleep) {
 	int count = call_method("ProcessInput", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling ProcessInput (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ProcessInput (" << SvPV_nolen(ERRSV) << ")");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling ProcessInput");
+		LOG_ERROR(this, "Error calling ProcessInput");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -360,14 +360,14 @@ void PerlModule::ProcessOutput(Resource *resource) {
 	int count = call_method("ProcessOutput", G_VOID|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling ProcessOutput (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ProcessOutput (" << SvPV_nolen(ERRSV) << ")");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
 		return;
 	} else if (count != 0) {
-		LOG_ERROR("Error calling ProcessOutput");
+		LOG_ERROR(this, "Error calling ProcessOutput");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -406,14 +406,14 @@ Resource *PerlModule::ProcessSimple(Resource *resource) {
 	int count = call_method("ProcessSimple", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling ProcessSimple (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ProcessSimple (" << SvPV_nolen(ERRSV) << ")");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling ProcessSimple");
+		LOG_ERROR(this, "Error calling ProcessSimple");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -477,14 +477,14 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	int count = call_method("ProcessMulti", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling ProcessMulti (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ProcessMulti (" << SvPV_nolen(ERRSV) << ")");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
-		LOG_ERROR("Error calling ProcesMulti (no result)");
+		LOG_ERROR(this, "Error calling ProcesMulti (no result)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -493,7 +493,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	}
 	SV *resultSV = POPs;
 	if (!SvIOK(resultSV)) {
-		LOG_ERROR("Error calling ProcessMulti (invalid result)");
+		LOG_ERROR(this, "Error calling ProcessMulti (invalid result)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -535,13 +535,13 @@ int PerlModule::ProcessingResources() {
 	int count = call_method("ProcessingResources", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling ProcessingResources (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ProcessingResources (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR("Error calling ProcessingResources (no result)");
+		LOG_ERROR(this, "Error calling ProcessingResources (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR("Error calling ProcessingResources (invalid result)");
+			LOG_ERROR(this, "Error calling ProcessingResources (invalid result)");
 		} else {
 			result = SvIV(resultSV);
 		}
@@ -568,9 +568,9 @@ char *PerlModule::getValueSync(const char *name) {
 	count = call_method("getValueSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling getValueSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling getValueSync (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR("Error calling getValueSync (no result)");
+		LOG_ERROR(this, "Error calling getValueSync (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvPOK(sv)) {
@@ -586,7 +586,7 @@ char *PerlModule::getValueSync(const char *name) {
 			snprintf(s, sizeof(s), "%lf", SvNV(sv));
 			result = strdup(s);
 		} else {
-			LOG_ERROR("Error calling getValueSync (invalid result type)");
+			LOG_ERROR(this, "Error calling getValueSync (invalid result type)");
 		}
 	}
 	PUTBACK;
@@ -609,13 +609,13 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
 	int count = call_method("setValueSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling setValueSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling setValueSync (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR("Error calling setValueSync (no result)");
+		LOG_ERROR(this, "Error calling setValueSync (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR("Error calling setValueSync (invalid result)");
+			LOG_ERROR(this, "Error calling setValueSync (invalid result)");
 		} else {
 			result = (SvIV(resultSV) != 0);
 		}
@@ -639,13 +639,13 @@ vector<string> *PerlModule::listNamesSync() {
 	int count = call_method("listNamesSync", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR("Error calling listNamesSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling listNamesSync (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR("Error calling listNamesSync (no result)");
+		LOG_ERROR(this, "Error calling listNamesSync (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
-			LOG_ERROR("Error calling listNamesSync (invalid result)");
+			LOG_ERROR(this, "Error calling listNamesSync (invalid result)");
 		} else {
 			result = new vector<string>();
 			AV *av = (AV*)SvRV(sv);

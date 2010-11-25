@@ -95,7 +95,7 @@ bool Processor::Init(Config *config) {
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/threads", getId());
 	s = config->getFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1 || nThreads <= 0 || nThreads > 100) {
-		LOG_ERROR("Invalid number of threads: " << s);
+		LOG_ERROR(this, "Invalid number of threads: " << s);
 		return false;
 	}
 	free(s);
@@ -116,7 +116,7 @@ bool Processor::Init(Config *config) {
 				// C++ library module
 				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(name, "create");
 				if (!create) {
-					LOG_ERROR("Module/lib not found: " << name);
+					LOG_ERROR(this, "Module/lib not found: " << name);
 					return false;
 				}
 				for (int i = 0; i < nThreads; ++i) {
@@ -136,7 +136,7 @@ bool Processor::Init(Config *config) {
 				free(type);
 				free(name);
 			} else {
-				LOG_ERROR("Unknown module type (" << name << ", " << type << ")");
+				LOG_ERROR(this, "Unknown module type (" << name << ", " << type << ")");
 				return false;
 			}
 			// create name-value argument pairs
@@ -150,7 +150,7 @@ bool Processor::Init(Config *config) {
 					snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/text()", mid, i+1);
 					val = config->getFirstValue(buffer);
 					if (!val) {
-						LOG_ERROR("No value for param: " << (*names)[i].c_str());
+						LOG_ERROR(this, "No value for param: " << (*names)[i].c_str());
 						continue;
 					}
 				}
@@ -191,7 +191,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &priority) != 1) {
-					LOG_ERROR("Invalid priority: " << s);
+					LOG_ERROR(this, "Invalid priority: " << s);
 					return false;
 				}
 				free(s);
@@ -202,7 +202,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxItems) != 1) {
-					LOG_ERROR("Invalid maxItems: " << s);
+					LOG_ERROR(this, "Invalid maxItems: " << s);
 					return false;
 				}
 				free(s);
@@ -213,7 +213,7 @@ bool Processor::Init(Config *config) {
 			s = config->getFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxSize) != 1) {
-					LOG_ERROR("Invalid maxSize: " << s);
+					LOG_ERROR(this, "Invalid maxSize: " << s);
 					return false;
 				}
 				free(s);
@@ -239,7 +239,7 @@ bool Processor::Init(Config *config) {
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@ref", getId(), i+1);
 			char *ref = config->getFirstValue(buffer);
 			if (!ref) {
-				LOG_ERROR("Missing reference: " << s);
+				LOG_ERROR(this, "Missing reference: " << s);
 				return false;
 			}
 			f->setProcessor(ref);
@@ -250,7 +250,7 @@ bool Processor::Init(Config *config) {
 			if (s) {
 				int priority;
 				if (sscanf(s, "%d", &priority) != 1) {
-					LOG_ERROR("Invalid priority: " << s);
+					LOG_ERROR(this, "Invalid priority: " << s);
 					return false;
 				}
 				f->setPriority(priority);
@@ -270,7 +270,7 @@ bool Processor::Init(Config *config) {
 			if (s) {
 				int filter;
 				if (sscanf(s, "%d", &filter) != 1) {
-					LOG_ERROR("Invalid filter: " << s);
+					LOG_ERROR(this, "Invalid filter: " << s);
 					return false;
 				}
 				f->setFilter(filter);
@@ -286,36 +286,36 @@ bool Processor::Init(Config *config) {
 			switch (modules[0][i]->type) {
 			case Module::INPUT:
 				if (i != 0) {
-					LOG_ERROR("Input module must be first");
+					LOG_ERROR(this, "Input module must be first");
 					return false;
 				}
 				if (inputQueue->getQueuesCount() > 0) {
-					LOG_ERROR("queue and input module must not be used together");
+					LOG_ERROR(this, "queue and input module must not be used together");
 					return false;
 				}
 				break;
 			case Module::OUTPUT:
 				if (i != n-1) {
-					LOG_ERROR("Output module must be the last one in a Processor");
+					LOG_ERROR(this, "Output module must be the last one in a Processor");
 					return false;
 				}
 				if (outputFilters.size() > 0) {
-					LOG_ERROR("nextProcessor and output module must not be used together");
+					LOG_ERROR(this, "nextProcessor and output module must not be used together");
 					return false;
 				}
 				break;
 			case Module::SIMPLE:
 			case Module::MULTI:
 				if (i == 0 && inputQueue->getQueuesCount() == 0) {
-					LOG_ERROR("No input queue defined");
+					LOG_ERROR(this, "No input queue defined");
 					return false;
 				} else if (i == n-1 && outputFilters.size() == 0) {
-					LOG_ERROR("No output queue defined");
+					LOG_ERROR(this, "No output queue defined");
 					return false;
 				}
 				break;
 			default:
-				LOG_ERROR("Should not happen");
+				LOG_ERROR(this, "Should not happen");
 				break;
 			}
 		}
@@ -337,7 +337,7 @@ bool Processor::Connect() {
 		} else {
 			ProcessingEngine *pe = dynamic_cast<ProcessingEngine*>(objects->getObject(ref));
 			if (!pe) {
-				LOG_ERROR("Processor or ProcessingEngine not found: " << ref);
+				LOG_ERROR(this, "Processor or ProcessingEngine not found: " << ref);
 				return false;
 			}
 			q = pe->getOutputQueue();
@@ -346,12 +346,12 @@ bool Processor::Connect() {
 		}
 
 		if (!q) {
-			LOG_ERROR("No input queue defined for Processor/ProcessingEngine: " << ref);
+			LOG_ERROR(this, "No input queue defined for Processor/ProcessingEngine: " << ref);
 			return false;
 		}
 
 		if (!q->hasQueue(priority)) {
-			LOG_ERROR("No input queue with priority " << priority << " for Processor/ProcessingEngine: " << ref);
+			LOG_ERROR(this, "No input queue with priority " << priority << " for Processor/ProcessingEngine: " << ref);
 			return false;
 		}
 		(*iter)->setQueue(q);
@@ -407,7 +407,7 @@ bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterI
 		}
 	}
 	if (!appended) {
-		LOG_ERROR("Lost resource (id: " << r->getId() << ")");
+		LOG_ERROR(this, "Lost resource (id: " << r->getId() << ")");
 		delete r;
 		engine->UpdateResourceCount(-1);
 	}
@@ -439,7 +439,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 		case Module::SIMPLE:
 			resource = minfo->module->ProcessSimple(resource);
 			if (!resource) {
-				LOG_ERROR("Resource lost");
+				LOG_ERROR(this, "Resource lost");
 				return NULL;
 			}
 			if (resource->isStatusDeleted()) {
@@ -450,7 +450,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			break;
 		case Module::MULTI:
 		default:
-			LOG_ERROR("Should not happen");
+			LOG_ERROR(this, "Should not happen");
 			break;
 		}
 		index++;
@@ -502,7 +502,7 @@ void Processor::runThread(int threadId) {
 						break;	// some resources are still being processed
 					}
 					// we should wait until input is un-paused
-					LOG_DEBUG("Processor input pause");
+					LOG_DEBUG(this, "Processor input pause");
 					while (pauseInput) {
 						pauseInputCond.WaitSend(NULL);
 						pauseInputCond.Unlock();
@@ -510,7 +510,7 @@ void Processor::runThread(int threadId) {
 							return;	// cancelled
 						pauseInputCond.Lock();
 					}
-					LOG_DEBUG("Processor input continue");
+					LOG_DEBUG(this, "Processor input continue");
 				}
 				pauseInputCond.Unlock();
 			}
@@ -637,7 +637,7 @@ void Processor::Start() {
 		t->id = i;
 		pthread_create(&threads[i], NULL, run_thread, (void *)t);
 	}
-	LOG_INFO("Processor started (" << nThreads << ")");
+	LOG_INFO(this, "Processor started (" << nThreads << ")");
 	ObjectUnlock();
 }
 
@@ -669,7 +669,7 @@ void Processor::Stop() {
 	}
 
 	delete[] copy;
-	LOG_INFO("Processor stopped (" << nThreads << ")");
+	LOG_INFO(this, "Processor stopped (" << nThreads << ")");
 }
 
 void Processor::Pause() {

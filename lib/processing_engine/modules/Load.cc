@@ -34,7 +34,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 
 Load::~Load() {
 	if (stream && !stream->Close())
-		LOG_ERROR("Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
+		LOG_ERROR(this, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
 	free(filename);
 	delete values;
@@ -61,14 +61,14 @@ void Load::setFilename(const char *name, const char *value) {
 	free(filename);
 	filename = strdup(value);
 	if (stream && !stream->Close())
-		LOG_ERROR("Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
+		LOG_ERROR(this, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
 	if (fd >= 0)
 		close(fd);
 	if ((fd = open(filename, O_RDONLY)) >= 0)
 		stream = new google::protobuf::io::FileInputStream(fd);
 	else
-		LOG_ERROR("Cannot open file " << filename << ": " << strerror(errno));
+		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
 	fileCond.SignalSend();
 	fileCond.Unlock();
 }
@@ -81,7 +81,7 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	if (!values->InitValues(params))
 		return false;
 	if (maxItems)
-		LOG_INFO("Going to load " << maxItems << " resources.");
+		LOG_INFO(this, "Going to load " << maxItems << " resources.");
 	return true;
 }
 
@@ -95,7 +95,7 @@ bool Load::ReadFromFile(char *data, int size, bool sleep) {
 		if (count < 0) {
 			if (count < 0) {
 				ObjectLockRead();
-				LOG_ERROR("Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
+				LOG_ERROR(this, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
 				ObjectUnlock();
 				return false;
 			}
@@ -164,14 +164,14 @@ bool Load::SaveCheckpointSync(const char *path) {
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fw = fopen(buffer1, "w");
 	if (!fw) {
-		LOG_ERROR("Cannot open file: " << buffer1);
+		LOG_ERROR(this, "Cannot open file: " << buffer1);
 		return false;
 	}
 	char buffer2[1024];
 	off_t offset = lseek(fd, 0, SEEK_CUR);
 	snprintf(buffer2, sizeof(buffer2), "%s\n%llu\n", filename, (unsigned long long)offset);
 	if (fwrite(buffer2, strlen(buffer2), 1, fw) != 1) {
-		LOG_ERROR("Cannot write data to file: " << buffer1);
+		LOG_ERROR(this, "Cannot write data to file: " << buffer1);
 		fclose(fw);
 		return false;
 	}
@@ -184,26 +184,26 @@ bool Load::RestoreCheckpointSync(const char *path) {
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fr = fopen(buffer1, "r");
 	if (!fr) {
-		LOG_ERROR("Cannot open file: " << buffer1);
+		LOG_ERROR(this, "Cannot open file: " << buffer1);
 		return false;
 	}
 	char buffer2[1024];
 	int n = fread(buffer2, 1, 1023, fr);
 	fclose(fr);
 	if (n == 0) {
-		LOG_ERROR("Cannot read data from file: " << buffer1);
+		LOG_ERROR(this, "Cannot read data from file: " << buffer1);
 		return false;
 	}
 	buffer2[n] = '\0';
 	char fn[1024];
 	unsigned long long offset;
 	if (sscanf(buffer2, "%s\n%llu\n", fn, &offset) != 2) {
-		LOG_ERROR("Cannot parse data: " << buffer1);
+		LOG_ERROR(this, "Cannot parse data: " << buffer1);
 		return false;
 	}
 	setFilename(NULL, fn);
 	if (lseek(fd, (off_t)offset, SEEK_SET) != offset) {
-		LOG_ERROR("Cannot seek in file: " << filename);
+		LOG_ERROR(this, "Cannot seek in file: " << filename);
 		return false;
 	}
 	return true;

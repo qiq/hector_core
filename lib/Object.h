@@ -15,11 +15,11 @@
 #include "ObjectRegistry.h"
 #include "RWLock.h"
 
-#define LOG_TRACE(...) { LOG4CXX_TRACE(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_DEBUG(...) { LOG4CXX_DEBUG(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_INFO(...) { LOG4CXX_INFO(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_ERROR(...) { LOG4CXX_ERROR(logger, getId() << ": " << __VA_ARGS__) }
-#define LOG_FATAL(...) { LOG4CXX_FATAL(logger, getId() << ": " << __VA_ARGS__) }
+#define LOG_TRACE(o, ...) { LOG4CXX_TRACE(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
+#define LOG_DEBUG(o, ...) { LOG4CXX_DEBUG(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
+#define LOG_INFO(o, ...) { LOG4CXX_INFO(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
+#define LOG_ERROR(o, ...) { LOG4CXX_ERROR(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
+#define LOG_FATAL(o, ...) { LOG4CXX_FATAL(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
 
 class Object {
 public:
@@ -36,6 +36,8 @@ public:
 	std::vector<std::string> *listNames();
 	bool SaveCheckpoint(const char *path);
 	bool RestoreCheckpoint(const char *path);
+
+	log4cxx::LoggerPtr getLogger();
 
 	void log_trace(const char *s);
 	void log_trace(const std::string &s);
@@ -166,44 +168,48 @@ inline bool Object::RestoreCheckpoint(const char *path) {
 	return result;
 }
 
+inline log4cxx::LoggerPtr Object::getLogger() {
+	return logger;
+}
+
 inline void Object::log_trace(const char *s) {
-	LOG_TRACE(s);
+	LOG_TRACE(this, s);
 }
 
 inline void Object::log_trace(const std::string &s) {
-	LOG_TRACE(s);
+	LOG_TRACE(this, s);
 }
 
 inline void Object::log_debug(const char *s) {
-	LOG_DEBUG(s);
+	LOG_DEBUG(this, s);
 }
 
 inline void Object::log_debug(const std::string &s) {
-	LOG_DEBUG(s);
+	LOG_DEBUG(this, s);
 }
 
 inline void Object::log_info(const char *s) {
-	LOG_INFO(s);
+	LOG_INFO(this, s);
 }
 
 inline void Object::log_info(const std::string &s) {
-	LOG_INFO(s);
+	LOG_INFO(this, s);
 }
 
 inline void Object::log_error(const char *s) {
-	LOG_ERROR(s);
+	LOG_ERROR(this, s);
 }
 
 inline void Object::log_error(const std::string &s) {
-	LOG_ERROR(s);
+	LOG_ERROR(this, s);
 }
 
 inline void Object::log_fatal(const char *s) {
-	LOG_FATAL(s);
+	LOG_FATAL(this, s);
 }
 
 inline void Object::log_fatal(const std::string &s) {
-	LOG_FATAL(s);
+	LOG_FATAL(this, s);
 }
 
 #endif
