@@ -45,7 +45,7 @@ int TestResource::getSize() {
 
 string TestResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "[TR %d %d] %s", id, isStatusDeleted() ? -1 : status, str.c_str());
+	snprintf(buf, sizeof(buf), "[TR %d %d] %s", id, isSetFlag(DELETED) ? -1 : status, str.c_str());
 	return buf;
 }
 

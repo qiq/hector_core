@@ -22,6 +22,9 @@ Obecne:
 - processor obsahuje jeden, ci vice modulu
 - modul zpracovava resource (resource je cokoliv, co je zabaleno do C++ objektu)
 
+- synchronizace:
+	- ze neni potreba pro moduly, kdy je potreba
+	- ze ProcessMulti by nemel sahat na vstupni a vytupni fronty mimo ProcessMulti
 
 Obecne
 - C++ a bindingy v dalsich jazycich (Perl, Python, Java -- pres SWIG)

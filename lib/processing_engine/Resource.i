@@ -8,6 +8,11 @@
 
 class Resource {
 public:
+        enum Flag {
+                DELETED = 1,
+                SKIP = 2,
+        };
+        
         Resource();
         virtual ~Resource();
         virtual Resource *Clone() = 0;
@@ -20,8 +25,9 @@ public:
         virtual void setId(int id) = 0;
         virtual int getStatus() = 0;
         virtual void setStatus(int status) = 0;
-        void setStatusDeleted();
-        bool isStatusDeleted();
+        void setFlag(Flag flag);
+        void resetFlag(Flag flag);
+        bool isSetFlag(Flag flag);
         virtual int getSize() = 0;
         virtual std::string toString(Object::LogLevel logLevel) = 0;
         std::string toStringShort();
@@ -32,5 +38,4 @@ public:
         // static methods common to all Resources
         static Resource *CreateResource(int id);
         static int NameToId(const char *name);
-        static const int RESOURCE_DELETED;
 };

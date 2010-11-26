@@ -423,7 +423,12 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 		switch (minfo->type) {
 		case Module::INPUT:
 			assert(resource == NULL);
-			resource = minfo->module->ProcessInput(sleep);
+			while (1) {
+				resource = minfo->module->ProcessInput(sleep);
+				if (!resource || !resource->isSetFlag(Resource::DELETED))
+					break;				// OK: no more resources or resource was not deleted
+				deletedResources.push(resource);	// deleted resource
+			}
 			if (!resource) {
 				if (stop)
 					*stop = true;
@@ -437,12 +442,13 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			resource = NULL;
 			break;
 		case Module::SIMPLE:
-			resource = minfo->module->ProcessSimple(resource);
+			if (!resource->isSetFlag(Resource::SKIP))
+				resource = minfo->module->ProcessSimple(resource);
 			if (!resource) {
 				LOG_ERROR(this, "Resource lost");
 				return NULL;
 			}
-			if (resource->isStatusDeleted()) {
+			if (resource->isSetFlag(Resource::DELETED)) {
 				// deleted resource
 				deletedResources.push(resource);
 				return NULL;
@@ -544,12 +550,20 @@ void Processor::runThread(int threadId) {
 		while (multiIndex >= 0) {
 			// call multi module
 			ModuleInfo *minfo = (*mis)[multiIndex];
+			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->module->ProcessingResources();
 			int n = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources);
 			n -= minfo->inputResources->size();
 			if (n < minN)
 				minN = n;
-			if (minfo->module->ProcessingResources() > 0)
+			int pr = minfo->module->ProcessingResources();
+			if (pr > 0)
 				block = false;
+			delta -= minfo->inputResources->size()+minfo->outputResources->size()+pr;
+			// some resources were added
+			if (delta != 0) {
+				assert(delta > 0);	// resources must not be deleted in ProcessMulti(), just marked as deleted
+				engine->UpdateResourceCount(-delta);
+			}
 			// set-up info for the next iteration
 			int nextMultiIndex = this->NextMultiModuleIndex(mis, multiIndex+1);
 
@@ -557,7 +571,7 @@ void Processor::runThread(int threadId) {
 			while (minfo->outputResources->size() > 0) {
 				Resource *resource = minfo->outputResources->front();
 				minfo->outputResources->pop();
-				if (resource->isStatusDeleted()) {
+				if (resource->isSetFlag(Resource::DELETED)) {
 					// deleted resource: do not process it any more
 					deletedResources.push(resource);
 					continue;
@@ -566,7 +580,10 @@ void Processor::runThread(int threadId) {
 				if (resource) {
 					if (nextMultiIndex >= 0) {
 						// next multi module
-						(*mis)[nextMultiIndex]->inputResources->push(resource);
+						if (!resource->isSetFlag(Resource::SKIP))
+							(*mis)[nextMultiIndex]->inputResources->push(resource);
+						else
+							(*mis)[nextMultiIndex]->outputResources->push(resource);
 					} else {
 						if (outputFilterResource) {
 							if (!QueueResource(outputFilterResource, (block && resourcesQueued == 0) ? &timeout : NULL, &outputFilterIndex))

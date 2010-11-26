@@ -16,9 +16,8 @@ tr1::unordered_map<int, Resource *(*)()> Resource::id2create;
 PlainLock Resource::idLock;
 int Resource::nextId = 0;
 
-const int Resource::RESOURCE_DELETED = std::numeric_limits<int>::max();
-
 Resource::Resource() {
+	flags = 0;
 	idLock.Lock();
 	setId(nextId++);
 	idLock.Unlock();
