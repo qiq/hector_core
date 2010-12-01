@@ -16,6 +16,7 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- IpAddress object (ip4 i ip6, metoda isEmpty(), ...)
 - nejak doresit unikatni resource id, asi se hodi, aby bylo vzdycky unikatni v
   ramci beziciho hectora
 	- pozor na clone(!)

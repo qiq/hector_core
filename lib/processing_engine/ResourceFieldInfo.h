@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <string>
 #include "Resource.h"
+#include "IpAddr.h"
 
 class ResourceFieldInfo {
 public:
@@ -18,8 +19,7 @@ public:
 		STRING,
 		INT,
 		LONG,
-		IP4,		// IPv4 address
-		IP6,		// IPv6 address
+		IP,		// IP address
 		STRING2,	// string->string
 		STRINGN,	// [string]
 	} FieldType;
@@ -31,16 +31,14 @@ public:
 	virtual const std::string &getString(Resource*) = 0;
 	virtual int getInt(Resource*) = 0;
 	virtual long getLong(Resource*) = 0;
-	virtual ip4_addr_t getIp4Addr(Resource*) = 0;
-	virtual ip6_addr_t getIp6Addr(Resource*) = 0;
+	virtual IpAddr &getIpAddr(Resource*) = 0;
 	virtual const std::string &getString2(Resource*, const std::string&) = 0;
 //	virtual const std::string &getStringN(Resource*, int) = 0;
 
 	virtual void setString(Resource*, const std::string&) = 0;
 	virtual void setInt(Resource*, int) = 0;
 	virtual void setLong(Resource*, long) = 0;
-	virtual void setIp4Addr(Resource*, ip4_addr_t) = 0;
-	virtual void setIp6Addr(Resource*, ip6_addr_t) = 0;
+	virtual void setIpAddr(Resource*, IpAddr&) = 0;
 	virtual void setString2(Resource*, const std::string&, const std::string&) = 0;
 //	virtual void setStringN(Resource*, int, const std::string&) = 0;
 
@@ -62,16 +60,14 @@ public:
 	const std::string &getString(Resource*);
 	int getInt(Resource*);
 	long getLong(Resource*);
-	ip4_addr_t getIp4Addr(Resource*);
-	ip6_addr_t getIp6Addr(Resource*);
+	IpAddr &getIpAddr(Resource*);
 	const std::string &getString2(Resource*, const std::string&);
 //	const std::string &getStringN(Resource*, int);
 
 	void setString(Resource*, const std::string&);
 	void setInt(Resource*, int);
 	void setLong(Resource*, long);
-	void setIp4Addr(Resource*, ip4_addr_t);
-	void setIp6Addr(Resource*, ip6_addr_t);
+	void setIpAddr(Resource*, IpAddr&);
 	void setString2(Resource*, const std::string&, const std::string&);
 //	void setStringN(Resource*, int, const std::string&);
 
@@ -84,8 +80,7 @@ protected:
 		const std::string &(T::*s)();
 		int (T::*i)();
 		long (T::*l)();
-		ip4_addr_t (T::*a4)();
-		ip6_addr_t (T::*a6)();
+		IpAddr &(T::*ip)();
 		const std::string &(T::*s2)(const std::string&);
 		const std::string &(T::*sn)(int);
 	} get_u;
@@ -93,8 +88,7 @@ protected:
 		void (T::*s)(const std::string&);
 		void (T::*i)(int);
 		void (T::*l)(long);
-		void (T::*a4)(ip4_addr_t);
-		void (T::*a6)(ip6_addr_t);
+		void (T::*ip)(IpAddr&);
 		void (T::*s2)(const std::string&, const std::string&);
 		void (T::*sn)(int, const std::string&);
 	} set_u;
@@ -128,15 +122,9 @@ long ResourceFieldInfoT<T>::getLong(Resource *resource) {
 }
 
 template <class T>
-ip4_addr_t ResourceFieldInfoT<T>::getIp4Addr(Resource *resource) {
+IpAddr &ResourceFieldInfoT<T>::getIpAddr(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
-	return get_u.a4 ? (static_cast<T*>(resource)->*get_u.a4)() : ip4_addr_empty;
-}
-
-template <class T>
-ip6_addr_t ResourceFieldInfoT<T>::getIp6Addr(Resource *resource) {
-	assert(resource->getTypeId() == T::typeId);
-	return get_u.a6 ? (static_cast<T*>(resource)->*get_u.a6)() : ip6_addr_empty;
+	return get_u.ip ? (static_cast<T*>(resource)->*get_u.ip)() : IpAddr::ipAddrEmpty;
 }
 
 template <class T>
@@ -167,17 +155,10 @@ void ResourceFieldInfoT<T>::setLong(Resource *resource, long value) {
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setIp4Addr(Resource *resource, ip4_addr_t value) {
+void ResourceFieldInfoT<T>::setIpAddr(Resource *resource, IpAddr &value) {
 	assert(resource->getTypeId() == T::typeId);
-	if (set_u.a4)
-		(static_cast<T*>(resource)->*set_u.a4)(value);
-}
-
-template <class T>
-void ResourceFieldInfoT<T>::setIp6Addr(Resource *resource, ip6_addr_t value) {
-	assert(resource->getTypeId() == T::typeId);
-	if (set_u.a6)
-		(static_cast<T*>(resource)->*set_u.a6)(value);
+	if (set_u.ip)
+		(static_cast<T*>(resource)->*set_u.ip)(value);
 }
 
 template <class T>

@@ -20,6 +20,10 @@ void ip4AddrDelete_w(ip4_addr_t *addr) {
         delete addr;
 }
 
+bool isEmptyIp4Addr_w(ip4_addr_t *addr) {
+        return isEmptyIp4Addr(*addr);
+}
+
 ip6_addr_t *str2Ip6Addr_w(const char *s) {
         ip6_addr_t *addr = new ip6_addr_t;
         *addr = str2Ip6Addr(s);
@@ -32,6 +36,10 @@ char *ip6Addr2Str_w(ip6_addr_t *addr) {
 
 void ip6AddrDelete_w(ip6_addr_t *addr) {
         delete addr;
+}
+
+bool isEmptyIp6Addr_w(ip6_addr_t *addr) {
+        return isEmptyIp6Addr(*addr);
 }
 
 %}

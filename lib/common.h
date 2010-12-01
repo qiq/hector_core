@@ -34,6 +34,7 @@ inline void die(const char *msg, ...) {
 void skipWs(std::string *data);
 void chomp(std::string *data);
 
+/*
 typedef struct {
 	uint32_t addr;
 } ip4_addr_t;
@@ -64,6 +65,10 @@ inline char *ip4Addr2Str(ip4_addr_t addr) {
 	return strdup(s);
 }
 
+inline bool isEmptyIp4Addr(ip4_addr_t addr) {
+	return addr.addr == 0;
+}
+
 inline ip6_addr_t str2Ip6Addr(const char *s) {
 	ip6_addr_t addr;
 	if (!inet_pton(AF_INET6, s, &addr.addr))
@@ -91,6 +96,15 @@ inline char *ip6Addr2Str(ip6_addr_t addr) {
 		return NULL;
 	return strdup(s);
 }
+
+inline bool isEmptyIp6Addr(ip6_addr_t addr) {
+	for (int i = 0; i < 16; i++) {
+		if (addr.addr[i] != 0)
+			return false;
+	}
+	return true;
+}
+*/
 
 /*void to_lowercase(string &s) {
 	for (string::iterator i = s.begin(); i != s.end(); i++)

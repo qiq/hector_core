@@ -10,9 +10,9 @@
 %include "std_string.i"
 %template(StringVector_hector) std::vector<std::string>;
 
-%include common.i
 %include Connection.i
 %include StdioConnection.i
+%include IpAddr.i
 %include Object.i
 %include ObjectRegistry.i
 %include Module.i
