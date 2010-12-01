@@ -6,8 +6,8 @@ AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
 lib_LTLIBRARIES = libhector.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = common.h Connection.h StdioConnection.h PlainLock.h RWLock.h CondLock.h MemoryPool.h IpAddr.h \
-	LibraryLoader.h SyncQueue.h Object.h ObjectRegistry.h ObjectValues.h Server.h \
+hectorinclude_HEADERS = common.h Connection.h StdioConnection.h PlainLock.h RWLock.h CondLock.h MemoryPool.h \
+	IpAddr.h IpAddr.i LibraryLoader.h SyncQueue.h Object.h ObjectRegistry.h ObjectValues.h Server.h \
 	Hector.i common.i Object.i ObjectRegistry.i Connection.i StdioConnection.i
 
 libhector_la_SOURCES = \

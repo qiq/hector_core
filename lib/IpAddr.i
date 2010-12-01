@@ -17,9 +17,9 @@ public:
         void setIp4Addr(uint32_t addr);
         void setIp6Addr(uint64_t addr, bool second);
         std::string toString();
-        bool ParseIp4Addr(std::string &s);
-        bool ParseIp6Addr(std::string &s);
+        bool ParseIp4Addr(const std::string &s);
+        bool ParseIp6Addr(const std::string &s);
         void ApplyPrefix(int prefix);
 
-        static IpAddr ipAddrEmpty;
+        static IpAddr emptyIpAddr;
 };

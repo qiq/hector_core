@@ -124,7 +124,7 @@ long ResourceFieldInfoT<T>::getLong(Resource *resource) {
 template <class T>
 IpAddr &ResourceFieldInfoT<T>::getIpAddr(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
-	return get_u.ip ? (static_cast<T*>(resource)->*get_u.ip)() : IpAddr::ipAddrEmpty;
+	return get_u.ip ? (static_cast<T*>(resource)->*get_u.ip)() : IpAddr::emptyIpAddr;
 }
 
 template <class T>
