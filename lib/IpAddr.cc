@@ -24,7 +24,7 @@ bool IpAddr::ParseIp6Addr(const string &s) {
 	return true;
 }
 
-void ReverseIp6Addr(in6_addr *addr) {
+void IpAddr::ReverseIp6Addr(in6_addr *addr) {
 	if (htons(0xabcd) != 0xabcd) {
 		for (int i = 0; i < 8; i++) {
 			uint8_t tmp = addr->s6_addr[15-i];
