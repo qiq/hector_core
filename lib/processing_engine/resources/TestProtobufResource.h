@@ -111,6 +111,10 @@ inline const char *TestProtobufResource::getModuleStr() {
 	return "Hector";
 }
 
+inline int TestProtobufResource::getSize() {
+	return 1;
+}
+
 inline void TestProtobufResource::setStr(const std::string &str) {
 	r.set_str(str);
 }

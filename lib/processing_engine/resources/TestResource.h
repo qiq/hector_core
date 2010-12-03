@@ -66,6 +66,10 @@ inline const char *TestResource::getModuleStr() {
 	return "Hector";
 }
 
+inline int TestResource::getSize() {
+	return 1;
+}
+
 inline const std::string &TestResource::getStr() {
 	return str;
 }

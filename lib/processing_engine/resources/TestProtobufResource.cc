@@ -11,10 +11,6 @@ ProtobufResource *TestProtobufResource::Clone() {
 	return new TestProtobufResource(*this);
 }
 
-int TestProtobufResource::getSize() {
-	return 1;
-}
-
 string TestProtobufResource::toString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", getId(), isSetFlag(DELETED) ? -1 : getStatus(), getStr().c_str());
