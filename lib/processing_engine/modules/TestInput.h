@@ -3,6 +3,7 @@ TestInput.la, input, native
 Create resources of given type.
 
 Dependencies: none
+
 Parameters:
 items		r/o	Total items processed
 maxItems	init	Number of resources to generate

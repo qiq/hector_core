@@ -3,6 +3,7 @@ TestSimple.la, simple, native
 Process resources using ProcessSimple()
 
 Dependencies: none
+
 Parameters:
 items		r/o	Total items processed
 foo		r/w	Test string

@@ -2,8 +2,8 @@
 Dump.la, simple, native
 Dumps Resource content into log. Useful for debugging purposes.
 
-Dependencies: pcrecpp
-Parameters:
+Dependencies: none
+Parameters: none
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_DUMP_H_
