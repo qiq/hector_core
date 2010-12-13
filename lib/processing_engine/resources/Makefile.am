@@ -41,7 +41,7 @@ EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto
 CLEANFILES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 ALIASES += TestProtobufResource.la
 
-# In order to enable Resources::CreateResource(id) to work, we need to know
+# In order to enable Resources::AcquireResource(id) to work, we need to know
 # mapping id -> library_name. This is achieved using symlink id.la ->
 # resource.la, so the same library is opened.
 

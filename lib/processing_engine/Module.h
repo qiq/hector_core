@@ -30,8 +30,8 @@ public:
 	int getThreadIndex();
 	// Input module: produce resource, possibly wait for input
 	virtual Resource *ProcessInput(bool sleep);
-	// Output module: consume resource
-	virtual void ProcessOutput(Resource *resource);
+	// Output module: consume resource, return resource to be deleted
+	virtual Resource *ProcessOutput(Resource *resource);
 	// Simple module: one resource a time
 	virtual Resource *ProcessSimple(Resource *resource);
 	// Multi modules use input/output interface: inputResources should be consumed, outputResources should be produced

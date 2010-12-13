@@ -26,7 +26,7 @@ public:
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
 	Resource *ProcessInput(bool sleep);
-	void ProcessOutput(Resource *resource);
+	Resource *ProcessOutput(Resource *resource);
 	Resource *ProcessSimple(Resource *resource);
 	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
 	int ProcessingResources();

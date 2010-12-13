@@ -408,7 +408,7 @@ bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterI
 	}
 	if (!appended) {
 		LOG_ERROR(this, "Lost resource (id: " << r->getId() << ")");
-		delete r;
+		Resource::ReleaseResource(r);
 		engine->UpdateResourceCount(-1);
 	}
 
@@ -437,7 +437,8 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			engine->UpdateResourceCount(1);
 			break;
 		case Module::OUTPUT:
-			minfo->module->ProcessOutput(resource);
+			resource = minfo->module->ProcessOutput(resource);
+			Resource::ReleaseResource(resource);
 			engine->UpdateResourceCount(-1);
 			resource = NULL;
 			break;
@@ -628,7 +629,8 @@ void Processor::runThread(int threadId) {
 			} else {
 				// no output queue => no need to store anything, we just
 				// discard the resource (and notify PE)
-				delete deletedResources.front();
+				LOG_DEBUG_R(this, deletedResources.front(), "Deleted");
+				Resource::ReleaseResource(deletedResources.front());
 				engine->UpdateResourceCount(-1);
 			}
 			deletedResources.pop();

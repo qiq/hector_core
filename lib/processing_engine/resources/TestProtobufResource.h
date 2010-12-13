@@ -21,6 +21,8 @@ public:
 	~TestProtobufResource() {};
 	// create copy of a resource
 	ProtobufResource *Clone();
+	// Clear current resource (as would delete + new do)
+	void Clear();
 	// save and restore resource
 	std::string *Serialize();
 	bool Deserialize(const char *data, int size);
@@ -31,7 +33,7 @@ public:
 
 	// return ResourceInfo describing one field
 	ResourceFieldInfo *getFieldInfo(const char *name);
-	// type id of a resource (to be used by Resources::CreateResource(typeid))
+	// type id of a resource (to be used by Resources::AcquireResource(typeid))
 	int getTypeId();
 	// type string of a resource
 	const char *getTypeStr();

@@ -1,6 +1,14 @@
 /**
- * Test module, does nothing.
- */
+TestInput.la, input, native
+Create resources of given type.
+
+Dependencies: none
+Parameters:
+items		r/o	Total items processed
+maxItems	init	Number of resources to generate
+idPrefix	r/w	Prefix to be used as prefix for string in TestResource
+resourceType	init	What resource to genereate.
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_INPUT_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_TEST_INPUT_H_
@@ -19,14 +27,10 @@ public:
 	Resource *ProcessInput(bool sleep);
 
 private:
-	int typeId;		// to create TestResource
-
 	int items;		// ObjectLock
 	int maxItems;		// initOnly
 	char *idPrefix;		// ObjectLock
 	char *resourceType;	// ObjectLock
-
-	ObjectValues<TestInput> *values;
 
 	char *getItems(const char *name);
 	char *getMaxItems(const char *name);
@@ -36,10 +40,13 @@ private:
 	char *getResourceType(const char *name);
 	void setResourceType(const char *name, const char *value);
 
+	ObjectValues<TestInput> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	int typeId;		// to create TestResource
 };
 
 inline Module::Type TestInput::getType() {

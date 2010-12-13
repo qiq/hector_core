@@ -1,3 +1,12 @@
+# TestInput.om, input, perl
+# Create TestResource resources.
+# 
+# Dependencies: none
+# Parameters:
+# items		r/o	Total items processed
+# maxItems	init	Number of resources to generate
+# idPrefix	r/w	Prefix to be used as prefix for string in TestResource
+
 package TestInput;
 
 use warnings;

@@ -1,6 +1,12 @@
 /**
- * Test module, does nothing.
- */
+Save.la, output, native
+Save Resources to the file.
+
+Dependencies: protobuf
+Parameters:
+items		r/o		Total items processed
+filename	initOnly	File to save resources to.
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -21,24 +27,24 @@ public:
 	~Save();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	void ProcessOutput(Resource *resource);
+	Resource *ProcessOutput(Resource *resource);
 
 private:
 	int items;		// ObjectLock
 	char *filename;		// initOnly
-	int fd;			// private to ProcessOutput()
-	google::protobuf::io::FileOutputStream *stream;	// private to ProcessOutput()
-
-	ObjectValues<Save> *values;
 
 	char *getItems(const char *name);
 	char *getFilename(const char *name);
 	void setFilename(const char *name, const char *value);
 
+	ObjectValues<Save> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	int fd;			// private to ProcessOutput()
+	google::protobuf::io::FileOutputStream *stream;	// private to ProcessOutput()
 
 	bool WriteToFile(const char *data, int size);
 };

@@ -1,6 +1,13 @@
 /**
- * Test module, does nothing.
- */
+TestMulti.la, multi, native
+Process resources using ProcessMulti()
+
+Dependencies: none
+Parameters:
+items		r/o	Total items processed
+foo		r/w	Test string
+timeTick	r/w	Max time to spend in ProcessMulti()
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_MULTI_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_TEST_MULTI_H_
@@ -28,9 +35,6 @@ private:
 	int items;		// ObjectLock
 	char *foo;		// ObjectLock
 	int timeTick;		// ObjectLock
-	std::queue<TestResource*> resources; // private to Process* (+ProcessingResources)
-
-	ObjectValues<TestMulti> *values;
 
 	char *getItems(const char *name);
 	char *getFoo(const char *name);
@@ -38,10 +42,13 @@ private:
 	char *getTimeTick(const char *name);
 	void setTimeTick(const char *name, const char *value);
 
+	ObjectValues<TestMulti> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	std::queue<TestResource*> resources; // private to Process* (+ProcessingResources)
 };
 
 inline Module::Type TestMulti::getType() {

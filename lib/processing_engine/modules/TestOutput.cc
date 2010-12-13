@@ -32,18 +32,17 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-void TestOutput::ProcessOutput(Resource *resource) {
+Resource *TestOutput::ProcessOutput(Resource *resource) {
 	if (resource->getTypeId() == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(resource);
 		LOG_INFO_R(this, tr, "Resource arrived (" << tr->getStr() << ")");
-		delete tr;
 	} else {
 		LOG_INFO_R(this, resource, "Resource arrived");
-		delete resource;
 	}
 	ObjectLockWrite();
 	items++;
 	ObjectUnlock();
+	return resource;
 }
 
 // the class factories

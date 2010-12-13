@@ -1,6 +1,10 @@
 /**
- * Dumps Resource content into log. Useful for debugging purposes.
- */
+Dump.la, simple, native
+Dumps Resource content into log. Useful for debugging purposes.
+
+Dependencies: pcrecpp
+Parameters:
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_DUMP_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_DUMP_H_
@@ -22,7 +26,6 @@ public:
 
 private:
 	ObjectValues<Dump> *values;
-
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);

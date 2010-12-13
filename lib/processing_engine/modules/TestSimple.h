@@ -1,6 +1,14 @@
 /**
- * Test module, does nothing.
- */
+TestSimple.la, simple, native
+Process resources using ProcessSimple()
+
+Dependencies: none
+Parameters:
+items		r/o	Total items processed
+foo		r/w	Test string
+flipStatus	r/w	Whether to change status from 1 to 0 (or vice-versa)
+setStatus	r/w	Whether to set status to an arbitrary value (setStatus >= 0)
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_SIMPLE_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_TEST_SIMPLE_H_
@@ -27,8 +35,6 @@ private:
 	bool flipStatus;	// ObjectLock
 	int setStatus;		// ObjectLock
 
-	ObjectValues<TestSimple> *values;
-
 	char *getItems(const char *name);
 	char *getFoo(const char *name);
 	void setFoo(const char *name, const char *value);
@@ -37,6 +43,7 @@ private:
 	char *getSetStatus(const char *name);
 	void setSetStatus(const char *name, const char *value);
 
+	ObjectValues<TestSimple> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);

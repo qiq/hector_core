@@ -336,15 +336,16 @@ Resource *PerlModule::ProcessInput(bool sleep) {
 	return result;
 }
 
-void PerlModule::ProcessOutput(Resource *resource) {
+Resource *PerlModule::ProcessOutput(Resource *resource) {
 	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
+	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
 		// create new instance of a resource (of given type)
 		if (!(resourceSV = CreatePerlResource(resource))) {
 			ObjectUnlock();
-			return;
+			return NULL;
 		}
 	} else {
 		resourceSV = &PL_sv_undef;
@@ -357,7 +358,7 @@ void PerlModule::ProcessOutput(Resource *resource) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(resourceSV));
         PUTBACK;
-	int count = call_method("ProcessOutput", G_VOID|G_EVAL);
+	int count = call_method("ProcessOutput", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(this, "Error calling ProcessOutput (" << SvPV_nolen(ERRSV) << ")");
@@ -365,20 +366,28 @@ void PerlModule::ProcessOutput(Resource *resource) {
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
-		return;
-	} else if (count != 0) {
-		LOG_ERROR(this, "Error calling ProcessOutput");
+		return result;
+	} else if (count != 1) {
+		LOG_ERROR(this, "Error calling ProcessSimple");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
-		return;
+		return result;
 	}
+	resourceSV = SvREFCNT_inc(POPs);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
 
+	// get Resource C++ pointer & DISOWN
+	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
+
+	// delete Perl resource object
+	SvREFCNT_dec(resourceSV);
+
 	ObjectUnlock();
+	return result;
 }
 
 Resource *PerlModule::ProcessSimple(Resource *resource) {

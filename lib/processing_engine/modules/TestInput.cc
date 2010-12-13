@@ -89,7 +89,7 @@ Resource *TestInput::ProcessInput(bool sleep) {
 	if (maxItems && i >= maxItems)
 		return NULL;
 	ObjectLockWrite();
-	Resource *r = Resource::CreateResource(typeId);
+	Resource *r = Resource::AcquireResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	if (typeId == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(r);

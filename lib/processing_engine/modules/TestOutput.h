@@ -1,6 +1,11 @@
 /**
- * Test module, does nothing.
- */
+TestOutput.la, output, native
+Just print out a message that resource arrived.
+
+Dependencies: none
+Parameters:
+items		r/o	Total items processed
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_OUTPUT_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_TEST_OUTPUT_H_
@@ -16,15 +21,14 @@ public:
 	~TestOutput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	void ProcessOutput(Resource *resource);
+	Resource *ProcessOutput(Resource *resource);
 
 private:
 	int items;		// ObjectLock
 
-	ObjectValues<TestOutput> *values;
-
 	char *getItems(const char *name);
 
+	ObjectValues<TestOutput> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);

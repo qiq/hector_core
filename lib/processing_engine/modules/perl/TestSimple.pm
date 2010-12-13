@@ -1,3 +1,13 @@
+# TestSimple.pm, simple, perl
+# Process resources using ProcessSimple()
+# 
+# Dependencies: none
+# Parameters:
+# items		r/o	Total items processed
+# foo		r/w	Test string
+# flipStatus	r/w	Whether to change status from 1 to 0 (or vice-versa)
+# setStatus	r/w	Whether to set status to an arbitrary value (setStatus >= 0)
+
 package TestSimple;
 
 use warnings;

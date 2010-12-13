@@ -7,11 +7,16 @@
 
 using namespace std;
 
+struct ResourceInfo {
+	Resource *(*create)();
+	vector<Resource*> available;
+};
+
 log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 
 PlainLock Resource::translateLock;
 tr1::unordered_map<string, int> Resource::name2id;
-tr1::unordered_map<int, Resource *(*)()> Resource::id2create;
+tr1::unordered_map<int, ResourceInfo*> Resource::id2info;
 
 PlainLock Resource::idLock;
 int Resource::nextId = 0;
@@ -29,6 +34,13 @@ Resource::Resource(const Resource &r) : status(r.status), attachedResource(r.att
 	idLock.Lock();
 	setId(nextId++);
 	idLock.Unlock();
+}
+
+void Resource::Clear() {
+	flags = 0;
+	status = 0;
+	id = 0;
+	attachedResource = NULL;
 }
 
 // Must be called with lock locked
@@ -54,31 +66,17 @@ int Resource::LoadResourceLibrary(const char *name, int id) {
 	id = r->getTypeId();
 	name = r->getTypeStr();
 	name2id[name] = id;
-	delete r;
-	// save constructor reference
-	id2create[id] = create;
+	ResourceInfo *info = new ResourceInfo;
+	// save constructor reference and store first available resource
+	info->create = create;
+	info->available.push_back(r);
+	id2info[id] = info;
 	return true;
-}
-
-Resource *Resource::CreateResource(int id) {
-	if (id < 0)
-		return NULL;
-	translateLock.Lock();
-	std::tr1::unordered_map<int, Resource *(*)()>::iterator iter = id2create.find(id);
-	if (iter == id2create.end()) {
-		if (!Resource::LoadResourceLibrary(NULL, id))
-			return NULL;
-		iter = id2create.find(id);
-		assert(iter != id2create.end());
-	}
-	translateLock.Unlock();
-	Resource *result = (*iter->second)();
-	return result;
 }
 
 int Resource::NameToId(const char *name) {
 	translateLock.Lock();
-	std::tr1::unordered_map<string, int>::iterator iter = name2id.find(name);
+	tr1::unordered_map<string, int>::iterator iter = name2id.find(name);
 	if (iter != name2id.end()) {
 		translateLock.Unlock();
 		return iter->second;
@@ -93,4 +91,54 @@ int Resource::NameToId(const char *name) {
 	int result = iter->second;
 	translateLock.Unlock();
 	return result;
+}
+
+int Resource::NextResourceId() {
+	idLock.Lock();
+	int next = nextId++;
+	idLock.Unlock();
+	return next;
+}
+
+Resource *Resource::AcquireResource(int id) {
+	if (id < 0)
+		return NULL;
+	translateLock.Lock();
+	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(id);
+	if (iter == id2info.end()) {
+		if (!Resource::LoadResourceLibrary(NULL, id))
+			return NULL;
+		iter = id2info.find(id);
+		assert(iter != id2info.end());
+	}
+	Resource *result;
+	if (iter->second->available.size() > 0) {
+		result = iter->second->available.back();
+		result->setId(Resource::NextResourceId());
+		iter->second->available.pop_back();
+	} else {
+ 		result = iter->second->create();
+	}
+	translateLock.Unlock();
+	return result;
+}
+
+#define AVAILABLE_SIZE_MAX 10000
+void Resource::ReleaseResource(Resource *resource) {
+	if (!resource)
+		return;
+	resource->Clear();
+	translateLock.Lock();
+	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(resource->getTypeId());
+	if (iter == id2info.end()) {
+		if (!Resource::LoadResourceLibrary(NULL, resource->getTypeId()))
+			return;
+		iter = id2info.find(resource->getTypeId());
+		assert(iter != id2info.end());
+	}
+	if (iter->second->available.size() < AVAILABLE_SIZE_MAX)
+		iter->second->available.push_back(resource);
+	else
+		delete resource;
+	translateLock.Unlock();
 }

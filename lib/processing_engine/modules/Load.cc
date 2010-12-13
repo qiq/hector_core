@@ -131,7 +131,7 @@ Resource *Load::ProcessInput(bool sleep) {
 	uint32_t size = *(uint32_t*)buffer;
 	uint8_t typeId = *(uint8_t*)(buffer+4);
 
-	Resource *r = Resource::CreateResource(typeId);
+	Resource *r = Resource::AcquireResource(typeId);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(r);
 	if (pr) {
 		ObjectLockRead();
@@ -143,12 +143,12 @@ Resource *Load::ProcessInput(bool sleep) {
 		char *data = (char*)malloc(size);
 		if (!ReadFromFile(data, size, false)) {
 			free(data);
-			delete r;
+			Resource::ReleaseResource(r);
 			return NULL;
 		}
 		if (!r->Deserialize(data, size)) {
 			free(data);
-			delete r;
+			Resource::ReleaseResource(r);
 			return NULL;
 		}
 		free(data);

@@ -1,3 +1,10 @@
+# TestOutput.pm, output, perl
+# Just print out a message that resource arrived.
+# 
+# Dependencies: none
+# Parameters:
+# items		r/o	Total items processed
+
 package TestOutput;
 
 use warnings;

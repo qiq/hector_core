@@ -1,6 +1,13 @@
 /**
- * Test module, does nothing.
- */
+Load.la, input, native
+Load Resources from the file.
+
+Dependencies: protobuf
+Parameters:
+items		r/o	Total items processed
+maxItems	r/w	Number of items to load
+filename	r/w	File to load. Change it to process another file
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
@@ -33,12 +40,6 @@ private:
 	int items;		// ObjectLock
 	int maxItems;		// ObjectLock
 	char *filename;		// ObjectLock
-	int fd;			// ObjectLock
-	bool cancel;		// ObjectLock
-	google::protobuf::io::FileInputStream *stream;	// ObjectLock
-	CondLock fileCond;	// for pause when source file is exhausted
-
-	ObjectValues<Load> *values;
 
 	char *getItems(const char *name);
 	char *getMaxItems(const char *name);
@@ -46,10 +47,16 @@ private:
 	char *getFilename(const char *name);
 	void setFilename(const char *name, const char *value);
 
+	ObjectValues<Load> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	int fd;
+	bool cancel;
+	google::protobuf::io::FileInputStream *stream;
+	CondLock fileCond;	// for pause when source file is exhausted
 
 	bool ReadFromFile(char *data, int size, bool sleep);
 };

@@ -1,3 +1,12 @@
+# TestMulti.pm, multi, perl
+# Process resources using ProcessMulti()
+# 
+# Dependencies: none
+# Parameters:
+# items		r/o	Total items processed
+# foo		r/w	Test string
+# timeTick	r/w	Max time to spend in ProcessMulti()
+
 package TestMulti;
 
 use warnings;
@@ -14,6 +23,7 @@ sub new {
 		'_resources' => [],
 		'items' => 0,
 		'foo' => 0,
+		'timeTick' => 100*1000,
 	};
 	bless($self, $class);
 	return $self;
@@ -100,7 +110,7 @@ sub ProcessMulti() {
 
 	return 0 if (@{$self->{'_resources'}} == 0);
 
-	select(undef, undef, undef, 0.0001);
+	select(undef, undef, undef, $self->{'timeTick'}/1000000);
 
 	my $resource = shift(@{$self->{'_resources'}});
 	push(@{$outputResources}, $resource);

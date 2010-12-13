@@ -7,10 +7,13 @@
 	  pristup ke svym datum, pak ho muze pouzivat vice modulu najednou
 - the Resource's id is unique (in memory) across all Resources
 
-- aby bylo unikatni id pro resource, je potreba, aby se pouzivalo:
-	- vytvareni resource pres rozhrani Resources (CreateResource), 
-	- nebo aspon ziskani aktualni hodnoty resourceId z Resources
-	- mazani pomoci specialni hodnoty status
+- alokovani Resource funguje pres new/delete, ale take pres
+  Resource::AcquireResource/ReleaseResource s tim, ze tyto dve metody pouzivaji
+  cache na volne Resources. Pokud nekdo potrebuje MemoryPool, tak ho muze
+  implementovat modul (WebSiteManager), nebo Resource (ale pak musi
+  predefinovat new, delete, new[] a delete[]).
+
+- mazani pomoci specialni hodnoty delete.
 
 - items property rika, kolik resources bylo uspesne zpracovano (nepocitaji se tam resources, ktere se nezpracovaly)
 

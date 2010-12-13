@@ -4,4 +4,4 @@ we do this for every resource:
 - create a loadable module with create() method to create the resource (e.g. TestResource)
 
 Modules using resource should link against the library,
-Resources::CreateResource() uses the wrapper.
+Resources::AcquireResource() uses the wrapper.

@@ -13,6 +13,11 @@ Resource *TestResource::Clone() {
 	return new TestResource(*this);
 }
 
+void TestResource::Clear() {
+	Resource::Clear();
+	str.clear();
+}
+
 string *TestResource::Serialize() {
 	string *strcopy = new string(str);
 	size_t idx;

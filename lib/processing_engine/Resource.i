@@ -16,6 +16,7 @@ public:
         Resource();
         virtual ~Resource();
         virtual Resource *Clone() = 0;
+        virtual void Clear();
         virtual std::string *Serialize() = 0;
         virtual bool Deserialize(const char *data, int size) = 0;
         virtual int getTypeId() = 0;
@@ -36,6 +37,8 @@ public:
         void clearAttachedResource();
 
         // static methods common to all Resources
-        static Resource *CreateResource(int id);
         static int NameToId(const char *name);
+        static int NextResourceId();
+        static Resource *AcquireResource(int id);
+        static void ReleaseResource(Resource *resource);
 };

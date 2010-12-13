@@ -1,6 +1,15 @@
 /**
- * TestCall: translate DNS name to IP address
- */
+TestCall.la, multi, native
+Call another processing engine.
+
+Dependencies: none
+Parameters:
+items		r/o	Total items processed
+maxRequests	init	Number of concurrent requests
+timeTick	r/w	Max time to spend in ProcessMulti()
+resourceType;	init	Type of resource to generate
+targetEngine;	init	engine to be called
+*/
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_TEST_CALL_H_
 #define _LIB_PROCESSING_ENGINE_MODULES_TEST_CALL_H_
@@ -43,10 +52,6 @@ private:
 	char *resourceType;	// init only, type of resource to generate
 	char *targetEngine;	// init-only, read-only
 
-	ObjectValues<TestCall> *values;
-
-	Call *call;
-
 	char *getItems(const char *name);
 	char *getMaxRequests(const char *name);
 	void setMaxRequests(const char *name, const char *value);
@@ -57,10 +62,13 @@ private:
 	char *getTargetEngine(const char *name);
 	void setTargetEngine(const char *name, const char *value);
 
+	ObjectValues<TestCall> *values;
 	char *getValueSync(const char *name);
 	bool setValueSync(const char *name, const char *value);
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
+
+	Call *call;
 };
 
 inline Module::Type TestCall::getType() {

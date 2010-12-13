@@ -11,13 +11,13 @@
 #include "common.h"
 #include "PlainLock.h"
 
-template<class T>
+template<class T, bool useLock>
 class MemoryPool {
 public:
 	MemoryPool(int chunkSize);
 	~MemoryPool();
-	T *alloc();
-	void clear();
+	T *Alloc();
+	void Clear();
 private:
 	PlainLock lock;
 	int chunkSize;
@@ -25,40 +25,46 @@ private:
 	int used;
 };
 
-template <class T>
-MemoryPool<T>::MemoryPool(int chunkSize) {
+template <class T, bool useLock>
+MemoryPool<T, useLock>::MemoryPool(int chunkSize) {
 	this->chunkSize = chunkSize;
 	this->used = chunkSize;
 }
 
-template <class T>
-MemoryPool<T>::~MemoryPool() {
-	lock.Lock();
+template <class T, bool useLock>
+MemoryPool<T, useLock>::~MemoryPool() {
+	if (useLock)
+		lock.Lock();
 	for (typename std::vector<T*>::iterator iter = chunks.begin(); iter != chunks.end(); ++iter)
 		delete[] (*iter);
-	lock.Unlock();
+	if (useLock)
+		lock.Unlock();
 }
 
-template <class T>
-T *MemoryPool<T>::alloc() {
-	lock.Lock();
+template <class T, bool useLock>
+T *MemoryPool<T, useLock>::Alloc() {
+	if (useLock)
+		lock.Lock();
 	if (used >= chunkSize) {
 		T *chunk = new T[chunkSize]();
 		chunks.push_back(chunk);
 		used = 0;
 	}
 	int index = used++;
-	lock.Unlock();
+	if (useLock)
+		lock.Unlock();
 	return &chunks.back()[index];
 }
 
-template <class T>
-void MemoryPool<T>::clear() {
-	lock.Lock();
+template <class T, bool useLock>
+void MemoryPool<T, useLock>::Clear() {
+	if (useLock)
+		lock.Lock();
 	for (typename std::vector<T*>::iterator iter = chunks.begin(); iter != chunks.end(); ++iter)
 		delete (*iter);
 	chunks.clear();
-	lock.Unlock();
+	if (useLock)
+		lock.Unlock();
 }
 
 #endif

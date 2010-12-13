@@ -1,3 +1,9 @@
+# Dump.pm, simple, perl
+# Dumps Resource content into log. Useful for debugging purposes.
+# 
+# Dependencies:
+# Parameters:
+
 package Dump;
 
 use warnings;

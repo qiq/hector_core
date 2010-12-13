@@ -19,7 +19,6 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
-AC_PROG_RANLIB
 AC_CHECK_PROG(PROTOC, protoc, protoc)
 if test -z "$PROTOC"; then
 	echo "Please install Protocol Buffers compiler (protoc)";

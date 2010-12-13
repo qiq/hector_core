@@ -21,8 +21,9 @@ Resource *Module::ProcessInput(bool sleep) {
 	return NULL;
 }
 
-void Module::ProcessOutput(Resource *resource) {
+Resource *Module::ProcessOutput(Resource *resource) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessOutput)");
+	return NULL;
 }
 
 Resource *Module::ProcessSimple(Resource *resource) {

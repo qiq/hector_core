@@ -20,7 +20,7 @@ Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources) {
 
 Resource *Call::PrepareResource(Resource *src) {
 	src->setStatus(1);
-	Resource *r = Resource::CreateResource(typeId);
+	Resource *r = Resource::AcquireResource(typeId);
 	if (!r) {
 		LOG4CXX_ERROR_R(logger, r, "Cannot generate resource of type: " << typeId);
 		return NULL;
@@ -41,7 +41,7 @@ Resource *Call::FinishResource(Resource *tmp) {
 
 	r->setStatus(0);
 
-	delete tmp;
+	Resource::ReleaseResource(tmp);
 	return r;
 }
 

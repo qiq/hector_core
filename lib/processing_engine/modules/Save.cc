@@ -85,7 +85,7 @@ bool Save::WriteToFile(const char *data, int size) {
 	return true;
 }
 
-void Save::ProcessOutput(Resource *resource) {
+Resource *Save::ProcessOutput(Resource *resource) {
 	assert(resource != NULL);
 	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
 	char buffer[5];
@@ -93,26 +93,25 @@ void Save::ProcessOutput(Resource *resource) {
 	if (pr) {
 		*(uint32_t*)buffer = pr->getSerializedSize();
 		if (!WriteToFile(buffer, 5))
-			return;
+			return resource;
 		if (!pr->SerializeWithCachedSizes(stream))
-			return;
+			return resource;
 	} else {
 		string *serial = resource->Serialize();
 		if (!serial)
-			return;
+			return resource;
 		*(uint32_t*)buffer = serial->length();
 		if (!WriteToFile(buffer, 5))
-			return;
+			return resource;
 		if (!WriteToFile(serial->data(), *(uint32_t*)buffer))
-			return;
+			return resource;
 		delete serial;
 	}
-
-	delete resource;
 
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();
+	return resource;
 }
 
 // the class factories

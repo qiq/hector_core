@@ -99,7 +99,7 @@ protected:
 	} clear_u;
 };
 
-ResourceFieldInfo::FieldType ResourceFieldInfo::getType() {
+inline ResourceFieldInfo::FieldType ResourceFieldInfo::getType() {
 	return type;
 }
 

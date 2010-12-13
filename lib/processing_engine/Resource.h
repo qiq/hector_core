@@ -9,25 +9,27 @@
 
 #include <limits>
 #include <string>
+#include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 #include "Object.h"
 #include "PlainLock.h"
 
 // logger helper macros (print short info about the resource)
 
-#define LOG4CXX_TRACE_R(logger, r, ...) { LOG4CXX_TRACE(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG4CXX_DEBUG_R(logger, r, ...) { LOG4CXX_DEBUG(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG4CXX_INFO_R(logger, r, ...) { LOG4CXX_INFO(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG4CXX_TRACE_R(logger, r, ...) { LOG4CXX_TRACE(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_DEBUG_R(logger, r, ...) { LOG4CXX_DEBUG(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_INFO_R(logger, r, ...) { LOG4CXX_INFO(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
 
-#define LOG_TRACE_R(o, r, ...) { LOG4CXX_TRACE(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_DEBUG_R(o, r, ...) { LOG4CXX_DEBUG(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_INFO_R(o, r, ...) { LOG4CXX_INFO(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_ERROR_R(o, r, ...) { LOG4CXX_ERROR(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
-#define LOG_FATAL_R(o, r, ...) { LOG4CXX_FATAL(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << (r->isSetFlag(Resource::DELETED) ? -1 : r->getStatus()) << "] " << __VA_ARGS__) }
+#define LOG_TRACE_R(o, r, ...) { LOG4CXX_TRACE(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_DEBUG_R(o, r, ...) { LOG4CXX_DEBUG(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_INFO_R(o, r, ...) { LOG4CXX_INFO(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_ERROR_R(o, r, ...) { LOG4CXX_ERROR(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_FATAL_R(o, r, ...) { LOG4CXX_FATAL(o->getLogger(), o->getId() << ": [" << r->getTypeStrShort() << " " << r->getId() << " " << r->getStatus() << (r->isSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
 
 class ResourceFieldInfo;
+class ResourceInfo;
 
 class Resource {
 public:
@@ -39,15 +41,17 @@ public:
 	Resource();
 	Resource(const Resource &r);
 	virtual ~Resource() {};
-	// create copy of a resource
+	// Create copy of a resource
 	virtual Resource *Clone() = 0;
+	// Clear current resource (as delete + new would do, except id is set to 0)
+	virtual void Clear();
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
 	// data need not be nul-terminated
 	virtual bool Deserialize(const char *data, int size) = 0;
 	// get info about a resource field
 	virtual ResourceFieldInfo *getFieldInfo(const char *name) = 0;
-	// type id of a resource (to be used by Resources::CreateResource(typeid))
+	// type id of a resource (to be used by Resources::AcquireResource(typeid))
 	virtual int getTypeId() = 0;
 	// type string of a resource
 	virtual const char *getTypeStr() = 0;
@@ -75,9 +79,11 @@ public:
 	virtual std::string toString(Object::LogLevel = Object::INFO) = 0;
 	std::string toStringShort();
 
-	// static methods common to all Resources
-	static Resource *CreateResource(int id);
+	// methods common to all Resources
 	static int NameToId(const char *name);
+	static int NextResourceId();
+	static Resource *AcquireResource(int id);
+	static void ReleaseResource(Resource *resource);
 
 protected:
 	// memory-only, used just in Processor
@@ -92,7 +98,7 @@ protected:
 	static int LoadResourceLibrary(const char *name, int id);
 	static PlainLock translateLock;
 	static std::tr1::unordered_map<std::string, int> name2id;
-	static std::tr1::unordered_map<int, Resource *(*)()> id2create;
+	static std::tr1::unordered_map<int, ResourceInfo*> id2info;
 
 	static PlainLock idLock;
 	static int nextId;
