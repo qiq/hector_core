@@ -37,7 +37,8 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 Load::~Load() {
 	delete stream;
 	delete file;
-	close(fd);
+	if (fd >= 0)
+		close(fd);
 	free(filename);
 	delete values;
 }
@@ -67,6 +68,7 @@ void Load::setFilename(const char *name, const char *value) {
 	int fd = open(filename, O_RDONLY);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
+		fileCond.Unlock();
 		return;
 	}
 	file = new google::protobuf::io::FileInputStream(fd);
@@ -89,8 +91,6 @@ bool Load::Init(vector<pair<string, string> > *params) {
 
 Resource *Load::ProcessInput(bool sleep) {
 	Resource *r = NULL;
-	if (!stream)
-		return NULL;
 	ObjectLockRead();
 	int i = items;
 	ObjectUnlock();
@@ -99,7 +99,7 @@ Resource *Load::ProcessInput(bool sleep) {
 	while (1) {
 		int size = 0;
 		ObjectLockRead();
-		r = Resource::Deserialize(stream, &size);
+		r = stream ? Resource::Deserialize(stream, &size) : NULL;
 		ObjectUnlock();
 		if (r) {
 			byteCount += size;

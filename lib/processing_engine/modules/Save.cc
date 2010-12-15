@@ -32,7 +32,8 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 Save::~Save() {
 	delete stream;
 	delete file;
-	close(fd);
+	if (fd >= 0)
+		close(fd);
 	free(filename);
 	delete values;
 }
