@@ -18,6 +18,7 @@ filename	initOnly	File to save resources to.
 #include <stdio.h>
 #include <string.h>
 #include <google/protobuf/message.h>
+#include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "Module.h"
 #include "ObjectValues.h"
@@ -44,10 +45,9 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	int fd;			// private to ProcessOutput()
-	google::protobuf::io::FileOutputStream *stream;	// private to ProcessOutput()
-
-	bool WriteToFile(const char *data, int size);
+	int fd;
+	google::protobuf::io::ZeroCopyOutputStream *file;
+	google::protobuf::io::CodedOutputStream *stream;
 };
 
 inline Module::Type Save::getType() {

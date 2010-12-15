@@ -15,7 +15,7 @@ hectorinclude_HEADERS = TestResource.h TestProtobufResource.h TestProtobufResour
 	TestResource.i TestProtobufResource.i
 
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
-libTestResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
+libTestResource_la_LDFLAGS = $(AM_LDFLAGS)
 
 TestResource_la_SOURCES = TestResourceWrapper.h TestResourceWrapper.cc
 TestResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
@@ -26,7 +26,7 @@ ALIASES += TestResource.la
 
 libTestProtobufResource_la_SOURCES = TestProtobufResource.h TestProtobufResource.cc TestProtobufResource.pb.h TestProtobufResource.pb.cc
 libTestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
-libTestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version @PROTOBUF_LIBS@
+libTestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
 
 BUILT_SOURCES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 TestProtobfuResource.pb.cc TestProtobufResource.pb.h: TestProtobufResource.proto

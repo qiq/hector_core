@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "common.h"
 #include "ProtobufResource.h"
 #include "Save.h"
@@ -19,8 +18,10 @@ using namespace std;
 
 Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	filename = NULL;
-	fd = -1;
 	items = 0;
+	fd = -1;
+	file = NULL;
+	stream = NULL;
 
 	values = new ObjectValues<Save>(this);
 	values->addGetter("items", &Save::getItems);
@@ -29,9 +30,9 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 }
 
 Save::~Save() {
-	if (!stream->Close())
-		LOG_ERROR(this, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
+	delete file;
+	close(fd);
 	free(filename);
 	delete values;
 }
@@ -62,55 +63,31 @@ bool Save::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	if ((fd = open(filename, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)) < 0) {
+	fd = open(filename, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
 		return false;
 	}
+	file = new google::protobuf::io::FileOutputStream(fd);
+	stream = new google::protobuf::io::CodedOutputStream(file);
 
-	stream = new google::protobuf::io::FileOutputStream(fd);
-
-	return true;
-}
-
-bool Save::WriteToFile(const char *data, int size) {
-	ObjectLockRead();
-	int f = fd;
-	ObjectUnlock();
-	if (WriteBytes(f, data, size) != size) {
-		ObjectLockRead();
-		LOG_ERROR(this, "Cannot write to file: " << filename << " (" << strerror(errno) << "), giving up.")
-		ObjectUnlock();
-		return false;
-	}
 	return true;
 }
 
 Resource *Save::ProcessOutput(Resource *resource) {
 	assert(resource != NULL);
-	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(resource);
-	char buffer[5];
-	*(uint8_t*)(buffer+4) = resource->getTypeId();
-	if (pr) {
-		*(uint32_t*)buffer = pr->getSerializedSize();
-		if (!WriteToFile(buffer, 5))
-			return resource;
-		if (!pr->SerializeWithCachedSizes(stream))
-			return resource;
-	} else {
-		string *serial = resource->Serialize();
-		if (!serial)
-			return resource;
-		*(uint32_t*)buffer = serial->length();
-		if (!WriteToFile(buffer, 5))
-			return resource;
-		if (!WriteToFile(serial->data(), *(uint32_t*)buffer))
-			return resource;
-		delete serial;
-	}
-
 	ObjectLockWrite();
-	++items;
+	if (!stream) {
+		ObjectUnlock();
+		LOG_ERROR_R(this, resource, "File not opened");
+		return resource;
+	}
+	bool res = Resource::Serialize(resource, stream);
+	if (res)
+		++items;
 	ObjectUnlock();
+	if (!res)
+		LOG_ERROR_R(this, resource, "Cannot serialize resource");
 	return resource;
 }
 

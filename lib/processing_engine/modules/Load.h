@@ -19,6 +19,7 @@ filename	r/w	File to load. Change it to process another file
 #include <stdio.h>
 #include <string.h>
 #include <google/protobuf/message.h>
+#include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "CondLock.h"
 #include "Module.h"
@@ -54,12 +55,12 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	int fd;
 	bool cancel;
-	google::protobuf::io::FileInputStream *stream;
+	unsigned long long byteCount;
+	int fd;
+	google::protobuf::io::FileInputStream *file;
+	google::protobuf::io::CodedInputStream *stream;
 	CondLock fileCond;	// for pause when source file is exhausted
-
-	bool ReadFromFile(char *data, int size, bool sleep);
 };
 
 inline Module::Type Load::getType() {

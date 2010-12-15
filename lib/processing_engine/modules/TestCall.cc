@@ -26,8 +26,8 @@ Resource *Call::PrepareResource(Resource *src) {
 		return NULL;
 	}
 	r->setId(src->getId()+10000);
-	TestResource *tr = dynamic_cast<TestResource*>(r);
-	if (tr) {
+	if (r->getTypeId() == TestResource::typeId) {
+		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
 		snprintf(s, sizeof(s), "pe-%d", src->getId()+10000);
 		tr->setStr(s);

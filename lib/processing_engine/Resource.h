@@ -30,6 +30,14 @@
 
 class ResourceFieldInfo;
 class ResourceInfo;
+namespace google {
+	namespace protobuf {
+		namespace io {
+	class CodedInputStream;
+	class CodedOutputStream;
+		}
+	}
+}
 
 class Resource {
 public:
@@ -45,6 +53,9 @@ public:
 	virtual Resource *Clone() = 0;
 	// Clear current resource (as delete + new would do, except id is set to 0)
 	virtual void Clear();
+	// Returns true if resource is serialized using Protocol Buffers. We
+	// cannot rely on the dynamic_cast as we use shared libraries and dlopen.
+	virtual bool isProtobufResource();
 	// save and restore resource
 	virtual std::string *Serialize() = 0;
 	// data need not be nul-terminated
@@ -84,6 +95,9 @@ public:
 	static int NextResourceId();
 	static Resource *AcquireResource(int id);
 	static void ReleaseResource(Resource *resource);
+	// serializes resource (together with size and type), returns total bytes written
+	static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
+	static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
 
 protected:
 	// memory-only, used just in Processor
@@ -105,6 +119,10 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
+
+inline bool Resource::isProtobufResource() {
+	return false;
+}
 
 inline int Resource::getId() {
 	return id;

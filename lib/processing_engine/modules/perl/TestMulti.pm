@@ -23,7 +23,7 @@ sub new {
 		'_resources' => [],
 		'items' => 0,
 		'foo' => 0,
-		'timeTick' => 100*1000,
+		'timeTick' => 1000,
 	};
 	bless($self, $class);
 	return $self;

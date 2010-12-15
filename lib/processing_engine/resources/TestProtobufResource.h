@@ -25,11 +25,10 @@ public:
 	void Clear();
 	// save and restore resource
 	std::string *Serialize();
+	int GetSerializedSize();
+	bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output);
 	bool Deserialize(const char *data, int size);
-	int getSerializedSize();
-	bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
-	bool SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output);
-	bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
+	bool Deserialize(google::protobuf::io::CodedInputStream *input);
 
 	// return ResourceInfo describing one field
 	ResourceFieldInfo *getFieldInfo(const char *name);
@@ -59,38 +58,35 @@ protected:
 inline std::string *TestProtobufResource::Serialize() {
 	r.set_id(getId());
 	r.set_status(getStatus());
-	return MessageSerialize(&r);
+
+	std::string *result = new std::string();
+	r.SerializeToString(result);
+	return result;
+}
+
+inline int TestProtobufResource::GetSerializedSize() {
+	r.set_id(getId());
+	r.set_status(getStatus());
+
+	return r.ByteSize();
+}
+
+inline bool TestProtobufResource::SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output) {
+	// r.id and r.status were set in getSerializedSize() already
+	r.SerializeWithCachedSizes(output);
+	return true;
 }
 
 inline bool TestProtobufResource::Deserialize(const char *data, int size) {
-	bool result = MessageDeserialize(&r, data, size);
+	bool result = r.ParseFromArray((void*)data, size);
+
 	// we keep id
 	setStatus(r.status());
 	return result;
 }
 
-inline int TestProtobufResource::getSerializedSize() {
-	r.set_id(getId());
-	r.set_status(getStatus());
-	return MessageGetSerializedSize(&r);
-}
-
-inline bool TestProtobufResource::Serialize(google::protobuf::io::ZeroCopyOutputStream *output) {
-	r.set_id(getId());
-	r.set_status(getStatus());
-	return MessageSerialize(&r, output);
-}
-
-inline bool TestProtobufResource::SerializeWithCachedSizes(google::protobuf::io::ZeroCopyOutputStream *output) {
-	// r.id and r.status were set in getSerializedSize() already
-	return MessageSerializeWithCachedSizes(&r, output);
-}
-
-inline bool TestProtobufResource::Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size) {
-	bool result = MessageDeserialize(&r, input, size);
-	// we keep id
-	setStatus(r.status());
-	return result;
+bool TestProtobufResource::Deserialize(google::protobuf::io::CodedInputStream *input) {
+	return r.ParseFromCodedStream(input);
 }
 
 inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {

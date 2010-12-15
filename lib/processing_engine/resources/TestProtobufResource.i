@@ -12,10 +12,10 @@ public:
         ~TestProtobufResource();
         Resource *Clone();
         std::string *Serialize();
+        int GetSerializedSize();
+        bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output);
         bool Deserialize(const char *data, int size);
-        int getSerializedSize();
-        bool Serialize(google::protobuf::io::ZeroCopyOutputStream *output);
-        bool Deserialize(google::protobuf::io::ZeroCopyInputStream *input, int size);
+        bool Deserialize(google::protobuf::io::CodedInputStream *input);
         int getTypeId();
         const char *getTypeStr();
         const char *getModuleStr();

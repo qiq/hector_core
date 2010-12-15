@@ -1,3 +1,6 @@
+- jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
+	robot/test6+
+
 - deleted vysledek v process -- jak predat na vystup?
 	- nechat tak -- da se to otestovat :)
 - dodelat save/restore checkpoint do vsech modulu (kde je to potreba)

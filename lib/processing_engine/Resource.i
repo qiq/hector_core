@@ -17,6 +17,7 @@ public:
         virtual ~Resource();
         virtual Resource *Clone() = 0;
         virtual void Clear();
+        virtual bool isProtobufResource();
         virtual std::string *Serialize() = 0;
         virtual bool Deserialize(const char *data, int size) = 0;
         virtual int getTypeId() = 0;
@@ -41,4 +42,6 @@ public:
         static int NextResourceId();
         static Resource *AcquireResource(int id);
         static void ReleaseResource(Resource *resource);
+        static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
+        static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
 };

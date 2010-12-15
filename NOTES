@@ -1,3 +1,6 @@
+- We cannot rely on usage of dynamic_cast<> as we use shared libraries. There
+  may be NULLs returned from the dynamic_cast<>, because compiler may include
+  more than one vtable for a class(?)
 - Init() is called twice -- first time with arguments, second time with NULL,
   reason is that first time own objects should be created, second time all
   other objects are created

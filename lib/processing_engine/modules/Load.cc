@@ -21,7 +21,9 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	items = 0;
 	maxItems = 0;
 	filename = NULL;
+	byteCount = 0;
 	fd = -1;
+	file = NULL;
 	stream = NULL;
 
 	values = new ObjectValues<Load>(this);
@@ -33,9 +35,9 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 }
 
 Load::~Load() {
-	if (stream && !stream->Close())
-		LOG_ERROR(this, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
+	delete file;
+	close(fd);
 	free(filename);
 	delete values;
 }
@@ -60,15 +62,15 @@ void Load::setFilename(const char *name, const char *value) {
 	fileCond.Lock();
 	free(filename);
 	filename = strdup(value);
-	if (stream && !stream->Close())
-		LOG_ERROR(this, "Error closing file: " << filename << " (" << strerror(stream->GetErrno()) << ").")
 	delete stream;
-	if (fd >= 0)
-		close(fd);
-	if ((fd = open(filename, O_RDONLY)) >= 0)
-		stream = new google::protobuf::io::FileInputStream(fd);
-	else
+	byteCount = 0;
+	int fd = open(filename, O_RDONLY);
+	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
+		return;
+	}
+	file = new google::protobuf::io::FileInputStream(fd);
+	stream = new google::protobuf::io::CodedInputStream(file);
 	fileCond.SignalSend();
 	fileCond.Unlock();
 }
@@ -85,73 +87,34 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-bool Load::ReadFromFile(char *data, int size, bool sleep) {
-	ObjectLockRead();
-	int f = fd;
-	ObjectUnlock();
-	int offset = 0;
-	while (size > 0) {
-		int count = ReadBytes(fd, data+offset, size);
-		if (count < 0) {
-			if (count < 0) {
-				ObjectLockRead();
-				LOG_ERROR(this, "Cannot read from file: " << filename << " (" << strerror(errno) << "), giving up.")
-				ObjectUnlock();
-				return false;
-			}
-		} else if (count == 0) {
-			// no more data to be read from this file
-			if (!sleep)
-				return false;
-			fileCond.Lock();
-			fileCond.WaitSend(NULL);
-			fileCond.Unlock();
-			ObjectLockRead();
-			bool c = cancel;
-			ObjectUnlock();
-			if (c)
-				return false;
-		} else {
-			size -= count;
-			offset += count;
-		}
-	}
-	return true;
-}
-
 Resource *Load::ProcessInput(bool sleep) {
+	Resource *r = NULL;
+	if (!stream)
+		return NULL;
 	ObjectLockRead();
 	int i = items;
 	ObjectUnlock();
 	if (maxItems && i >= maxItems)
 		return NULL;
-	char buffer[5];
-	if (!ReadFromFile(buffer, 5, sleep))
-		return NULL;
-	uint32_t size = *(uint32_t*)buffer;
-	uint8_t typeId = *(uint8_t*)(buffer+4);
-
-	Resource *r = Resource::AcquireResource(typeId);
-	ProtobufResource *pr = dynamic_cast<ProtobufResource*>(r);
-	if (pr) {
+	while (1) {
+		int size = 0;
 		ObjectLockRead();
-		bool result = pr->Deserialize(stream, (int)size);
+		r = Resource::Deserialize(stream, &size);
 		ObjectUnlock();
-		if (!result)
-			return NULL;
-	} else {
-		char *data = (char*)malloc(size);
-		if (!ReadFromFile(data, size, false)) {
-			free(data);
-			Resource::ReleaseResource(r);
-			return NULL;
+		if (r) {
+			byteCount += size;
+			break;
 		}
-		if (!r->Deserialize(data, size)) {
-			free(data);
-			Resource::ReleaseResource(r);
+		if (!sleep)
 			return NULL;
-		}
-		free(data);
+		fileCond.Lock();
+		fileCond.WaitSend(NULL);
+		fileCond.Unlock();
+		ObjectLockRead();
+		bool c = cancel;
+		ObjectUnlock();
+		if (c)
+			return NULL;
 	}
 	ObjectLockWrite();
 	++items;
@@ -168,8 +131,7 @@ bool Load::SaveCheckpointSync(const char *path) {
 		return false;
 	}
 	char buffer2[1024];
-	off_t offset = lseek(fd, 0, SEEK_CUR);
-	snprintf(buffer2, sizeof(buffer2), "%s\n%llu\n", filename, (unsigned long long)offset);
+	snprintf(buffer2, sizeof(buffer2), "%s\n%llu\n", filename, byteCount);
 	if (fwrite(buffer2, strlen(buffer2), 1, fw) != 1) {
 		LOG_ERROR(this, "Cannot write data to file: " << buffer1);
 		fclose(fw);
@@ -202,7 +164,7 @@ bool Load::RestoreCheckpointSync(const char *path) {
 		return false;
 	}
 	setFilename(NULL, fn);
-	if (lseek(fd, (off_t)offset, SEEK_SET) != offset) {
+	if (!stream->Skip(offset)) {
 		LOG_ERROR(this, "Cannot seek in file: " << filename);
 		return false;
 	}
