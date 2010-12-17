@@ -25,7 +25,7 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 
 	// stored input resource
 	bool processInput = true;
-	if (tmpInputResource && running.size() <= maxRequests) {
+	if (tmpInputResource && (int)running.size() <= maxRequests) {
 		if (engine->ProcessResource(tmpInputResource, running.size() == 0 ? tv : NULL)) {
 			running.insert(tmpInputResource->getId());
 			tmpInputResource = NULL;
@@ -37,7 +37,7 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	}
 
 	// get input resources and start resolution for them
-	while (processInput && inputResources->size() > 0 && running.size() < maxRequests) {
+	while (processInput && inputResources->size() > 0 && (int)running.size() < maxRequests) {
 		Resource *src = inputResources->front();
 		tmpInputResource = PrepareResource(src);
 		if (tmpInputResource) {

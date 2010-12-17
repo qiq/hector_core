@@ -15,7 +15,6 @@ using namespace std;
 
 XS(_wrap_new_Any) {
 	int argvi = 0;
-	int ecode;
 	unsigned long addr;
 	char *name = NULL;
 	dXSARGS;
@@ -75,7 +74,6 @@ XS(_wrap_new_Any) {
 // based on SWIG code
 
 void *convert_ptr(SV *sv, bool disown) {
-	void *ptr = NULL;
 	SV *tsv = 0;
 	/* If magical, apply more magic */
 	if (SvGMAGICAL(sv))

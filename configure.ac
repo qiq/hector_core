@@ -62,7 +62,7 @@ AC_CHECK_FUNCS([dup2 floor gethostbyname inet_ntoa memset putenv select setenv s
 # Misc
 dnl Check for debug options
 if test "x$use_debug" = "xyes"; then
-	CXXFLAGS="$CXXFLAGS -ggdb -O0"
+	CXXFLAGS="$CXXFLAGS -ggdb -O0 -Wall"
 else
 	CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi

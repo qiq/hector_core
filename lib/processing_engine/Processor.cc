@@ -143,7 +143,7 @@ bool Processor::Init(Config *config) {
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@name", mid);
 			vector<string> *names = config->getValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
-			for (int i = 0; names && i < names->size(); i++) {
+			for (int i = 0; names && i < (int)names->size(); i++) {
 				snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/@value", mid, i+1);
 				char *val = config->getFirstValue(buffer);
 				if (!val) {
@@ -418,7 +418,7 @@ bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterI
 
 Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, int index, bool sleep, bool *stop) {
 	// process obtained resource through all non-multi modules
-	while (index < mis->size() && (*mis)[index]->type != Module::MULTI) {
+	while (index < (int)mis->size() && (*mis)[index]->type != Module::MULTI) {
 		ModuleInfo *minfo = (*mis)[index];
 		// apply modules
 		switch (minfo->type) {
@@ -467,9 +467,9 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 }
 
 int Processor::NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index) {
-	while (index < mis->size() && (*mis)[index]->type != Module::MULTI)
+	while (index < (int)mis->size() && (*mis)[index]->type != Module::MULTI)
 		index++;
-	return index == mis->size() ? -1 : index;
+	return index == (int)mis->size() ? -1 : index;
 }
 
 void Processor::runThread(int threadId) {

@@ -114,7 +114,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		ProcessingEngine *engine = iter->second;
 
 		// check that PROCESS/PASS is correct for given PE
-		if ((process && !engine->getOutputQueue()) || !process && engine->getOutputQueue()) {
+		if ((process && !engine->getOutputQueue()) || (!process && engine->getOutputQueue())) {
 			LOG4CXX_ERROR(logger, "Invalid method for ProcessingEngine: " << method);
 			conn->setResponseCode(500, "Invalid method for ProcessorEngine");
 			return true;
@@ -126,7 +126,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		const char *data = body.data();
 		struct timeval timeout = { 0, 0 };
 		int i = 0;
-		while (body.length() > 5 && i < body.length()) {
+		while (body.length() > 5 && i < (int)body.length()) {
 			uint32_t size = *(uint32_t*)(data+i);
 			i += 4;
 			uint8_t typeId = *(uint8_t*)(data+i);
@@ -147,7 +147,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			resourceIds.push_back(id);
 		}
 
-		if (i < body.length()) {
+		if (i < (int)body.length()) {
 			conn->setResponseCode(500, "Error passing data to ProcessingEngine");
 			return true;
 		}
@@ -155,7 +155,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		if (process) {
 			// wait for result
 			i = 0;
-			while (i < resourceIds.size()) {
+			while (i < (int)resourceIds.size()) {
 				Resource *r = engine->GetProcessedResource(resourceIds[i], &timeout);
 				if (!r)
 					break;
@@ -169,7 +169,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				Resource::ReleaseResource(r);
 				i++;
 			}
-			if (i == resourceIds.size())
+			if (i == (int)resourceIds.size())
 				conn->setResponseCode(200, "OK");
 			else
 				conn->setResponseCode(500, "Error getting data from ProcessingEngine");
