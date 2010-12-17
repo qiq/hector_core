@@ -148,15 +148,11 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-int TestCall::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+int TestCall::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
 	ObjectLockRead();
 	int tick = timeTick;
 	ObjectUnlock();
-	return call->Process(inputResources, outputResources, tick);
-}
-
-int TestCall::ProcessingResources() {
-	return call->ProcessingResources();
+	return call->Process(inputResources, outputResources, expectingResources, tick);
 }
 
 // factory functions

@@ -29,8 +29,7 @@ public:
 	~TestMulti();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
-	int ProcessingResources();
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 private:
 	int items;		// ObjectLock
@@ -49,7 +48,7 @@ private:
 	bool isInitOnly(const char *name);
 	std::vector<std::string> *listNamesSync();
 
-	std::queue<TestResource*> resources; // private to Process* (+ProcessingResources)
+	std::queue<TestResource*> resources;
 };
 
 inline Module::Type TestMulti::getType() {

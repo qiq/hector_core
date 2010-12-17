@@ -31,13 +31,8 @@ Resource *Module::ProcessSimple(Resource *resource) {
 	return NULL;
 }
 
-int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessMulti)");
-	return 0;
-}
-
-int Module::ProcessingResources() {
-	LOG_ERROR(this, "Unimplemented resource processing (ProcessingResources)");
 	return 0;
 }
 

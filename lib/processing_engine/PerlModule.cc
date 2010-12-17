@@ -444,10 +444,10 @@ Resource *PerlModule::ProcessSimple(Resource *resource) {
 	return result;
 }
 
-int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
 	ObjectLockWrite();
 	PERL_SET_CONTEXT(my_perl);
-	int result = 0;
+	int processingResources = 0;
 	SV *inputResourcesSV;
 	SV *outputResourcesSV;
 
@@ -483,7 +483,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
         XPUSHs(inputResourcesSV);
         XPUSHs(outputResourcesSV);
         PUTBACK;
-	int count = call_method("ProcessMulti", G_SCALAR|G_EVAL);
+	int count = call_method("ProcessMulti", G_ARRAY|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
 		LOG_ERROR(this, "Error calling ProcessMulti (" << SvPV_nolen(ERRSV) << ")");
@@ -491,25 +491,36 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
-		return result;
-	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling ProcesMulti (no result)");
+		return processingResources;
+	} else if (count != 2) {
+		LOG_ERROR(this, "Error calling ProcesMulti (invalid number of return arguments)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
-		return result;
+		return processingResources;
 	}
 	SV *resultSV = POPs;
 	if (!SvIOK(resultSV)) {
-		LOG_ERROR(this, "Error calling ProcessMulti (invalid result)");
+		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 1)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ObjectUnlock();
-		return result;
+		return processingResources;
 	}
-	result = SvIV(resultSV);
+	if (expectingResources)
+		*expectingResources = SvIV(resultSV);
+	resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 2)");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		ObjectUnlock();
+		return processingResources;
+	}
+	processingResources = SvIV(resultSV);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -529,37 +540,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	SvREFCNT_dec(outputResourcesSV);
 
 	ObjectUnlock();
-	return result;
-}
-
-int PerlModule::ProcessingResources() {
-	ObjectLockWrite();
-	PERL_SET_CONTEXT(my_perl);
-	int result = 0;
-	dSP;
-	ENTER;
-        PUSHMARK(SP);
-        XPUSHs(ref);
-        PUTBACK;
-	int count = call_method("ProcessingResources", G_SCALAR|G_EVAL);
-	SPAGAIN;
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling ProcessingResources (" << SvPV_nolen(ERRSV) << ")");
-	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling ProcessingResources (no result)");
-	} else {
-		SV *resultSV = POPs;
-		if (!SvIOK(resultSV)) {
-			LOG_ERROR(this, "Error calling ProcessingResources (invalid result)");
-		} else {
-			result = SvIV(resultSV);
-		}
-	}
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-	ObjectUnlock();
-	return result;
+	return processingResources;
 }
 
 char *PerlModule::getValueSync(const char *name) {

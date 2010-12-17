@@ -21,9 +21,8 @@ public:
 	CallProcessingEngine(int maxRequests);
 	virtual ~CallProcessingEngine();
 	void setProcessingEngine(ProcessingEngine *engine);
-	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int timeTick);
+	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int timeTick);
 	void Pass(std::queue<Resource*> *inputResources, int timeTick);
-	int ProcessingResources();
 
 	// may be called instead of ProcessMulti()
 	bool ReadWrite(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, struct timeval *tv);

@@ -117,12 +117,7 @@ sub ProcessMulti() {
 	$self->{'_object'}->log_info($resource->toStringShort()." Processed (".$resource->getStr().")");
 	$self->{'items'}++;
 
-	return $MAX_RESOURCES-@{$self->{'_resources'}};
-}
-
-sub ProcessingResources() {
-	my ($self) = @_;
-	return scalar @{$self->{'_resources'}};
+	return (scalar @{$self->{'_resources'}}, $MAX_RESOURCES-@{$self->{'_resources'}});
 }
 
 1;

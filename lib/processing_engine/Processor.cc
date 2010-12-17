@@ -165,6 +165,7 @@ bool Processor::Init(Config *config) {
 					return false;
 				mi->type = mi->module->getType();
 				if (mi->type == Module::MULTI) {
+					mi->processingResources = 0;
 					mi->inputResources = new queue<Resource*>();
 					mi->outputResources = new queue<Resource*>();
 				} else {
@@ -551,15 +552,15 @@ void Processor::runThread(int threadId) {
 		while (multiIndex >= 0) {
 			// call multi module
 			ModuleInfo *minfo = (*mis)[multiIndex];
-			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->module->ProcessingResources();
-			int n = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources);
+			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
+			int n;
+			minfo->processingResources = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources, &n);
 			n -= minfo->inputResources->size();
 			if (n < minN)
 				minN = n;
-			int pr = minfo->module->ProcessingResources();
-			if (pr > 0)
+			if (minfo->processingResources > 0)
 				block = false;
-			delta -= minfo->inputResources->size()+minfo->outputResources->size()+pr;
+			delta -= minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			// some resources were added
 			if (delta != 0) {
 				assert(delta > 0);	// resources must not be deleted in ProcessMulti(), just marked as deleted

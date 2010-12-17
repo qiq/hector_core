@@ -28,8 +28,7 @@ public:
 	Resource *ProcessInput(bool sleep);
 	Resource *ProcessOutput(Resource *resource);
 	Resource *ProcessSimple(Resource *resource);
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources);
-	int ProcessingResources();
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 protected:
 	char *getValueSync(const char *name);

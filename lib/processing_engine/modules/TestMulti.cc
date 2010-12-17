@@ -63,7 +63,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources) {
+int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
 	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
 		if (r->getTypeId() == TestResource::typeId)
@@ -71,8 +71,11 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 		inputResources->pop();
 	}
 
-	if (resources.size() == 0)
-		return MAX_RESOURCES;
+	if (resources.size() == 0) {
+		if (expectResources)	
+			*expectResources = MAX_RESOURCES;
+		return 0;
+	}
 
 	struct timeval tv;
 	ObjectLockRead();
@@ -82,7 +85,9 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 
 	if (select(1, NULL, NULL, NULL, &tv) < 0) {
 		LOG_INFO(this, "Error in select() = " << errno);
-		return 0;
+		if (expectResources)	
+			*expectResources = 0;
+		return resources.size();
 	}
 	TestResource *tr = resources.front();
 	resources.pop();
@@ -91,11 +96,9 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	ObjectLockWrite();
 	++items;
 	ObjectUnlock();
-	
-	return MAX_RESOURCES-resources.size();
-}
 
-int TestMulti::ProcessingResources() {
+	if (expectResources)
+		*expectResources = MAX_RESOURCES-resources.size();
 	return resources.size();
 }
 

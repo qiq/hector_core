@@ -42,6 +42,7 @@ protected:
 	typedef struct {
 		Module *module;
 		Module::Type type;
+		int processingResources;	// numbers of processing resources
 		std::queue<Resource*> *inputResources;
 		std::queue<Resource*> *outputResources;
 	} ModuleInfo;

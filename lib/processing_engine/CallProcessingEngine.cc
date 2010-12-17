@@ -39,10 +39,10 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	// get input resources and start resolution for them
 	while (processInput && inputResources->size() > 0 && running.size() < maxRequests) {
 		Resource *src = inputResources->front();
-		Resource *tmp = PrepareResource(src);
-		if (tmp) {
-			if (engine->ProcessResource(tmp, running.size() == 0 ? tv : NULL)) {
-				running.insert(tmp->getId());
+		tmpInputResource = PrepareResource(src);
+		if (tmpInputResource) {
+			if (engine->ProcessResource(tmpInputResource, running.size() == 0 ? tv : NULL)) {
+				running.insert(tmpInputResource->getId());
 				tmpInputResource = NULL;
 				changed = true;
 			} else {
@@ -84,7 +84,7 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	return changed;
 }
 
-int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int timeTick) {
+int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int timeTick) {
 	assert(engine->getOutputQueue() != NULL);
 	struct timeval tv = ConstructTimeout(timeTick);
 
@@ -92,8 +92,11 @@ int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resour
 	while (ReadWrite(inputResources, outputResources, NULL))
 		;
 	// nothing to process
-	if (running.size() == 0)
-		return maxRequests;
+	if (running.size() == 0) {
+		if (expectingResources)
+			*expectingResources = maxRequests-(tmpInputResource ? 1 : 0);
+		return 0;
+	}
 	// block in read (once)
 	ReadWrite(inputResources, outputResources, &tv);
 	// do not block
@@ -101,7 +104,9 @@ int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resour
 		;
 
 	// finished resources are already appended to the outputResources queue
-	return maxRequests-running.size()-(tmpInputResource ? 1 : 0);
+	if (expectingResources)
+		*expectingResources = maxRequests-running.size()-(tmpInputResource ? 1 : 0);
+	return running.size();
 }
 
 void CallProcessingEngine::Pass(queue<Resource*> *inputResources, int timeTick) {
@@ -109,8 +114,4 @@ void CallProcessingEngine::Pass(queue<Resource*> *inputResources, int timeTick) 
 	struct timeval tv = ConstructTimeout(timeTick);
 
 	ReadWrite(inputResources, NULL, &tv);
-}
-
-int CallProcessingEngine::ProcessingResources() {
-	return running.size();
 }
