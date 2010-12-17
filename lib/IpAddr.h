@@ -61,9 +61,9 @@ inline bool IpAddr::isEmpty() {
 
 inline void IpAddr::setEmpty() {
 	if (ip4Addr)
-		memset((void*)addr.ip4.s_addr, 0, sizeof(in_addr));
+		memset((void*)&addr.ip4.s_addr, 0, sizeof(in_addr));
 	else
-		memset((void*)addr.ip6.s6_addr, 0, sizeof(in6_addr));
+		memset((void*)&addr.ip6.s6_addr, 0, sizeof(in6_addr));
 }
 
 // returns address in network-order
