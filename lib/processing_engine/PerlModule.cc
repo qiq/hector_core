@@ -173,6 +173,7 @@ PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex,
 }
 
 PerlModule::~PerlModule() {
+	PERL_SET_CONTEXT(my_perl);
 	perl_destruct(my_perl);
 	perl_free(my_perl);
 	free(name);
