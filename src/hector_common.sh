@@ -36,6 +36,15 @@ function hector_client_wait {
 	done
 }
 
+function hector_client_wait_lower {
+	x=`hector_client_get $1`;
+	while [ -z "$x" -o "0$x" -lt "$2" ]; do
+		bash -c "$HECTOR_SLEEP_COMMAND"
+		x=`hector_client_get $1`;
+		echo -ne "."
+	done
+}
+
 function hector_client_wait_dontfail {
 	x=`hector_client_get_dontfail $1`
 	while [ -z "$x" -o "$x" != "$2" ]; do

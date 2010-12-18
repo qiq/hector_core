@@ -4,8 +4,11 @@
 
 #include <config.h>
 
+#include <fcntl.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <string>
 #include <vector>
 #include <log4cxx/logger.h>
@@ -156,9 +159,16 @@ int main(int argc, char *argv[]) {
 			exit(EXIT_FAILURE);
 		}
 
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		close(STDERR_FILENO);
+		// close standard file descriptors (but replace them with
+		// /dev/null, so that log4cxx logging does not interfere with
+		// server processing)
+		int fd = open("/dev/null", O_RDWR);
+		if (fd >= 0) {
+			dup2(fd, STDIN_FILENO);
+			dup2(fd, STDOUT_FILENO);
+			dup2(fd, STDERR_FILENO);
+			close(fd);
+		}
 	}
 
 	// run server

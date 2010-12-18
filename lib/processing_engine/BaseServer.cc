@@ -45,7 +45,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				string property = args.substr(dot+1);
 				char *value = objects->getObjectValue(object.c_str(), property.c_str());
 				if (value) {
-					LOG4CXX_ERROR(logger, "GET " << args << " = " << value);
+					LOG4CXX_INFO(logger, "GET " << args << " = " << value);
 					conn->setResponseCode(200, "OK");
 					conn->appendResponseBody(value);
 				} else {
