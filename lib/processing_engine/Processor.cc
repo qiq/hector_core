@@ -563,7 +563,11 @@ void Processor::runThread(int threadId) {
 			delta -= minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			// some resources were added
 			if (delta != 0) {
-				assert(delta > 0);	// resources must not be deleted in ProcessMulti(), just marked as deleted
+				if (delta > 0) {
+					LOG_ERROR(this, "Some resources were deleted in " << minfo->module->getId() << "::ProcessMulti(), which is prohibited. Just mark them deleted.");
+				}
+				// resources must not be deleted in ProcessMulti(), just marked as deleted
+				assert(delta < 0);
 				engine->UpdateResourceCount(-delta);
 			}
 			// set-up info for the next iteration
