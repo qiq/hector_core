@@ -37,7 +37,6 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	if (args.substr(0, 1) == "/")
 		args = args.substr(1);
 	if (method == "GET") {
-		LOG4CXX_INFO(logger, "GET " << args);
 		if (!args.empty()) {
 			size_t dot = args.find_first_of('.');
 			if (dot != string::npos) {
@@ -46,9 +45,11 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				string property = args.substr(dot+1);
 				char *value = objects->getObjectValue(object.c_str(), property.c_str());
 				if (value) {
+					LOG4CXX_ERROR(logger, "GET " << args << " = " << value);
 					conn->setResponseCode(200, "OK");
 					conn->appendResponseBody(value);
 				} else {
+					LOG4CXX_ERROR(logger, "GET " << args << ": Object not found");
 					conn->ErrorResponse(400, "Object/property not found", "");
 				}
 				free(value);
@@ -57,13 +58,19 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				Object *object = objects->getObject(args.c_str());
 				if (object) {
 					vector<string> *names = object->listNames();
+					string s;
 					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
 						conn->appendResponseBody(iter->c_str());
 						conn->appendResponseBody("\r\n");
+						if (s.length() > 0)
+							s += ", ";
+						s += *iter;
 					}
+					LOG4CXX_INFO(logger, "GET " << args << " = " << s);
 					delete names;
 				} else {
 					// object not found
+					LOG4CXX_ERROR(logger, "GET " << args << ": Object not found");
 					conn->ErrorResponse(400, "Object not found", "");
 				}
 			}
@@ -71,15 +78,19 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			// list objects
 			vector<string> *all = objects->getIds();
 			conn->setResponseCode(200, "OK");
+			string s;
 			for (vector<string>::iterator iter = all->begin(); iter != all->end(); ++iter) {
 				conn->appendResponseBody(iter->c_str());
 				conn->appendResponseBody("\r\n");
+				if (s.length() > 0)
+					s += ", ";
+				s += *iter;
 			}
+			LOG4CXX_INFO(logger, "GET " << args << " = " << s);
 			delete all;
 		}
 		return true;
 	} else if (method == "SET") {
-		LOG4CXX_INFO(logger, "SET " << args);
 		if (!args.empty()) {
 			size_t dot = args.find_first_of('.');
 			if (dot != string::npos) {
@@ -89,13 +100,18 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				size_t eoln = body.find_first_of("\r\n");
 				string value = eoln != string::npos ? body.substr(0, eoln): body;
 				if (objects->setObjectValue(object.c_str(), property.c_str(), value.c_str())) {
+					LOG4CXX_INFO(logger, "SET " << args << " = " << value);
 					conn->setResponseCode(200, "OK");
 				} else {
+					LOG4CXX_ERROR(logger, "SET " << args << " = " << value << ": Object/property not found");
 					conn->ErrorResponse(400, "Object/property not found", "");
 				}
+			} else {
+				LOG4CXX_ERROR(logger, "SET " << args << ": no property");
 			}
 		} else {
 			// error: no object.property given
+			LOG4CXX_ERROR(logger, "SET: no arguments");
 			conn->ErrorResponse(400, "No object.property argument given", "");
 		}
 		return true;
