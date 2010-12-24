@@ -59,9 +59,10 @@ Processor::~Processor() {
 char *Processor::getPauseInput(const char *name) {
 	ObjectUnlock();
 	pauseInputCond.Lock();
-	return bool2str(pauseInput);
+	char *result = bool2str(pauseInput);
 	pauseInputCond.Unlock();
 	ObjectLockRead();		// so that Object can release ObjectLock
+	return result;
 }
 
 void Processor::setPauseInput(const char *name, const char *value) {
@@ -72,7 +73,7 @@ void Processor::setPauseInput(const char *name, const char *value) {
 	if (old && !pauseInput)
 		pauseInputCond.SignalSend();
 	pauseInputCond.Unlock();
-	ObjectLockRead();		// so that Object can release ObjectLock
+	ObjectLockWrite();		// so that Object can release ObjectLock
 }
 
 bool Processor::Init(Config *config) {
@@ -366,7 +367,7 @@ bool Processor::Connect() {
 
 bool Processor::isRunning() {
 	bool result;
-	ObjectLockWrite();
+	ObjectLockRead();
 	result = running;
 	ObjectUnlock();
 	return result;
