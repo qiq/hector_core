@@ -28,18 +28,17 @@
 
 <!-- ProcessingEngine -->
 
-<!ELEMENT ProcessingEngine	(inputQueue?,Processor+) >
+<!ELEMENT ProcessingEngine	(inputProcessor|Processor)* >
 <!ATTLIST ProcessingEngine
 	id		ID		#REQUIRED>
 
-<!ELEMENT inputQueue EMPTY >
-<!ATTLIST inputQueue
-	ref		IDREF 		#REQUIRED
-	priority	CDATA		"0" >
+<!ELEMENT inputProcessor EMPTY >
+<!ATTLIST inputProcessor
+	ref		IDREF 		#REQUIRED >
 
 <!-- Processor -->
 
-<!ELEMENT Processor	(threads,modules,input?,output?) >
+<!ELEMENT Processor	(threads|input|modules|output)* >
 <!ATTLIST Processor
 	id		ID		#REQUIRED >
 
