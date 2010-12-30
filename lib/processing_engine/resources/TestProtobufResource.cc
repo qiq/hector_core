@@ -28,16 +28,16 @@ ResourceFieldInfoT<T>::ResourceFieldInfoT(const string &name) {
 		type = INT;
 		get_u.i = &TestProtobufResource::getId;
 		set_u.i = &TestProtobufResource::setId;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	} else if (name == "status") {
 		type = INT;
 		get_u.i = &TestProtobufResource::getStatus;
 		set_u.i = &TestProtobufResource::setStatus;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	} else if (name == "str") {
 		type = STRING;
 		get_u.s = &TestProtobufResource::getStr;
 		set_u.s = &TestProtobufResource::setStr;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	}
 }

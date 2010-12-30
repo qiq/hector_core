@@ -427,6 +427,10 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			assert(resource == NULL);
 			while (1) {
 				resource = minfo->module->ProcessInput(sleep);
+				if (resource)
+					LOG_TRACE_R(minfo->module, resource, ">")
+				else
+					LOG_TRACE(minfo->module, ">0");
 				if (!resource || !resource->isSetFlag(Resource::DELETED))
 					break;				// OK: no more resources or resource was not deleted
 				deletedResources.push(resource);	// deleted resource
@@ -439,14 +443,21 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			engine->UpdateResourceCount(1);
 			break;
 		case Module::OUTPUT:
+			LOG_TRACE_R(minfo->module, resource, "<");
 			resource = minfo->module->ProcessOutput(resource);
 			Resource::ReleaseResource(resource);
 			engine->UpdateResourceCount(-1);
 			resource = NULL;
 			break;
 		case Module::SIMPLE:
-			if (!resource->isSetFlag(Resource::SKIP))
+			if (!resource->isSetFlag(Resource::SKIP)) {
+				LOG_TRACE_R(minfo->module, resource, "<");
 				resource = minfo->module->ProcessSimple(resource);
+				if (resource)
+					LOG_TRACE_R(minfo->module, resource, ">")
+				else
+					LOG_TRACE(minfo->module, ">0");
+			}
 			if (!resource) {
 				LOG_ERROR(this, "Resource lost");
 				return NULL;
@@ -555,7 +566,9 @@ void Processor::runThread(int threadId) {
 			ModuleInfo *minfo = (*mis)[multiIndex];
 			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			int n;
+			LOG_TRACE(minfo->module, "< (" << minfo->inputResources->size() << ", " << minfo->inputResources->size() << ")");
 			minfo->processingResources = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources, &n);
+			LOG_TRACE(minfo->module, "> (" << minfo->inputResources->size() << ", " << minfo->inputResources->size() << ")");
 			n -= minfo->inputResources->size();
 			if (n < minN)
 				minN = n;

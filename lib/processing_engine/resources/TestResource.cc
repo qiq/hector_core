@@ -56,17 +56,17 @@ ResourceFieldInfoT<T>::ResourceFieldInfoT(const std::string &name) {
 		type = INT;
 		get_u.i = &TestResource::getId;
 		set_u.i = &TestResource::setId;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	} else if (name == "status") {
 		type = INT;
 		get_u.i = &TestResource::getStatus;
 		set_u.i = &TestResource::setStatus;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	} else if (name == "str") {
 		type = STRING;
 		get_u.s = &TestResource::getStr;
 		set_u.s = &TestResource::setStr;
-		clear_u.c = NULL;
+		clear_all = NULL;
 	}
 }
 
