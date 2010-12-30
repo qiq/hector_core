@@ -51,6 +51,38 @@ void IpAddr::ApplyPrefix(int prefix) {
 	}
 }
 
+bool IpAddr::Compare(IpAddr *other, int prefix) {
+	if (ip4Addr) {
+		return (ntohl(addr.ip4.s_addr) & (uint32_t)0xffffffff << (32-prefix)) == 
+			(ntohl(other->getIp4Addr()) & (uint32_t)0xffffffff << (32-prefix));
+	} else {
+		in6_addr ip6 = this->addr.ip6;
+		ReverseIp6Addr(&ip6);
+		in6_addr oip6;
+		*(((uint64_t*)&oip6.s6_addr)) = other->getIp6Addr(true);
+		*(((uint64_t*)&oip6.s6_addr) + 1) = other->getIp6Addr(false);
+		ReverseIp6Addr(&oip6);
+		return (*(((uint64_t*)&ip6.s6_addr)) == *(((uint64_t*)&oip6.s6_addr))
+			 && *(((uint64_t*)&ip6.s6_addr) + 1) == *(((uint64_t*)&oip6.s6_addr) + 1));
+	}
+}
+
+bool IpAddr::Match(const std::string &addr, int prefix) {
+	IpAddr other = IpAddr(ip4Addr, addr);
+	return this->Compare(&other, prefix);
+}
+
+bool IpAddr::Match(const std::string &addr) {
+	size_t slash = addr.find('/');
+	if (slash == string::npos || slash < 1) {
+		return this->Match(addr, ip4Addr ? 32 : 128);
+	} else {
+		string a = addr.substr(0, slash);
+		int prefix = atoi(addr.c_str()+slash+1);
+		return this->Match(a, prefix);
+	}
+}
+
 
 string IpAddr::toString() {
 	char s[INET6_ADDRSTRLEN];

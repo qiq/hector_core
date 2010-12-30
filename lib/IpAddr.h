@@ -15,6 +15,7 @@
 class IpAddr {
 public:
 	IpAddr();
+	IpAddr(bool ip4Addr, const std::string &s);
 	~IpAddr() {};
 
 	bool isIp4Addr();
@@ -28,6 +29,8 @@ public:
 	bool ParseIp6Addr(const std::string &s);
 	void ReverseIp6Addr(in6_addr *addr);
 	void ApplyPrefix(int prefix);
+	bool Match(const std::string &addr, int prefix);
+	bool Match(const std::string &addr);
 	std::string toString();
 
 	static IpAddr emptyIpAddr;
@@ -38,11 +41,17 @@ private:
 		in_addr ip4;
 		in6_addr ip6;
 	} addr;
+
+	bool Compare(IpAddr *other, int prefix);
 };
 
 inline IpAddr::IpAddr() {
 	ip4Addr = true;
 	memset(&addr, 0, sizeof(addr));
+}
+
+inline IpAddr::IpAddr(bool ip4Addr, const std::string &s) {
+	ip4Addr ? this->ParseIp4Addr(s) : this->ParseIp6Addr(s);
 }
 
 inline bool IpAddr::isIp4Addr() {
