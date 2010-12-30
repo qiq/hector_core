@@ -7,6 +7,7 @@
 class IpAddr {
 public:
         IpAddr();
+        IpAddr(bool ip4Addr, const std::string &s);
         ~IpAddr();
 
         bool isIp4Addr();
@@ -20,6 +21,8 @@ public:
         bool ParseIp4Addr(const std::string &s);
         bool ParseIp6Addr(const std::string &s);
         void ApplyPrefix(int prefix);
+        bool Match(const std::string &addr, int prefix);
+        bool Match(const std::string &addr);
 
         static IpAddr emptyIpAddr;
 };
