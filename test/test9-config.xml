@@ -28,7 +28,7 @@ test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
 					<Module id="M_multi1" lib="TestMulti.la">
 						<param name="timeTick" value="100"/>
 					</Module>
-					<module id="m_dump2" lib="dump.la"/>
+					<Module id="m_dump2" lib="Dump.la"/>
 					<Module id="M_multi2" lib="TestMulti.la">
 						<param name="timeTick" value="100"/>
 					</Module>
