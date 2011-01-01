@@ -428,9 +428,9 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			while (1) {
 				resource = minfo->module->ProcessInput(sleep);
 				if (resource)
-					LOG_TRACE_R(minfo->module, resource, ">")
+					LOG_TRACE_R(minfo->module, resource, "I >")
 				else
-					LOG_TRACE(minfo->module, ">0");
+					LOG_TRACE(minfo->module, "I > 0");
 				if (!resource || !resource->isSetFlag(Resource::DELETED))
 					break;				// OK: no more resources or resource was not deleted
 				deletedResources.push(resource);	// deleted resource
@@ -443,7 +443,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 			engine->UpdateResourceCount(1);
 			break;
 		case Module::OUTPUT:
-			LOG_TRACE_R(minfo->module, resource, "<");
+			LOG_TRACE_R(minfo->module, resource, "O <");
 			resource = minfo->module->ProcessOutput(resource);
 			Resource::ReleaseResource(resource);
 			engine->UpdateResourceCount(-1);
@@ -456,7 +456,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 				if (resource)
 					LOG_TRACE_R(minfo->module, resource, ">")
 				else
-					LOG_TRACE(minfo->module, ">0");
+					LOG_TRACE(minfo->module, "> 0");
 			}
 			if (!resource) {
 				LOG_ERROR(this, "Resource lost");
@@ -648,7 +648,7 @@ void Processor::runThread(int threadId) {
 			} else {
 				// no output queue => no need to store anything, we just
 				// discard the resource (and notify PE)
-				LOG_DEBUG_R(this, deletedResources.front(), "Deleted");
+				LOG_TRACE_R(this, deletedResources.front(), "Deleted");
 				Resource::ReleaseResource(deletedResources.front());
 				engine->UpdateResourceCount(-1);
 			}
