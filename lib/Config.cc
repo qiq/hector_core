@@ -44,7 +44,7 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 	}
 	fseek(f, 0, SEEK_SET);
 	char *data = (char*)malloc(size);
-	if (fread(data, 1, size, f) != size) {
+	if ((long)fread(data, 1, size, f) != size) {
 		fprintf(stderr, "%s: failed to read file\n", fileName);
 		free(data);
 		fclose(f);
@@ -55,6 +55,7 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 	// substitute $N by arguments
 	string s;
 	bool escape = false;
+	int lineno = 1;
 	for (int i = 0; i < size; i++) {
 		char c = data[i];
 		switch (c) {
@@ -76,19 +77,25 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 					n = n*10+(data[i]-'0');
 					i++;
 				}
-				if (args && i-start > 0 && n > 0 && n <= args->size()) {
-					// replace argument
-					s.append((*args)[n-1]);
-					i--;
-				} else {
-					// no number -> ignore
-					i = start-1;
+				if (n == 0 || i-start == 0) {
+					fprintf(stderr, "Invalid argument, line %d: %.10s\n", lineno, data+(start >= 8 ? start-8 : 0));
+					return false;
 				}
+				if (!args || n > (int)args->size()) {
+					// invalid number -> error
+					fprintf(stderr, "Parameter %d missing, line %d: %.10s\n", n, lineno, data+(start >= 8 ? start-8 : 0));
+					return false;
+				}
+				// replace argument
+				s.append((*args)[n-1]);
+				i--;
 			} else {
 				s.append("$");
 			}
 			escape = false;
 			break;
+		case '\n':
+			lineno++;
 		default:
 			s.append(1, c);
 			escape = false;
