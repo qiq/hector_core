@@ -96,7 +96,85 @@ bool ProcessingEngine::ProcessResource(Resource *resource, struct timeval *timeo
 	return inputQueue->putItem(resource, timeout, 0);
 }
 
+// get processed resource from the processing engine, false: cancelled or timeout
+bool ProcessingEngine::GetProcessedResources(tr1::unordered_set<int> *ids, vector<Resource*> *output, struct timeval *timeout) {
+	if (!outputQueue)
+		return false;
+
+	bool result = true;	// false: cancelled or timeout
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	finishedLock.Lock();
+	tr1::unordered_set<int>::iterator iter = ids->begin();
+	while (iter != ids->end()) {
+		int id = *iter;
+		tr1::unordered_map<int, Resource*>::iterator iter2 = finishedResources.find(id);
+		if (iter2 != finishedResources.end()) {
+			// resource found
+			output->push_back(iter2->second);
+			finishedResources.erase(id);
+			++iter;
+			ids->erase(id);
+			continue;
+		}
+		// we cannot wait for a resource
+		if (!timeout) {
+			++iter;
+			continue;
+		}
+		if (waitingInQueue) {
+			waiting++;
+			bool timedOut = !finishedLock.WaitSend(timeout);
+			waiting--;
+			if (cancel || timedOut) {
+				// timed out: just check all remaining ids,
+				// whether they are ready, but do not wait for them
+				timeout = NULL;
+				iter = ids->begin();
+				result = false;
+				continue;
+			}
+		} else {
+			waitingInQueue = true;
+			finishedLock.Unlock();
+			Resource *r = outputQueue->getItem(timeout);
+			finishedLock.Lock();
+			waitingInQueue = false;
+			if (!r) {
+				// cancel or timeout
+				finishedLock.SignalSend();
+				timeout = NULL;
+				iter = ids->begin();
+				result = false;
+				continue;
+			}
+			bool found_my = false;
+			bool found_foreign = false;
+			while (r) {
+				id = r->getId();
+				if (ids->find(id) != ids->end()) {
+					output->push_back(r);
+					ids->erase(id);
+					found_my = true;
+				} else {
+					finishedResources[id] = r;
+					found_foreign = true;
+				}
+				r = outputQueue->getItem(NULL);
+			}
+			// re-set iterator if we deleted some of ids
+			if (found_my)
+				iter = ids->begin();
+			if (found_foreign)
+				finishedLock.SignalSend();
+		}
+	}
+	finishedLock.Unlock();
+	return result;
+}
+
 // get processed resource from the processing engine, false: not available or cancelled
+/*
 Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout) {
 	if (!outputQueue)
 		return NULL;
@@ -149,7 +227,7 @@ Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout
 	finishedResources.erase(id);
 	finishedLock.Unlock();
 	return result;
-}
+}*/
 
 void ProcessingEngine::StartSync() {
 	if (!propRun) {

@@ -60,26 +60,14 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 		return changed;
 
 	// read resources in non-blocking mode
-	bool processOutput = outputResources ? true : false;
-	while (processOutput && running.size() > 0) {
-		vector<int> erase;
-		for (tr1::unordered_set<int>::iterator iter = running.begin(); iter != running.end(); ++iter) {
-			Resource *r = engine->GetProcessedResource(*iter, tv);
-			if (r) {
-				// finish processed resource
-				outputResources->push(FinishResource(r));
-				erase.push_back(*iter);
-
-				changed = true;
-			} else {
-				// cancelled or timeout
-				processOutput = false;
-				break;
-			}
-		}
-		for (vector<int>::iterator iter = erase.begin(); iter != erase.end(); ++iter) {
-			running.erase(*iter);
-		}
+	if (!outputResources)
+		return changed;
+	vector<Resource*> finished;
+	engine->GetProcessedResources(&running, &finished, tv);
+	for (int i = 0; i < (int)finished.size(); i++) {
+		// finish processed resource
+		outputResources->push(FinishResource(finished[i]));
+		changed = true;
 	}
 	return changed;
 }

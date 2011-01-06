@@ -3,6 +3,8 @@
  */
 
 #include <assert.h>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #include "BaseServer.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
@@ -137,7 +139,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		}
 
 		// create all resources
-		vector<int> resourceIds;
+		tr1::unordered_set<int> resourceIds;
+		vector<int> resourceIdsOrdered;
 		string body = conn->getRequestBody();
 		const char *data = body.data();
 		struct timeval timeout = { 0, 0 };
@@ -160,7 +163,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			int id = r->getId();
 			if (!engine->ProcessResource(r, &timeout))
 				break;
-			resourceIds.push_back(id);
+			resourceIdsOrdered.push_back(id);
+			resourceIds.insert(id);
 		}
 
 		if (i < (int)body.length()) {
@@ -170,11 +174,15 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 
 		if (process) {
 			// wait for result
-			i = 0;
-			while (i < (int)resourceIds.size()) {
-				Resource *r = engine->GetProcessedResource(resourceIds[i], &timeout);
-				if (!r)
-					break;
+			vector<Resource*> result;
+			engine->GetProcessedResources(&resourceIds, &result, &timeout);
+			// reorder back to the original order (we wait for all resources anyway)
+			tr1::unordered_map<int, Resource*> map;
+			for (int i = 0; i < (int)result.size(); i++) {
+				map[result[i]->getId()] = result[i];
+			}
+			for (int i = 0; i < (int)resourceIdsOrdered.size(); i++) {
+				Resource *r = map[resourceIdsOrdered[i]];
 				string *s = r->Serialize();
 				uint32_t size = s->length();
 				conn->appendResponseBody((char*)&size, 4);
@@ -183,9 +191,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				conn->appendResponseBody(*s);
 				delete s;
 				Resource::ReleaseResource(r);
-				i++;
 			}
-			if (i == (int)resourceIds.size())
+			if (result.size() == resourceIdsOrdered.size())
 				conn->setResponseCode(200, "OK");
 			else
 				conn->setResponseCode(500, "Error getting data from ProcessingEngine");

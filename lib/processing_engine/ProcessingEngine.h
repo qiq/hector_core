@@ -11,6 +11,7 @@
 #include <vector>
 #include <log4cxx/logger.h>
 #include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #include "common.h"
 #include "Object.h"
 #include "ObjectRegistry.h"
@@ -30,8 +31,11 @@ public:
 
 	// process resource using the processing engine
 	bool ProcessResource(Resource *resource, struct timeval *timeout);
+	// get processed resources from the processing engine, result: cancelled or timeout
+	bool GetProcessedResources(tr1::unordered_set<int> *ids, vector<Resource*> *output, struct timeval *timeout);
 	// get processed resource from the processing engine, result: available/not available
-	Resource *GetProcessedResource(int id, struct timeval *timeout);
+	// TODO: remove
+	//Resource *GetProcessedResource(int id, struct timeval *timeout);
 
 	// helper methods for Processor::Connect()
 	SyncQueue<Resource> *CreateOutputQueue();
