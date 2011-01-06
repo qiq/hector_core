@@ -18,7 +18,7 @@
 class CallProcessingEngine {
 public:
 	// maxRequests: number of concurrent requests
-	CallProcessingEngine(int maxRequests);
+	CallProcessingEngine(int maxRequests, bool ordered);
 	virtual ~CallProcessingEngine();
 	void setProcessingEngine(ProcessingEngine *engine);
 	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int timeTick);
@@ -35,7 +35,10 @@ protected:
 	int maxRequests;
 	ProcessingEngine *engine;
 	Resource *tmpInputResource;
-	std::tr1::unordered_set<int> running;
+	bool ordered;	// whether we should keep resource order or not
+	int running;	// number or resources currently being processed
+	std::tr1::unordered_set<int> runningSet;
+	std::vector<int> runningVector;
 
 	static log4cxx::LoggerPtr logger;
 };

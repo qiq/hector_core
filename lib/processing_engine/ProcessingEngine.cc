@@ -173,6 +173,74 @@ bool ProcessingEngine::GetProcessedResources(tr1::unordered_set<int> *ids, vecto
 	return result;
 }
 
+// get processed resource from the processing engine, false: cancelled or timeout
+bool ProcessingEngine::GetProcessedResourcesOrdered(vector<int> *ids, vector<Resource*> *output, struct timeval *timeout) {
+	if (!outputQueue)
+		return false;	// false: cancelled or timeout
+
+	pauseLock.Lock();
+	pauseLock.Unlock();
+	finishedLock.Lock();
+	int index = 0;
+	while (index < (int)ids->size()) {
+		int id = (*ids)[index];
+		tr1::unordered_map<int, Resource*>::iterator iter = finishedResources.find(id);
+		if (iter != finishedResources.end()) {
+			// resource found
+			output->push_back(iter->second);
+			finishedResources.erase(id);
+			index++;
+			continue;
+		}
+		// we cannot wait for a resource
+		if (!timeout) {
+			finishedLock.Unlock();
+			return true;
+		}
+		if (waitingInQueue) {
+			waiting++;
+			bool timedOut = !finishedLock.WaitSend(timeout);
+			waiting--;
+			if (cancel || timedOut) {
+				finishedLock.Unlock();
+				return false;
+			}
+		} else {
+			waitingInQueue = true;
+			finishedLock.Unlock();
+			Resource *r = outputQueue->getItem(timeout);
+			finishedLock.Lock();
+			waitingInQueue = false;
+			if (!r) {
+				// cancel or timeout
+				finishedLock.SignalSend();
+				finishedLock.Unlock();
+				return false;
+			}
+			bool found_foreign = false;
+			while (r) {
+				id = r->getId();
+				if ((*ids)[index] == id) {
+					output->push_back(r);
+					index++;
+				} else {
+					finishedResources[id] = r;
+					found_foreign = true;
+				}
+				r = outputQueue->getItem(NULL);
+			}
+			if (found_foreign) {
+				finishedLock.SignalSend();
+				finishedLock.Unlock();
+				sched_yield();
+				finishedLock.Lock();
+			}
+		}
+	}
+	finishedLock.Unlock();
+	return true;
+}
+
 // get processed resource from the processing engine, false: not available or cancelled
 /*
 Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout) {

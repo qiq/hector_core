@@ -32,7 +32,8 @@ public:
 	// process resource using the processing engine
 	bool ProcessResource(Resource *resource, struct timeval *timeout);
 	// get processed resources from the processing engine, result: cancelled or timeout
-	bool GetProcessedResources(tr1::unordered_set<int> *ids, vector<Resource*> *output, struct timeval *timeout);
+	bool GetProcessedResources(std::tr1::unordered_set<int> *ids, vector<Resource*> *output, struct timeval *timeout);
+	bool GetProcessedResourcesOrdered(std::vector<int> *ids, vector<Resource*> *output, struct timeval *timeout);
 	// get processed resource from the processing engine, result: available/not available
 	// TODO: remove
 	//Resource *GetProcessedResource(int id, struct timeval *timeout);

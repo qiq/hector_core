@@ -11,9 +11,11 @@ using namespace std;
 
 log4cxx::LoggerPtr CallProcessingEngine::logger(log4cxx::Logger::getLogger("CallProcessingEngine"));
 
-CallProcessingEngine::CallProcessingEngine(int maxRequests) {
+CallProcessingEngine::CallProcessingEngine(int maxRequests, bool ordered) {
 	this->maxRequests = maxRequests;
 	tmpInputResource = NULL;
+	this->ordered = ordered;
+	running = 0;
 }
 
 CallProcessingEngine::~CallProcessingEngine() {
@@ -25,9 +27,13 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 
 	// stored input resource
 	bool processInput = true;
-	if (tmpInputResource && (int)running.size() <= maxRequests) {
-		if (engine->ProcessResource(tmpInputResource, running.size() == 0 ? tv : NULL)) {
-			running.insert(tmpInputResource->getId());
+	if (tmpInputResource && running <= maxRequests) {
+		if (engine->ProcessResource(tmpInputResource, running == 0 ? tv : NULL)) {
+			if (ordered)
+				runningSet.insert(tmpInputResource->getId());
+			else
+				runningVector.push_back(tmpInputResource->getId());
+			running++;
 			tmpInputResource = NULL;
 			changed = true;
 		} else {
@@ -37,12 +43,16 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	}
 
 	// get input resources and start resolution for them
-	while (processInput && inputResources->size() > 0 && (int)running.size() < maxRequests) {
+	while (processInput && inputResources->size() > 0 && running < maxRequests) {
 		Resource *src = inputResources->front();
 		tmpInputResource = PrepareResource(src);
 		if (tmpInputResource) {
-			if (engine->ProcessResource(tmpInputResource, running.size() == 0 ? tv : NULL)) {
-				running.insert(tmpInputResource->getId());
+			if (engine->ProcessResource(tmpInputResource, running == 0 ? tv : NULL)) {
+				if (ordered)
+					runningSet.insert(tmpInputResource->getId());
+				else
+					runningVector.push_back(tmpInputResource->getId());
+				running++;
 				tmpInputResource = NULL;
 				changed = true;
 			} else {
@@ -56,14 +66,20 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 		inputResources->pop();
 	}
 
-	if (running.size() == 0)
+	if (running == 0)
 		return changed;
 
 	// read resources in non-blocking mode
 	if (!outputResources)
 		return changed;
 	vector<Resource*> finished;
-	engine->GetProcessedResources(&running, &finished, tv);
+	if (ordered) {
+		engine->GetProcessedResources(&runningSet, &finished, tv);
+		running = runningSet.size();
+	} else {
+		engine->GetProcessedResourcesOrdered(&runningVector, &finished, tv);
+		running = runningVector.size();
+	}
 	for (int i = 0; i < (int)finished.size(); i++) {
 		// finish processed resource
 		outputResources->push(FinishResource(finished[i]));
@@ -80,7 +96,7 @@ int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resour
 	while (ReadWrite(inputResources, outputResources, NULL))
 		;
 	// nothing to process
-	if (running.size() == 0) {
+	if (running == 0) {
 		if (expectingResources)
 			*expectingResources = maxRequests-(tmpInputResource ? 1 : 0);
 		return 0;
@@ -93,8 +109,8 @@ int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resour
 
 	// finished resources are already appended to the outputResources queue
 	if (expectingResources)
-		*expectingResources = maxRequests-running.size()-(tmpInputResource ? 1 : 0);
-	return running.size();
+		*expectingResources = maxRequests-running-(tmpInputResource ? 1 : 0);
+	return running;
 }
 
 void CallProcessingEngine::Pass(queue<Resource*> *inputResources, int timeTick) {

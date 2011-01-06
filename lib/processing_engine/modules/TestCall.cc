@@ -14,7 +14,7 @@ using namespace std;
 // sleep TIME_TICK useconds waiting for socket changes
 #define DEFAULT_TIME_TICK 100*1000
 
-Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources) {
+Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources, true) {
 	this->typeId = typeId;
 }
 
