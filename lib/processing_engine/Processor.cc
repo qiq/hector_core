@@ -144,6 +144,7 @@ bool Processor::Init(Config *config) {
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@name", mid);
 			vector<string> *names = config->getValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
+			string logLevel;
 			for (int i = 0; names && i < (int)names->size(); i++) {
 				snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/@value", mid, i+1);
 				char *val = config->getFirstValue(buffer);
@@ -155,7 +156,10 @@ bool Processor::Init(Config *config) {
 						continue;
 					}
 				}
-				c->push_back(pair<string, string>((*names)[i], val));
+				if ((*names)[i] == "logLevel")
+					logLevel = val;
+				else
+					c->push_back(pair<string, string>((*names)[i], val));
 				free(val);
 			}
 			delete names;
@@ -164,6 +168,8 @@ bool Processor::Init(Config *config) {
 				ModuleInfo *mi = modules[i].back();
 				if (!mi->module->Init(c))
 					return false;
+				if (logLevel.length() > 0)
+					mi->module->setLogLevel(logLevel.c_str());
 				mi->type = mi->module->getType();
 				if (mi->type == Module::MULTI) {
 					mi->processingResources = 0;
@@ -566,9 +572,9 @@ void Processor::runThread(int threadId) {
 			ModuleInfo *minfo = (*mis)[multiIndex];
 			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			int n;
-			LOG_TRACE(minfo->module, "< (" << minfo->inputResources->size() << ", " << minfo->inputResources->size() << ")");
+			LOG_TRACE(minfo->module, "< (" << minfo->inputResources->size() << ", " << minfo->outputResources->size() << ")");
 			minfo->processingResources = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources, &n);
-			LOG_TRACE(minfo->module, "> (" << minfo->inputResources->size() << ", " << minfo->inputResources->size() << ")");
+			LOG_TRACE(minfo->module, "> (" << minfo->inputResources->size() << ", " << minfo->outputResources->size() << ")");
 			n -= minfo->inputResources->size();
 			if (n < minN)
 				minN = n;

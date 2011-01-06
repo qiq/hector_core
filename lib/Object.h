@@ -50,6 +50,8 @@ public:
 	void log_fatal(const char *s);
 	void log_fatal(const std::string &s);
 
+	bool setLogLevel(const char *logLevel);
+
 	enum LogLevel {
 		TRACE = 0,
 		DEBUG =  1,
@@ -72,7 +74,6 @@ protected:
 	virtual bool RestoreCheckpointSync(const char *path);
 
 	const char *getLogLevelStr(log4cxx::LoggerPtr logger);
-	bool setLogLevel(const char *logLevel);
 
 	log4cxx::LoggerPtr logger;
 };
