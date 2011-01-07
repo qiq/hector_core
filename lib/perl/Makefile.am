@@ -13,10 +13,11 @@ perl_LTLIBRARIES = Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.pm
 Hector_wrap.cc Hector.pm: $(top_srcdir)/lib/Hector.i
-	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -c++ -perl -o Hector_wrap.cc $<
+	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -DSWIG_TYPE_TABLE=hector -c++ -perl -o Hector_wrap.cc $<
 
 Hector_la_SOURCES = \
 	Hector_wrap.cc
+Hector_la_CXXFLAGS = $(AM_CXXFLAGS) -DSWIGRUNTIME_DEBUG
 Hector_la_LIBADD = $(top_builddir)/lib/libhector.la $(top_builddir)/lib/processing_engine/resources/libTestResource.la $(top_builddir)/lib/processing_engine/resources/libTestProtobufResource.la
 
 
