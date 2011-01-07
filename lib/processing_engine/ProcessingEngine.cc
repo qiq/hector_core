@@ -325,14 +325,15 @@ void ProcessingEngine::StopSync() {
 			sched_yield();
 			finishedLock.Lock();
 		}
-
 		// cancel reader in the queue
+		ObjectUnlock();		// we have to unlock, so that Processor threads may be cancelled and joined
 		if (outputQueue)
 			outputQueue->Stop();
 		// cancel running threads and join all threads
 		for (unsigned i = 0; i < processors.size(); i++) {
 			processors[i]->Stop();
 		}
+		ObjectLockWrite();
 		propRun = false;
 	}
 }
