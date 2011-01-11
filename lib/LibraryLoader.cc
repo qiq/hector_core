@@ -5,6 +5,7 @@
 
 #include <config.h>
 
+#include <stdlib.h>
 #include "LibraryLoader.h"
 
 using namespace std;
@@ -22,7 +23,8 @@ LibraryLoader::LibraryLoader() {
 }
 
 LibraryLoader::~LibraryLoader() {
-	lock.Lock();
+	if (getenv("HECTOR_NO_UNLOAD"))
+		return;
 	for (tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
 		lt_dlclose(*iter->second);
 		delete iter->second;
