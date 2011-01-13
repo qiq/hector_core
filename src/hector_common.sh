@@ -1,4 +1,4 @@
-# Useful bash functions to be used with hector_server and hector_client.
+# Useful bash functions to be used with hector_server and $HECTOR_CLIENT.
 # This script should be include in other scripts.
 
 if which perl >/dev/null; then
@@ -7,24 +7,28 @@ else
 	HECTOR_SLEEP_COMMAND="sleep 1";
 fi
 
+if [ -z "$HECTOR_HOST" ]; then
+	HECTOR_HOST="localhost:1100"
+fi
+
 function hector_server_start {
 	hector_server -c $@
 }
 
 function hector_server_shutdown {
-	echo "shutdown" | ( hector_client || exit )
+	echo "shutdown" | ( hector_client $HECTOR_HOST || exit )
 }
 
 function hector_client_set {
-	echo "set $1=$2" | ( hector_client || exit )
+	echo "set $1=$2" | ( hector_client $HECTOR_HOST || exit )
 }
 
 function hector_client_get {
-	echo "get $1" | ( hector_client || exit ) | sed -e 's/.*= //'
+	echo "get $1" | ( hector_client $HECTOR_HOST || exit ) | sed -e 's/.*= //'
 }
 
 function hector_client_get_dontfail {
-	echo "get $1" | hector_client 2>/dev/null | sed -e 's/.*= //'
+	echo "get $1" | hector_client $HECTOR_HOST 2>/dev/null | sed -e 's/.*= //'
 }
 
 function hector_client_wait {
