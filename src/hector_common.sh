@@ -34,29 +34,37 @@ function hector_client_get_dontfail {
 function hector_client_wait {
 	x=`hector_client_get $1`;
 	while [ -z "$x" -o "$x" != "$2" ]; do
-		echo -n $x;
+		echo -n "$x";
 		bash -c "$HECTOR_SLEEP_COMMAND"
 		x=`hector_client_get $1`;
-		echo -ne "\b\b\b\b\b\b\b\b\b\b";
+		echo -ne "\033[100D\033[K";
 	done
 }
 
 function hector_client_wait_lower {
 	x=`hector_client_get $1`;
 	while [ -z "$x" -o "0$x" -lt "$2" ]; do
-		echo -n $x;
+		echo -n "$x";
 		bash -c "$HECTOR_SLEEP_COMMAND"
 		x=`hector_client_get $1`;
-		echo -ne "\b\b\b\b\b\b\b\b\b\b";
+		echo -ne "\033[100D\033[K";
 	done
 }
 
 function hector_client_wait_dontfail {
 	x=`hector_client_get_dontfail $1`
 	while [ -z "$x" -o "$x" != "$2" ]; do
-		echo -n $x;
+		echo -n "$x";
 		bash -c "$HECTOR_SLEEP_COMMAND"
 		x=`hector_client_get_dontfail $1`
-		echo -ne "\b\b\b\b\b\b\b\b\b\b";
+		echo -ne "\033[100D\033[K";
 	done
+}
+
+function hector_client_save_checkpoint {
+	echo "save_checkpoint $1" | ( hector_client $HECTOR_HOST || exit )
+}
+
+function hector_client_restore_checkpoint {
+	echo "restore_checkpoint $1" | ( hector_client $HECTOR_HOST || exit )
 }
