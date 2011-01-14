@@ -7,7 +7,7 @@ test10: test of loading/saving module
 	<Server id="test" lib="TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1100</serverPort>
+		<serverPort>1101</serverPort>
 		<logConfig>test.log.props</logConfig>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_load">

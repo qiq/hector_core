@@ -7,7 +7,7 @@ test20: test of loading/saving module, using both TestResource and TestProtobufR
 	<Server id="test" lib="TestServer.la">
 		<threads>1</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1100</serverPort>
+		<serverPort>1101</serverPort>
 		<logConfig>test.log.props</logConfig>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_load">

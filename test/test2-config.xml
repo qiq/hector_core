@@ -8,7 +8,7 @@ Also testing another parameter value usage.
 	<Server id="test" lib="TestServer.la">
 		<threads>2</threads>
 		<serverHost>*</serverHost>
-		<serverPort>1100</serverPort>
+		<serverPort>1101</serverPort>
 		<logConfig>test.log.props</logConfig>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">

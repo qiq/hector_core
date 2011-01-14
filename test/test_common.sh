@@ -18,6 +18,7 @@ function test_init {
 	export PATH=$base/src:$PATH
 	export LD_LIBRARY_PATH=$base/lib:$base/lib/processing_engine/servers:$base/lib/processing_engine/resources:$base/lib/processing_engine/modules:$base/lib/perl/.libs:$LD_LIBRARY_PATH
 	export PERL5LIB=$base/lib/perl:$base/lib/processing_engine/modules/perl:$PERL5LIB
+	HECTOR_HOST=localhost:1101
 
 	# hector helper functions
 	. hector_common.sh
