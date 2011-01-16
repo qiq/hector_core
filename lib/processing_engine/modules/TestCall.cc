@@ -65,7 +65,8 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 }
 
 TestCall::~TestCall() {
-	delete resourceType;
+	free(targetEngine);
+	free(resourceType);
 	delete values;
 	delete call;
 }

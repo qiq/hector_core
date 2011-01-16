@@ -33,7 +33,7 @@ Resource::Resource() {
 	attachedResource = NULL;
 }
 
-Resource::Resource(const Resource &r) : status(r.status), attachedResource(r.attachedResource) {
+Resource::Resource(const Resource &r) : flags(r.flags), status(r.status), attachedResource(r.attachedResource) {
 	idLock.Lock();
 	setId(nextId++);
 	idLock.Unlock();
