@@ -74,7 +74,7 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 		resourceType = strdup("TestResource");
 	if (maxItems)
 		LOG_INFO(this, "Going to produce " << maxItems << " resources of type " << resourceType << ".");
-	typeId = Resource::NameToId(resourceType);
+	typeId = Resource::registry.NameToId(resourceType);
 	if (typeId < 0) {
 		LOG_ERROR(this, "Cannot load " << resourceType << " library");
 		return false;
@@ -89,7 +89,7 @@ Resource *TestInput::ProcessInput(bool sleep) {
 	if (maxItems && i >= maxItems)
 		return NULL;
 	ObjectLockWrite();
-	Resource *r = Resource::AcquireResource(typeId);
+	Resource *r = Resource::registry.AcquireResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	if (typeId == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(r);

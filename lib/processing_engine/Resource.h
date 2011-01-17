@@ -13,6 +13,7 @@
 #include <log4cxx/logger.h>
 #include "Object.h"
 #include "PlainLock.h"
+#include "ResourceRegistry.h"
 
 // logger helper macros (print short info about the resource)
 
@@ -91,13 +92,13 @@ public:
 	std::string toStringShort();
 
 	// methods common to all Resources
-	static int NameToId(const char *name);
 	static int NextResourceId();
-	static Resource *AcquireResource(int id);
-	static void ReleaseResource(Resource *resource);
+
 	// serializes resource (together with size and type), returns total bytes written
 	static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
 	static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
+
+	static ResourceRegistry registry;
 
 protected:
 	// memory-only, used just in Processor
@@ -108,11 +109,6 @@ protected:
 	int id;
 	int status;
 	Resource *attachedResource;
-
-	static int LoadResourceLibrary(const char *name, int id);
-	static PlainLock translateLock;
-	static std::tr1::unordered_map<std::string, int> name2id;
-	static std::tr1::unordered_map<int, ResourceInfo*> id2info;
 
 	static PlainLock idLock;
 	static int nextId;

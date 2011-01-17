@@ -16,6 +16,7 @@
 %include Object.i
 %include ObjectRegistry.i
 %include Module.i
+%include ResourceRegistry.i
 %include Resource.i
 %include ProtobufResource.i
 %include TestResource.i

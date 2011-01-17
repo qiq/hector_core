@@ -38,10 +38,7 @@ public:
         void clearAttachedResource();
 
         // static methods common to all Resources
-        static int NameToId(const char *name);
         static int NextResourceId();
-        static Resource *AcquireResource(int id);
-        static void ReleaseResource(Resource *resource);
         static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
         static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
 };

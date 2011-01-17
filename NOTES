@@ -1,3 +1,4 @@
+- set USE_VALGRIND=1 to run server using valgrind memcheck tool (log is hector_server.log.valgrind)
 - set HECTOR_HOST="host:port" to enable different host:port for hector_client_* bash functions
 - set HECTOR_NO_UNLOAD=1 to prevent unloading of dynamic libraries. Usefull for
   debugging using valgrind (memory leak detection).
