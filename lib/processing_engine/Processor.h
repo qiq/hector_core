@@ -65,13 +65,13 @@ protected:
 	char *getPauseInput(const char *name);
 	void setPauseInput(const char *name, const char *value);
 
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
-	bool SaveCheckpointSync(const char *path);
-	bool RestoreCheckpointSync(const char *path);
+	bool SaveCheckpoint(const char *path);
+	bool RestoreCheckpoint(const char *path);
 
 	// connect processors to other processors
 	bool Connect();
@@ -89,20 +89,20 @@ inline SyncQueue<Resource> *Processor::getInputQueue() {
 	return inputQueue;
 }
 
-inline char *Processor::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *Processor::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool Processor::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool Processor::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool Processor::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool Processor::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *Processor::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *Processor::ListNames() {
+	return values->ListNames();
 }
 
 #endif

@@ -31,13 +31,13 @@ public:
 	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 protected:
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
-	void SaveCheckpointSync(const char *path, const char *id);
-	void RestoreCheckpointSync(const char *path, const char *id);
+	void SaveCheckpoint(const char *path, const char *id);
+	void RestoreCheckpoint(const char *path, const char *id);
 	
 	SV *CreatePerlResource(Resource *resource);
 
@@ -48,7 +48,7 @@ protected:
 	std::tr1::unordered_set<std::string> initialized;
 };
 
-inline bool PerlModule::isInitOnly(const char *name) {
+inline bool PerlModule::IsInitOnly(const char *name) {
 	return false;
 }
 

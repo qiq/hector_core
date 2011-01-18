@@ -12,7 +12,7 @@ TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex)
 	items = 0;
 
 	values = new ObjectValues<TestOutput>(this);
-	values->addGetter("items", &TestOutput::getItems);
+	values->AddGetter("items", &TestOutput::getItems);
 }
 
 TestOutput::~TestOutput() {

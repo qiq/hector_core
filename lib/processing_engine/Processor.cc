@@ -26,8 +26,8 @@ Processor::Processor(ObjectRegistry *objects, ProcessingEngine *engine, const ch
 	pauseInput = false;
 
 	values = new ObjectValues<Processor>(this);
-	values->addGetter("pauseInput", &Processor::getPauseInput);
-	values->addSetter("pauseInput", &Processor::setPauseInput);
+	values->AddGetter("pauseInput", &Processor::getPauseInput);
+	values->AddSetter("pauseInput", &Processor::setPauseInput);
 }
 
 Processor::~Processor() {
@@ -94,7 +94,7 @@ bool Processor::Init(Config *config) {
 
 	// threads
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/threads", getId());
-	s = config->getFirstValue(buffer);
+	s = config->GetFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1 || nThreads <= 0 || nThreads > 100) {
 		LOG_ERROR(this, "Invalid number of threads: " << s);
 		return false;
@@ -105,17 +105,17 @@ bool Processor::Init(Config *config) {
 
 	// module(s)
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/modules/Module/@id", getId());
-	v = config->getValues(buffer);
+	v = config->GetValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *mid = iter->c_str();
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/@lib", mid);
-			char *name = config->getFirstValue(buffer);
+			char *name = config->GetFirstValue(buffer);
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/@type", mid);
-			char *type = config->getFirstValue(buffer);
+			char *type = config->GetFirstValue(buffer);
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
-				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::loadLibrary(name, "create");
+				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::LoadLibrary(name, "create");
 				if (!create) {
 					LOG_ERROR(this, "Module/lib not found: " << name);
 					return false;
@@ -142,15 +142,15 @@ bool Processor::Init(Config *config) {
 			}
 			// create name-value argument pairs
 			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@name", mid);
-			vector<string> *names = config->getValues(buffer);
+			vector<string> *names = config->GetValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
 			string logLevel;
 			for (int i = 0; names && i < (int)names->size(); i++) {
 				snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/@value", mid, i+1);
-				char *val = config->getFirstValue(buffer);
+				char *val = config->GetFirstValue(buffer);
 				if (!val) {
 					snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/text()", mid, i+1);
-					val = config->getFirstValue(buffer);
+					val = config->GetFirstValue(buffer);
 					if (!val) {
 						LOG_ERROR(this, "No value for param: " << (*names)[i].c_str());
 						continue;
@@ -188,7 +188,7 @@ bool Processor::Init(Config *config) {
 	// input queue(s)
 	inputQueue = new SyncQueue<Resource>();
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue", getId());
-	v = config->getValues(buffer);
+	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
 		delete v;
@@ -196,7 +196,7 @@ bool Processor::Init(Config *config) {
 			// priority
 			int priority = 0;
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@priority", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &priority) != 1) {
 					LOG_ERROR(this, "Invalid priority: " << s);
@@ -207,7 +207,7 @@ bool Processor::Init(Config *config) {
 			// maxItems
 			int maxItems = 0;
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxItems", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxItems) != 1) {
 					LOG_ERROR(this, "Invalid maxItems: " << s);
@@ -218,7 +218,7 @@ bool Processor::Init(Config *config) {
 			// maxSize
 			int maxSize = 0;
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxSize", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxSize) != 1) {
 					LOG_ERROR(this, "Invalid maxSize: " << s);
@@ -230,13 +230,13 @@ bool Processor::Init(Config *config) {
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			values->addGetter(buffer, &Processor::getInputQueueItems);
+			values->AddGetter(buffer, &Processor::getInputQueueItems);
 		}
 	}
 
 	// output queue(s)
 	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor", getId());
-	v = config->getValues(buffer);
+	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
 		delete v;
@@ -245,7 +245,7 @@ bool Processor::Init(Config *config) {
 			outputFilters.push_back(f);
 			// reference
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@ref", getId(), i+1);
-			char *ref = config->getFirstValue(buffer);
+			char *ref = config->GetFirstValue(buffer);
 			if (!ref) {
 				LOG_ERROR(this, "Missing reference: " << s);
 				return false;
@@ -254,7 +254,7 @@ bool Processor::Init(Config *config) {
 			free(ref);
 			// priority
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@priority", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				int priority;
 				if (sscanf(s, "%d", &priority) != 1) {
@@ -266,7 +266,7 @@ bool Processor::Init(Config *config) {
 			}
 			// copy
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@copy", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (!strcmp(s, "1") || !strcasecmp(s, "true"))
 					f->setCopy(true);
@@ -274,7 +274,7 @@ bool Processor::Init(Config *config) {
 			}
 			// filter
 			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@filter", getId(), i+1);
-			s = config->getFirstValue(buffer);
+			s = config->GetFirstValue(buffer);
 			if (s) {
 				int filter;
 				if (sscanf(s, "%d", &filter) != 1) {
@@ -339,11 +339,11 @@ bool Processor::Connect() {
 		const char *ref = (*iter)->getProcessor();
 		assert(ref != NULL);
 		SyncQueue<Resource> *q;
-		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
+		Processor *p = dynamic_cast<Processor*>(objects->GetObject(ref));
 		if (p) {
 			q = p->getInputQueue();
 		} else {
-			ProcessingEngine *pe = dynamic_cast<ProcessingEngine*>(objects->getObject(ref));
+			ProcessingEngine *pe = dynamic_cast<ProcessingEngine*>(objects->GetObject(ref));
 			if (!pe) {
 				LOG_ERROR(this, "Processor or ProcessingEngine not found: " << ref);
 				return false;
@@ -734,20 +734,20 @@ void Processor::Resume() {
 	}
 }
 
-bool Processor::SaveCheckpointSync(const char *path) {
+bool Processor::SaveCheckpoint(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			if (!(*iter)->module->SaveCheckpoint(path))
+			if (!(*iter)->module->LockSaveCheckpoint(path))
 				return false;
 		}
 	}
 	return true;
 }
 
-bool Processor::RestoreCheckpointSync(const char *path) {
+bool Processor::RestoreCheckpoint(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			if (!(*iter)->module->RestoreCheckpoint(path))
+			if (!(*iter)->module->LockRestoreCheckpoint(path))
 				return false;
 		}
 	}

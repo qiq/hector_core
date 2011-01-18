@@ -40,10 +40,10 @@ private:
 	void setFilename(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
 	int fd;
 	google::protobuf::io::ZeroCopyOutputStream *file;
@@ -54,20 +54,20 @@ inline Module::Type Save::getType() {
 	return OUTPUT;
 }
 
-inline char *Save::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *Save::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool Save::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool Save::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool Save::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool Save::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *Save::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *Save::ListNames() {
+	return values->ListNames();
 }
 
 #endif

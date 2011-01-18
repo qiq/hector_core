@@ -6,31 +6,31 @@
 
 using namespace std;
 
-char *Object::getValueSync(const char *name) {
+char *Object::GetValue(const char *name) {
 	return NULL;
 }
 
-bool Object::setValueSync(const char *name, const char *value) {
+bool Object::SetValue(const char *name, const char *value) {
 	return false;
 }
 
-bool Object::isInitOnly(const char *name) {
+bool Object::IsInitOnly(const char *name) {
 	return false;
 }
 
-vector<string> *Object::listNamesSync() {
+vector<string> *Object::ListNames() {
 	return new vector<string>();
 }
 
-bool Object::SaveCheckpointSync(const char *path) {
+bool Object::SaveCheckpoint(const char *path) {
 	return true;
 }
 
-bool Object::RestoreCheckpointSync(const char *path) {
+bool Object::RestoreCheckpoint(const char *path) {
 	return true;
 }
 
-const char *Object::getLogLevelStr(log4cxx::LoggerPtr logger) {
+const char *Object::GetLogLevelStr(log4cxx::LoggerPtr logger) {
 	log4cxx::LevelPtr level = logger->getLevel();
 	if (level == log4cxx::Level::getTrace())
 		return "TRACE";
@@ -44,7 +44,7 @@ const char *Object::getLogLevelStr(log4cxx::LoggerPtr logger) {
 		return "FATAL";
 	log4cxx::LoggerPtr parent = logger->getParent();
 	if (parent)
-		return getLogLevelStr(parent);
+		return GetLogLevelStr(parent);
 	return "unknown";
 }
 

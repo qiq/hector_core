@@ -45,7 +45,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				// get value
 				string object = args.substr(0, dot);
 				string property = args.substr(dot+1);
-				char *value = objects->getObjectValue(object.c_str(), property.c_str());
+				char *value = objects->GetObjectValue(object.c_str(), property.c_str());
 				if (value) {
 					LOG4CXX_INFO(logger, "GET " << args << " = " << value);
 					conn->setResponseCode(200, "OK");
@@ -57,9 +57,9 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				free(value);
 			} else {
 				// list object properties
-				Object *object = objects->getObject(args.c_str());
+				Object *object = objects->GetObject(args.c_str());
 				if (object) {
-					vector<string> *names = object->listNames();
+					vector<string> *names = object->LockListNames();
 					string s;
 					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
 						conn->appendResponseBody(iter->c_str());
@@ -78,7 +78,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			}
 		} else {
 			// list objects
-			vector<string> *all = objects->getIds();
+			vector<string> *all = objects->GetIds();
 			conn->setResponseCode(200, "OK");
 			string s;
 			for (vector<string>::iterator iter = all->begin(); iter != all->end(); ++iter) {
@@ -101,7 +101,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				string body = conn->getRequestBody();
 				size_t eoln = body.find_first_of("\r\n");
 				string value = eoln != string::npos ? body.substr(0, eoln): body;
-				if (objects->setObjectValue(object.c_str(), property.c_str(), value.c_str())) {
+				if (objects->SetObjectValue(object.c_str(), property.c_str(), value.c_str())) {
 					LOG4CXX_INFO(logger, "SET " << args << " = " << value);
 					conn->setResponseCode(200, "OK");
 				} else {
@@ -203,7 +203,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	} else if (method == "SAVE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			if (!(*iter)->SaveCheckpoint(args.c_str())) {
+			if (!(*iter)->LockSaveCheckpoint(args.c_str())) {
 				conn->setResponseCode(500, "Error saving checkpoint");
 				return true;
 			}
@@ -213,7 +213,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	} else if (method == "RESTORE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			if (!(*iter)->RestoreCheckpoint(args.c_str())) {
+			if (!(*iter)->LockRestoreCheckpoint(args.c_str())) {
 				conn->setResponseCode(500, "Error restoring checkpoint");
 				return true;
 			}

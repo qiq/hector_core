@@ -30,30 +30,30 @@ private:
 	char *getItems(const char *name);
 
 	ObjectValues<TestOutput> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 };
 
 inline Module::Type TestOutput::getType() {
 	return OUTPUT;
 }
 
-inline char *TestOutput::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *TestOutput::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool TestOutput::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool TestOutput::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool TestOutput::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool TestOutput::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *TestOutput::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *TestOutput::ListNames() {
+	return values->ListNames();
 }
 
 #endif

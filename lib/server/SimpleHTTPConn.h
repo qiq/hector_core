@@ -20,6 +20,30 @@ typedef enum {
 } request_ready_t;
 
 class SimpleHTTPConn {
+public:
+	SimpleHTTPConn(int sock);
+	~SimpleHTTPConn();
+	void Clear();
+	bool isKeepAlive();
+
+	bool ReadRequest();
+	void SendResponse();
+
+	string getRequestMethod();
+	string getRequestArgs();
+	string getRequestHeaderField(string &field);
+	string getRequestBody();
+
+	void ErrorResponse(int code, const char *description, const char *message);
+	void setResponseCode(int code, const char *description);
+	void clearResponseHeader();
+	void appendResponseHeader(const std::string &s);
+	void appendResponseHeader(const char *s, int size);
+	void clearResponseBody();
+	void appendResponseBody(const std::string &s);
+	void appendResponseBody(const char *s, int size);
+
+private:
 	int socket;			// socket used
 
 	// keep-alive support
@@ -45,28 +69,6 @@ class SimpleHTTPConn {
 	request_ready_t RequestReady();
 
 	static log4cxx::LoggerPtr logger;
-public:
-	SimpleHTTPConn(int sock);
-	~SimpleHTTPConn();
-	void Clear();
-	bool isKeepAlive();
-
-	bool ReadRequest();
-	void SendResponse();
-
-	string getRequestMethod();
-	string getRequestArgs();
-	string getRequestHeaderField(string &field);
-	string getRequestBody();
-
-	void ErrorResponse(int code, const char *description, const char *message);
-	void setResponseCode(int code, const char *description);
-	void clearResponseHeader();
-	void appendResponseHeader(const std::string &s);
-	void appendResponseHeader(const char *s, int size);
-	void clearResponseBody();
-	void appendResponseBody(const std::string &s);
-	void appendResponseBody(const char *s, int size);
 };
 
 #endif

@@ -22,15 +22,15 @@ public:
 	ObjectValues(T *module): module(module) {};
 	~ObjectValues() {};
 
-	void addGetter(const char *name, char *(T::*f)(const char*));
-	void addSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly = false);
+	void AddGetter(const char *name, char *(T::*f)(const char*));
+	void AddSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly = false);
 	bool InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown = false);
 	bool InitValue(const char *name, const char *value, bool ignoreUnknown = false);
 
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
 private:
 	T *module;
@@ -71,20 +71,20 @@ bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignore
 }
 
 template<class T>
-void ObjectValues<T>::addGetter(const char *name, char *(T::*f)(const char*)) {
+void ObjectValues<T>::AddGetter(const char *name, char *(T::*f)(const char*)) {
 	getters[name] = f;
 }
 
 // initOnly: cannot set value outside of InitValue()/InitValues() -- does not require locking at all
 template<class T>
-void ObjectValues<T>::addSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly) {
+void ObjectValues<T>::AddSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly) {
 	setters[name] = f;
 	if (initOnly)
 		this->initOnly.insert(name);
 }
 
 template<class T>
-char *ObjectValues<T>::getValueSync(const char *name) {
+char *ObjectValues<T>::GetValue(const char *name) {
 	typename std::tr1::unordered_map<std::string, char*(T::*)(const char*)>::iterator iter = getters.find(name);
 	if (iter != getters.end())
 		return (module->*iter->second)(name);
@@ -92,7 +92,7 @@ char *ObjectValues<T>::getValueSync(const char *name) {
 }
 
 template<class T>
-bool ObjectValues<T>::setValueSync(const char *name, const char *value) {
+bool ObjectValues<T>::SetValue(const char *name, const char *value) {
 	typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(module->*iter->second)(name, value);
@@ -102,13 +102,13 @@ bool ObjectValues<T>::setValueSync(const char *name, const char *value) {
 }
 
 template<class T>
-bool ObjectValues<T>::isInitOnly(const char *name) {
+bool ObjectValues<T>::IsInitOnly(const char *name) {
 	typename std::tr1::unordered_set<std::string>::iterator iter = initOnly.find(name);
 	return iter != initOnly.end();
 }
 
 template<class T>
-std::vector<std::string> *ObjectValues<T>::listNamesSync() {
+std::vector<std::string> *ObjectValues<T>::ListNames() {
 	std::vector<std::string> *result = new std::vector<std::string>();
 	for (typename std::tr1::unordered_map<std::string, char*(T::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);

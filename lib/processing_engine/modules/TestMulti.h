@@ -43,10 +43,10 @@ private:
 	void setTimeTick(const char *name, const char *value);
 
 	ObjectValues<TestMulti> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
 	std::queue<TestResource*> resources;
 };
@@ -55,20 +55,20 @@ inline Module::Type TestMulti::getType() {
 	return MULTI;
 }
 
-inline char *TestMulti::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *TestMulti::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool TestMulti::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool TestMulti::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool TestMulti::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool TestMulti::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *TestMulti::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *TestMulti::ListNames() {
+	return values->ListNames();
 }
 
 #endif

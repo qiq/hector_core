@@ -45,30 +45,30 @@ private:
 	void setSetStatus(const char *name, const char *value);
 
 	ObjectValues<TestSimple> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 };
 
 inline 	Module::Type TestSimple::getType() {
 	return SIMPLE;
 }
 
-inline char *TestSimple::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *TestSimple::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool TestSimple::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool TestSimple::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool TestSimple::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool TestSimple::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *TestSimple::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *TestSimple::ListNames() {
+	return values->ListNames();
 }
 
 #endif

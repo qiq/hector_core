@@ -542,7 +542,7 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	return processingResources;
 }
 
-char *PerlModule::getValueSync(const char *name) {
+char *PerlModule::GetValue(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
@@ -554,12 +554,12 @@ char *PerlModule::getValueSync(const char *name) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         PUTBACK;
-	count = call_method("getValueSync", G_SCALAR|G_EVAL);
+	count = call_method("GetValue", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling getValueSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling GetValue (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling getValueSync (no result)");
+		LOG_ERROR(this, "Error calling GetValue (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvPOK(sv)) {
@@ -575,7 +575,7 @@ char *PerlModule::getValueSync(const char *name) {
 			snprintf(s, sizeof(s), "%lf", SvNV(sv));
 			result = strdup(s);
 		} else {
-			LOG_ERROR(this, "Error calling getValueSync (invalid result type)");
+			LOG_ERROR(this, "Error calling GetValue (invalid result type)");
 		}
 	}
 	PUTBACK;
@@ -585,7 +585,7 @@ char *PerlModule::getValueSync(const char *name) {
 	return result;
 }
 
-bool PerlModule::setValueSync(const char *name, const char *value) {
+bool PerlModule::SetValue(const char *name, const char *value) {
 	PERL_SET_CONTEXT(my_perl);
 	bool result = false;
 	dSP;
@@ -595,16 +595,16 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         XPUSHs(sv_2mortal(newSVpv(value, 0)));
         PUTBACK;
-	int count = call_method("setValueSync", G_SCALAR|G_EVAL);
+	int count = call_method("SetValue", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling setValueSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling SetValue (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling setValueSync (no result)");
+		LOG_ERROR(this, "Error calling SetValue (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR(this, "Error calling setValueSync (invalid result)");
+			LOG_ERROR(this, "Error calling SetValue (invalid result)");
 		} else {
 			result = (SvIV(resultSV) != 0);
 		}
@@ -615,7 +615,7 @@ bool PerlModule::setValueSync(const char *name, const char *value) {
 	return result;
 }
 
-vector<string> *PerlModule::listNamesSync() {
+vector<string> *PerlModule::ListNames() {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
@@ -625,16 +625,16 @@ vector<string> *PerlModule::listNamesSync() {
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
-	int count = call_method("listNamesSync", G_SCALAR|G_EVAL);
+	int count = call_method("ListNames", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling listNamesSync (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ListNames (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling listNamesSync (no result)");
+		LOG_ERROR(this, "Error calling ListNames (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
-			LOG_ERROR(this, "Error calling listNamesSync (invalid result)");
+			LOG_ERROR(this, "Error calling ListNames (invalid result)");
 		} else {
 			result = new vector<string>();
 			AV *av = (AV*)SvRV(sv);
@@ -656,7 +656,7 @@ vector<string> *PerlModule::listNamesSync() {
 	return result;
 }
 
-void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
+void PerlModule::SaveCheckpoint(const char *path, const char *id) {
 	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;
@@ -665,13 +665,13 @@ void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
         XPUSHs(sv_2mortal(newSVpv(path, 0)));
         XPUSHs(sv_2mortal(newSVpv(id, 0)));
         PUTBACK;
-	call_method("setValueSync", G_DISCARD);
+	call_method("SaveCheckpoint", G_DISCARD);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
 }
 
-void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
+void PerlModule::RestoreCheckpoint(const char *path, const char *id) {
 	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;
@@ -680,7 +680,7 @@ void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
         XPUSHs(sv_2mortal(newSVpv(path, 0)));
         XPUSHs(sv_2mortal(newSVpv(id, 0)));
         PUTBACK;
-	call_method("setValueSync", G_DISCARD);
+	call_method("RestoreCheckpoint", G_DISCARD);
 	PUTBACK;
 	FREETMPS;
 	LEAVE;

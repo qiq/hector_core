@@ -19,13 +19,13 @@ TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): 
 	timeTick = DEFAULT_TIMETICK;
 
 	values = new ObjectValues<TestMulti>(this);
-	values->addGetter("items", &TestMulti::getItems);
-	values->addGetter("foo", &TestMulti::getFoo);
-	values->addSetter("foo", &TestMulti::setFoo);
-	values->addGetter("alias", &TestMulti::getFoo);
-	values->addSetter("alias", &TestMulti::setFoo);
-	values->addGetter("timeTick", &TestMulti::getTimeTick);
-	values->addSetter("timeTick", &TestMulti::setTimeTick);
+	values->AddGetter("items", &TestMulti::getItems);
+	values->AddGetter("foo", &TestMulti::getFoo);
+	values->AddSetter("foo", &TestMulti::setFoo);
+	values->AddGetter("alias", &TestMulti::getFoo);
+	values->AddSetter("alias", &TestMulti::setFoo);
+	values->AddGetter("timeTick", &TestMulti::getTimeTick);
+	values->AddSetter("timeTick", &TestMulti::setTimeTick);
 }
 
 TestMulti::~TestMulti() {

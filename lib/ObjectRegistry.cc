@@ -8,7 +8,7 @@ using namespace std;
 
 log4cxx::LoggerPtr ObjectRegistry::logger(log4cxx::Logger::getLogger("lib.ObjectRegistry"));
 
-bool ObjectRegistry::registerObject(Object *obj) {
+bool ObjectRegistry::RegisterObject(Object *obj) {
 	const char *id = obj->getId();
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
@@ -19,7 +19,7 @@ bool ObjectRegistry::registerObject(Object *obj) {
 	return true;
 }
 
-bool ObjectRegistry::unregisterObject(const char *id) {
+bool ObjectRegistry::UnregisterObject(const char *id) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		objects.erase(id);
@@ -28,7 +28,7 @@ bool ObjectRegistry::unregisterObject(const char *id) {
 	return false;
 }
 
-Object *ObjectRegistry::getObject(const char *id) {
+Object *ObjectRegistry::GetObject(const char *id) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		return iter->second;
@@ -36,7 +36,7 @@ Object *ObjectRegistry::getObject(const char *id) {
 	return NULL;
 }
 
-vector<string> *ObjectRegistry::getIds() {
+vector<string> *ObjectRegistry::GetIds() {
 	vector<string> *result = new vector<string>();
 	for (tr1::unordered_map<string, Object*>::iterator iter = objects.begin(); iter != objects.end(); ++iter) {
 		result->push_back(iter->first);
@@ -44,19 +44,19 @@ vector<string> *ObjectRegistry::getIds() {
 	return result;
 }
 
-char *ObjectRegistry::getObjectValue(const char *id, const char *name) {
+char *ObjectRegistry::GetObjectValue(const char *id, const char *name) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		Object *obj = iter->second;
-		return obj->getValue(name);
+		return obj->LockGetValue(name);
 	}
 	return NULL;
 }
 
-bool ObjectRegistry::setObjectValue(const char *id, const char *name, const char *value) {
+bool ObjectRegistry::SetObjectValue(const char *id, const char *name, const char *value) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		return iter->second->setValue(name, value);
+		return iter->second->LockSetValue(name, value);
 	}
 	return false;
 }

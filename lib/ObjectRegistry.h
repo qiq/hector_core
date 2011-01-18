@@ -21,13 +21,13 @@ public:
 	ObjectRegistry() {};
 	~ObjectRegistry() {};
 
-	bool registerObject(Object *obj);
-	bool unregisterObject(const char *id);
-	Object *getObject(const char *id);
-	std::vector<std::string> *getIds();
+	bool RegisterObject(Object *obj);
+	bool UnregisterObject(const char *id);
+	Object *GetObject(const char *id);
+	std::vector<std::string> *GetIds();
 
-	char *getObjectValue(const char *id, const char *name);
-	bool setObjectValue(const char *id, const char *name, const char *value);
+	char *GetObjectValue(const char *id, const char *name);
+	bool SetObjectValue(const char *id, const char *name, const char *value);
 
 private:
 	std::tr1::unordered_map<std::string, Object*> objects;

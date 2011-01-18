@@ -28,7 +28,7 @@ Config::~Config() {
 	xmlCleanupParser();
 }
 
-bool Config::parseFile(const char *fileName, vector<string> *args) {
+bool Config::ParseFile(const char *fileName, vector<string> *args) {
 	// read entire document into memory
 	FILE *f = fopen(fileName, "r");
 	if (!f) {
@@ -126,7 +126,7 @@ bool Config::parseFile(const char *fileName, vector<string> *args) {
 	return true;
 }
 
-vector<string> *Config::getValues(const char *xpath) {
+vector<string> *Config::GetValues(const char *xpath) {
 	xmlXPathContextPtr context;
 	xmlXPathObjectPtr nodes;
 
@@ -163,7 +163,7 @@ vector<string> *Config::getValues(const char *xpath) {
 	return result;
 }
 
-char *Config::getFirstValue(const char *xpath) {
+char *Config::GetFirstValue(const char *xpath) {
 	xmlXPathContextPtr context;
 	xmlXPathObjectPtr nodes;
 
@@ -199,7 +199,7 @@ char *Config::getFirstValue(const char *xpath) {
 	return result;
 }
 
-bool Config::evaluateXPath(const char *xpath) {
+bool Config::EvaluateXPath(const char *xpath) {
 	xmlXPathContextPtr context;
 
 	context = xmlXPathNewContext(doc);
@@ -208,7 +208,7 @@ bool Config::evaluateXPath(const char *xpath) {
 	return result;
 }
 
-int Config::getInt(const char *s) {
+int Config::GetInt(const char *s) {
 	int i;
 	if (!s || sscanf(s, " %d", &i) != 1)
 		return INT_MAX;

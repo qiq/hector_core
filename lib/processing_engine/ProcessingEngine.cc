@@ -23,11 +23,11 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Obj
 
 	values = new ObjectValues<ProcessingEngine>(this);
 
-	values->addGetter("run", &ProcessingEngine::getRun);
-	values->addSetter("run", &ProcessingEngine::setRun);
-	values->addGetter("pause", &ProcessingEngine::getPause);
-	values->addSetter("pause", &ProcessingEngine::setPause);
-	values->addGetter("resourceCount", &ProcessingEngine::getResourceCount);
+	values->AddGetter("run", &ProcessingEngine::getRun);
+	values->AddSetter("run", &ProcessingEngine::setRun);
+	values->AddGetter("pause", &ProcessingEngine::getPause);
+	values->AddSetter("pause", &ProcessingEngine::setPause);
+	values->AddGetter("resourceCount", &ProcessingEngine::getResourceCount);
 }
 
 ProcessingEngine::~ProcessingEngine() {
@@ -54,7 +54,7 @@ bool ProcessingEngine::Init(Config *config) {
 
 	// create children: processors
 	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/Processor/@id", getId());
-	v = config->getValues(buffer);
+	v = config->GetValues(buffer);
 	if (v) {
 		// create and initialize all Processors
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
@@ -71,9 +71,9 @@ bool ProcessingEngine::Init(Config *config) {
 
 	// input queue(s)
 	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/inputProcessor/@ref", getId());
-	char *ref = config->getFirstValue(buffer);
+	char *ref = config->GetFirstValue(buffer);
 	if (ref) {
-		Processor *p = dynamic_cast<Processor*>(objects->getObject(ref));
+		Processor *p = dynamic_cast<Processor*>(objects->GetObject(ref));
 		if (!p) {
 			LOG_ERROR(this, "Processor not found: " << ref);
 			return false;
@@ -352,36 +352,36 @@ void ProcessingEngine::ResumeSync() {
 	}
 }
 
-bool ProcessingEngine::SaveCheckpointSync(const char *path) {
+bool ProcessingEngine::SaveCheckpoint(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		if (!(*iter)->SaveCheckpoint(path))
+		if (!(*iter)->LockSaveCheckpoint(path))
 			return false;
 	}
 	return true;
 }
 
-bool ProcessingEngine::RestoreCheckpointSync(const char *path) {
+bool ProcessingEngine::RestoreCheckpoint(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		if (!(*iter)->RestoreCheckpoint(path))
+		if (!(*iter)->LockRestoreCheckpoint(path))
 			return false;
 	}
 	return true;
 }
 
-char *ProcessingEngine::getValueSync(const char *name) {
-	return values->getValueSync(name);
+char *ProcessingEngine::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-bool ProcessingEngine::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+bool ProcessingEngine::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-bool ProcessingEngine::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+bool ProcessingEngine::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-vector<string> *ProcessingEngine::listNamesSync() {
-	return values->listNamesSync();
+vector<string> *ProcessingEngine::ListNames() {
+	return values->ListNames();
 }
 
 char *ProcessingEngine::getRun(const char *name) {

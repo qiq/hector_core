@@ -27,11 +27,11 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	stream = NULL;
 
 	values = new ObjectValues<Load>(this);
-	values->addGetter("items", &Load::getItems);
-	values->addGetter("maxItems", &Load::getMaxItems);
-	values->addSetter("maxItems", &Load::setMaxItems);
-	values->addGetter("filename", &Load::getFilename);
-	values->addSetter("filename", &Load::setFilename);
+	values->AddGetter("items", &Load::getItems);
+	values->AddGetter("maxItems", &Load::getMaxItems);
+	values->AddSetter("maxItems", &Load::setMaxItems);
+	values->AddGetter("filename", &Load::getFilename);
+	values->AddSetter("filename", &Load::setFilename);
 }
 
 Load::~Load() {
@@ -122,7 +122,7 @@ Resource *Load::ProcessInput(bool sleep) {
 	return r;
 }
 
-bool Load::SaveCheckpointSync(const char *path) {
+bool Load::SaveCheckpoint(const char *path) {
 	char buffer1[1024];
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fw = fopen(buffer1, "w");
@@ -141,7 +141,7 @@ bool Load::SaveCheckpointSync(const char *path) {
 	return true;
 }
 
-bool Load::RestoreCheckpointSync(const char *path) {
+bool Load::RestoreCheckpoint(const char *path) {
 	char buffer1[1024];
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fr = fopen(buffer1, "r");

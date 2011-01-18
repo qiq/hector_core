@@ -14,7 +14,7 @@ public:
 	LibraryLoader();
 	~LibraryLoader();
 
-	static void *loadLibrary(const char *lib, const char *sym);
+	static void *LoadLibrary(const char *lib, const char *sym);
 
 private:
 	static PlainLock lock;

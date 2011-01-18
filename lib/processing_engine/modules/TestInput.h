@@ -42,10 +42,10 @@ private:
 	void setResourceType(const char *name, const char *value);
 
 	ObjectValues<TestInput> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
 	int typeId;		// to create TestResource
 };
@@ -54,20 +54,20 @@ inline Module::Type TestInput::getType() {
 	return INPUT;
 }
 
-inline char *TestInput::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *TestInput::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool TestInput::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool TestInput::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool TestInput::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool TestInput::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *TestInput::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *TestInput::ListNames() {
+	return values->ListNames();
 }
 
 #endif

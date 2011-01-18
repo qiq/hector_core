@@ -63,10 +63,10 @@ private:
 	void setTargetEngine(const char *name, const char *value);
 
 	ObjectValues<TestCall> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 
 	Call *call;
 };
@@ -75,20 +75,20 @@ inline Module::Type TestCall::getType() {
 	return MULTI;
 }
 
-inline char *TestCall::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *TestCall::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool TestCall::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool TestCall::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool TestCall::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool TestCall::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *TestCall::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *TestCall::ListNames() {
+	return values->ListNames();
 }
 
 #endif

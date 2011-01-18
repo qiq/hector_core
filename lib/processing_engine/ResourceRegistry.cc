@@ -34,7 +34,7 @@ int ResourceRegistry::LoadResourceLibrary(const char *name, int id) {
 		snprintf(s, sizeof(s), "%s.la", name);
 	else
 		snprintf(s, sizeof(s), "%d.la", id);
-	Resource *(*create)() = (Resource*(*)())LibraryLoader::loadLibrary(s, "create");
+	Resource *(*create)() = (Resource*(*)())LibraryLoader::LoadLibrary(s, "create");
 	if (!create) {
 		if (name) {
 			LOG4CXX_ERROR(logger, "Invalid Resource name: " << name);

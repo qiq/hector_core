@@ -34,7 +34,7 @@ LibraryLoader::~LibraryLoader() {
 	lock.Unlock();
 }
 
-void *LibraryLoader::loadLibrary(const char *lib, const char *sym) {
+void *LibraryLoader::LoadLibrary(const char *lib, const char *sym) {
 	lock.Lock();
 	if (!initialized) {
 		if (lt_dlinit() != 0) {

@@ -18,12 +18,12 @@ class Config {
 public:
 	Config();
 	~Config();
-	bool parseFile(const char *fileName, std::vector<std::string> *args);
+	bool ParseFile(const char *fileName, std::vector<std::string> *args);
 
-	std::vector<std::string> *getValues(const char *XPath);
-	char *getFirstValue(const char *XPath);
-	bool evaluateXPath(const char *XPath);
-	int getInt(const char *s);
+	std::vector<std::string> *GetValues(const char *XPath);
+	char *GetFirstValue(const char *XPath);
+	bool EvaluateXPath(const char *XPath);
+	int GetInt(const char *s);
 };
 
 #endif

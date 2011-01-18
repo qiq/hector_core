@@ -17,13 +17,13 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	resourceType = NULL;
 
 	values = new ObjectValues<TestInput>(this);
-	values->addGetter("items", &TestInput::getItems);
-	values->addGetter("maxItems", &TestInput::getMaxItems);
-	values->addSetter("maxItems", &TestInput::setMaxItems, true);
-	values->addGetter("idPrefix", &TestInput::getIdPrefix);
-	values->addSetter("idPrefix", &TestInput::setIdPrefix);
-	values->addGetter("resourceType", &TestInput::getResourceType);
-	values->addSetter("resourceType", &TestInput::setResourceType, true);
+	values->AddGetter("items", &TestInput::getItems);
+	values->AddGetter("maxItems", &TestInput::getMaxItems);
+	values->AddSetter("maxItems", &TestInput::setMaxItems, true);
+	values->AddGetter("idPrefix", &TestInput::getIdPrefix);
+	values->AddSetter("idPrefix", &TestInput::setIdPrefix);
+	values->AddGetter("resourceType", &TestInput::getResourceType);
+	values->AddSetter("resourceType", &TestInput::setResourceType, true);
 }
 
 TestInput::~TestInput() {

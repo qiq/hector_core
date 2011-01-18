@@ -53,15 +53,15 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	targetEngine = NULL;
 
 	values = new ObjectValues<TestCall>(this);
-	values->addGetter("items", &TestCall::getItems);
-	values->addGetter("maxRequests", &TestCall::getMaxRequests);
-	values->addSetter("maxRequests", &TestCall::setMaxRequests, true);
-	values->addGetter("timeTick", &TestCall::getTimeTick);
-	values->addSetter("timeTick", &TestCall::setTimeTick);
-	values->addGetter("resourceType", &TestCall::getResourceType);
-	values->addSetter("resourceType", &TestCall::setResourceType, true);
-	values->addGetter("targetEngine", &TestCall::getTargetEngine);
-	values->addSetter("targetEngine", &TestCall::setTargetEngine);
+	values->AddGetter("items", &TestCall::getItems);
+	values->AddGetter("maxRequests", &TestCall::getMaxRequests);
+	values->AddSetter("maxRequests", &TestCall::setMaxRequests, true);
+	values->AddGetter("timeTick", &TestCall::getTimeTick);
+	values->AddSetter("timeTick", &TestCall::setTimeTick);
+	values->AddGetter("resourceType", &TestCall::getResourceType);
+	values->AddSetter("resourceType", &TestCall::setResourceType, true);
+	values->AddGetter("targetEngine", &TestCall::getTargetEngine);
+	values->AddSetter("targetEngine", &TestCall::setTargetEngine);
 }
 
 TestCall::~TestCall() {
@@ -112,7 +112,7 @@ void TestCall::setTargetEngine(const char *name, const char *value) {
 bool TestCall::Init(vector<pair<string, string> > *params) {
 	// second stage?
 	if (!params) {
-		ProcessingEngine *engine = dynamic_cast<ProcessingEngine*>(objects->getObject(targetEngine));
+		ProcessingEngine *engine = dynamic_cast<ProcessingEngine*>(objects->GetObject(targetEngine));
 		if (!engine) {
 			LOG_ERROR(this, "Invalid targetEngine parameter" << targetEngine);
 			return false;

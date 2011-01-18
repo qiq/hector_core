@@ -119,19 +119,19 @@ int main(int argc, char *argv[]) {
 
 	// load config file
 	Config *config = new Config();
-	if (!config->parseFile(configFile, &args))
+	if (!config->ParseFile(configFile, &args))
 		exit(EXIT_FAILURE);
 
 	// check that serverId does exist
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']", serverId);
-	char *s = config->getFirstValue(buffer);
+	char *s = config->GetFirstValue(buffer);
 	if (!s)
 		die("serverId %s not found in %s\n", serverId, configFile);
 	free(s);
 
 	// set up logging
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/logConfig", serverId);
-	char *logConfig = config->getFirstValue(buffer);
+	char *logConfig = config->GetFirstValue(buffer);
 	if (!logConfig)
 		die("logConfig not found\n");
 

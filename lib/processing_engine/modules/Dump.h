@@ -26,30 +26,30 @@ public:
 
 private:
 	ObjectValues<Dump> *values;
-	char *getValueSync(const char *name);
-	bool setValueSync(const char *name, const char *value);
-	bool isInitOnly(const char *name);
-	std::vector<std::string> *listNamesSync();
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	bool IsInitOnly(const char *name);
+	std::vector<std::string> *ListNames();
 };
 
 inline 	Module::Type Dump::getType() {
 	return SIMPLE;
 }
 
-inline char *Dump::getValueSync(const char *name) {
-	return values->getValueSync(name);
+inline char *Dump::GetValue(const char *name) {
+	return values->GetValue(name);
 }
 
-inline bool Dump::setValueSync(const char *name, const char *value) {
-	return values->setValueSync(name, value);
+inline bool Dump::SetValue(const char *name, const char *value) {
+	return values->SetValue(name, value);
 }
 
-inline bool Dump::isInitOnly(const char *name) {
-	return values->isInitOnly(name);
+inline bool Dump::IsInitOnly(const char *name) {
+	return values->IsInitOnly(name);
 }
 
-inline std::vector<std::string> *Dump::listNamesSync() {
-	return values->listNamesSync();
+inline std::vector<std::string> *Dump::ListNames() {
+	return values->ListNames();
 }
 
 #endif

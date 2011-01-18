@@ -11,7 +11,7 @@ Server::Server(const char *id) : Object(NULL, id) {
 	simpleHTTPServer = NULL;
 	// not done in constructor
 	objects = new ObjectRegistry();
-	objects->registerObject(this);
+	objects->RegisterObject(this);
 }
 
 Server::~Server() {
@@ -31,7 +31,7 @@ bool Server::Init(Config *config) {
 
 	// threads
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", getId());
-	s = config->getFirstValue(buffer);
+	s = config->GetFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &threads) != 1) {
 		LOG_ERROR(this, "Invalid number of threads, using 1 thread");
 		threads = 1;
@@ -40,7 +40,7 @@ bool Server::Init(Config *config) {
 
 	// serverHost
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverHost", getId());
-	serverHost = config->getFirstValue(buffer);
+	serverHost = config->GetFirstValue(buffer);
 	if (!serverHost) {
 		LOG_ERROR(this, "Server/serverHost not found");
 		return false;
@@ -48,7 +48,7 @@ bool Server::Init(Config *config) {
 
 	// serverPort
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverPort", getId());
-	s = config->getFirstValue(buffer);
+	s = config->GetFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &serverPort) != 1) {
 		LOG_ERROR(this, "Server/serverPort not found");
 		return false;
@@ -57,7 +57,7 @@ bool Server::Init(Config *config) {
 
 	// create processing engine(s)
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine/@id", getId());
-	v = config->getValues(buffer);
+	v = config->GetValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *peid = iter->c_str();
@@ -71,14 +71,14 @@ bool Server::Init(Config *config) {
 
 	// server library
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", getId());
-	s = config->getFirstValue(buffer);
+	s = config->GetFirstValue(buffer);
 	if (!s) {
 		LOG_ERROR(this, "Server/lib not found");
 		return false;
 	}
 	
 	// load server library
-	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::loadLibrary(s, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::LoadLibrary(s, "create");
 	if (!create) {
 		LOG_ERROR(this, "Invalid library: " << s);
 		return false;
