@@ -89,40 +89,32 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *Load::ProcessInput(bool sleep) {
+Resource *Load::ProcessInputSync(bool sleep) {
 	Resource *r = NULL;
-	ObjectLockRead();
-	int i = items;
-	ObjectUnlock();
-	if (maxItems && i >= maxItems)
+	if (maxItems && items >= maxItems)
 		return NULL;
 	while (1) {
 		int size = 0;
-		ObjectLockRead();
 		r = stream ? Resource::Deserialize(stream, &size) : NULL;
-		ObjectUnlock();
 		if (r) {
 			byteCount += size;
 			break;
 		}
 		if (!sleep)
 			return NULL;
+		ObjectUnlock();
 		fileCond.Lock();
 		fileCond.WaitSend(NULL);
 		fileCond.Unlock();
-		ObjectLockRead();
-		bool c = cancel;
-		ObjectUnlock();
-		if (c)
+		ObjectLockWrite();
+		if (cancel)
 			return NULL;
 	}
-	ObjectLockWrite();
 	++items;
-	ObjectUnlock();
 	return r;
 }
 
-bool Load::SaveCheckpoint(const char *path) {
+bool Load::SaveCheckpointSync(const char *path) {
 	char buffer1[1024];
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fw = fopen(buffer1, "w");
@@ -141,7 +133,7 @@ bool Load::SaveCheckpoint(const char *path) {
 	return true;
 }
 
-bool Load::RestoreCheckpoint(const char *path) {
+bool Load::RestoreCheckpointSync(const char *path) {
 	char buffer1[1024];
 	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
 	FILE *fr = fopen(buffer1, "r");
@@ -171,19 +163,17 @@ bool Load::RestoreCheckpoint(const char *path) {
 	return true;
 }
 
-void Load::Start() {
-	ObjectLockWrite();
+void Load::StartSync() {
 	cancel = false;
-	ObjectUnlock();
 }
 
-void Load::Stop() {
-	ObjectLockWrite();
+void Load::StopSync() {
 	cancel = true;
 	ObjectUnlock();
 	fileCond.Lock();
 	fileCond.SignalSend();
 	fileCond.Unlock();
+	ObjectLockWrite();
 }
 
 // the class factories

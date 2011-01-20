@@ -1,5 +1,5 @@
 # Useful bash functions to be used with hector_server and $HECTOR_CLIENT.
-# This script should be include in other scripts.
+# This script should be included in other scripts.
 
 if which perl >/dev/null; then
 	HECTOR_SLEEP_COMMAND="perl -e 'select(undef, undef, undef, 0.25)';"

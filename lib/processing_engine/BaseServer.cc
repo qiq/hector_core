@@ -59,7 +59,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				// list object properties
 				Object *object = objects->GetObject(args.c_str());
 				if (object) {
-					vector<string> *names = object->LockListNames();
+					vector<string> *names = object->ListNames();
 					string s;
 					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
 						conn->appendResponseBody(iter->c_str());
@@ -203,7 +203,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	} else if (method == "SAVE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			if (!(*iter)->LockSaveCheckpoint(args.c_str())) {
+			if (!(*iter)->SaveCheckpoint(args.c_str())) {
 				conn->setResponseCode(500, "Error saving checkpoint");
 				return true;
 			}
@@ -213,7 +213,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	} else if (method == "RESTORE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-			if (!(*iter)->LockRestoreCheckpoint(args.c_str())) {
+			if (!(*iter)->RestoreCheckpoint(args.c_str())) {
 				conn->setResponseCode(500, "Error restoring checkpoint");
 				return true;
 			}

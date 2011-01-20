@@ -60,18 +60,16 @@ protected:
 	std::queue<Resource*> deletedResources;	// deleted resources to be appended to the engine's output queue
 	SyncQueue<Resource> *engineOutputQueue;	// used only for appending deleted resources to engine's output queue
 
-	ObjectValues<Processor> *values;
-
 	char *getPauseInput(const char *name);
 	void setPauseInput(const char *name, const char *value);
 
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	ObjectValues<Processor> *values;
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
-	bool SaveCheckpoint(const char *path);
-	bool RestoreCheckpoint(const char *path);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
 
 	// connect processors to other processors
 	bool Connect();
@@ -89,19 +87,15 @@ inline SyncQueue<Resource> *Processor::getInputQueue() {
 	return inputQueue;
 }
 
-inline char *Processor::GetValue(const char *name) {
+inline char *Processor::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool Processor::SetValue(const char *name, const char *value) {
+inline bool Processor::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool Processor::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *Processor::ListNames() {
+inline std::vector<std::string> *Processor::ListNamesSync() {
 	return values->ListNames();
 }
 

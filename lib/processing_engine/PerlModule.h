@@ -25,19 +25,18 @@ public:
 	~PerlModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
-	Resource *ProcessInput(bool sleep);
-	Resource *ProcessOutput(Resource *resource);
-	Resource *ProcessSimple(Resource *resource);
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	Resource *ProcessInputSync(bool sleep);
+	Resource *ProcessOutputSync(Resource *resource);
+	Resource *ProcessSimpleSync(Resource *resource);
+	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 protected:
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
-	void SaveCheckpoint(const char *path, const char *id);
-	void RestoreCheckpoint(const char *path, const char *id);
+	void SaveCheckpointSync(const char *path, const char *id);
+	void RestoreCheckpointSync(const char *path, const char *id);
 	
 	SV *CreatePerlResource(Resource *resource);
 
@@ -47,10 +46,6 @@ protected:
 
 	std::tr1::unordered_set<std::string> initialized;
 };
-
-inline bool PerlModule::IsInitOnly(const char *name) {
-	return false;
-}
 
 #else
 

@@ -31,12 +31,12 @@ public:
 	~Load();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *ProcessInput(bool sleep);
-	bool SaveCheckpoint(const char *path);
-	bool RestoreCheckpoint(const char *path);
+	Resource *ProcessInputSync(bool sleep);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
 
-	void Start();
-	void Stop();
+	void StartSync();
+	void StopSync();
 
 private:
 	int items;		// ObjectLock
@@ -50,10 +50,10 @@ private:
 	void setFilename(const char *name, const char *value);
 
 	ObjectValues<Load> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
 	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	std::vector<std::string> *ListNamesSync();
 
 	bool cancel;
 	unsigned long long byteCount;
@@ -67,19 +67,15 @@ inline Module::Type Load::getType() {
 	return INPUT;
 }
 
-inline char *Load::GetValue(const char *name) {
+inline char *Load::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool Load::SetValue(const char *name, const char *value) {
+inline bool Load::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool Load::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *Load::ListNames() {
+inline std::vector<std::string> *Load::ListNamesSync() {
 	return values->ListNames();
 }
 

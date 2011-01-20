@@ -25,7 +25,7 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *Dump::ProcessSimple(Resource *resource) {
+Resource *Dump::ProcessSimpleSync(Resource *resource) {
 	string s = resource->toString();
 	LOG_DEBUG(this, s);
 	return resource;

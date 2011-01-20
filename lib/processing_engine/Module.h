@@ -28,24 +28,14 @@ public:
 	virtual bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	virtual Module::Type getType();
 	int getThreadIndex();
-	// Input module: produce resource, possibly wait for input
-	virtual Resource *ProcessInput(bool sleep);
-	// Output module: consume resource, return resource to be deleted
-	virtual Resource *ProcessOutput(Resource *resource);
-	// Simple module: one resource a time
-	virtual Resource *ProcessSimple(Resource *resource);
-	// Multi modules use input/output interface: inputResources should be
-	// consumed, outputResources should be produced Returns number of
-	// currently processing resources (not counting inputResources and
-	// outputResources). expectingResources is number of resources module is
-	// expecting on the input next time. ProcessMulti is allowed to produce
-	// new resources
-	virtual int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
-
-	virtual void Start();
-	virtual void Stop();
-	virtual void Pause();
-	virtual void Resume();
+	void Start();
+	void Stop();
+	void Pause();
+	void Resume();
+	Resource *ProcessInput(bool sleep);
+	Resource *ProcessOutput(Resource *resource);
+	Resource *ProcessSimple(Resource *resource);
+	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
         // Helper methods for SWIG
         static void ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource);
@@ -54,10 +44,80 @@ public:
 
 protected:
 	int threadIndex;
+
+	virtual Resource *ProcessInputSync(bool sleep);
+	// Output module: consume resource, return resource to be deleted
+	virtual Resource *ProcessOutputSync(Resource *resource);
+	// Simple module: one resource a time
+	virtual Resource *ProcessSimpleSync(Resource *resource);
+	// Multi modules use input/output interface: inputResources should be
+	// consumed, outputResources should be produced Returns number of
+	// currently processing resources (not counting inputResources and
+	// outputResources). expectingResources is number of resources module is
+	// expecting on the input next time. ProcessMulti is allowed to produce
+	// new resources
+	virtual int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+
+	virtual void StartSync();
+	virtual void StopSync();
+	virtual void PauseSync();
+	virtual void ResumeSync();
 };
 
 inline int Module::getThreadIndex() {
 	return threadIndex;
+}
+
+inline void Module::Start() {
+	ObjectLockWrite();
+	StartSync();
+	ObjectUnlock();
+}
+
+inline void Module::Stop() {
+	ObjectLockWrite();
+	StopSync();
+	ObjectUnlock();
+}
+
+inline void Module::Pause() {
+	ObjectLockWrite();
+	PauseSync();
+	ObjectUnlock();
+}
+
+inline void Module::Resume() {
+	ObjectLockWrite();
+	ResumeSync();
+	ObjectUnlock();
+}
+
+inline Resource *Module::ProcessInput(bool sleep) {
+	ObjectLockWrite();
+	Resource *result = ProcessInputSync(sleep);
+	ObjectUnlock();
+	return result;
+}
+
+inline Resource *Module::ProcessOutput(Resource *resource) {
+	ObjectLockWrite();
+	resource = ProcessOutputSync(resource);
+	ObjectUnlock();
+	return resource;
+}
+
+inline Resource *Module::ProcessSimple(Resource *resource) {
+	ObjectLockWrite();
+	resource = ProcessSimpleSync(resource);
+	ObjectUnlock();
+	return resource;
+}
+
+inline int Module::ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources) {
+	ObjectLockWrite();
+	int result = ProcessMultiSync(inputResources, outputResources, expectingResources);
+	ObjectUnlock();
+	return result;
 }
 
 // Helper methods for SWIG, FIXME: do we need this? We convert vector<Resource*> to Perl array anyway...
@@ -75,4 +135,5 @@ inline Resource *Module::ResourceQueuePop(std::queue<Resource*> *queue) {
 inline int Module::ResourceQueueSize(std::queue<Resource*> *queue) {
 	return queue->size();
 }
+
 #endif

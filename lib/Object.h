@@ -31,11 +31,11 @@ public:
 	void ObjectLockWrite();
 	void ObjectUnlock();
 	const char *getId();
-	char *LockGetValue(const char *name);
-	bool LockSetValue(const char *name, const char *value);
-	std::vector<std::string> *LockListNames();
-	bool LockSaveCheckpoint(const char *path);
-	bool LockRestoreCheckpoint(const char *path);
+	char *GetValue(const char *name);
+	bool SetValue(const char *name, const char *value);
+	std::vector<std::string> *ListNames();
+	bool SaveCheckpoint(const char *path);
+	bool RestoreCheckpoint(const char *path);
 
 	log4cxx::LoggerPtr getLogger();
 
@@ -65,13 +65,12 @@ protected:
 	char *id;
 	RWLock rwlock;
 
-	virtual char *GetValue(const char *name);
-	virtual bool SetValue(const char *name, const char *value);
-	virtual bool IsInitOnly(const char *name);
-	virtual std::vector<std::string> *ListNames();
+	virtual char *GetValueSync(const char *name);
+	virtual bool SetValueSync(const char *name, const char *value);
+	virtual std::vector<std::string> *ListNamesSync();
 
-	virtual bool SaveCheckpoint(const char *path);
-	virtual bool RestoreCheckpoint(const char *path);
+	virtual bool SaveCheckpointSync(const char *path);
+	virtual bool RestoreCheckpointSync(const char *path);
 
 	const char *GetLogLevelStr(log4cxx::LoggerPtr logger);
 
@@ -122,50 +121,43 @@ inline void Object::ObjectUnlock() {
 	rwlock.Unlock();
 }
 
-inline char *Object::LockGetValue(const char *name) {
+inline char *Object::GetValue(const char *name) {
 	if (!strcmp(name, "logLevel"))
 		return strdup(this->GetLogLevelStr(this->logger));
-	// no need to lock
-	if (IsInitOnly(name))
-		return GetValue(name);
-	char *result;
 	ObjectLockRead();
-	result = GetValue(name);
+	char *result = GetValueSync(name);
 	ObjectUnlock();
 	return result;
 }
 
-inline bool Object::LockSetValue(const char *name, const char *value) {
+inline bool Object::SetValue(const char *name, const char *value) {
 	if (!strcmp(name, "logLevel"))
 		return this->setLogLevel(value);
-	bool result;
-	if (IsInitOnly(name))
-		return false;
 	ObjectLockWrite();
-	result = SetValue(name, value);
+	bool result = SetValueSync(name, value);
 	ObjectUnlock();
 	return result;
 }
 
-inline std::vector<std::string> *Object::LockListNames() {
+inline std::vector<std::string> *Object::ListNames() {
 	std::vector<std::string> *result;
 	ObjectLockRead();
-	result = ListNames();
+	result = ListNamesSync();
 	ObjectUnlock();
 	result->push_back("logLevel");
 	return result;
 }
 
-inline bool Object::LockSaveCheckpoint(const char *path) {
+inline bool Object::SaveCheckpoint(const char *path) {
 	ObjectLockWrite();
-	bool result = SaveCheckpoint(path);
+	bool result = SaveCheckpointSync(path);
 	ObjectUnlock();
 	return result;
 }
 
-inline bool Object::LockRestoreCheckpoint(const char *path) {
+inline bool Object::RestoreCheckpoint(const char *path) {
 	ObjectLockWrite();
-	bool result = RestoreCheckpoint(path);
+	bool result = RestoreCheckpointSync(path);
 	ObjectUnlock();
 	return result;
 }

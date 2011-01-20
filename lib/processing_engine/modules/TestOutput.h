@@ -22,7 +22,7 @@ public:
 	~TestOutput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *ProcessOutput(Resource *resource);
+	Resource *ProcessOutputSync(Resource *resource);
 
 private:
 	int items;		// ObjectLock
@@ -30,29 +30,24 @@ private:
 	char *getItems(const char *name);
 
 	ObjectValues<TestOutput> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 };
 
 inline Module::Type TestOutput::getType() {
 	return OUTPUT;
 }
 
-inline char *TestOutput::GetValue(const char *name) {
+inline char *TestOutput::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool TestOutput::SetValue(const char *name, const char *value) {
+inline bool TestOutput::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool TestOutput::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *TestOutput::ListNames() {
+inline std::vector<std::string> *TestOutput::ListNamesSync() {
 	return values->ListNames();
 }
 

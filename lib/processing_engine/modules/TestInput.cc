@@ -82,13 +82,9 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestInput::ProcessInput(bool sleep) {
-	ObjectLockRead();
-	int i = items;
-	ObjectUnlock();
-	if (maxItems && i >= maxItems)
+Resource *TestInput::ProcessInputSync(bool sleep) {
+	if (maxItems && items >= maxItems)
 		return NULL;
-	ObjectLockWrite();
 	Resource *r = Resource::registry.AcquireResource(typeId);
 	r->setId(getThreadIndex()*10000+items);
 	if (typeId == TestResource::typeId) {
@@ -101,7 +97,6 @@ Resource *TestInput::ProcessInput(bool sleep) {
 		LOG_INFO_R(this, r, "Creating resource");
 	}
 	items++;
-	ObjectUnlock();
 	return r;
 }
 

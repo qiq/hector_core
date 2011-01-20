@@ -81,13 +81,12 @@ protected:
 	void doPause();
 	void doResume();
 
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
-	bool SaveCheckpoint(const char *path);
-	bool RestoreCheckpoint(const char *path);
+	bool SaveCheckpointSync(const char *path);
+	bool RestoreCheckpointSync(const char *path);
 };
 
 inline void ProcessingEngine::Start() {

@@ -29,7 +29,7 @@ public:
 	~Save();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *ProcessOutput(Resource *resource);
+	Resource *ProcessOutputSync(Resource *resource);
 
 private:
 	int items;		// ObjectLock
@@ -40,10 +40,9 @@ private:
 	void setFilename(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
 	int fd;
 	google::protobuf::io::ZeroCopyOutputStream *file;
@@ -54,19 +53,15 @@ inline Module::Type Save::getType() {
 	return OUTPUT;
 }
 
-inline char *Save::GetValue(const char *name) {
+inline char *Save::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool Save::SetValue(const char *name, const char *value) {
+inline bool Save::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool Save::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *Save::ListNames() {
+inline std::vector<std::string> *Save::ListNamesSync() {
 	return values->ListNames();
 }
 

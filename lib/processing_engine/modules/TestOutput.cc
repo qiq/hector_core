@@ -32,16 +32,14 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestOutput::ProcessOutput(Resource *resource) {
+Resource *TestOutput::ProcessOutputSync(Resource *resource) {
 	if (resource->getTypeId() == TestResource::typeId) {
 		TestResource *tr = static_cast<TestResource*>(resource);
 		LOG_INFO_R(this, tr, "Resource arrived (" << tr->getStr() << ")");
 	} else {
 		LOG_INFO_R(this, resource, "Resource arrived");
 	}
-	ObjectLockWrite();
 	items++;
-	ObjectUnlock();
 	return resource;
 }
 

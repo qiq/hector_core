@@ -43,7 +43,7 @@ public:
 	~TestCall();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 private:
 	int items;		// ObjectLock, items processed
@@ -63,10 +63,9 @@ private:
 	void setTargetEngine(const char *name, const char *value);
 
 	ObjectValues<TestCall> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
 	Call *call;
 };
@@ -75,19 +74,15 @@ inline Module::Type TestCall::getType() {
 	return MULTI;
 }
 
-inline char *TestCall::GetValue(const char *name) {
+inline char *TestCall::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool TestCall::SetValue(const char *name, const char *value) {
+inline bool TestCall::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool TestCall::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *TestCall::ListNames() {
+inline std::vector<std::string> *TestCall::ListNamesSync() {
 	return values->ListNames();
 }
 

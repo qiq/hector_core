@@ -352,35 +352,31 @@ void ProcessingEngine::ResumeSync() {
 	}
 }
 
-bool ProcessingEngine::SaveCheckpoint(const char *path) {
+bool ProcessingEngine::SaveCheckpointSync(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		if (!(*iter)->LockSaveCheckpoint(path))
+		if (!(*iter)->SaveCheckpoint(path))
 			return false;
 	}
 	return true;
 }
 
-bool ProcessingEngine::RestoreCheckpoint(const char *path) {
+bool ProcessingEngine::RestoreCheckpointSync(const char *path) {
 	for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-		if (!(*iter)->LockRestoreCheckpoint(path))
+		if (!(*iter)->RestoreCheckpoint(path))
 			return false;
 	}
 	return true;
 }
 
-char *ProcessingEngine::GetValue(const char *name) {
+char *ProcessingEngine::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-bool ProcessingEngine::SetValue(const char *name, const char *value) {
+bool ProcessingEngine::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-bool ProcessingEngine::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-vector<string> *ProcessingEngine::ListNames() {
+vector<string> *ProcessingEngine::ListNamesSync() {
 	return values->ListNames();
 }
 

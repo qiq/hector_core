@@ -29,7 +29,6 @@ public:
 
 	char *GetValue(const char *name);
 	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
 	std::vector<std::string> *ListNames();
 
 private:
@@ -37,7 +36,7 @@ private:
 
 	std::tr1::unordered_map<std::string, char *(T::*)(const char*)> getters;
 	std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)> setters;
-	std::tr1::unordered_set<std::string> initOnly;
+	std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)> initOnly;
 
 	static log4cxx::LoggerPtr logger;
 };
@@ -50,9 +49,14 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 		typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
 		if (iter2 != setters.end()) {
 			(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
-		} else if (!ignoreUnknown) {
-			LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
-			return false;
+		} else {
+			typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = initOnly.find(iter->first);
+			if (iter2 != initOnly.end()) {
+				(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
+			} else if (!ignoreUnknown) {
+				LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+				return false;
+			}
 		}
 	}
 	return true;
@@ -62,11 +66,17 @@ template<class T>
 bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignoreUnknown) {
 	typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
-		(module->*iter->second)(iter->first, iter->second);
+		(module->*iter->second)(name, value);
 		return true;
-	} else if (!ignoreUnknown) {
-		LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
-		return false;
+	} else {
+		typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = initOnly.find(name);
+		if (iter != initOnly.end()) {
+			(module->*iter->second)(name, value);
+			return true;
+		} else if (!ignoreUnknown) {
+			LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+			return false;
+		}
 	}
 }
 
@@ -78,9 +88,10 @@ void ObjectValues<T>::AddGetter(const char *name, char *(T::*f)(const char*)) {
 // initOnly: cannot set value outside of InitValue()/InitValues() -- does not require locking at all
 template<class T>
 void ObjectValues<T>::AddSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly) {
-	setters[name] = f;
-	if (initOnly)
-		this->initOnly.insert(name);
+	if (!initOnly)
+		setters[name] = f;
+	else
+		this->initOnly[name] = f;
 }
 
 template<class T>
@@ -99,12 +110,6 @@ bool ObjectValues<T>::SetValue(const char *name, const char *value) {
 		return true;
 	}
 	return false;
-}
-
-template<class T>
-bool ObjectValues<T>::IsInitOnly(const char *name) {
-	typename std::tr1::unordered_set<std::string>::iterator iter = initOnly.find(name);
-	return iter != initOnly.end();
 }
 
 template<class T>

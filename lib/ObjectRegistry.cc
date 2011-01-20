@@ -48,7 +48,7 @@ char *ObjectRegistry::GetObjectValue(const char *id, const char *name) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		Object *obj = iter->second;
-		return obj->LockGetValue(name);
+		return obj->GetValue(name);
 	}
 	return NULL;
 }
@@ -56,7 +56,7 @@ char *ObjectRegistry::GetObjectValue(const char *id, const char *name) {
 bool ObjectRegistry::SetObjectValue(const char *id, const char *name, const char *value) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		return iter->second->LockSetValue(name, value);
+		return iter->second->SetValue(name, value);
 	}
 	return false;
 }

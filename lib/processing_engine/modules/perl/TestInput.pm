@@ -1,4 +1,4 @@
-# TestInput.om, input, perl
+# TestInput.pm, input, perl
 # Create TestResource resources.
 # 
 # Dependencies: none

@@ -79,22 +79,16 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *TestSimple::ProcessSimple(Resource *resource) {
+Resource *TestSimple::ProcessSimpleSync(Resource *resource) {
 	if (resource->getTypeId() != TestResource::typeId)
 		return resource;
 	TestResource *tr = static_cast<TestResource*>(resource);
 	LOG_DEBUG_R(this, tr, "Processing (" << tr->getStr() << ")");
-	ObjectLockRead();
-	bool fs = flipStatus;
-	int ss = setStatus;
-	ObjectUnlock();
-	if (fs)
+	if (flipStatus)
 		tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
-	if (ss >= 0)
-		tr->setStatus(ss);
-	ObjectLockWrite();
+	if (setStatus >= 0)
+		tr->setStatus(setStatus);
 	++items;
-	ObjectUnlock();
 	return resource;
 }
 

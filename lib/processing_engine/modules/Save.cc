@@ -75,18 +75,15 @@ bool Save::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-Resource *Save::ProcessOutput(Resource *resource) {
+Resource *Save::ProcessOutputSync(Resource *resource) {
 	assert(resource != NULL);
-	ObjectLockWrite();
 	if (!stream) {
-		ObjectUnlock();
 		LOG_ERROR_R(this, resource, "File not opened");
 		return resource;
 	}
 	bool res = Resource::Serialize(resource, stream);
 	if (res)
 		++items;
-	ObjectUnlock();
 	if (!res)
 		LOG_ERROR_R(this, resource, "Cannot serialize resource");
 	return resource;

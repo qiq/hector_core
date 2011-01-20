@@ -292,8 +292,7 @@ Module::Type PerlModule::getType() {
 	return result;
 }
 
-Resource *PerlModule::ProcessInput(bool sleep) {
-	ObjectLockWrite();
+Resource *PerlModule::ProcessInputSync(bool sleep) {
 	PERL_SET_CONTEXT(my_perl);
 	Resource *result = NULL;
 
@@ -310,14 +309,12 @@ Resource *PerlModule::ProcessInput(bool sleep) {
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
 		LOG_ERROR(this, "Error calling ProcessInput");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	}
 	SV *resourceSV = SvREFCNT_inc(POPs);
@@ -331,21 +328,17 @@ Resource *PerlModule::ProcessInput(bool sleep) {
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
 
-	ObjectUnlock();
 	return result;
 }
 
-Resource *PerlModule::ProcessOutput(Resource *resource) {
-	ObjectLockWrite();
+Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	PERL_SET_CONTEXT(my_perl);
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
 		// create new instance of a resource (of given type)
-		if (!(resourceSV = CreatePerlResource(resource))) {
-			ObjectUnlock();
+		if (!(resourceSV = CreatePerlResource(resource)))
 			return NULL;
-		}
 	} else {
 		resourceSV = &PL_sv_undef;
 	}
@@ -364,14 +357,12 @@ Resource *PerlModule::ProcessOutput(Resource *resource) {
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
 		LOG_ERROR(this, "Error calling ProcessSimple");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	}
 	resourceSV = SvREFCNT_inc(POPs);
@@ -385,21 +376,17 @@ Resource *PerlModule::ProcessOutput(Resource *resource) {
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
 
-	ObjectUnlock();
 	return result;
 }
 
-Resource *PerlModule::ProcessSimple(Resource *resource) {
-	ObjectLockWrite();
+Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	PERL_SET_CONTEXT(my_perl);
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
 		// create new instance of a resource (of given type)
-		if (!(resourceSV = CreatePerlResource(resource))) {
-			ObjectUnlock();
+		if (!(resourceSV = CreatePerlResource(resource)))
 			return NULL;
-		}
 	} else {
 		resourceSV = &PL_sv_undef;
 	}
@@ -418,14 +405,12 @@ Resource *PerlModule::ProcessSimple(Resource *resource) {
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	} else if (count != 1) {
 		LOG_ERROR(this, "Error calling ProcessSimple");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return result;
 	}
 	resourceSV = SvREFCNT_inc(POPs);
@@ -439,12 +424,10 @@ Resource *PerlModule::ProcessSimple(Resource *resource) {
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
 
-	ObjectUnlock();
 	return result;
 }
 
-int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
-	ObjectLockWrite();
+int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
 	PERL_SET_CONTEXT(my_perl);
 	int processingResources = 0;
 	SV *inputResourcesSV;
@@ -455,10 +438,8 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 		AV *a = newAV();
 		while (inputResources->size() > 0) {
 			SV *resourceSV = CreatePerlResource(inputResources->front());
-			if (!resourceSV) {
-				ObjectUnlock();
+			if (!resourceSV)
 				return 0;
-			}
 			av_push(a, newSVsv(resourceSV));
 			inputResources->pop();
 		}
@@ -489,14 +470,12 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return processingResources;
 	} else if (count != 2) {
 		LOG_ERROR(this, "Error calling ProcesMulti (invalid number of return arguments)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return processingResources;
 	}
 	SV *resultSV = POPs;
@@ -505,7 +484,6 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return processingResources;
 	}
 	if (expectingResources)
@@ -516,7 +494,6 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		ObjectUnlock();
 		return processingResources;
 	}
 	processingResources = SvIV(resultSV);
@@ -538,11 +515,10 @@ int PerlModule::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> 
 	SvREFCNT_dec(inputResourcesSV);
 	SvREFCNT_dec(outputResourcesSV);
 
-	ObjectUnlock();
 	return processingResources;
 }
 
-char *PerlModule::GetValue(const char *name) {
+char *PerlModule::GetValueSync(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
@@ -585,7 +561,7 @@ char *PerlModule::GetValue(const char *name) {
 	return result;
 }
 
-bool PerlModule::SetValue(const char *name, const char *value) {
+bool PerlModule::SetValueSync(const char *name, const char *value) {
 	PERL_SET_CONTEXT(my_perl);
 	bool result = false;
 	dSP;
@@ -615,7 +591,7 @@ bool PerlModule::SetValue(const char *name, const char *value) {
 	return result;
 }
 
-vector<string> *PerlModule::ListNames() {
+vector<string> *PerlModule::ListNamesSync() {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	PERL_SET_CONTEXT(my_perl);
@@ -656,7 +632,7 @@ vector<string> *PerlModule::ListNames() {
 	return result;
 }
 
-void PerlModule::SaveCheckpoint(const char *path, const char *id) {
+void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
 	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;
@@ -671,7 +647,7 @@ void PerlModule::SaveCheckpoint(const char *path, const char *id) {
 	LEAVE;
 }
 
-void PerlModule::RestoreCheckpoint(const char *path, const char *id) {
+void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
 	PERL_SET_CONTEXT(my_perl);
 	dSP;
 	ENTER;

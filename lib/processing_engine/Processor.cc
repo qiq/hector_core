@@ -717,37 +717,41 @@ void Processor::Stop() {
 }
 
 void Processor::Pause() {
+	ObjectLockWrite();
 	inputQueue->Pause();
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
 			(*iter)->module->Pause();
 		}
 	}
+	ObjectUnlock();
 }
 
 void Processor::Resume() {
+	ObjectLockWrite();
 	inputQueue->Resume();
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
 			(*iter)->module->Resume();
 		}
 	}
+	ObjectUnlock();
 }
 
-bool Processor::SaveCheckpoint(const char *path) {
+bool Processor::SaveCheckpointSync(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			if (!(*iter)->module->LockSaveCheckpoint(path))
+			if (!(*iter)->module->SaveCheckpoint(path))
 				return false;
 		}
 	}
 	return true;
 }
 
-bool Processor::RestoreCheckpoint(const char *path) {
+bool Processor::RestoreCheckpointSync(const char *path) {
 	for (int i = 0; i < nThreads; i++) {
 		for (vector<ModuleInfo*>::iterator iter = modules[i].begin(); iter != modules[i].end(); ++iter) {
-			if (!(*iter)->module->LockRestoreCheckpoint(path))
+			if (!(*iter)->module->RestoreCheckpoint(path))
 				return false;
 		}
 	}

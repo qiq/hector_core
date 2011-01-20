@@ -25,7 +25,7 @@ public:
 	~TestInput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *ProcessInput(bool sleep);
+	Resource *ProcessInputSync(bool sleep);
 
 private:
 	int items;		// ObjectLock
@@ -42,10 +42,9 @@ private:
 	void setResourceType(const char *name, const char *value);
 
 	ObjectValues<TestInput> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
 	int typeId;		// to create TestResource
 };
@@ -54,19 +53,15 @@ inline Module::Type TestInput::getType() {
 	return INPUT;
 }
 
-inline char *TestInput::GetValue(const char *name) {
+inline char *TestInput::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool TestInput::SetValue(const char *name, const char *value) {
+inline bool TestInput::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool TestInput::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *TestInput::ListNames() {
+inline std::vector<std::string> *TestInput::ListNamesSync() {
 	return values->ListNames();
 }
 

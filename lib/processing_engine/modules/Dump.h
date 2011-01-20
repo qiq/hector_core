@@ -22,33 +22,28 @@ public:
 	~Dump();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	Resource *ProcessSimple(Resource *resource);
+	Resource *ProcessSimpleSync(Resource *resource);
 
 private:
 	ObjectValues<Dump> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 };
 
 inline 	Module::Type Dump::getType() {
 	return SIMPLE;
 }
 
-inline char *Dump::GetValue(const char *name) {
+inline char *Dump::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool Dump::SetValue(const char *name, const char *value) {
+inline bool Dump::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool Dump::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *Dump::ListNames() {
+inline std::vector<std::string> *Dump::ListNamesSync() {
 	return values->ListNames();
 }
 

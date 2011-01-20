@@ -29,7 +29,7 @@ public:
 	~TestMulti();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type getType();
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 private:
 	int items;		// ObjectLock
@@ -43,10 +43,9 @@ private:
 	void setTimeTick(const char *name, const char *value);
 
 	ObjectValues<TestMulti> *values;
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	bool IsInitOnly(const char *name);
-	std::vector<std::string> *ListNames();
+	char *GetValueSync(const char *name);
+	bool SetValueSync(const char *name, const char *value);
+	std::vector<std::string> *ListNamesSync();
 
 	std::queue<TestResource*> resources;
 };
@@ -55,19 +54,15 @@ inline Module::Type TestMulti::getType() {
 	return MULTI;
 }
 
-inline char *TestMulti::GetValue(const char *name) {
+inline char *TestMulti::GetValueSync(const char *name) {
 	return values->GetValue(name);
 }
 
-inline bool TestMulti::SetValue(const char *name, const char *value) {
+inline bool TestMulti::SetValueSync(const char *name, const char *value) {
 	return values->SetValue(name, value);
 }
 
-inline bool TestMulti::IsInitOnly(const char *name) {
-	return values->IsInitOnly(name);
-}
-
-inline std::vector<std::string> *TestMulti::ListNames() {
+inline std::vector<std::string> *TestMulti::ListNamesSync() {
 	return values->ListNames();
 }
 

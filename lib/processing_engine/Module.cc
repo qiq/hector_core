@@ -16,34 +16,34 @@ Module::Type Module::getType() {
 	return Module::INVALID;
 }
 
-Resource *Module::ProcessInput(bool sleep) {
+Resource *Module::ProcessInputSync(bool sleep) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessInput)");
 	return NULL;
 }
 
-Resource *Module::ProcessOutput(Resource *resource) {
+Resource *Module::ProcessOutputSync(Resource *resource) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessOutput)");
 	return NULL;
 }
 
-Resource *Module::ProcessSimple(Resource *resource) {
+Resource *Module::ProcessSimpleSync(Resource *resource) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessSimple)");
 	return NULL;
 }
 
-int Module::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
+int Module::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessMulti)");
 	return 0;
 }
 
-void Module::Start() {
+void Module::StartSync() {
 }
 
-void Module::Stop() {
+void Module::StopSync() {
 }
 
-void Module::Pause() {
+void Module::PauseSync() {
 }
 
-void Module::Resume() {
+void Module::ResumeSync() {
 }

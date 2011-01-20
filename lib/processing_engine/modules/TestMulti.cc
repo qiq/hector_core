@@ -63,7 +63,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
+int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
 	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
 		if (r->getTypeId() == TestResource::typeId)
@@ -78,10 +78,8 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	}
 
 	struct timeval tv;
-	ObjectLockRead();
 	tv.tv_sec = timeTick / 1000000;
 	tv.tv_usec = timeTick % 1000000;
-	ObjectUnlock();
 
 	if (select(1, NULL, NULL, NULL, &tv) < 0) {
 		LOG_INFO(this, "Error in select() = " << errno);
@@ -93,9 +91,7 @@ int TestMulti::ProcessMulti(queue<Resource*> *inputResources, queue<Resource*> *
 	resources.pop();
 	outputResources->push(tr);
 	LOG_INFO_R(this, tr, "Processed TestResource (" << tr->getStr() << ")");
-	ObjectLockWrite();
 	++items;
-	ObjectUnlock();
 
 	if (expectResources)
 		*expectResources = MAX_RESOURCES-resources.size();

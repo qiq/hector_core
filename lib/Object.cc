@@ -6,27 +6,23 @@
 
 using namespace std;
 
-char *Object::GetValue(const char *name) {
+char *Object::GetValueSync(const char *name) {
 	return NULL;
 }
 
-bool Object::SetValue(const char *name, const char *value) {
+bool Object::SetValueSync(const char *name, const char *value) {
 	return false;
 }
 
-bool Object::IsInitOnly(const char *name) {
-	return false;
-}
-
-vector<string> *Object::ListNames() {
+vector<string> *Object::ListNamesSync() {
 	return new vector<string>();
 }
 
-bool Object::SaveCheckpoint(const char *path) {
+bool Object::SaveCheckpointSync(const char *path) {
 	return true;
 }
 
-bool Object::RestoreCheckpoint(const char *path) {
+bool Object::RestoreCheckpointSync(const char *path) {
 	return true;
 }
 
