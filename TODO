@@ -1,3 +1,8 @@
+- zrusit -threads pro SWIG a python (mozna ne, kdyz budeme pouzivat jen jeden interpret?)
+- jeden interpret pythonu (EmbeddedPython.cc), lazy-initialized
+- import modulu -- neni problem s vice vlakny, protoze se pristup totalne serializuje
+- resources taky tak.
+
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
 	robot/test6+
 

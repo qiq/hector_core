@@ -97,7 +97,7 @@ my $MAX_RESOURCES = 100;
 sub ProcessMulti() {
 	my ($self, $inputResources, $outputResources) = @_;
 
-	return 0 if (not defined $inputResources or not defined $outputResources);
+	return (0, $MAX_RESOURCES) if (not defined $inputResources or not defined $outputResources);
 
 	while (@{$inputResources} > 0 and @{$self->{'_resources'}} <= $MAX_RESOURCES) {
 		my $resource = shift(@{$inputResources});
@@ -108,7 +108,7 @@ sub ProcessMulti() {
 		}
 	}
 
-	return 0 if (@{$self->{'_resources'}} == 0);
+	return (0, $MAX_RESOURCES) if (@{$self->{'_resources'}} == 0);
 
 	select(undef, undef, undef, $self->{'timeTick'}/1000000);
 

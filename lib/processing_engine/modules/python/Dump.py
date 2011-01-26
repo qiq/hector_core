@@ -1,21 +1,17 @@
-# TestSimple.py, simple, python
-# Process resources using ProcessSimple()
+# Dump.py, simple, python
+# Dumps Resource content into log. Useful for debugging purposes.
 # 
-# Dependencies: none
+# Dependencies:
 # Parameters:
-# items		r/o	Total items processed
-# foo		r/w	Test string
-# flipStatus	r/w	Whether to change status from 1 to 0 (or vice-versa)
-# setStatus	r/w	Whether to set status to an arbitrary value (setStatus >= 0)
 
 import Hector
 
-class TestSimple:
+class Dump:
     def __init__(self, _object, _id, threadIndex):
 	self._object = _object
 	self._id = _id
 	self.threadIndex = threadIndex
-    	self.values = { 'items': 0, 'foo': "", 'flipStatus': 0, 'setStatus': -1 }
+    	self.values = { }
 
     def __del__(self):
 	pass
@@ -27,7 +23,10 @@ class TestSimple:
 
 	for p in params:
 	    if p[0] in self.values:
-		self.values[p[0]] = p[1]
+		if isinstance(self.values[p[0]], int):
+			self.values[p[0]] = int(p[1])
+		else:
+			self.values[p[0]] = str(p[1])
 	return True
 
     def getType(self):
@@ -56,13 +55,5 @@ class TestSimple:
 	self._object.log_info("RestoreCheckpoint(path, id)");
 
     def ProcessSimple(self, resource):
-	if (resource is None or resource.getTypeStr() != "TestResource"):
-		self._object.log_error("Invalid resource: "+resource.getTypeStr())
-		return resource
-	self._object.log_info(resource.toStringShort()+" Processing ("+resource.getStr()+")")
-	if self.values['flipStatus']:
-		resource.setStatus(1 if resource.getStatus() == 0 else 0)
-	if self.values['setStatus'] >= 0:
-		resource.setStatus(self.values['setStatus'])
-	self.values['items'] += 1
+	self._object.log_debug(resource.toString(Hector.Object.INFO))
 	return resource

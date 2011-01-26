@@ -2,27 +2,21 @@
  * Dummy module, does nothing.
  */
 
-#ifndef _LIB_PROCESSING_ENGINE_PERL_MODULE_H_
-#define _LIB_PROCESSING_ENGINE_PERL_MODULE_H_
+#ifndef _LIB_PROCESSING_ENGINE_PYTHON_MODULE_H_
+#define _LIB_PROCESSING_ENGINE_PYTHON_MODULE_H_
 
 #include <config.h>
 
-#ifdef HAVE_PERL_H
+#ifdef HAVE_PYTHON_H
 
-#include <EXTERN.h>
-#include <perl.h>
-#include <XSUB.h>
-#undef New	// protocol buffers
-#undef Pause	// Processor
-
-#include <tr1/unordered_set>
-
+// #include <tr1/unordered_set>
+#include "EmbeddedPython.h"
 #include "Module.h"
 
-class PerlModule : public Module {
+class PythonModule : public Module {
 public:
-	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name);
-	~PerlModule();
+	PythonModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name);
+	~PythonModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
 	Resource *ProcessInputSync(bool sleep);
@@ -37,25 +31,24 @@ protected:
 
 	void SaveCheckpointSync(const char *path, const char *id);
 	void RestoreCheckpointSync(const char *path, const char *id);
-	
-	SV *CreatePerlResource(Resource *resource);
 
 	char *name;
-	PerlInterpreter *my_perl;
-	SV *ref;
-
-	// resource types that were already initialized
-	std::tr1::unordered_set<std::string> initialized;
+	EmbeddedPython *python;
+	PyObject *module;
+	PyObject *obj;		// this module as an Object
+	//std::tr1::unordered_set<std::string> initialized;
 };
 
 #else
 
 #include "Module.h"
 
-class PerlModule : public Module {
+using namespace std;
+
+class PythonModule : public Module {
 public:
-	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {};
-	~PerlModule() {};
+	PythonModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {};
+	~PythonModule() {};
 };
 
 #endif

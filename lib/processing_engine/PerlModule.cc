@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include "../common.h"
+#include "common.h"
 #include "PerlModule.h"
 
 EXTERN_C void xs_init (pTHX);

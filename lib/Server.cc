@@ -4,6 +4,8 @@
 #include "Server.h"
 #include "LibraryLoader.h"
 
+#include "EmbeddedPython.h"
+
 using namespace std;
 
 Server::Server(const char *id) : Object(NULL, id) {
@@ -28,6 +30,22 @@ bool Server::Init(Config *config) {
 	char buffer[1024];
 	char *s;
 	vector<string> *v;
+//
+//EmbeddedPython *python = EmbeddedPython::GetPython();
+//PyGILState_STATE gstate = python->Lock();
+//PyObject *x1 = PyImport_ImportModule("Hector");
+//if (!x1) {
+//        python->LogError();
+//        LOG4CXX_ERROR(logger, "Cannot load Hector");
+//        return NULL;
+//}
+//python->Unlock(gstate);
+//void *symbol = LibraryLoader::LoadLibrary("_Hector.so", "SWIG_Python_ConvertPtrAndOwn");
+//fprintf(stderr, "symbol: %p\n", symbol);
+//symbol = LibraryLoader::LoadLibrary("_Hector.so", "SWIG_Python_ConvertPtrAndOwnX");
+//fprintf(stderr, "symbol: %p\n", symbol);
+//return false;
+//
 
 	// threads
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", getId());

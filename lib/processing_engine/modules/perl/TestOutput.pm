@@ -91,6 +91,7 @@ sub ProcessOutput() {
 		$self->{'_object'}->log_info($resource->toStringShort()." Resource arrived (".$resource->getStr().")");
 		$self->{'items'}++;
 	}
+	return $resource;
 }
 
 1;

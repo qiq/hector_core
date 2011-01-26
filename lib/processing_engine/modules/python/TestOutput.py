@@ -6,18 +6,13 @@
 # items		r/o	Total items processed
 
 import Hector
-import re
 
 class TestOutput:
-    _object = None
-    _id = None
-    _threadIndex = None
-    values = { 'items': 0 }
-
     def __init__(self, _object, _id, threadIndex):
 	self._object = _object
 	self._id = _id
 	self.threadIndex = threadIndex
+	self.values = { 'items': 0 }
 
     def __del__(self):
 	pass
@@ -29,7 +24,7 @@ class TestOutput:
 
 	for p in params:
 	    if p[0] in self.values:
-		self.values[p[0]] = int(p[1])
+		self.values[p[0]] = p[1]
 	return True
 
     def getType(self):
@@ -49,8 +44,7 @@ class TestOutput:
 	return False;
 
     def ListNames(self):
-	expr = re.compile('^[^_]')
-	return filter(expr.search, self.values.keys())
+	return self.values.keys()
 
     def SaveCheckpoint(self, path, id):
 	self._object.log_info("SaveCheckpoint(path, id)");

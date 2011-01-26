@@ -117,6 +117,10 @@ int main(int argc, char *argv[]) {
 	snprintf(value, sizeof(value), "%s/modules/perl:%s", baseDir, path ? path : "");
 	setenv("PERL5LIB", value, 1);
 
+	path = getenv("PYTHONPATH");
+	snprintf(value, sizeof(value), "%s/modules/python:%s", baseDir, path ? path : "");
+	setenv("PYTHONPATH", value, 1);
+
 	// load config file
 	Config *config = new Config();
 	if (!config->ParseFile(configFile, &args))

@@ -172,7 +172,7 @@ if test "x$SWIG" != x; then
 			AC_SUBST(JAVA_CFLAGS)
 			current_CPPFLAGS="$CPPFLAGS"
 			CPPFLAGS="$JAVA_CFLAGS"
-			AC_CHECK_HEADER(jni.h,,
+			AC_CHECK_HEADERS([jni.h],,
 				[AC_MSG_WARN([could not find jni.h. The Java bindings will not be built.])
 				JAVA=
 				]
@@ -199,18 +199,18 @@ if test "x$SWIG" != x; then
 			fi
 			AC_SUBST(PYTHON_SITE_PACKAGES_DIR)
 			if test "$PYTHON_INCLUDE_DIR" = ""; then
-				PYTHON_INCLUDE_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()"`
+				PYTHON_INCLUDE_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()+' -I'+distutils.sysconfig.get_python_inc(plat_specific=True)"`
 			fi
 			if test "$PYTHON_LIB_DIR" = ""; then
 				PYTHON_LIB_DIR=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBPL')"`
 			fi
 			PYTHON_CFLAGS="-I$PYTHON_INCLUDE_DIR"
 			AC_SUBST(PYTHON_CFLAGS)
-			PYTHON_LDFLAGS="-L$PYTHON_LIB_DIR"
+			PYTHON_LDFLAGS="-L$PYTHON_LIB_DIR "`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBS')+' '+distutils.sysconfig.get_config_var('SYSLIBS')+' -lpython'+distutils.sysconfig.get_config_var('VERSION')"`
 			AC_SUBST(PYTHON_LDFLAGS)
 			current_CPPFLAGS="$CPPFLAGS"
 			CPPFLAGS="-I$PYTHON_INCLUDE_DIR"
-			AC_CHECK_HEADER(Python.h,,
+			AC_CHECK_HEADERS([Python.h],,
 				[AC_MSG_WARN([could not find Python.h. The Python bindings will not be built.])
 				PYTHON=
 				]

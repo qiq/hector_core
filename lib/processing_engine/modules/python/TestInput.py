@@ -8,18 +8,13 @@
 # idPrefix	r/w	Prefix to be used as prefix for string in TestResource
 
 import Hector
-import re
 
 class TestInput:
-    _object = None
-    _id = None
-    _threadIndex = None
-    values = { 'items': 0, 'maxItems': 0, 'idPrefix': None }
-
     def __init__(self, _object, _id, threadIndex):
 	self._object = _object
 	self._id = _id
 	self.threadIndex = threadIndex
+    	self.values = { 'items': 0, 'maxItems': 0, 'idPrefix': None }
 
     def __del__(self):
 	pass
@@ -31,7 +26,10 @@ class TestInput:
 
 	for p in params:
 	    if p[0] in self.values:
-		self.values[p[0]] = int(p[1])
+		if isinstance(self.values[p[0]], int):
+			self.values[p[0]] = int(p[1])
+		else:
+			self.values[p[0]] = str(p[1])
 	return True
 
     def getType(self):
@@ -51,8 +49,7 @@ class TestInput:
 	return False;
 
     def ListNames(self):
-	expr = re.compile('^[^_]')
-	return filter(expr.search, self.values.keys())
+	return self.values.keys()
 
     def SaveCheckpoint(self, path, id):
 	self._object.log_info("SaveCheckpoint(path, id)");

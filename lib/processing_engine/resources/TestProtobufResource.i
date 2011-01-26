@@ -19,6 +19,10 @@ public:
         int getTypeId();
         const char *getTypeStr();
         const char *getModuleStr();
+        int getId();
+        void setId(int id);
+        int getStatus();
+        void setStatus(int status);
         int getSize();
         std::string toString(Object::LogLevel logLevel);
 

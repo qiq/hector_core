@@ -13,6 +13,7 @@
 #include "Config.h"
 #include "OutputFilter.h"
 #include "PerlModule.h"
+#include "PythonModule.h"
 #include "ProcessingEngine.h"
 #include "Processor.h"
 #include "LibraryLoader.h"
@@ -132,6 +133,15 @@ bool Processor::Init(Config *config) {
 				for (int i = 0; i < nThreads; ++i) {
 					ModuleInfo * mi = new ModuleInfo;
 					mi->module = new PerlModule(objects, mid, i, name);
+					modules[i].push_back(mi);
+				}
+				free(type);
+				free(name);
+			} else if (!strcmp(type, "python")) {
+				// Python module
+				for (int i = 0; i < nThreads; ++i) {
+					ModuleInfo * mi = new ModuleInfo;
+					mi->module = new PythonModule(objects, mid, i, name);
 					modules[i].push_back(mi);
 				}
 				free(type);
