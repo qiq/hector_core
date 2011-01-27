@@ -1,4 +1,4 @@
-TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(top_builddir)/lib/perl/.libs:$(LD_LIBRARY_PATH) PERL5LIB=$(top_builddir)/lib/perl $(SHELL)
+TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(top_builddir)/lib/perl/.libs:$(top_builddir)/lib/python/.libs:$(LD_LIBRARY_PATH) PERL5LIB=$(top_builddir)/lib/perl PYTHONPATH=$(top_builddir)/lib/python $(SHELL)
 
 TESTS =
 EXTRA_DIST = test_common.sh test.log.props
@@ -80,14 +80,50 @@ TESTS += test19.sh
 EXTRA_DIST += test19.sh test19-config.xml test19.log.correct
 CLEANFILES += test19.log.test
 
-TESTS += test20.sh
-EXTRA_DIST += test20.sh test20-config.xml test20.log.correct test20.data.in
-CLEANFILES += test20.log.test test20.data.out
-
 TESTS += test21.sh
-EXTRA_DIST += test21.sh test21-config.xml test21.log.correct test21.data.in
-CLEANFILES += test21.log.test test21.data.out
+EXTRA_DIST += test21.sh test21-config.xml test21.log.correct
+CLEANFILES += test21.log.test
 
 TESTS += test22.sh
 EXTRA_DIST += test22.sh test22-config.xml test22.log.correct
 CLEANFILES += test22.log.test
+
+TESTS += test23.sh
+EXTRA_DIST += test23.sh test23-config.xml test23.log.correct
+CLEANFILES += test23.log.test
+
+TESTS += test24.sh
+EXTRA_DIST += test24.sh test24-config.xml test24.log.correct
+CLEANFILES += test24.log.test
+
+TESTS += test25.sh
+EXTRA_DIST += test25.sh test25-config.xml test25.log.correct
+CLEANFILES += test25.log.test
+
+TESTS += test26.sh
+EXTRA_DIST += test26.sh test26-config.xml test26.log.correct
+CLEANFILES += test26.log.test
+
+TESTS += test27.sh
+EXTRA_DIST += test27.sh test27-config.xml test27.log.correct
+CLEANFILES += test27.log.test
+
+TESTS += test28.sh
+EXTRA_DIST += test28.sh test28-config.xml test28.log.correct
+CLEANFILES += test28.log.test
+
+TESTS += test29.sh
+EXTRA_DIST += test29.sh test29-config.xml test29.log.correct
+CLEANFILES += test29.log.test
+
+TESTS += test30.sh
+EXTRA_DIST += test30.sh test30-config.xml test30.log.correct test30.data.in
+CLEANFILES += test30.log.test test30.data.out
+
+TESTS += test31.sh
+EXTRA_DIST += test31.sh test31-config.xml test31.log.correct test31.data.in
+CLEANFILES += test31.log.test test31.data.out
+
+TESTS += test32.sh
+EXTRA_DIST += test32.sh test32-config.xml test32.log.correct
+CLEANFILES += test32.log.test

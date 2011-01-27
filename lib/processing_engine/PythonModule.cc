@@ -232,14 +232,14 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 		if (PyTuple_Check(out) >= 0 || PyTuple_Size(out) != 2) {
 			PyObject *a = PyTuple_GetItem(out, 0);
 			if (PyLong_Check(a) >= 0) {
-				if (expectingResources)
-					*expectingResources = PyLong_AsLong(a);
+				result = PyLong_AsLong(a);
 			} else {
 				LOG_ERROR(this, "Error calling ProcessMulti: expected integer as result[0]");
 			}
 			PyObject *b = PyTuple_GetItem(out, 1);
 			if (PyLong_Check(b) >= 0) {
-				result = PyLong_AsLong(b);
+				if (expectingResources)
+					*expectingResources = PyLong_AsLong(b);
 			} else {
 				LOG_ERROR(this, "Error calling ProcessMulti: expected integer as result[1]");
 			}
@@ -253,8 +253,6 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 
 	python->Unlock(gstate);
 	return result;
-	
-	return 0;
 }
 
 char *PythonModule::GetValueSync(const char *name) {

@@ -25,10 +25,13 @@ class TestSimple:
 	if params is None:
 	    return True
 
-	for p in params:
-	    if p[0] in self.values:
-		self.values[p[0]] = p[1]
-	return True
+	try:
+	    for p in params:
+		if p[0] in self.values:
+		    self.values[p[0]] = int(p[1]) if isinstance(self.values[p[0]], int) else str(p[1])
+	    return True
+	except:
+	    return False
 
     def getType(self):
 	return Hector.Module.SIMPLE
@@ -40,9 +43,12 @@ class TestSimple:
 	return None;
 
     def SetValue(self, name, value):
-	if name in self.values:
-	    self.values[name] = value
+	try:
+	    if name in self.values:
+		self.values[name] = int(values) if isinstance(self.values[name], int) else str(value)
 	    return True
+	except:
+	    pass
 	self._object.log_error("Invalid value name: "+name);
 	return False;
 
