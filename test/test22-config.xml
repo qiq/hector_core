@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test2: multithreaded read-write: one reader(5), one writer(5)
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_input" type="python" lib="TestInput.py">
+						<param name="maxItems" value="1000"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_output"/>
+				</output>
+			</Processor>
+			<Processor id="P_output">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_output" type="python" lib="TestOutput.py"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>
