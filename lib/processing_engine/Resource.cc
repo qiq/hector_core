@@ -12,6 +12,7 @@ using namespace std;
 log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 
 ResourceRegistry Resource::registry;
+string Resource::empty;
 
 PlainLock Resource::idLock;
 int Resource::nextId = 0;

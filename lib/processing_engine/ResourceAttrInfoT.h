@@ -2,84 +2,22 @@
  * Class representing a resource field, so that it can be used in a general way.
  */
 
-#ifndef _LIB_PROCESSING_ENGINE_RESOURCE_FIELD_INFO_H_
-#define _LIB_PROCESSING_ENGINE_RESOURCE_FIELD_INFO_H_
+#ifndef _LIB_PROCESSING_ENGINE_RESOURCE_ATTR_INFO_T_H_
+#define _LIB_PROCESSING_ENGINE_RESOURCE_ATTR_INFO_T_H_
 
 #include <config.h>
 
 #include <assert.h>
 #include <string>
-#include "Resource.h"
 #include "IpAddr.h"
-
-class ResourceFieldInfo {
-public:
-	typedef enum {
-		UNKNOWN,
-		STRING,
-		INT,
-		LONG,
-		IP,		// IP address
-		ARRAY_STRING,
-		ARRAY_INT,
-		ARRAY_LONG,
-		ARRAY_IP,
-		HASH_STRING,
-		HASH_INT,
-		HASH_LONG,
-		HASH_IP,
-	} FieldType;
-
-	ResourceFieldInfo() : type(UNKNOWN) {};
-	virtual ~ResourceFieldInfo() {};
-	FieldType getType();
-
-	virtual const std::string &getString(Resource*) = 0;
-	virtual int getInt(Resource*) = 0;
-	virtual long getLong(Resource*) = 0;
-	virtual IpAddr &getIpAddr(Resource*) = 0;
-	virtual const std::string &getArrayString(Resource*, int) = 0;
-	virtual int getArrayInt(Resource*, int) = 0;
-	virtual long getArrayLong(Resource*, int) = 0;
-	virtual IpAddr &getArrayIpAddr(Resource*, int) = 0;
-	virtual const std::string &getHashString(Resource*, const std::string&) = 0;
-	virtual int getHashInt(Resource*, const std::string&) = 0;
-	virtual long getHashLong(Resource*, const std::string&) = 0;
-	virtual IpAddr &getHashIpAddr(Resource*, const std::string&) = 0;
-
-	virtual void setString(Resource*, const std::string&) = 0;
-	virtual void setInt(Resource*, int) = 0;
-	virtual void setLong(Resource*, long) = 0;
-	virtual void setIpAddr(Resource*, IpAddr&) = 0;
-	virtual void setArrayString(Resource*, int, const std::string&) = 0;
-	virtual void setArrayInt(Resource*, int, int) = 0;
-	virtual void setArrayLong(Resource*, int, long) = 0;
-	virtual void setArrayIpAddr(Resource*, int, IpAddr&) = 0;
-	virtual void setHashString(Resource*, const std::string&, const std::string&) = 0;
-	virtual void setHashInt(Resource*, const std::string&, int) = 0;
-	virtual void setHashLong(Resource*, const std::string&, long) = 0;
-	virtual void setHashIpAddr(Resource*, const std::string&, IpAddr&) = 0;
-
-	virtual void clear(Resource*) = 0;
-	virtual void deleteHashItem(Resource*, const std::string&) = 0;
-
-	virtual int getCount(Resource*) = 0;
-	virtual std::vector<std::string> *getKeys(Resource*) = 0;
-	virtual std::vector<std::string> *getValuesString(Resource*) = 0;
-	virtual std::vector<int> *getValuesInt(Resource*) = 0;
-	virtual std::vector<long> *getValuesLong(Resource*) = 0;
-	virtual std::vector<IpAddr> *getValuesIpAddr(Resource*) = 0;
-
-protected:
-	FieldType type;
-};
+#include "ResourceAttrInfo.h"
 
 template<class T>
-class ResourceFieldInfoT : public ResourceFieldInfo {
+class ResourceAttrInfoT : public ResourceAttrInfo {
 public:
 
-	ResourceFieldInfoT(const std::string &name);
-	~ResourceFieldInfoT() {};
+	ResourceAttrInfoT() {};
+	~ResourceAttrInfoT() {};
 
 	const std::string &getString(Resource*);
 	int getInt(Resource*);
@@ -116,6 +54,21 @@ public:
 	std::vector<int> *getValuesInt(Resource*);
 	std::vector<long> *getValuesLong(Resource*);
 	std::vector<IpAddr> *getValuesIpAddr(Resource*);
+
+	void InitString(const char *name, const std::string &(T::*get)(), void (T::*set)(const std::string&));
+	void InitInt(const char *name, int (T::*get)(), void (T::*set)(int));
+	void InitLong(const char *name, long (T::*get)(), void (T::*set)(long));
+	void InitIpAddr(const char *name, IpAddr &(T::*get)(), void (T::*set)(IpAddr));
+
+	void InitArrayString(const char *name, const std::string &get(Resource*, int), void set(Resource*, int, const std::string&), void clear(Resource*), int count(Resource*));
+	void InitArrayInt(const char *name, int get(Resource*, int), void set(Resource*, int, int), void clear(Resource*), int count(Resource*));
+	void InitArrayLong(const char *name, long get(Resource*, int), void set(Resource*, int, long), void clear(Resource*), int count(Resource*));
+	void InitArrayIpAddr(const char *name, IpAddr &get(Resource*, int), void set(Resource*, int, IpAddr&), void clear(Resource*), int count(Resource*));
+
+	void InitHashString(const char *name, const std::string &get(Resource*, const std::string&), void set(Resource*, const std::string, int, const std::string&), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<std::string> *values(Resource*));
+	void InitHashInt(const char *name, int get(Resource*, const std::string&), void set(Resource*, const std::string, int, int), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<int> *values(Resource*));
+	void InitHashLong(const char *name, long get(Resource*, const std::string&), void set(Resource*, const std::string, int, long), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<long> *values(Resource*));
+	void InitHashIpAddr(const char *name, IpAddr &get(Resource*, const std::string&), void set(Resource*, const std::string, int, IpAddr&), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<IpAddr> *values(Resource*));
 
 protected:
 	union {
@@ -170,188 +123,184 @@ protected:
 	void (T::*delete_hash_item)(const std::string&);
 };
 
-inline ResourceFieldInfo::FieldType ResourceFieldInfo::getType() {
-	return type;
-}
-
 template <class T>
-const std::string &ResourceFieldInfoT<T>::getString(Resource *resource) {
+const std::string &ResourceAttrInfoT<T>::getString(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.s ? (static_cast<T*>(resource)->*get_u.s)() : empty_string;
 }
 
 template <class T>
-int ResourceFieldInfoT<T>::getInt(Resource *resource) {
+int ResourceAttrInfoT<T>::getInt(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.i ? (static_cast<T*>(resource)->*get_u.i)() : -1;
 }
 
 template <class T>
-long ResourceFieldInfoT<T>::getLong(Resource *resource) {
+long ResourceAttrInfoT<T>::getLong(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.l ? (static_cast<T*>(resource)->*get_u.l)() : -1;
 }
 
 template <class T>
-IpAddr &ResourceFieldInfoT<T>::getIpAddr(Resource *resource) {
+IpAddr &ResourceAttrInfoT<T>::getIpAddr(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.ip ? (static_cast<T*>(resource)->*get_u.ip)() : IpAddr::emptyIpAddr;
 }
 
 template <class T>
-const std::string &ResourceFieldInfoT<T>::getArrayString(Resource *resource, int index) {
+const std::string &ResourceAttrInfoT<T>::getArrayString(Resource *resource, int index) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.as ? (static_cast<T*>(resource)->*get_u.as)(index) : empty_string;
 }
 
 template <class T>
-int ResourceFieldInfoT<T>::getArrayInt(Resource *resource, int index) {
+int ResourceAttrInfoT<T>::getArrayInt(Resource *resource, int index) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.ai ? (static_cast<T*>(resource)->*get_u.ai)(index) : -1;
 }
 
 template <class T>
-long ResourceFieldInfoT<T>::getArrayLong(Resource *resource, int index) {
+long ResourceAttrInfoT<T>::getArrayLong(Resource *resource, int index) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.al ? (static_cast<T*>(resource)->*get_u.al)(index) : -1;
 }
 
 template <class T>
-IpAddr &ResourceFieldInfoT<T>::getArrayIpAddr(Resource *resource, int index) {
+IpAddr &ResourceAttrInfoT<T>::getArrayIpAddr(Resource *resource, int index) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.aip ? (static_cast<T*>(resource)->*get_u.aip)(index) : IpAddr::emptyIpAddr;
 }
 
 template <class T>
-const std::string &ResourceFieldInfoT<T>::getHashString(Resource *resource, const std::string &name) {
+const std::string &ResourceAttrInfoT<T>::getHashString(Resource *resource, const std::string &name) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.s ? (static_cast<T*>(resource)->*get_u.hs)(name) : empty_string;
 }
 
 template <class T>
-int ResourceFieldInfoT<T>::getHashInt(Resource *resource, const std::string &name) {
+int ResourceAttrInfoT<T>::getHashInt(Resource *resource, const std::string &name) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.i ? (static_cast<T*>(resource)->*get_u.hi)(name) : -1;
 }
 
 template <class T>
-long ResourceFieldInfoT<T>::getHashLong(Resource *resource, const std::string &name) {
+long ResourceAttrInfoT<T>::getHashLong(Resource *resource, const std::string &name) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.l ? (static_cast<T*>(resource)->*get_u.hl)(name) : -1;
 }
 
 template <class T>
-IpAddr &ResourceFieldInfoT<T>::getHashIpAddr(Resource *resource, const std::string &name) {
+IpAddr &ResourceAttrInfoT<T>::getHashIpAddr(Resource *resource, const std::string &name) {
 	assert(resource->getTypeId() == T::typeId);
 	return get_u.ip ? (static_cast<T*>(resource)->*get_u.hip)(name) : IpAddr::emptyIpAddr;
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setString(Resource *resource, const std::string &value) {
+void ResourceAttrInfoT<T>::setString(Resource *resource, const std::string &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.s)
 		(static_cast<T*>(resource)->*set_u.s)(value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setInt(Resource *resource, int value) {
+void ResourceAttrInfoT<T>::setInt(Resource *resource, int value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.i)
 		(static_cast<T*>(resource)->*set_u.i)(value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setLong(Resource *resource, long value) {
+void ResourceAttrInfoT<T>::setLong(Resource *resource, long value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.l)
 		(static_cast<T*>(resource)->*set_u.l)(value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setIpAddr(Resource *resource, IpAddr &value) {
+void ResourceAttrInfoT<T>::setIpAddr(Resource *resource, IpAddr &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.ip)
 		(static_cast<T*>(resource)->*set_u.ip)(value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setArrayString(Resource *resource, int index, const std::string &value) {
+void ResourceAttrInfoT<T>::setArrayString(Resource *resource, int index, const std::string &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.as)
 		(static_cast<T*>(resource)->*set_u.as)(index, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setArrayInt(Resource *resource, int index, int value) {
+void ResourceAttrInfoT<T>::setArrayInt(Resource *resource, int index, int value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.ai)
 		(static_cast<T*>(resource)->*set_u.ai)(index, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setArrayLong(Resource *resource, int index, long value) {
+void ResourceAttrInfoT<T>::setArrayLong(Resource *resource, int index, long value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.al)
 		(static_cast<T*>(resource)->*set_u.al)(index, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setArrayIpAddr(Resource *resource, int index, IpAddr &value) {
+void ResourceAttrInfoT<T>::setArrayIpAddr(Resource *resource, int index, IpAddr &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.aip)
 		(static_cast<T*>(resource)->*set_u.aip)(index, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setHashString(Resource *resource, const std::string &name, const std::string &value) {
+void ResourceAttrInfoT<T>::setHashString(Resource *resource, const std::string &name, const std::string &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.hs)
 		(static_cast<T*>(resource)->*set_u.hs)(name, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setHashInt(Resource *resource, const std::string &name, int value) {
+void ResourceAttrInfoT<T>::setHashInt(Resource *resource, const std::string &name, int value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.hi)
 		(static_cast<T*>(resource)->*set_u.hi)(name, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setHashLong(Resource *resource, const std::string &name, long value) {
+void ResourceAttrInfoT<T>::setHashLong(Resource *resource, const std::string &name, long value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.hl)
 		(static_cast<T*>(resource)->*set_u.hl)(name, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::setHashIpAddr(Resource *resource, const std::string &name, IpAddr &value) {
+void ResourceAttrInfoT<T>::setHashIpAddr(Resource *resource, const std::string &name, IpAddr &value) {
 	assert(resource->getTypeId() == T::typeId);
 	if (set_u.hip)
 		(static_cast<T*>(resource)->*set_u.hip)(name, value);
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::clear(Resource *resource) {
+void ResourceAttrInfoT<T>::clear(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	if (clear_all)
 		(static_cast<T*>(resource)->*clear_all)();
 }
 
 template <class T>
-void ResourceFieldInfoT<T>::deleteHashItem(Resource *resource, const std::string &name) {
+void ResourceAttrInfoT<T>::deleteHashItem(Resource *resource, const std::string &name) {
 	assert(resource->getTypeId() == T::typeId);
 	if (delete_hash_item)
 		(static_cast<T*>(resource)->*delete_hash_item)(name);
 }
 
 template <class T>
-int ResourceFieldInfoT<T>::getCount(Resource *resource) {
+int ResourceAttrInfoT<T>::getCount(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	return count ? (static_cast<T*>(resource)->*count)() : 0;
 }
 
 template <class T>
-std::vector<std::string> *ResourceFieldInfoT<T>::getKeys(Resource *resource) {
+std::vector<std::string> *ResourceAttrInfoT<T>::getKeys(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	assert(type == HASH_STRING || type == HASH_INT || type == HASH_LONG || type == HASH_IP);
 	if (get_all_keys)
@@ -360,7 +309,7 @@ std::vector<std::string> *ResourceFieldInfoT<T>::getKeys(Resource *resource) {
 }
 
 template <class T>
-std::vector<std::string> *ResourceFieldInfoT<T>::getValuesString(Resource *resource) {
+std::vector<std::string> *ResourceAttrInfoT<T>::getValuesString(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	assert(type == HASH_STRING || type == ARRAY_STRING);
 	if (get_all_values_u.s)
@@ -369,7 +318,7 @@ std::vector<std::string> *ResourceFieldInfoT<T>::getValuesString(Resource *resou
 }
 
 template <class T>
-std::vector<int> *ResourceFieldInfoT<T>::getValuesInt(Resource *resource) {
+std::vector<int> *ResourceAttrInfoT<T>::getValuesInt(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	assert(type == HASH_INT || type == ARRAY_INT);
 	if (get_all_values_u.i)
@@ -378,7 +327,7 @@ std::vector<int> *ResourceFieldInfoT<T>::getValuesInt(Resource *resource) {
 }
 
 template <class T>
-std::vector<long> *ResourceFieldInfoT<T>::getValuesLong(Resource *resource) {
+std::vector<long> *ResourceAttrInfoT<T>::getValuesLong(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	assert(type == HASH_LONG || type == ARRAY_LONG);
 	if (get_all_values_u.l)
@@ -387,12 +336,76 @@ std::vector<long> *ResourceFieldInfoT<T>::getValuesLong(Resource *resource) {
 }
 
 template <class T>
-std::vector<IpAddr> *ResourceFieldInfoT<T>::getValuesIpAddr(Resource *resource) {
+std::vector<IpAddr> *ResourceAttrInfoT<T>::getValuesIpAddr(Resource *resource) {
 	assert(resource->getTypeId() == T::typeId);
 	assert(type == HASH_IP || type == ARRAY_IP);
 	if (get_all_values_u.ip)
 		return (static_cast<T*>(resource)->*get_all_values_u.ip)();
 	return new std::vector<IpAddr>();
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitString(const char *name, const std::string &(T::*get)(), void (T::*set)(const std::string&)) {
+	type = STRING;
+	this->name = name;
+	get_u.s = get;
+	set_u.s = set;
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitInt(const char *name, int (T::*get)(), void (T::*set)(int)) {
+	type = INT;
+	this->name = name;
+	get_u.i = get;
+	set_u.i = set;
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitLong(const char *name, long (T::*get)(), void (T::*set)(long)) {
+	type = LONG;
+	this->name = name;
+	get_u.l = get;
+	set_u.l = set;
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitIpAddr(const char *name, IpAddr &(T::*get)(), void (T::*set)(IpAddr)) {
+	type = IP;
+	this->name = name;
+	get_u.ip = get;
+	set_u.ip = set;
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitArrayString(const char *name, const std::string &get(Resource*, int), void set(Resource*, int, const std::string&), void clear(Resource*), int count(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitArrayInt(const char *name, int get(Resource*, int), void set(Resource*, int, int), void clear(Resource*), int count(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitArrayLong(const char *name, long get(Resource*, int), void set(Resource*, int, long), void clear(Resource*), int count(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitArrayIpAddr(const char *name, IpAddr &get(Resource*, int), void set(Resource*, int, IpAddr&), void clear(Resource*), int count(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitHashString(const char *name, const std::string &get(Resource*, const std::string&), void set(Resource*, const std::string, int, const std::string&), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<std::string> *values(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitHashInt(const char *name, int get(Resource*, const std::string&), void set(Resource*, const std::string, int, int), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<int> *values(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitHashLong(const char *name, long get(Resource*, const std::string&), void set(Resource*, const std::string, int, long), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<long> *values(Resource*)) {
+}
+
+template <class T>
+void ResourceAttrInfoT<T>::InitHashIpAddr(const char *name, IpAddr &get(Resource*, const std::string&), void set(Resource*, const std::string, int, IpAddr&), void clear(Resource*), void deleteItem(Resource*, const std::string&), int count(Resource*), std::vector<std::string> *keys(Resource*), std::vector<IpAddr> *values(Resource*)) {
 }
 
 #endif

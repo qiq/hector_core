@@ -8,9 +8,11 @@
 #include <config.h>
 
 #include <string>
+#include <vector>
 #include <log4cxx/logger.h>
 #include "Resource.h"
 #include "ResourceFieldInfo.h"
+#include "ResourceAttrInfoT.h"
 
 class TestResource : public Resource {
 public:
@@ -23,8 +25,8 @@ public:
 	// save and restore resource
 	std::string *Serialize();
 	bool Deserialize(const char *data, int size);
-	// return ResourceInfo describing one field
-	ResourceFieldInfo *getFieldInfo(const char *name);
+	// return ResourceAttrInfo describing one field
+	ResourceAttrInfo *GetAttrInfo(const char *name);
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
 	int getTypeId();
 	// type string of a resource
@@ -45,12 +47,18 @@ public:
 protected:
 	std::string str;
 
+	static std::vector<ResourceAttrInfoT<TestResource> > info;
+	static std::tr1::unordered_map<std::string, ResourceAttrInfoT<TestResource>*> infoMap;
+
+	static bool init;
+	static bool Init();
+
 	static log4cxx::LoggerPtr logger;
 };
 
-inline ResourceFieldInfo *TestResource::getFieldInfo(const char *name) {
-	return new ResourceFieldInfoT<TestResource>(name);
-}
+//inline ResourceFieldInfo *TestResource::getFieldInfo(const char *name) {
+//	return new ResourceFieldInfoT<TestResource>(name);
+//}
 
 inline int TestResource::getTypeId() {
 	return typeId;

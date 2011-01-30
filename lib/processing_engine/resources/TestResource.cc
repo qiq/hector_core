@@ -7,6 +7,9 @@
 
 using namespace std;
 
+vector<ResourceAttrInfoT<TestResource> > TestResource::info;
+tr1::unordered_map<string, ResourceAttrInfoT<TestResource>*> TestResource::infoMap;
+bool TestResource::init = TestResource::Init();	// static init
 log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("resources.TestResource"));
 
 Resource *TestResource::Clone() {
@@ -50,23 +53,22 @@ string TestResource::toString(Object::LogLevel logLevel) {
 	return buf;
 }
 
-template<class T>
-ResourceFieldInfoT<T>::ResourceFieldInfoT(const std::string &name) {
-	if (name == "id") {
-		type = INT;
-		get_u.i = &TestResource::getId;
-		set_u.i = &TestResource::setId;
-		clear_all = NULL;
-	} else if (name == "status") {
-		type = INT;
-		get_u.i = &TestResource::getStatus;
-		set_u.i = &TestResource::setStatus;
-		clear_all = NULL;
-	} else if (name == "str") {
-		type = STRING;
-		get_u.s = &TestResource::getStr;
-		set_u.s = &TestResource::setStr;
-		clear_all = NULL;
-	}
+bool TestResource::Init() {
+	ResourceAttrInfoT<TestResource> ai;
+
+	ai.InitInt("id", &TestResource::getId, &TestResource::setId);
+	info.push_back(ai);
+	ai.InitInt("status", &TestResource::getStatus, &TestResource::setStatus);
+	info.push_back(ai);
+	ai.InitString("str", &TestResource::getStr, &TestResource::setStr);
+	info.push_back(ai);
+
+	for (vector<ResourceAttrInfoT<TestResource> >::iterator iter = info.begin(); iter != info.end(); ++iter)
+		infoMap[iter->getName()] = &(*iter);
+	return true;
 }
 
+ResourceAttrInfo *TestResource::GetAttrInfo(const char *name) {
+	tr1::unordered_map<std::string, ResourceAttrInfoT<TestResource>*>::iterator iter = infoMap.find(name);
+	return iter->second;
+}

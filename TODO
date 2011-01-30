@@ -1,7 +1,8 @@
-- zrusit -threads pro SWIG a python (mozna ne, kdyz budeme pouzivat jen jeden interpret?)
-- jeden interpret pythonu (EmbeddedPython.cc), lazy-initialized
-- import modulu -- neni problem s vice vlakny, protoze se pristup totalne serializuje
-- resources taky tak.
+- navrhnout API pro resource
+	- zakladni metody: type, id, status, flags, (de-)serialization, attached resource, size, toString(Short), 
+	- GetAttrString(ai) a GetAttrString("name")
+
+- PythonModule a reference counting -- je to spravne? Zkontrolovat
 
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
 	robot/test6+
@@ -24,6 +25,11 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+- python:
+	- zrusit -threads pro SWIG a python (ne, budeme pouzivat jen jeden interpret)
+	- jeden interpret pythonu (EmbeddedPython.cc), lazy-initialized
+	- import modulu -- neni problem s vice vlakny, protoze se pristup totalne serializuje
+	- resources taky tak.
 - IpAddress object (ip4 i ip6, metoda isEmpty(), ...)
 - nejak doresit unikatni resource id, asi se hodi, aby bylo vzdycky unikatni v
   ramci beziciho hectora

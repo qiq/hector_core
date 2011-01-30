@@ -12,7 +12,7 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "ProtobufResource.h"
-#include "ResourceFieldInfo.h"
+#include "ResourceAttrInfoT.h"
 #include "TestProtobufResource.pb.h"
 
 class TestProtobufResource : public ProtobufResource {
@@ -30,8 +30,8 @@ public:
 	bool Deserialize(const char *data, int size);
 	bool Deserialize(google::protobuf::io::CodedInputStream *input);
 
-	// return ResourceInfo describing one field
-	ResourceFieldInfo *getFieldInfo(const char *name);
+	// return ResourceAttrInfo describing one attribute
+	ResourceAttrInfo *GetAttrInfo(const char *name);
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
 	int getTypeId();
 	// type string of a resource
@@ -51,6 +51,12 @@ public:
 
 protected:
 	hector::resources::TestProtobufResource r;
+
+	static std::vector<ResourceAttrInfoT<TestProtobufResource> > info;
+	static std::tr1::unordered_map<std::string, ResourceAttrInfoT<TestProtobufResource>*> infoMap;
+
+	static bool init;
+	static bool Init();
 
 	static log4cxx::LoggerPtr logger;
 };
@@ -89,9 +95,9 @@ bool TestProtobufResource::Deserialize(google::protobuf::io::CodedInputStream *i
 	return r.ParseFromCodedStream(input);
 }
 
-inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
-	return new ResourceFieldInfoT<TestProtobufResource>(name);
-}
+//inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
+//	return new ResourceFieldInfoT<TestProtobufResource>(name);
+//}
 
 inline int TestProtobufResource::getTypeId() {
 	return typeId;
