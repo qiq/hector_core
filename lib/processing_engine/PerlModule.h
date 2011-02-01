@@ -9,13 +9,7 @@
 
 #ifdef HAVE_PERL_H
 
-#include <EXTERN.h>
-#include <perl.h>
-#include <XSUB.h>
-#undef New	// protocol buffers
-#undef Pause	// Processor
-
-#include <tr1/unordered_set>
+#include "EmbeddedPerl.h"
 
 #include "Module.h"
 
@@ -25,6 +19,10 @@ public:
 	~PerlModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
+	void StartSync();
+	void StopSync();
+	void PauseSync();
+	void ResumeSync();
 	Resource *ProcessInputSync(bool sleep);
 	Resource *ProcessOutputSync(Resource *resource);
 	Resource *ProcessSimpleSync(Resource *resource);
@@ -41,11 +39,8 @@ protected:
 	SV *CreatePerlResource(Resource *resource);
 
 	char *name;
-	PerlInterpreter *my_perl;
+	EmbeddedPerl *perl;
 	SV *ref;
-
-	// resource types that were already initialized
-	std::tr1::unordered_set<std::string> initialized;
 };
 
 #else

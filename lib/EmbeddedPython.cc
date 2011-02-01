@@ -17,7 +17,8 @@ PlainLock EmbeddedPython::lock;
 EmbeddedPython *EmbeddedPython::python = NULL;
 swig_type_info *(*EmbeddedPython::Python_TypeQuery)(const char *type);
 PyObject *(*EmbeddedPython::Python_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
-int (*EmbeddedPython::Python_ConvertPtrAndOwn)(PyObject *obj, void **ptr, swig_type_info *ty, int flags, int *own);
+int (*EmbeddedPython::Python_ConvertPtr)(PyObject *obj, void **ptr, swig_type_info *ty, int flags);
+tr1::unordered_map<string, swig_type_info*> EmbeddedPython::typeInfoCache;
 log4cxx::LoggerPtr EmbeddedPython::logger(log4cxx::Logger::getLogger("lib.EmbeddedPython"));
 
 EmbeddedPython::EmbeddedPython() {
@@ -57,19 +58,19 @@ EmbeddedPython *EmbeddedPython::GetPython() {
 			return NULL;
 		}
 		python->Unlock(gstate);
-		Python_TypeQuery = (swig_type_info*(*)(const char*))LibraryLoader::LoadLibrary("_Hector.so", "SWIG_Python_TypeQuery");
+		Python_TypeQuery = (swig_type_info*(*)(const char*))LibraryLoader::LoadLibrary("_Hector.so", "Python_TypeQuery_Wrapper");
 		if (!Python_TypeQuery) {
-			LOG4CXX_ERROR(logger, "Cannot find SWIG_Python_TypeQuery");
+			LOG4CXX_ERROR(logger, "Cannot find Python_TypeQuery_Wrapper");
 			return NULL;
 		}
-		Python_NewPointerObj = (PyObject*(*)(void*, swig_type_info*, int))LibraryLoader::LoadLibrary("_Hector.so", "SWIG_Python_NewPointerObj");
+		Python_NewPointerObj = (PyObject*(*)(void*, swig_type_info*, int))LibraryLoader::LoadLibrary("_Hector.so", "Python_NewPointerObj_Wrapper");
 		if (!Python_NewPointerObj) {
-			LOG4CXX_ERROR(logger, "Cannot find SWIG_Python_NewPointerObj");
+			LOG4CXX_ERROR(logger, "Cannot find Python_NewPointerObj_Wrapper");
 			return NULL;
 		}
-		Python_ConvertPtrAndOwn = (int(*)(PyObject*, void**, swig_type_info *ty, int, int*))LibraryLoader::LoadLibrary("_Hector.so", "SWIG_Python_ConvertPtrAndOwn");
-		if (!Python_ConvertPtrAndOwn) {
-			LOG4CXX_ERROR(logger, "Cannot find SWIG_Python_ConvertPtrAndOwn");
+		Python_ConvertPtr = (int(*)(PyObject*, void**, swig_type_info *ty, int))LibraryLoader::LoadLibrary("_Hector.so", "Python_ConvertPtr_Wrapper");
+		if (!Python_ConvertPtr) {
+			LOG4CXX_ERROR(logger, "Cannot find Python_ConvertPtr_Wrapper");
 			return NULL;
 		}
 	}
@@ -123,11 +124,29 @@ void EmbeddedPython::LogError() {
 }
 
 PyObject *EmbeddedPython::NewPointerObj(void *ptr, const char *type, int flags) {
-	return (*Python_NewPointerObj)(ptr, (*Python_TypeQuery)(type), flags);
+	// typeInfoCache is used only with GIL lock held, so no need to apply further lock
+	tr1::unordered_map<string, swig_type_info*>::iterator iter = typeInfoCache.find(type);
+	swig_type_info *info;
+	if (iter != typeInfoCache.end()) {
+		info = iter->second;
+	} else {
+		info = (*Python_TypeQuery)(type);
+		typeInfoCache[type] = info;
+	}
+	return (*Python_NewPointerObj)(ptr, info, flags);
 }
 
 int EmbeddedPython::ConvertPtr(PyObject *obj, void **ptr, const char *type, int flags) {
-	return (*Python_ConvertPtrAndOwn)(obj, ptr, (*Python_TypeQuery)(type), flags, 0);
+	// typeInfoCache is used only with GIL lock held, so no need to apply further lock
+	tr1::unordered_map<string, swig_type_info*>::iterator iter = typeInfoCache.find(type);
+	swig_type_info *info;
+	if (iter != typeInfoCache.end()) {
+		info = iter->second;
+	} else {
+		info = (*Python_TypeQuery)(type);
+		typeInfoCache[type] = info;
+	}
+	return (*Python_ConvertPtr)(obj, ptr, info, flags);
 }
 
 PyObject *EmbeddedPython::LoadModule(const char *name, const char *format, ...) {

@@ -11,7 +11,6 @@
 #include <vector>
 #include <log4cxx/logger.h>
 #include "Resource.h"
-#include "ResourceFieldInfo.h"
 #include "ResourceAttrInfoT.h"
 
 class TestResource : public Resource {

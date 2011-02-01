@@ -17,7 +17,6 @@ Hector_wrap.cc Hector.pm: $(top_srcdir)/lib/Hector.i
 
 Hector_la_SOURCES = \
 	Hector_wrap.cc
-Hector_la_CXXFLAGS = $(AM_CXXFLAGS)
 Hector_la_LIBADD = $(top_builddir)/lib/libhector.la $(top_builddir)/lib/processing_engine/resources/libTestResource.la $(top_builddir)/lib/processing_engine/resources/libTestProtobufResource.la
 
 

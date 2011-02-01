@@ -70,16 +70,6 @@ public:
 	virtual const char *getTypeStrShort() = 0;
 	// module prefix (e.g. Hector for Hector::TestResource)
 	virtual const char *getModuleStr() = 0;
-	// id should be unique across all in-memory resources
-	virtual int getId();
-	virtual void setId(int id);
-	// status may be tested in Processor to select target queue
-	virtual int getStatus();
-	virtual void setStatus(int status);
-	// flags 
-	void setFlag(Flag flag);
-	void resetFlag(Flag flag);
-	bool isSetFlag(Flag flag);
 	// resource may contain link to other resource, it is only kept only in the memory
 	Resource *getAttachedResource();
 	void setAttachedResource(Resource *attachedResource);
@@ -90,6 +80,16 @@ public:
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string toString(Object::LogLevel = Object::INFO) = 0;
 	std::string toStringShort();
+	// id should be unique across all in-memory resources
+	virtual int getId();
+	virtual void setId(int id);
+	// status may be tested in Processor to select target queue
+	virtual int getStatus();
+	virtual void setStatus(int status);
+	// flags 
+	void setFlag(Flag flag);
+	void resetFlag(Flag flag);
+	bool isSetFlag(Flag flag);
 
 	// methods common to all Resources
 	static int NextResourceId();

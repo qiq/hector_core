@@ -96,19 +96,88 @@ Module::Type PythonModule::getType() {
 	return result;
 }
 
+void PythonModule::StartSync() {
+	PyGILState_STATE gstate = python->Lock();
+
+	PyObject *out = python->CallMethod(module, "Start", "()");
+	if (out) {
+		if (PyInt_Check(out) >= 0) {
+			if (PyInt_AsLong(out) == 0)
+				LOG_ERROR(this, "Start returned error");
+		}
+		Py_DECREF(out);
+	} else {
+		LOG_ERROR(this, "Error calling Start");
+	}
+
+	python->Unlock(gstate);
+}
+
+void PythonModule::StopSync() {
+	PyGILState_STATE gstate = python->Lock();
+
+	PyObject *out = python->CallMethod(module, "Stop", "()");
+	if (out) {
+		if (PyInt_Check(out) >= 0) {
+			if (PyInt_AsLong(out) == 0)
+				LOG_ERROR(this, "Stop returned error");
+		}
+		Py_DECREF(out);
+	} else {
+		LOG_ERROR(this, "Error calling Stop");
+	}
+
+	python->Unlock(gstate);
+}
+
+void PythonModule::PauseSync() {
+	PyGILState_STATE gstate = python->Lock();
+
+	PyObject *out = python->CallMethod(module, "Pause", "()");
+	if (out) {
+		if (PyInt_Check(out) >= 0) {
+			if (PyInt_AsLong(out) == 0)
+				LOG_ERROR(this, "Pause returned error");
+		}
+		Py_DECREF(out);
+	} else {
+		LOG_ERROR(this, "Error calling Pause");
+	}
+
+	python->Unlock(gstate);
+}
+
+void PythonModule::ResumeSync() {
+	PyGILState_STATE gstate = python->Lock();
+
+	PyObject *out = python->CallMethod(module, "Resume", "()");
+	if (out) {
+		if (PyInt_Check(out) >= 0) {
+			if (PyInt_AsLong(out) == 0)
+				LOG_ERROR(this, "Resume returned error");
+		}
+		Py_DECREF(out);
+	} else {
+		LOG_ERROR(this, "Error calling Resume");
+	}
+
+	python->Unlock(gstate);
+}
+
+
 Resource *PythonModule::ProcessInputSync(bool sleep) {
 	PyGILState_STATE gstate = python->Lock();
 	Resource *result = NULL;
 
-	PyObject *r = python->CallMethod(module, "ProcessInput", "()");
-	if (r) {
-		void *res = NULL;
-		if (python->ConvertPtr(r, &res, "Resource *", 0x01) >= 0) {
-			result = reinterpret_cast<Resource*>(res);
+	PyObject *out = python->CallMethod(module, "ProcessInput", "()");
+	if (out) {
+		void *r = NULL;
+		if (python->ConvertPtr(out, &r, "Resource *", 0x01) >= 0) {
+			result = reinterpret_cast<Resource*>(r);
 		} else {
 			LOG_ERROR(this, "Error calling ProcessInput");
 		}
-		Py_DECREF(r);
+		Py_DECREF(out);
 	} else {
 		LOG_ERROR(this, "Error calling ProcessInput");
 	}

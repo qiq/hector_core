@@ -26,6 +26,14 @@ libhector_la_LIBADD = server/libhector_server.la processing_engine/libhector_pro
 libhector_la_LDFLAGS = -version-info 0:0:0 $(AM_LDFLAGS)
 
 if WITH_SWIG
+if WITH_PERL
+libhector_la_SOURCES += \
+	EmbeddedPerl.h EmbeddedPerl.cc perlxsi.c
+libhector_la_CXXFLAGS += @PERL_CFLAGS@
+libhector_la_CFLAGS = ${libhector_la_CXXFLAGS}
+libhector_la_LDFLAGS += @PERL_LDFLAGS@
+endif
+
 if WITH_PYTHON
 libhector_la_SOURCES += \
 	EmbeddedPython.h EmbeddedPython.cc
@@ -33,7 +41,6 @@ libhector_la_CXXFLAGS += @PYTHON_CFLAGS@
 libhector_la_LDFLAGS += @PYTHON_LDFLAGS@
 endif
 endif
-
 
 # SWIG interface
 EXTRA_DIST = Connection.i StdioConnection.i Hector.i Object.i ObjectRegistry.i

@@ -37,13 +37,13 @@ public:
 	Resource *ProcessSimple(Resource *resource);
 	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
-        // Helper methods for SWIG
-        static void ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource);
-        static Resource *ResourceQueuePop(std::queue<Resource*> *queue);
-        static int ResourceQueueSize(std::queue<Resource*> *queue);
-
 protected:
 	int threadIndex;
+
+	virtual void StartSync();
+	virtual void StopSync();
+	virtual void PauseSync();
+	virtual void ResumeSync();
 
 	virtual Resource *ProcessInputSync(bool sleep);
 	// Output module: consume resource, return resource to be deleted
@@ -57,11 +57,6 @@ protected:
 	// expecting on the input next time. ProcessMulti is allowed to produce
 	// new resources
 	virtual int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
-
-	virtual void StartSync();
-	virtual void StopSync();
-	virtual void PauseSync();
-	virtual void ResumeSync();
 };
 
 inline int Module::getThreadIndex() {
@@ -118,22 +113,6 @@ inline int Module::ProcessMulti(std::queue<Resource*> *inputResources, std::queu
 	int result = ProcessMultiSync(inputResources, outputResources, expectingResources);
 	ObjectUnlock();
 	return result;
-}
-
-// Helper methods for SWIG, FIXME: do we need this? We convert vector<Resource*> to Perl array anyway...
-
-inline void Module::ResourceQueuePush(std::queue<Resource*> *queue, Resource *resource) {
-	queue->push(resource);
-}
-
-inline Resource *Module::ResourceQueuePop(std::queue<Resource*> *queue) {
-	Resource *resource = queue->front();
-	queue->pop();
-	return resource;
-}
-
-inline int Module::ResourceQueueSize(std::queue<Resource*> *queue) {
-	return queue->size();
 }
 
 #endif

@@ -7,158 +7,7 @@
 #include "common.h"
 #include "PerlModule.h"
 
-EXTERN_C void xs_init (pTHX);
-
 using namespace std;
-
-// based on SWIG code
-
-XS(_wrap_new_Any) {
-	int argvi = 0;
-	unsigned long addr;
-	char *name = NULL;
-	dXSARGS;
-
-	if ((items < 2) || (items > 2)) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Usage: new_Any(string, unsigned long);");
-		croak(Nullch);
-	}
-
-	if (!SvPOK(ST(0))) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid name (string)");
-		croak(Nullch);
-	}
-	STRLEN len = 0;
-	char *cstr = SvPV(ST(0), len); 
-	name = strndup(cstr, len);
-
-	if (!SvIOK(ST(1))) {
-		sv_setpvf(GvSV(PL_errgv),"%s %s\n", "RuntimeError", "Invalid address (unsigned long)");
-		croak(Nullch);
-	}
-	addr = SvIV(ST(1));
-
-// SWIG_Perl_NewPointerObj(SWIG_MAYBE_PERL_OBJECT void *ptr, swig_type_info *t, int flags) {
-	SV *sv = sv_newmortal();
-	void *ptr = const_cast< void * >((void *)addr);
-
-// SWIG_MakePtr(sv, ptr, _swigt__p_TestResource, SWIG_OWNER | SWIG_SHADOW);
-	SV *self;
-	SV *obj=newSV(0);
-	HV *hash=newHV();
-	HV *stash;
-	sv_setref_pv(obj, name, ptr);
-	stash=SvSTASH(SvRV(obj));
-	    HV *hv;
-	    GV *gv=*(GV**)hv_fetch(stash, "OWNER", 5, TRUE);
-	    if (!isGV(gv))
-		gv_init(gv, stash, "OWNER", 5, FALSE);
-	    hv=GvHVn(gv);
-	    hv_store_ent(hv, obj, newSViv(1), 0);
-	sv_magic((SV *)hash, (SV *)obj, 'P', Nullch, 0);
-	SvREFCNT_dec(obj);
-	self=newRV_noinc((SV *)hash);
-	sv_setsv(sv, self);
-	SvREFCNT_dec((SV *)self);
-	sv_bless(sv, stash);
-//
-	ST(argvi) = sv;
-//
-	argvi++ ;
-
-	free(name);
-
-	XSRETURN(argvi);
-}
-
-// based on SWIG code
-
-void *convert_ptr(SV *sv, bool disown) {
-	SV *tsv = 0;
-	/* If magical, apply more magic */
-	if (SvGMAGICAL(sv))
-		mg_get(sv);
-
-	/* Check to see if this is an object */
-	if (sv_isobject(sv)) {
-		IV tmp = 0;
-		tsv = (SV*) SvRV(sv);
-		if ((SvTYPE(tsv) == SVt_PVHV)) {
-			MAGIC *mg;
-			if (SvMAGICAL(tsv)) {
-				mg = mg_find(tsv,'P');
-				if (mg) {
-					sv = mg->mg_obj;
-					if (sv_isobject(sv)) {
-						tsv = (SV*)SvRV(sv);
-						tmp = SvIV(tsv);
-					}
-				}
-			} else {
-				return NULL;
-			}
-		} else {
-			tmp = SvIV(tsv);
-		}
-   		/* SWIG: DISOWN implementation: we need a perl guru to check this one. */
-		if (tsv && disown) {
-			SV *obj = sv;
-			HV *stash = SvSTASH(SvRV(obj));
-			GV *gv = *(GV**) hv_fetch(stash, "OWNER", 5, TRUE);
-			if (isGV(gv)) {
-				HV *hv = GvHVn(gv);
-				if (hv_exists_ent(hv, obj, 0))
-					hv_delete_ent(hv, obj, 0, 0);
-			}
-		}
-		return (void*)(unsigned long)(tmp);
-	} 
-	return NULL;
-}
-
-SV *PerlModule::CreatePerlResource(Resource *resource) {
-	SV *result;
-	const char *type = resource->getTypeStr();
-	const char *module = resource->getModuleStr();
-	// initialize resource type
-	if (initialized.find(type) == initialized.end()) {
-		char s[1024];
-		snprintf(s, sizeof(s), "use %s; package %s::%s; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", module, module, type);
-		eval_pv(s, FALSE);
-		if (SvTRUE(ERRSV)) {
-			LOG_ERROR(this, "Error initialize " << type << " (" << SvPV_nolen(ERRSV) << ")");
-			return NULL;
-		}
-		initialized.insert(type);
-	}
-
-	// create new instance of a resource (of given type): HectorXXX::YYYResource->new2(0xabc)
-	char s[1024];
-	snprintf(s, sizeof(s), "%s::%s", module, type);
-	dSP;
-	ENTER;
-        PUSHMARK(SP);
-	XPUSHs(sv_2mortal(newSVpv(s, strlen(s))));
-        XPUSHs(sv_2mortal(newSViv((unsigned long)resource)));
-        PUTBACK;
-	int count = call_method("new2", G_SCALAR|G_EVAL);
-	SPAGAIN;
-	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling new2: " << type << " (" << SvPV_nolen(ERRSV) << ")");
-		POPs;
-		result = NULL;
-	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling new2: " << type);
-		result = NULL;
-	} else {
-		result = SvREFCNT_inc(POPs);
-	}
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
-	return result;
-}
 
 PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name): Module(objects, id, threadIndex) {
 	this->name = strdup(name);
@@ -167,48 +16,28 @@ PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex,
 	if (dot)
 		*dot = '\0';
 	this->threadIndex = threadIndex;
-	my_perl = perl_alloc();
-	perl_construct(my_perl);
+	perl = new EmbeddedPerl();
 	ref = NULL;
 }
 
 PerlModule::~PerlModule() {
-	PERL_SET_CONTEXT(my_perl);
-	perl_destruct(my_perl);
-	perl_free(my_perl);
+	delete perl;
 	free(name);
 }
 
 bool PerlModule::Init(vector<pair<string, string> > *c) {
+	perl->SetContext();
 	SV *sv = &PL_sv_undef;
 	// first stage?
 	if (c) {
 		// run Perl
-		const char *embedding[] = { "", "-e", "0" };
-		perl_parse(my_perl, xs_init, 3, (char **)embedding, NULL);
-		PERL_SET_CONTEXT(my_perl);
-		perl_run(my_perl);
-
-		// init SWIG extension (_new_Any)
-		newXS("Hectorc::new_Any", _wrap_new_Any, (char*)__FILE__);
-
-		// create Hector::Object::new2()
-		eval_pv("package Hector::Object; sub new2 { my $pkg = shift; my $self = Hectorc::new_Any($pkg, shift); bless $self, $pkg if defined($self); }", FALSE);
-		if (SvTRUE(ERRSV)) {
-			LOG_ERROR(this, "Error initialize Hector::Object (new2) (" << SvPV_nolen(ERRSV) << ")");
+		if (!perl->Init())
 			return false;
-		}
-
-		// call Hector::Object->new2()
-		char s[1024];
-		snprintf(s, sizeof(s), "use Hector; $_object = Hector::Object->new2(%ld); $_object->DISOWN()", (unsigned long)dynamic_cast<Object*>(this));
-		eval_pv(s , FALSE);
-		if (SvTRUE(ERRSV)) {
-			LOG_ERROR(this, "Error initialize Hector::Object (" << SvPV_nolen(ERRSV) << ")");
-			return false;
-		}
 
 		// create Perl module
+		SV *_object = get_sv("_object", TRUE);
+		sv_setsv(_object, perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0));
+		char s[1024];
 		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
@@ -264,7 +93,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 
 Module::Type PerlModule::getType() {
 	ObjectLockWrite();
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	Module::Type result = Module::INVALID;
 	dSP;
 	ENTER;
@@ -292,8 +121,72 @@ Module::Type PerlModule::getType() {
 	return result;
 }
 
+void PerlModule::StartSync() {
+	perl->SetContext();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	call_method("Start", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+}
+
+void PerlModule::StopSync() {
+	perl->SetContext();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	call_method("Stop", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+}
+
+void PerlModule::PauseSync() {
+	perl->SetContext();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	call_method("Pause", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+}
+
+void PerlModule::ResumeSync() {
+	perl->SetContext();
+	dSP;
+	ENTER;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	call_method("Resume", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+}
+
 Resource *PerlModule::ProcessInputSync(bool sleep) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	Resource *result = NULL;
 
 	// call Process method: $module->Process($resource)
@@ -323,7 +216,12 @@ Resource *PerlModule::ProcessInputSync(bool sleep) {
 	LEAVE;
 
 	// get Resource C++ pointer & DISOWN
-	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
+	void *r = NULL;
+	if (perl->ConvertPtr(resourceSV, &r, "Resource *", 0x01) >= 0) {
+		result = reinterpret_cast<Resource*>(r);
+	} else {
+		LOG_ERROR(this, "Error calling ProcessInput");
+	}
 
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
@@ -332,12 +230,14 @@ Resource *PerlModule::ProcessInputSync(bool sleep) {
 }
 
 Resource *PerlModule::ProcessOutputSync(Resource *resource) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
-		// create new instance of a resource (of given type)
-		if (!(resourceSV = CreatePerlResource(resource)))
+		char buffer[100];
+		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
+		if (!resourceSV)
 			return NULL;
 	} else {
 		resourceSV = &PL_sv_undef;
@@ -371,7 +271,12 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	LEAVE;
 
 	// get Resource C++ pointer & DISOWN
-	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
+	void *r = NULL;
+	if (perl->ConvertPtr(resourceSV, &r, "Resource *", 0x01) >= 0) {
+		result = reinterpret_cast<Resource*>(r);
+	} else {
+		LOG_ERROR(this, "Error calling ProcessOutput");
+	}
 
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
@@ -380,12 +285,15 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 }
 
 Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	Resource *result = NULL;
 	SV *resourceSV;
 	if (resource) {
 		// create new instance of a resource (of given type)
-		if (!(resourceSV = CreatePerlResource(resource)))
+		char buffer[100];
+		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
+		if (!resourceSV)
 			return NULL;
 	} else {
 		resourceSV = &PL_sv_undef;
@@ -419,7 +327,12 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	LEAVE;
 
 	// get Resource C++ pointer & DISOWN
-	result = reinterpret_cast<Resource*>(convert_ptr(resourceSV, true));
+	void *r = NULL;
+	if (perl->ConvertPtr(resourceSV, &r, "Resource *", 0x01) >= 0) {
+		result = reinterpret_cast<Resource*>(r);
+	} else {
+		LOG_ERROR(this, "Error calling ProcessSimple");
+	}
 
 	// delete Perl resource object
 	SvREFCNT_dec(resourceSV);
@@ -428,7 +341,7 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 }
 
 int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	int processingResources = 0;
 	SV *inputResourcesSV;
 	SV *outputResourcesSV;
@@ -437,7 +350,10 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	if (inputResources) {
 		AV *a = newAV();
 		while (inputResources->size() > 0) {
-			SV *resourceSV = CreatePerlResource(inputResources->front());
+			Resource *resource = inputResources->front();
+			char buffer[100];
+			snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+			SV *resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 			if (!resourceSV)
 				return 0;
 			av_push(a, newSVsv(resourceSV));
@@ -505,10 +421,20 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	// inputResources queue was cleaned before, outputResource was not
 	SV *sv;
 	while ((sv = av_shift((AV*)SvRV(inputResourcesSV))) != &PL_sv_undef) {
-		inputResources->push(reinterpret_cast<Resource*>(convert_ptr(sv, true)));
+		void *r = NULL;
+		if (perl->ConvertPtr(sv, &r, "Resource *", 0x01) >= 0) {
+			inputResources->push(reinterpret_cast<Resource*>(r));
+		} else {
+			LOG_ERROR(this, "Error calling ProcessMulti: invalid input resource");
+		}
 	}
 	while ((sv = av_shift((AV*)SvRV(outputResourcesSV))) != &PL_sv_undef) {
-		outputResources->push(reinterpret_cast<Resource*>(convert_ptr(sv, true)));
+		void *r = NULL;
+		if (perl->ConvertPtr(sv, &r, "Resource *", 0x01) >= 0) {
+			outputResources->push(reinterpret_cast<Resource*>(r));
+		} else {
+			LOG_ERROR(this, "Error calling ProcessMulti: invalid outputresource");
+		}
 	}
 
 	// delete Perl resource object
@@ -521,7 +447,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 char *PerlModule::GetValueSync(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	int count;
 	char *result = NULL;
 	dSP;
@@ -562,7 +488,7 @@ char *PerlModule::GetValueSync(const char *name) {
 }
 
 bool PerlModule::SetValueSync(const char *name, const char *value) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	bool result = false;
 	dSP;
 	ENTER;
@@ -594,7 +520,7 @@ bool PerlModule::SetValueSync(const char *name, const char *value) {
 vector<string> *PerlModule::ListNamesSync() {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	vector<string> *result = NULL;
 	dSP;
 	ENTER;
@@ -633,7 +559,7 @@ vector<string> *PerlModule::ListNamesSync() {
 }
 
 void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -641,14 +567,17 @@ void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
         XPUSHs(sv_2mortal(newSVpv(path, 0)));
         XPUSHs(sv_2mortal(newSVpv(id, 0)));
         PUTBACK;
-	call_method("SaveCheckpoint", G_DISCARD);
+	call_method("SaveCheckpoint", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
 }
 
 void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
-	PERL_SET_CONTEXT(my_perl);
+	perl->SetContext();
 	dSP;
 	ENTER;
         PUSHMARK(SP);
@@ -656,7 +585,10 @@ void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
         XPUSHs(sv_2mortal(newSVpv(path, 0)));
         XPUSHs(sv_2mortal(newSVpv(id, 0)));
         PUTBACK;
-	call_method("RestoreCheckpoint", G_DISCARD);
+	call_method("RestoreCheckpoint", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling RestoreCheckpont");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;

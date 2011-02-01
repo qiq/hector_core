@@ -9,7 +9,6 @@
 
 #ifdef HAVE_PYTHON_H
 
-// #include <tr1/unordered_set>
 #include "EmbeddedPython.h"
 #include "Module.h"
 
@@ -19,6 +18,10 @@ public:
 	~PythonModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
 	Module::Type getType();
+	void StartSync();
+	void StopSync();
+	void PauseSync();
+	void ResumeSync();
 	Resource *ProcessInputSync(bool sleep);
 	Resource *ProcessOutputSync(Resource *resource);
 	Resource *ProcessSimpleSync(Resource *resource);
@@ -36,7 +39,6 @@ protected:
 	EmbeddedPython *python;
 	PyObject *module;
 	PyObject *obj;		// this module as an Object
-	//std::tr1::unordered_set<std::string> initialized;
 };
 
 #else

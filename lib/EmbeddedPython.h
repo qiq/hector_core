@@ -1,5 +1,7 @@
 /**
- * Dummy module, does nothing.
+ * Embedding Python, only one instance of Python interpreter is supported (as
+ * it is problematic to have more than one Python instance running in the same
+ * time due to per-process-GIL).
  */
 
 #ifndef _LIB_PROCESSING_ENGINE_EMBEDDED_PYTHON_H_
@@ -42,11 +44,12 @@ private:
 	static EmbeddedPython *python;
 	static swig_type_info *(*Python_TypeQuery)(const char *type);
 	static PyObject *(*Python_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
-	static int (*Python_ConvertPtrAndOwn)(PyObject *obj, void **ptr, swig_type_info *ty, int flags, int *own);
-
-	static log4cxx::LoggerPtr logger;
+	static int (*Python_ConvertPtr)(PyObject *obj, void **ptr, swig_type_info *ty, int flags);
+	static std::tr1::unordered_map<std::string, swig_type_info*> typeInfoCache;
 
 	PyObject *_CallMethod(PyObject *module, const char *name, PyObject *args);
+
+	static log4cxx::LoggerPtr logger;
 };
 
 inline PyGILState_STATE EmbeddedPython::Lock() {
