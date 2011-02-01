@@ -44,6 +44,22 @@ sub getType {
 	return $Hector::Module::SIMPLE;
 }
 
+sub Start {
+	my ($self) = @_;
+}
+
+sub Stop {
+	my ($self) = @_;
+}
+
+sub Pause {
+	my ($self) = @_;
+}
+
+sub Resume {
+	my ($self) = @_;
+}
+
 sub GetValue {
 	my ($self, $name) = @_;
 	if (exists $self->{$name}) {

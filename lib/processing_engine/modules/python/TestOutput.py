@@ -33,6 +33,18 @@ class TestOutput:
     def getType(self):
 	return Hector.Module.OUTPUT
 
+    def Start(self):
+	pass
+
+    def Stop(self):
+	pass
+
+    def Pause(self):
+	pass
+
+    def Resume(self):
+	pass
+
     def GetValue(self, name):
 	if name in self.values:
 	    return str(self.values[name])
