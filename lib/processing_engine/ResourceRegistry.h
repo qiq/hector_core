@@ -9,28 +9,58 @@
 
 #include <limits>
 #include <string>
+#include <utility>
+#include <vector>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 #include "PlainLock.h"
+#include "PerlInterpreters.h"
 
-class ResourceInfo;
 class Resource;
+class Config;
 
 class ResourceRegistry {
 public:
-	ResourceRegistry() {};
+	ResourceRegistry();
 	~ResourceRegistry();
 
-	// methods common to all Resources
+	// load resource libraries (lib, type)
+	bool Load(const char *id, Config *config);
+
+	// translate resource name to resource id
 	int NameToId(const char *name);
-	Resource *AcquireResource(int id);
+
+	// obtain resource of given type
+	Resource *AcquireResource(int typeId);
+
+	// release resource
 	void ReleaseResource(Resource *resource);
 
+	// get attribute info of a resource
+	ResourceAttrInfo *GetAttrInfo(int typeId, const char *name);
+
+	// returns next free id
+	static int NextResourceId();
+
 protected:
-	int LoadResourceLibrary(const char *name, int id);
-	PlainLock translateLock;
+	struct ResourceInfo {
+		int typeId;
+		std::string typeStr;
+		Resource *(*create)();
+		bool perl;
+		bool python;
+		std::vector<ResourceAttrInfo*> *attrInfo;
+		std::tr1::unordered_map<std::string, ResourceAttrInfo*> attrMap;
+		std::vector<Resource*> available;
+	};
+
+	static PlainLock idLock;
+	static int nextId;
+	PlainLock infoLock;
 	std::tr1::unordered_map<std::string, int> name2id;
 	std::tr1::unordered_map<int, ResourceInfo*> id2info;
+
+	PerlInterpreters *perl;
 
 	static log4cxx::LoggerPtr logger;
 };

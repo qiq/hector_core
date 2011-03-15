@@ -49,7 +49,7 @@ sub Init {
 	return 1;
 }
 
-sub getType {
+sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::SIMPLE;
 }
@@ -113,13 +113,13 @@ sub RestoreCheckpoint {
 sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
-	if (not defined $resource or $resource->getTypeStr() ne 'TestResource') {
-		$self->{'_object'}->log_error("Invalid resource: ".$resource->getTypeStr());
+	if (not defined $resource or $resource->GetTypeString() ne 'TestResource') {
+		$self->{'_object'}->log_error("Invalid resource: ".$resource->GetTypeString());
 		return $resource;
 	}
-	$self->{'_object'}->log_info($resource->toStringShort()." Processing (".$resource->getStr().")");
-	$resource->setStatus($resource->getStatus() == 0 ? 1 : 0) if ($self->{'flipStatus'});
-	$resource->setStatus($self->{'setStatus'}) if ($self->{'setStatus'} >= 0);
+	$self->{'_object'}->log_info($resource->ToStringShort()." Processing (".$resource->GetStr().")");
+	$resource->SetStatus($resource->GetStatus() == 0 ? 1 : 0) if ($self->{'flipStatus'});
+	$resource->SetStatus($self->{'setStatus'}) if ($self->{'setStatus'} >= 0);
 	$self->{'items'}++;
 
 	return $resource;

@@ -33,7 +33,7 @@ class TestInput:
 	    pass
 	return False
 
-    def getType(self):
+    def GetType(self):
 	return Hector.Module.INPUT
 
     def Start(self):
@@ -77,10 +77,10 @@ class TestInput:
 	if self.values['maxItems'] > 0 and self.values['items'] >= self.values['maxItems']:
 		return None
 	resource = Hector.TestResource()
-	resource.setId(self.threadIndex*10000+self.values['items'])
+	resource.SetId(self.threadIndex*10000+self.values['items'])
 	s = "" if self.values['idPrefix'] is None else self.values['idPrefix']
 	s += str(self.threadIndex)+"-"+str(self.values['items'])
-	resource.setStr(s)
-	self._object.log_info(resource.toStringShort()+" Loading resource ("+resource.getStr()+")")
+	resource.SetStr(s)
+	self._object.log_info(resource.ToStringShort()+" Loading resource ("+resource.GetStr()+")")
 	self.values['items'] += 1
 	return resource

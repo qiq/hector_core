@@ -28,16 +28,16 @@ public:
 	Save(ObjectRegistry *objects, const char *id, int threadIndex);
 	~Save();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	Resource *ProcessOutputSync(Resource *resource);
 
 private:
 	int items;		// ObjectLock
 	char *filename;		// initOnly
 
-	char *getItems(const char *name);
-	char *getFilename(const char *name);
-	void setFilename(const char *name, const char *value);
+	char *GetItems(const char *name);
+	char *GetFilename(const char *name);
+	void SetFilename(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
 	char *GetValueSync(const char *name);
@@ -49,7 +49,7 @@ private:
 	google::protobuf::io::CodedOutputStream *stream;
 };
 
-inline Module::Type Save::getType() {
+inline Module::Type Save::GetType() {
 	return OUTPUT;
 }
 

@@ -30,7 +30,7 @@ class Dump:
 	    pass
 	return False
 
-    def getType(self):
+    def GetType(self):
 	return Hector.Module.SIMPLE
 
     def Start(self):
@@ -71,5 +71,5 @@ class Dump:
 	self._object.log_info("RestoreCheckpoint(path, id)");
 
     def ProcessSimple(self, resource):
-	self._object.log_debug(resource.toString(Hector.Object.INFO))
+	self._object.log_debug(resource.ToString(Hector.Object.INFO))
 	return resource

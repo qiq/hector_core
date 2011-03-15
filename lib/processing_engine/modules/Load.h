@@ -30,7 +30,7 @@ public:
 	Load(ObjectRegistry *objects, const char *id, int threadIndex);
 	~Load();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	Resource *ProcessInputSync(bool sleep);
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);
@@ -43,11 +43,11 @@ private:
 	int maxItems;		// ObjectLock
 	char *filename;		// ObjectLock
 
-	char *getItems(const char *name);
-	char *getMaxItems(const char *name);
-	void setMaxItems(const char *name, const char *value);
-	char *getFilename(const char *name);
-	void setFilename(const char *name, const char *value);
+	char *GetItems(const char *name);
+	char *GetMaxItems(const char *name);
+	void SetMaxItems(const char *name, const char *value);
+	char *GetFilename(const char *name);
+	void SetFilename(const char *name, const char *value);
 
 	ObjectValues<Load> *values;
 	char *GetValueSync(const char *name);
@@ -63,7 +63,7 @@ private:
 	CondLock fileCond;	// for pause when source file is exhausted
 };
 
-inline Module::Type Load::getType() {
+inline Module::Type Load::GetType() {
 	return INPUT;
 }
 

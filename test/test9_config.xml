@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test9: multiple module: one reader(1), one multi intermediate(1), one writer(1)
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<resources>
+			<Resource id="R_test" lib="TestResource.la"/>
+		</resources>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_input" lib="TestInput.la">
+						<param name="maxItems" value="100"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_multi"/>
+				</output>
+			</Processor>
+			<Processor id="P_multi">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_dump1" lib="Dump.la"/>
+					<Module id="M_multi1" lib="TestMulti.la">
+						<param name="timeTick" value="100"/>
+					</Module>
+					<Module id="m_dump2" lib="Dump.la"/>
+					<Module id="M_multi2" lib="TestMulti.la">
+						<param name="timeTick" value="100"/>
+					</Module>
+					<Module id="M_dump3" lib="Dump.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+				<output>
+					<nextProcessor ref="P_output"/>
+				</output>
+			</Processor>
+			<Processor id="P_output">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_dump4" lib="Dump.la"/>
+					<Module id="M_output" lib="TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

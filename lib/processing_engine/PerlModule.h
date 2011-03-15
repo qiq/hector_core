@@ -18,7 +18,7 @@ public:
 	PerlModule(ObjectRegistry *objects, const char *id, int threadIndex, const char *name);
 	~PerlModule();
 	bool Init(std::vector<std::pair<std::string, std::string> > *args);
-	Module::Type getType();
+	Module::Type GetType();
 	void StartSync();
 	void StopSync();
 	void PauseSync();

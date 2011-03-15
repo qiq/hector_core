@@ -26,8 +26,8 @@ public:
 	Module(ObjectRegistry *objects, const char *id, int threadIndex): Object(objects, id, threadIndex), threadIndex(threadIndex) {};
 	virtual ~Module() {};
 	virtual bool Init(std::vector<std::pair<std::string, std::string> > *args);
-	virtual Module::Type getType();
-	int getThreadIndex();
+	virtual Module::Type GetType();
+	int GetThreadIndex();
 	void Start();
 	void Stop();
 	void Pause();
@@ -59,7 +59,7 @@ protected:
 	virtual int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 };
 
-inline int Module::getThreadIndex() {
+inline int Module::GetThreadIndex() {
 	return threadIndex;
 }
 

@@ -21,7 +21,7 @@ public:
 	Dump(ObjectRegistry *objects, const char *id, int threadIndex);
 	~Dump();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	Resource *ProcessSimpleSync(Resource *resource);
 
 private:
@@ -31,7 +31,7 @@ private:
 	std::vector<std::string> *ListNamesSync();
 };
 
-inline 	Module::Type Dump::getType() {
+inline 	Module::Type Dump::GetType() {
 	return SIMPLE;
 }
 

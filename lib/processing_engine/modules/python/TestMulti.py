@@ -39,7 +39,7 @@ class TestMulti:
 	except:
 	    return False
 
-    def getType(self):
+    def GetType(self):
 	return Hector.Module.MULTI
 
     def Start(self):
@@ -89,7 +89,7 @@ class TestMulti:
 
 	while len(inputResources) > 0 and len(self.resources) <= TestMulti.MAX_RESOURCES:
 	    resource = inputResources.pop(0)
-	    if resource.getTypeStr() == "TestResource":
+	    if resource.GetTypeString() == "TestResource":
 		self.resources.append(resource)
 	    else:
 		outputResources.append(resource)
@@ -101,6 +101,6 @@ class TestMulti:
 
 	resource = self.resources.pop(0)
 	outputResources.append(resource)
-	self._object.log_info(resource.toStringShort()+" Processed ("+resource.getStr()+")")
+	self._object.log_info(resource.ToStringShort()+" Processed ("+resource.GetStr()+")")
 	self.values['items'] += 1
 	return len(self.resources), TestMulti.MAX_RESOURCES-len(self.resources)

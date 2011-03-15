@@ -24,9 +24,9 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	stream = NULL;
 
 	values = new ObjectValues<Save>(this);
-	values->AddGetter("items", &Save::getItems);
-	values->AddGetter("filename", &Save::getFilename);
-	values->AddSetter("filename", &Save::setFilename, true);
+	values->AddGetter("items", &Save::GetItems);
+	values->AddGetter("filename", &Save::GetFilename);
+	values->AddSetter("filename", &Save::SetFilename, true);
 }
 
 Save::~Save() {
@@ -38,15 +38,15 @@ Save::~Save() {
 	delete values;
 }
 
-char *Save::getItems(const char *name) {
+char *Save::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *Save::getFilename(const char *name) {
+char *Save::GetFilename(const char *name) {
 	return filename ? strdup(filename) : NULL;
 }
 
-void Save::setFilename(const char *name, const char *value) {
+void Save::SetFilename(const char *name, const char *value) {
 	free(filename);
 	filename = strdup(value);
 }

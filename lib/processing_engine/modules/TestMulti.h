@@ -28,7 +28,7 @@ public:
 	TestMulti(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestMulti();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 private:
@@ -36,11 +36,11 @@ private:
 	char *foo;		// ObjectLock
 	int timeTick;		// ObjectLock
 
-	char *getItems(const char *name);
-	char *getFoo(const char *name);
-	void setFoo(const char *name, const char *value);
-	char *getTimeTick(const char *name);
-	void setTimeTick(const char *name, const char *value);
+	char *GetItems(const char *name);
+	char *GetFoo(const char *name);
+	void SetFoo(const char *name, const char *value);
+	char *GetTimeTick(const char *name);
+	void SetTimeTick(const char *name, const char *value);
 
 	ObjectValues<TestMulti> *values;
 	char *GetValueSync(const char *name);
@@ -50,7 +50,7 @@ private:
 	std::queue<TestResource*> resources;
 };
 
-inline Module::Type TestMulti::getType() {
+inline Module::Type TestMulti::GetType() {
 	return MULTI;
 }
 

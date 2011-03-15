@@ -19,13 +19,13 @@ TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): 
 	timeTick = DEFAULT_TIMETICK;
 
 	values = new ObjectValues<TestMulti>(this);
-	values->AddGetter("items", &TestMulti::getItems);
-	values->AddGetter("foo", &TestMulti::getFoo);
-	values->AddSetter("foo", &TestMulti::setFoo);
-	values->AddGetter("alias", &TestMulti::getFoo);
-	values->AddSetter("alias", &TestMulti::setFoo);
-	values->AddGetter("timeTick", &TestMulti::getTimeTick);
-	values->AddSetter("timeTick", &TestMulti::setTimeTick);
+	values->AddGetter("items", &TestMulti::GetItems);
+	values->AddGetter("foo", &TestMulti::GetFoo);
+	values->AddSetter("foo", &TestMulti::SetFoo);
+	values->AddGetter("alias", &TestMulti::GetFoo);
+	values->AddSetter("alias", &TestMulti::SetFoo);
+	values->AddGetter("timeTick", &TestMulti::GetTimeTick);
+	values->AddSetter("timeTick", &TestMulti::SetTimeTick);
 }
 
 TestMulti::~TestMulti() {
@@ -33,24 +33,24 @@ TestMulti::~TestMulti() {
 	free(foo);
 }
 
-char *TestMulti::getItems(const char *name) {
+char *TestMulti::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *TestMulti::getFoo(const char *name) {
+char *TestMulti::GetFoo(const char *name) {
 	return foo ? strdup(foo) : NULL;
 }
 
-void TestMulti::setFoo(const char *name, const char *value) {
+void TestMulti::SetFoo(const char *name, const char *value) {
 	free(foo);
 	foo = strdup(value);
 }
 
-char *TestMulti::getTimeTick(const char *name) {
+char *TestMulti::GetTimeTick(const char *name) {
 	return int2str(timeTick);
 }
 
-void TestMulti::setTimeTick(const char *name, const char *value) {
+void TestMulti::SetTimeTick(const char *name, const char *value) {
 	timeTick = str2int(value);
 }
 
@@ -66,7 +66,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
 	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
-		if (r->getTypeId() == TestResource::typeId)
+		if (TestResource::IsTestResource(r))
 			resources.push(static_cast<TestResource*>(r));
 		inputResources->pop();
 	}
@@ -90,7 +90,7 @@ int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource
 	TestResource *tr = resources.front();
 	resources.pop();
 	outputResources->push(tr);
-	LOG_INFO_R(this, tr, "Processed TestResource (" << tr->getStr() << ")");
+	LOG_INFO_R(this, tr, "Processed TestResource (" << tr->GetStr() << ")");
 	++items;
 
 	if (expectResources)

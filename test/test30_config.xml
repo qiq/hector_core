@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test20: test of loading/saving module, using both TestResource and TestProtobufResource
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<resources>
+			<Resource id="R_test" lib="TestResource.la"/>
+			<Resource id="R_pbtest" lib="TestProtobufResource.la"/>
+		</resources>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_load">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load" lib="Load.la">
+						<param name="filename" value="$1"/>
+					</Module>
+					<Module id="M_dump" type="perl" lib="Dump.pm"/>
+				</modules>
+				<output>
+					<nextProcessor ref="P_save"/>
+				</output>
+			</Processor>
+			<Processor id="P_save">
+				<threads>1</threads>
+				<modules>
+<Module id="M_dumpX" lib="Dump.la"/>
+					<Module id="M_save" lib="Save.la">
+						<param name="filename" value="$2"/>
+					</Module>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

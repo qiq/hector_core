@@ -9,7 +9,7 @@ using namespace std;
 log4cxx::LoggerPtr ObjectRegistry::logger(log4cxx::Logger::getLogger("lib.ObjectRegistry"));
 
 bool ObjectRegistry::RegisterObject(Object *obj) {
-	const char *id = obj->getId();
+	const char *id = obj->GetId();
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		LOG4CXX_ERROR(logger, "Object " << id << " already defined");

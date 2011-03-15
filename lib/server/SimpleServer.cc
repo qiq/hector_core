@@ -32,7 +32,7 @@ SimpleServer::~SimpleServer() {
 }
 
 // thread safe
-bool SimpleServer::getRunning() {
+bool SimpleServer::GetRunning() {
 	bool result;
 	main_lock.Lock();
 	result = main_running;
@@ -41,7 +41,7 @@ bool SimpleServer::getRunning() {
 }
 
 // thread safe
-void SimpleServer::setRunning(bool running) {
+void SimpleServer::SetRunning(bool running) {
 	main_lock.Lock();
 	main_running = running;
 	if (!running) {
@@ -64,8 +64,8 @@ void *http_service_thread(void *ptr) {
 
 void SimpleServer::ServiceThread() {
 	struct timeval timeout = { 0, 0 };
-	while (getRunning()) {
-		FileDescriptor *fd = queue->getItem(&timeout);
+	while (GetRunning()) {
+		FileDescriptor *fd = queue->GetItem(&timeout);
 		if (!fd)
 			break; // cancelled
 		Request(fd->fd);
@@ -113,13 +113,13 @@ void SimpleServer::MainThread() {
 	}
 
 	struct timeval timeout = { 0, 0 };
-	while (getRunning()) {
+	while (GetRunning()) {
 		sockaddr_in client_addr;
 		socklen_t client_addrlen = sizeof(client_addr);
 
 		int fd;		// must declare it now because of cleanup_push/cleanup_pop
 		fd = accept(main_socket, (sockaddr*)&client_addr, &client_addrlen);
-		if (!getRunning())
+		if (!GetRunning())
 			break;
 		if (fd == -1) {
 			LOG4CXX_ERROR(logger, "Cannot accept connection: " << strerror(errno));
@@ -142,7 +142,7 @@ void SimpleServer::MainThread() {
 		// put request into the queue, it will be serviced as soon as
 		// there is a free thread available
 		FileDescriptor *pfd = new FileDescriptor(fd);
-		if (!queue->putItem(pfd, &timeout)) {
+		if (!queue->PutItem(pfd, &timeout)) {
 			delete pfd;
 			break;	// canceled
 		}

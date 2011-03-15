@@ -42,10 +42,10 @@ public:
 	SyncQueue<Resource> *CreateOutputQueue();
 	// used by Processor::Connect and by Processor when resource is
 	// detected to be deleted. This method is thread-safe.
-	SyncQueue<Resource> *getOutputQueue();
+	SyncQueue<Resource> *GetOutputQueue();
 	// used to detect, whether Processor's queue is PE's input queue. This
 	// method is thread-safe.
-	SyncQueue<Resource> *getInputQueue();
+	SyncQueue<Resource> *GetInputQueue();
 	// Update number of resources processed in a PE. This method is
 	// thread-safe.
 	void UpdateResourceCount(int n);
@@ -67,11 +67,11 @@ protected:
 	bool propPause;		// ObjectLock
 	int resourceCount;	// ObjectLock
 
-	char *getRun(const char *name);
-	void setRun(const char *name, const char *value);
-	char *getPause(const char *name);
-	void setPause(const char *name, const char *value);
-	char *getResourceCount(const char *name);
+	char *GetRun(const char *name);
+	void SetRun(const char *name, const char *value);
+	char *GetPause(const char *name);
+	void SetPause(const char *name, const char *value);
+	char *GetResourceCount(const char *name);
 
 	void StartSync();
 	void StopSync();
@@ -121,11 +121,11 @@ inline SyncQueue<Resource> *ProcessingEngine::CreateOutputQueue() {
         return outputQueue;
 }
 
-inline SyncQueue<Resource> *ProcessingEngine::getOutputQueue() {
+inline SyncQueue<Resource> *ProcessingEngine::GetOutputQueue() {
 	return outputQueue;
 }
 
-inline SyncQueue<Resource> *ProcessingEngine::getInputQueue() {
+inline SyncQueue<Resource> *ProcessingEngine::GetInputQueue() {
 	return inputQueue;
 }
 

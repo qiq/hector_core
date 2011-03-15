@@ -5,9 +5,6 @@
 
 using namespace std;
 
-vector<ResourceAttrInfoT<TestProtobufResource> > TestProtobufResource::info;
-tr1::unordered_map<string, ResourceAttrInfoT<TestProtobufResource>*> TestProtobufResource::infoMap;
-bool TestProtobufResource::init = TestProtobufResource::Init();	// static init
 log4cxx::LoggerPtr TestProtobufResource::logger(log4cxx::Logger::getLogger("resources.TestProtobufResource"));
 
 ProtobufResource *TestProtobufResource::Clone() {
@@ -19,28 +16,27 @@ void TestProtobufResource::Clear() {
 	r.Clear();
 }
 
-string TestProtobufResource::toString(Object::LogLevel logLevel) {
+string TestProtobufResource::ToString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", getId(), isSetFlag(DELETED) ? -1 : getStatus(), getStr().c_str());
+	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", GetId(), IsSetFlag(DELETED) ? -1 : GetStatus(), GetStr().c_str());
 	return buf;
 }
 
-bool TestProtobufResource::Init() {
-	ResourceAttrInfoT<TestProtobufResource> ai;
+vector<ResourceAttrInfo*> *TestProtobufResource::GetAttrInfoList() {
+	vector<ResourceAttrInfo*> *result = new vector<ResourceAttrInfo*>();
+	ResourceAttrInfoT<TestProtobufResource> *ai;
 
-	ai.InitInt("id", &TestProtobufResource::getId, &TestProtobufResource::setId);
-	info.push_back(ai);
-	ai.InitInt("status", &TestProtobufResource::getStatus, &TestProtobufResource::setStatus);
-	info.push_back(ai);
-	ai.InitString("str", &TestProtobufResource::getStr, &TestProtobufResource::setStr);
-	info.push_back(ai);
+	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
+	ai->InitInt("id", &TestProtobufResource::GetId, &TestProtobufResource::SetId);
+	result->push_back(ai);
 
-	for (vector<ResourceAttrInfoT<TestProtobufResource> >::iterator iter = info.begin(); iter != info.end(); ++iter)
-		infoMap[iter->getName()] = &(*iter);
-	return true;
-}
+	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
+	ai->InitInt("status", &TestProtobufResource::GetStatus, &TestProtobufResource::SetStatus);
+	result->push_back(ai);
 
-ResourceAttrInfo *TestProtobufResource::GetAttrInfo(const char *name) {
-	tr1::unordered_map<std::string, ResourceAttrInfoT<TestProtobufResource>*>::iterator iter = infoMap.find(name);
-	return iter->second;
+	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
+	ai->InitString("str", &TestProtobufResource::GetStr, &TestProtobufResource::SetStr);
+	result->push_back(ai);
+
+	return result;
 }

@@ -48,7 +48,7 @@ sub Init {
 	return 1;
 }
 
-sub getType {
+sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::MULTI;
 }
@@ -117,7 +117,7 @@ sub ProcessMulti() {
 
 	while (@{$inputResources} > 0 and @{$self->{'_resources'}} <= $MAX_RESOURCES) {
 		my $resource = shift(@{$inputResources});
-		if ($resource->getTypeStr() eq 'TestResource') {
+		if ($resource->GetTypeString() eq 'TestResource') {
 			push(@{$self->{'_resources'}}, $resource);
 		} else {
 			push(@{$outputResources}, $resource);
@@ -130,7 +130,7 @@ sub ProcessMulti() {
 
 	my $resource = shift(@{$self->{'_resources'}});
 	push(@{$outputResources}, $resource);
-	$self->{'_object'}->log_info($resource->toStringShort()." Processed (".$resource->getStr().")");
+	$self->{'_object'}->log_info($resource->ToStringShort()." Processed (".$resource->GetStr().")");
 	$self->{'items'}++;
 
 	return (scalar @{$self->{'_resources'}}, $MAX_RESOURCES-@{$self->{'_resources'}});

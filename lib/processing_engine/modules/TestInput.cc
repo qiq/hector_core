@@ -17,13 +17,13 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	resourceType = NULL;
 
 	values = new ObjectValues<TestInput>(this);
-	values->AddGetter("items", &TestInput::getItems);
-	values->AddGetter("maxItems", &TestInput::getMaxItems);
-	values->AddSetter("maxItems", &TestInput::setMaxItems, true);
-	values->AddGetter("idPrefix", &TestInput::getIdPrefix);
-	values->AddSetter("idPrefix", &TestInput::setIdPrefix);
-	values->AddGetter("resourceType", &TestInput::getResourceType);
-	values->AddSetter("resourceType", &TestInput::setResourceType, true);
+	values->AddGetter("items", &TestInput::GetItems);
+	values->AddGetter("maxItems", &TestInput::GetMaxItems);
+	values->AddSetter("maxItems", &TestInput::SetMaxItems, true);
+	values->AddGetter("idPrefix", &TestInput::GetIdPrefix);
+	values->AddSetter("idPrefix", &TestInput::SetIdPrefix);
+	values->AddGetter("resourceType", &TestInput::GetResourceType);
+	values->AddSetter("resourceType", &TestInput::SetResourceType, true);
 }
 
 TestInput::~TestInput() {
@@ -33,32 +33,32 @@ TestInput::~TestInput() {
 	delete values;
 }
 
-char *TestInput::getItems(const char *name) {
+char *TestInput::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *TestInput::getMaxItems(const char *name) {
+char *TestInput::GetMaxItems(const char *name) {
 	return int2str(maxItems);
 }
 
-void TestInput::setMaxItems(const char *name, const char *value) {
+void TestInput::SetMaxItems(const char *name, const char *value) {
 	maxItems = str2int(value);
 }
 
-char *TestInput::getIdPrefix(const char *name) {
+char *TestInput::GetIdPrefix(const char *name) {
 	return idPrefix ? strdup(idPrefix) : NULL;
 }
 
-void TestInput::setIdPrefix(const char *name, const char *value) {
+void TestInput::SetIdPrefix(const char *name, const char *value) {
 	free(idPrefix);
 	idPrefix = strdup(value);
 }
 
-char *TestInput::getResourceType(const char *name) {
+char *TestInput::GetResourceType(const char *name) {
 	return resourceType ? strdup(resourceType) : NULL;
 }
 
-void TestInput::setResourceType(const char *name, const char *value) {
+void TestInput::SetResourceType(const char *name, const char *value) {
 	free(resourceType);
 	resourceType = strdup(value);
 }
@@ -74,9 +74,9 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 		resourceType = strdup("TestResource");
 	if (maxItems)
 		LOG_INFO(this, "Going to produce " << maxItems << " resources of type " << resourceType << ".");
-	typeId = Resource::registry.NameToId(resourceType);
+	typeId = Resource::registry->NameToId(resourceType);
 	if (typeId < 0) {
-		LOG_ERROR(this, "Cannot load " << resourceType << " library");
+		LOG_ERROR(this, "Resource " << resourceType << " not configured.");
 		return false;
 	}
 	return true;
@@ -85,14 +85,14 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 Resource *TestInput::ProcessInputSync(bool sleep) {
 	if (maxItems && items >= maxItems)
 		return NULL;
-	Resource *r = Resource::registry.AcquireResource(typeId);
-	r->setId(getThreadIndex()*10000+items);
-	if (typeId == TestResource::typeId) {
+	Resource *r = Resource::registry->AcquireResource(typeId);
+	r->SetId(GetThreadIndex()*10000+items);
+	if (TestResource::IsTestResource(r)) {
 		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
-		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", getThreadIndex(), items);
-		tr->setStr(s);
-		LOG_INFO_R(this, tr, "Creating TestResource (" << tr->getStr() << ")");
+		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", GetThreadIndex(), items);
+		tr->SetStr(s);
+		LOG_INFO_R(this, tr, "Creating TestResource (" << tr->GetStr() << ")");
 	} else {
 		LOG_INFO_R(this, r, "Creating resource");
 	}

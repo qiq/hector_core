@@ -30,7 +30,7 @@ class TestOutput:
 	except:
 	    return False
 
-    def getType(self):
+    def GetType(self):
 	return Hector.Module.OUTPUT
 
     def Start(self):
@@ -71,9 +71,9 @@ class TestOutput:
 	self._object.log_info("RestoreCheckpoint(path, id)");
 
     def ProcessOutput(self, resource):
-	if (resource is None or resource.getTypeStr() != "TestResource"):
-		self._object.log_error("Invalid resource: "+resource.getTypeStr());
+	if (resource is None or resource.GetTypeString() != "TestResource"):
+		self._object.log_error("Invalid resource: "+resource.GetTypeString());
 	else:
-		self._object.log_info(resource.toStringShort()+" Resource arrived ("+resource.getStr()+")");
+		self._object.log_info(resource.ToStringShort()+" Resource arrived ("+resource.GetStr()+")");
 		self.values['items'] += 1
 	return resource

@@ -54,7 +54,7 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 			if (iter2 != initOnly.end()) {
 				(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
 			} else if (!ignoreUnknown) {
-				LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+				LOG4CXX_ERROR(logger, module->GetId() << ": Invalid value name: " << iter->first);
 				return false;
 			}
 		}
@@ -74,7 +74,7 @@ bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignore
 			(module->*iter->second)(name, value);
 			return true;
 		} else if (!ignoreUnknown) {
-			LOG4CXX_ERROR(logger, module->getId() << ": Invalid value name: " << iter->first);
+			LOG4CXX_ERROR(logger, module->GetId() << ": Invalid value name: " << iter->first);
 			return false;
 		}
 	}

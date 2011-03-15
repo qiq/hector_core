@@ -17,18 +17,18 @@ public:
 	OutputFilter();
 	~OutputFilter();
 
-	int getFilter();
-	bool isEmptyFilter();
-	void setFilter(int filter);
-	int getPriority();
-	void setPriority(int priority);
-	const char *getProcessor();
-	void setProcessor(const char *ref);
-	bool getCopy();
-	void setCopy(bool copy);
-	SyncQueue<Resource> *getQueue();
-	void setQueue(SyncQueue<Resource> *queue);
-	bool processResource(Resource *r, struct timeval *timeout);
+	int GetFilter();
+	bool IsEmptyFilter();
+	void SetFilter(int filter);
+	int GetPriority();
+	void SetPriority(int priority);
+	const char *GetProcessor();
+	void SetProcessor(const char *ref);
+	bool GetCopy();
+	void SetCopy(bool copy);
+	SyncQueue<Resource> *GetQueue();
+	void SetQueue(SyncQueue<Resource> *queue);
+	bool ProcessResource(Resource *r, struct timeval *timeout);
 };
 
 inline OutputFilter::OutputFilter() {
@@ -44,53 +44,53 @@ inline OutputFilter::~OutputFilter() {
 	free(processor);
 }
 
-inline int OutputFilter::getFilter() {
+inline int OutputFilter::GetFilter() {
 	return filter;
 }
 
-inline bool OutputFilter::isEmptyFilter() {
+inline bool OutputFilter::IsEmptyFilter() {
 	return emptyFilter;
 }
 
-inline void OutputFilter::setFilter(int filter) {
+inline void OutputFilter::SetFilter(int filter) {
 	this->filter = filter;
 	emptyFilter = false;
 }
 
-inline int OutputFilter::getPriority() {
+inline int OutputFilter::GetPriority() {
 	return priority;
 }
 
-inline void OutputFilter::setPriority(int priority) {
+inline void OutputFilter::SetPriority(int priority) {
 	this->priority = priority;
 }
 
-inline const char *OutputFilter::getProcessor() {
+inline const char *OutputFilter::GetProcessor() {
 	return processor;
 }
 
-inline void OutputFilter::setProcessor(const char *processor) {
+inline void OutputFilter::SetProcessor(const char *processor) {
 	this->processor = processor ? strdup(processor) : NULL;
 }
 
-inline bool OutputFilter::getCopy() {
+inline bool OutputFilter::GetCopy() {
 	return copy;
 }
 
-inline void OutputFilter::setCopy(bool copy) {
+inline void OutputFilter::SetCopy(bool copy) {
 	this->copy = copy;
 }
 
-inline SyncQueue<Resource> *OutputFilter::getQueue() {
+inline SyncQueue<Resource> *OutputFilter::GetQueue() {
 	return queue;
 }
 
-inline void OutputFilter::setQueue(SyncQueue<Resource> *queue) {
+inline void OutputFilter::SetQueue(SyncQueue<Resource> *queue) {
 	this->queue = queue;
 }
 
-inline bool OutputFilter::processResource(Resource *r, struct timeval *timeout) {
-	return queue->putItem(r, timeout, priority);
+inline bool OutputFilter::ProcessResource(Resource *r, struct timeval *timeout) {
+	return queue->PutItem(r, timeout, priority);
 }
 
 #endif

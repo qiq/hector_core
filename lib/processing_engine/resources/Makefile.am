@@ -1,3 +1,5 @@
+SUBDIRS = perl python
+
 AM_CXXFLAGS = @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine
 AM_LDFLAGS = @LOG4CXX_LIBS@
 AM_LIBTOOLFLAGS = --tag=disable-static
@@ -40,25 +42,3 @@ TestProtobufResource_la_LIBADD = libTestProtobufResource.la
 EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto
 CLEANFILES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 ALIASES += TestProtobufResource.la
-
-# In order to enable Resources::AcquireResource(id) to work, we need to know
-# mapping id -> library_name. This is achieved using symlink id.la ->
-# resource.la, so the same library is opened.
-
-all-local: $(ALIASES)
-	for i in $(ALIASES); do \
-		h=`echo $$i|sed -e 's/\.la/\.h/'`; \
-		id=`grep "int typeId" $(top_srcdir)/lib/processing_engine/resources/$$h|sed -e 's/.*int typeId = \([0-9]\+\).*/\1/'`; \
-		ln -fs $$i $${id}.la; \
-	done
-
-clean-local:
-	rm -f {0,1,2,3,4,5,6,7,8,9}*.la
-
-install-exec-local:
-	$(INSTALL) -d $(DESTDIR)$(resourcesdir); \
-	for i in $(ALIASES); do \
-		h=`echo $$i|sed -e 's/\.la/\.h/'`; \
-		id=`grep "int typeId" $(top_srcdir)/lib/processing_engine/resources/$$h|sed -e 's/.*int typeId = \([0-9]\+\).*/\1/'`; \
-		ln -fs $$i $(DESTDIR)$(resourcesdir)/$${id}.la; \
-	done

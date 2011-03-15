@@ -16,15 +16,15 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	setStatus = -1;
 
 	values = new ObjectValues<TestSimple>(this);
-	values->AddGetter("items", &TestSimple::getItems);
-	values->AddGetter("foo", &TestSimple::getFoo);
-	values->AddSetter("foo", &TestSimple::setFoo);
-	values->AddGetter("alias", &TestSimple::getFoo);
-	values->AddSetter("alias", &TestSimple::setFoo);
-	values->AddGetter("flipStatus", &TestSimple::getFlipStatus);
-	values->AddSetter("flipStatus", &TestSimple::setFlipStatus);
-	values->AddGetter("setStatus", &TestSimple::getSetStatus);
-	values->AddSetter("setStatus", &TestSimple::setSetStatus);
+	values->AddGetter("items", &TestSimple::GetItems);
+	values->AddGetter("foo", &TestSimple::GetFoo);
+	values->AddSetter("foo", &TestSimple::SetFoo);
+	values->AddGetter("alias", &TestSimple::GetFoo);
+	values->AddSetter("alias", &TestSimple::SetFoo);
+	values->AddGetter("flipStatus", &TestSimple::GetFlipStatus);
+	values->AddSetter("flipStatus", &TestSimple::SetFlipStatus);
+	values->AddGetter("setStatus", &TestSimple::GetSetStatus);
+	values->AddSetter("setStatus", &TestSimple::SetSetStatus);
 }
 
 TestSimple::~TestSimple() {
@@ -32,24 +32,24 @@ TestSimple::~TestSimple() {
 	free(foo);
 }
 
-char *TestSimple::getItems(const char *name) {
+char *TestSimple::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *TestSimple::getFoo(const char *name) {
+char *TestSimple::GetFoo(const char *name) {
 	return foo ? strdup(foo) : NULL;
 }
 
-void TestSimple::setFoo(const char *name, const char *value) {
+void TestSimple::SetFoo(const char *name, const char *value) {
 	free(foo);
 	foo = strdup(value);
 }
 
-char *TestSimple::getFlipStatus(const char *name) {
+char *TestSimple::GetFlipStatus(const char *name) {
 	return bool2str(flipStatus);
 }
 
-void TestSimple::setFlipStatus(const char *name, const char *value) {
+void TestSimple::SetFlipStatus(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		flipStatus = false;
@@ -62,11 +62,11 @@ void TestSimple::setFlipStatus(const char *name, const char *value) {
 	}
 }
 
-char *TestSimple::getSetStatus(const char *name) {
+char *TestSimple::GetSetStatus(const char *name) {
 	return int2str(setStatus);
 }
 
-void TestSimple::setSetStatus(const char *name, const char *value) {
+void TestSimple::SetSetStatus(const char *name, const char *value) {
 	setStatus = str2int(value);
 }
 
@@ -80,14 +80,14 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestSimple::ProcessSimpleSync(Resource *resource) {
-	if (resource->getTypeId() != TestResource::typeId)
+	if (!TestResource::IsTestResource(resource))
 		return resource;
 	TestResource *tr = static_cast<TestResource*>(resource);
-	LOG_DEBUG_R(this, tr, "Processing (" << tr->getStr() << ")");
+	LOG_DEBUG_R(this, tr, "Processing (" << tr->GetStr() << ")");
 	if (flipStatus)
-		tr->setStatus(tr->getStatus() == 0 ? 1 : 0);
+		tr->SetStatus(tr->GetStatus() == 0 ? 1 : 0);
 	if (setStatus >= 0)
-		tr->setStatus(setStatus);
+		tr->SetStatus(setStatus);
 	++items;
 	return resource;
 }

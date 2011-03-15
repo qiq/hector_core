@@ -29,41 +29,33 @@ public:
 	bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output);
 	bool Deserialize(const char *data, int size);
 	bool Deserialize(google::protobuf::io::CodedInputStream *input);
-
-	// return ResourceAttrInfo describing one attribute
-	ResourceAttrInfo *GetAttrInfo(const char *name);
+	// return ResourceAttrInfo describing all attributes
+	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	int getTypeId();
+	int GetTypeId();
 	// type string of a resource
-	const char *getTypeStr();
-	const char *getTypeStrShort();
-	// module prefix (e.g. Hector for Hector::TestResource)
-	const char *getModuleStr();
+	const char *GetTypeString(bool terse = false);
 	// used by queues in case there is limit on queue size
-	int getSize();
+	int GetSize();
 	// return string representation of the resource (e.g. for debugging purposes)
-	std::string toString(Object::LogLevel logLevel);
+	std::string ToString(Object::LogLevel logLevel);
 
-	void setStr(const std::string &s);
-	const std::string &getStr();
+	void SetStr(const std::string &s);
+	const std::string GetStr();
 
-	static const int typeId = 2;
+	static bool IsTestProtobufResource(Resource *resource);
 
 protected:
+	static const int typeId = 2;
+
 	hector::resources::TestProtobufResource r;
-
-	static std::vector<ResourceAttrInfoT<TestProtobufResource> > info;
-	static std::tr1::unordered_map<std::string, ResourceAttrInfoT<TestProtobufResource>*> infoMap;
-
-	static bool init;
-	static bool Init();
 
 	static log4cxx::LoggerPtr logger;
 };
 
 inline std::string *TestProtobufResource::Serialize() {
-	r.set_id(getId());
-	r.set_status(getStatus());
+	r.set_id(GetId());
+	r.set_status(GetStatus());
 
 	std::string *result = new std::string();
 	r.SerializeToString(result);
@@ -71,14 +63,14 @@ inline std::string *TestProtobufResource::Serialize() {
 }
 
 inline int TestProtobufResource::GetSerializedSize() {
-	r.set_id(getId());
-	r.set_status(getStatus());
+	r.set_id(GetId());
+	r.set_status(GetStatus());
 
 	return r.ByteSize();
 }
 
 inline bool TestProtobufResource::SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output) {
-	// r.id and r.status were set in getSerializedSize() already
+	// r.id and r.status were set in GetSerializedSize() already
 	r.SerializeWithCachedSizes(output);
 	return true;
 }
@@ -87,7 +79,7 @@ inline bool TestProtobufResource::Deserialize(const char *data, int size) {
 	bool result = r.ParseFromArray((void*)data, size);
 
 	// we keep id
-	setStatus(r.status());
+	SetStatus(r.status());
 	return result;
 }
 
@@ -95,36 +87,32 @@ bool TestProtobufResource::Deserialize(google::protobuf::io::CodedInputStream *i
 	return r.ParseFromCodedStream(input);
 }
 
-//inline ResourceFieldInfo *TestProtobufResource::getFieldInfo(const char *name) {
+//inline ResourceFieldInfo *TestProtobufResource::GetFieldInfo(const char *name) {
 //	return new ResourceFieldInfoT<TestProtobufResource>(name);
 //}
 
-inline int TestProtobufResource::getTypeId() {
+inline int TestProtobufResource::GetTypeId() {
 	return typeId;
 }
 
-inline const char *TestProtobufResource::getTypeStr() {
-	return "TestProtobufResource";
+inline const char *TestProtobufResource::GetTypeString(bool terse) {
+	return terse ? "TPR" : "TestProtobufResource";
 }
 
-inline const char *TestProtobufResource::getTypeStrShort() {
-	return "TPR";
-}
-
-inline const char *TestProtobufResource::getModuleStr() {
-	return "Hector";
-}
-
-inline int TestProtobufResource::getSize() {
+inline int TestProtobufResource::GetSize() {
 	return 1;
 }
 
-inline void TestProtobufResource::setStr(const std::string &str) {
+inline const std::string TestProtobufResource::GetStr() {
+	return r.str();
+}
+
+inline void TestProtobufResource::SetStr(const std::string &str) {
 	r.set_str(str);
 }
 
-inline const std::string &TestProtobufResource::getStr() {
-	return r.str();
+inline bool TestProtobufResource::IsTestProtobufResource(Resource *resource) {
+	return resource->GetTypeId() == typeId;
 }
 
 #endif

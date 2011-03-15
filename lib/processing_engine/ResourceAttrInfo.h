@@ -15,7 +15,7 @@ class Resource;
 
 class ResourceAttrInfo {
 public:
-	typedef enum {
+	enum FieldType {
 		UNKNOWN,
 		STRING,
 		INT,
@@ -29,64 +29,71 @@ public:
 		HASH_INT,
 		HASH_LONG,
 		HASH_IP,
-	} FieldType;
+	};
 
-	ResourceAttrInfo();
+	ResourceAttrInfo(int typeId_): type(UNKNOWN), typeId(typeId_) {};
 	virtual ~ResourceAttrInfo() {};
-	FieldType getType();
-	std::string &getName();
+	FieldType GetType();
+	void SetType(FieldType type);
+	int GetTypeId();
+	void SetTypeId(int id);
 
-	virtual const std::string &getString(Resource*) = 0;
-	virtual int getInt(Resource*) = 0;
-	virtual long getLong(Resource*) = 0;
-	virtual IpAddr &getIpAddr(Resource*) = 0;
-	virtual const std::string &getArrayString(Resource*, int) = 0;
-	virtual int getArrayInt(Resource*, int) = 0;
-	virtual long getArrayLong(Resource*, int) = 0;
-	virtual IpAddr &getArrayIpAddr(Resource*, int) = 0;
-	virtual const std::string &getHashString(Resource*, const std::string&) = 0;
-	virtual int getHashInt(Resource*, const std::string&) = 0;
-	virtual long getHashLong(Resource*, const std::string&) = 0;
-	virtual IpAddr &getHashIpAddr(Resource*, const std::string&) = 0;
+	virtual const std::string GetString(Resource*) = 0;
+	virtual int GetInt(Resource*) = 0;
+	virtual long GetLong(Resource*) = 0;
+	virtual IpAddr GetIpAddr(Resource*) = 0;
+	virtual const std::string GetArrayString(Resource*, int) = 0;
+	virtual int GetArrayInt(Resource*, int) = 0;
+	virtual long GetArrayLong(Resource*, int) = 0;
+	virtual IpAddr GetArrayIpAddr(Resource*, int) = 0;
+	virtual const std::string GetHashString(Resource*, const std::string&) = 0;
+	virtual int GetHashInt(Resource*, const std::string&) = 0;
+	virtual long GetHashLong(Resource*, const std::string&) = 0;
+	virtual IpAddr GetHashIpAddr(Resource*, const std::string&) = 0;
 
-	virtual void setString(Resource*, const std::string&) = 0;
-	virtual void setInt(Resource*, int) = 0;
-	virtual void setLong(Resource*, long) = 0;
-	virtual void setIpAddr(Resource*, IpAddr&) = 0;
-	virtual void setArrayString(Resource*, int, const std::string&) = 0;
-	virtual void setArrayInt(Resource*, int, int) = 0;
-	virtual void setArrayLong(Resource*, int, long) = 0;
-	virtual void setArrayIpAddr(Resource*, int, IpAddr&) = 0;
-	virtual void setHashString(Resource*, const std::string&, const std::string&) = 0;
-	virtual void setHashInt(Resource*, const std::string&, int) = 0;
-	virtual void setHashLong(Resource*, const std::string&, long) = 0;
-	virtual void setHashIpAddr(Resource*, const std::string&, IpAddr&) = 0;
+	virtual void SetString(Resource*, const std::string&) = 0;
+	virtual void SetInt(Resource*, int) = 0;
+	virtual void SetLong(Resource*, long) = 0;
+	virtual void SetIpAddr(Resource*, IpAddr&) = 0;
+	virtual void SetArrayString(Resource*, int, const std::string&) = 0;
+	virtual void SetArrayInt(Resource*, int, int) = 0;
+	virtual void SetArrayLong(Resource*, int, long) = 0;
+	virtual void SetArrayIpAddr(Resource*, int, IpAddr&) = 0;
+	virtual void SetHashString(Resource*, const std::string&, const std::string&) = 0;
+	virtual void SetHashInt(Resource*, const std::string&, int) = 0;
+	virtual void SetHashLong(Resource*, const std::string&, long) = 0;
+	virtual void SetHashIpAddr(Resource*, const std::string&, IpAddr&) = 0;
 
-	virtual void clear(Resource*) = 0;
-	virtual void deleteHashItem(Resource*, const std::string&) = 0;
+	virtual void Clear(Resource*) = 0;
+	virtual void DeleteHashItem(Resource*, const std::string&) = 0;
 
-	virtual int getCount(Resource*) = 0;
-	virtual std::vector<std::string> *getKeys(Resource*) = 0;
-	virtual std::vector<std::string> *getValuesString(Resource*) = 0;
-	virtual std::vector<int> *getValuesInt(Resource*) = 0;
-	virtual std::vector<long> *getValuesLong(Resource*) = 0;
-	virtual std::vector<IpAddr> *getValuesIpAddr(Resource*) = 0;
+	virtual int GetCount(Resource*) = 0;
+	virtual std::vector<std::string> *GetKeys(Resource*) = 0;
+	virtual std::vector<std::string> *GetValuesString(Resource*) = 0;
+	virtual std::vector<int> *GetValuesInt(Resource*) = 0;
+	virtual std::vector<long> *GetValuesLong(Resource*) = 0;
+	virtual std::vector<IpAddr> *GetValuesIpAddr(Resource*) = 0;
 
 protected:
 	FieldType type;
+	int typeId;		// resource typeId
 	std::string name;
 };
 
-inline ResourceAttrInfo::ResourceAttrInfo() {
-	type = UNKNOWN;
-}
-
-inline ResourceAttrInfo::FieldType ResourceAttrInfo::getType() {
+inline ResourceAttrInfo::FieldType ResourceAttrInfo::GetType() {
 	return type;
 }
 
-inline std::string &ResourceAttrInfo::getName() {
-	return name;
+inline void ResourceAttrInfo::SetType(ResourceAttrInfo::FieldType type) {
+	this->type = type;
+}
+
+inline int ResourceAttrInfo::GetTypeId() {
+	return typeId;
+}
+
+inline void ResourceAttrInfo::SetTypeId(int typeId) {
+	this->typeId = typeId;
 }
 
 #endif

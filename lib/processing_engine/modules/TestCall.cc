@@ -19,29 +19,29 @@ Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources, tr
 }
 
 Resource *Call::PrepareResource(Resource *src) {
-	src->setStatus(1);
-	Resource *r = Resource::registry.AcquireResource(typeId);
+	src->SetStatus(1);
+	Resource *r = Resource::registry->AcquireResource(typeId);
 	if (!r) {
 		LOG4CXX_ERROR_R(logger, r, "Cannot generate resource of type: " << typeId);
 		return NULL;
 	}
-	r->setId(src->getId()+10000);
-	if (r->getTypeId() == TestResource::typeId) {
+	r->SetId(src->GetId()+10000);
+	if (TestResource::IsTestResource(r)) {
 		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
-		snprintf(s, sizeof(s), "pe-%d", src->getId()+10000);
-		tr->setStr(s);
+		snprintf(s, sizeof(s), "pe-%d", src->GetId()+10000);
+		tr->SetStr(s);
 	}
-	r->setAttachedResource(src);
+	r->SetAttachedResource(src);
 	return r;
 }
 
 Resource *Call::FinishResource(Resource *tmp) {
-	Resource *r = tmp->getAttachedResource();
+	Resource *r = tmp->GetAttachedResource();
 
-	r->setStatus(0);
+	r->SetStatus(0);
 
-	Resource::registry.ReleaseResource(tmp);
+	Resource::registry->ReleaseResource(tmp);
 	return r;
 }
 
@@ -53,15 +53,15 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	targetEngine = NULL;
 
 	values = new ObjectValues<TestCall>(this);
-	values->AddGetter("items", &TestCall::getItems);
-	values->AddGetter("maxRequests", &TestCall::getMaxRequests);
-	values->AddSetter("maxRequests", &TestCall::setMaxRequests, true);
-	values->AddGetter("timeTick", &TestCall::getTimeTick);
-	values->AddSetter("timeTick", &TestCall::setTimeTick);
-	values->AddGetter("resourceType", &TestCall::getResourceType);
-	values->AddSetter("resourceType", &TestCall::setResourceType, true);
-	values->AddGetter("targetEngine", &TestCall::getTargetEngine);
-	values->AddSetter("targetEngine", &TestCall::setTargetEngine);
+	values->AddGetter("items", &TestCall::GetItems);
+	values->AddGetter("maxRequests", &TestCall::GetMaxRequests);
+	values->AddSetter("maxRequests", &TestCall::SetMaxRequests, true);
+	values->AddGetter("timeTick", &TestCall::GetTimeTick);
+	values->AddSetter("timeTick", &TestCall::SetTimeTick);
+	values->AddGetter("resourceType", &TestCall::GetResourceType);
+	values->AddSetter("resourceType", &TestCall::SetResourceType, true);
+	values->AddGetter("targetEngine", &TestCall::GetTargetEngine);
+	values->AddSetter("targetEngine", &TestCall::SetTargetEngine);
 }
 
 TestCall::~TestCall() {
@@ -71,40 +71,40 @@ TestCall::~TestCall() {
 	delete call;
 }
 
-char *TestCall::getItems(const char *name) {
+char *TestCall::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *TestCall::getMaxRequests(const char *name) {
+char *TestCall::GetMaxRequests(const char *name) {
 	return int2str(maxRequests);
 }
 
-void TestCall::setMaxRequests(const char *name, const char *value) {
+void TestCall::SetMaxRequests(const char *name, const char *value) {
 	maxRequests = str2int(value);
 }
 
-char *TestCall::getTimeTick(const char *name) {
+char *TestCall::GetTimeTick(const char *name) {
 	return int2str(timeTick);
 }
 
-void TestCall::setTimeTick(const char *name, const char *value) {
+void TestCall::SetTimeTick(const char *name, const char *value) {
 	timeTick = str2long(value);
 }
 
-char *TestCall::getResourceType(const char *name) {
+char *TestCall::GetResourceType(const char *name) {
 	return resourceType ? strdup(resourceType) : NULL;
 }
 
-void TestCall::setResourceType(const char *name, const char *value) {
+void TestCall::SetResourceType(const char *name, const char *value) {
 	free(resourceType);
 	resourceType = strdup(value);
 }
 
-char *TestCall::getTargetEngine(const char *name) {
+char *TestCall::GetTargetEngine(const char *name) {
 	return targetEngine ? strdup(targetEngine) : NULL;
 }
 
-void TestCall::setTargetEngine(const char *name, const char *value) {
+void TestCall::SetTargetEngine(const char *name, const char *value) {
 	free(targetEngine);
 	targetEngine = strdup(value);
 }
@@ -117,7 +117,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 			LOG_ERROR(this, "Invalid targetEngine parameter" << targetEngine);
 			return false;
 		}
-		call->setProcessingEngine(engine);
+		call->SetProcessingEngine(engine);
 		return true;
 	}
 
@@ -138,7 +138,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 		LOG_ERROR(this, "resourceType is not defined");
 		return false;
 	}
-	int typeId = Resource::registry.NameToId(resourceType);
+	int typeId = Resource::registry->NameToId(resourceType);
 	if (typeId < 0) {
 		LOG_ERROR(this, "Cannot load " << resourceType << " library");
 		return false;

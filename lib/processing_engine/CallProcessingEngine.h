@@ -20,7 +20,7 @@ public:
 	// maxRequests: number of concurrent requests
 	CallProcessingEngine(int maxRequests, bool ordered);
 	virtual ~CallProcessingEngine();
-	void setProcessingEngine(ProcessingEngine *engine);
+	void SetProcessingEngine(ProcessingEngine *engine);
 	int Process(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int timeTick);
 	void Pass(std::queue<Resource*> *inputResources, int timeTick);
 
@@ -43,7 +43,7 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-inline void CallProcessingEngine::setProcessingEngine(ProcessingEngine *engine) {
+inline void CallProcessingEngine::SetProcessingEngine(ProcessingEngine *engine) {
 	this->engine = engine;
 }
 

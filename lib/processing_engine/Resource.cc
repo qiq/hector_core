@@ -11,25 +11,18 @@ using namespace std;
 
 log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 
-ResourceRegistry Resource::registry;
+ResourceRegistry *Resource::registry = NULL;
 string Resource::empty;
-
-PlainLock Resource::idLock;
-int Resource::nextId = 0;
 
 Resource::Resource() {
 	flags = 0;
-	idLock.Lock();
-	setId(nextId++);
-	idLock.Unlock();
+	SetId(registry->NextResourceId());
 	status = 0;
 	attachedResource = NULL;
 }
 
 Resource::Resource(const Resource &r) : flags(r.flags), status(r.status), attachedResource(r.attachedResource) {
-	idLock.Lock();
-	setId(nextId++);
-	idLock.Unlock();
+	SetId(registry->NextResourceId());
 }
 
 void Resource::Clear() {
@@ -39,17 +32,10 @@ void Resource::Clear() {
 	attachedResource = NULL;
 }
 
-int Resource::NextResourceId() {
-	idLock.Lock();
-	int next = nextId++;
-	idLock.Unlock();
-	return next;
-}
-
 bool Resource::Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream) {
 	char buffer[5];
-	*(uint8_t*)(buffer+4) = resource->getTypeId();
-	if (resource->isProtobufResource()) {
+	*(uint8_t*)(buffer+4) = resource->GetTypeId();
+	if (resource->IsProtobufResource()) {
 		ProtobufResource *pr = static_cast<ProtobufResource*>(resource);
 		*(uint32_t*)buffer = pr->GetSerializedSize();
 		stream->WriteRaw(buffer, 5);
@@ -73,12 +59,12 @@ Resource *Resource::Deserialize(google::protobuf::io::CodedInputStream *stream, 
 		return NULL;
 	uint32_t size = *(uint32_t*)buffer;
 	uint8_t typeId = *(uint8_t*)(buffer+4);
-	Resource *r = registry.AcquireResource(typeId);
+	Resource *r = registry->AcquireResource(typeId);
 	if (!r) {
-		LOG4CXX_ERROR(logger, "Cannot create resource of type: " << typeId);
+		LOG4CXX_ERROR(logger, "Cannot create resource of type: " << (int)typeId);
 		return NULL;
 	}
-	if (r->isProtobufResource()) {
+	if (r->IsProtobufResource()) {
 		ProtobufResource *pr = static_cast<ProtobufResource*>(r);
 		google::protobuf::io::CodedInputStream::Limit l = stream->PushLimit(size);
 		pr->Deserialize(stream);
@@ -87,12 +73,12 @@ Resource *Resource::Deserialize(google::protobuf::io::CodedInputStream *stream, 
 		char *data = (char*)malloc(size);
 		if (!stream->ReadRaw(data, size)) {
 			free(data);
-			registry.ReleaseResource(r);
+			registry->ReleaseResource(r);
 			return NULL;
 		}
 		if (!r->Deserialize(data, size)) {
 			free(data);
-			registry.ReleaseResource(r);
+			registry->ReleaseResource(r);
 			return NULL;
 		}
 		free(data);

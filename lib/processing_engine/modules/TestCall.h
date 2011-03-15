@@ -42,7 +42,7 @@ public:
 	TestCall(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestCall();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
 
 private:
@@ -52,15 +52,15 @@ private:
 	char *resourceType;	// init only, type of resource to generate
 	char *targetEngine;	// init-only, read-only
 
-	char *getItems(const char *name);
-	char *getMaxRequests(const char *name);
-	void setMaxRequests(const char *name, const char *value);
-	char *getTimeTick(const char *name);
-	void setTimeTick(const char *name, const char *value);
-	char *getResourceType(const char *name);
-	void setResourceType(const char *name, const char *value);
-	char *getTargetEngine(const char *name);
-	void setTargetEngine(const char *name, const char *value);
+	char *GetItems(const char *name);
+	char *GetMaxRequests(const char *name);
+	void SetMaxRequests(const char *name, const char *value);
+	char *GetTimeTick(const char *name);
+	void SetTimeTick(const char *name, const char *value);
+	char *GetResourceType(const char *name);
+	void SetResourceType(const char *name, const char *value);
+	char *GetTargetEngine(const char *name);
+	void SetTargetEngine(const char *name, const char *value);
 
 	ObjectValues<TestCall> *values;
 	char *GetValueSync(const char *name);
@@ -70,7 +70,7 @@ private:
 	Call *call;
 };
 
-inline Module::Type TestCall::getType() {
+inline Module::Type TestCall::GetType() {
 	return MULTI;
 }
 

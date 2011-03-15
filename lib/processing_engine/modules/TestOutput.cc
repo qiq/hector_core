@@ -12,14 +12,14 @@ TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex)
 	items = 0;
 
 	values = new ObjectValues<TestOutput>(this);
-	values->AddGetter("items", &TestOutput::getItems);
+	values->AddGetter("items", &TestOutput::GetItems);
 }
 
 TestOutput::~TestOutput() {
 	delete values;
 }
 
-char *TestOutput::getItems(const char *name) {
+char *TestOutput::GetItems(const char *name) {
 	return int2str(items);
 }
 
@@ -33,9 +33,9 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestOutput::ProcessOutputSync(Resource *resource) {
-	if (resource->getTypeId() == TestResource::typeId) {
+	if (TestResource::IsTestResource(resource)) {
 		TestResource *tr = static_cast<TestResource*>(resource);
-		LOG_INFO_R(this, tr, "Resource arrived (" << tr->getStr() << ")");
+		LOG_INFO_R(this, tr, "Resource arrived (" << tr->GetStr() << ")");
 	} else {
 		LOG_INFO_R(this, resource, "Resource arrived");
 	}

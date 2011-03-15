@@ -25,14 +25,14 @@ public:
 
 	FileDescriptor(int fd);
 	~FileDescriptor() {};
-	int getSize();
+	int GetSize();
 };
 
 inline FileDescriptor::FileDescriptor(int fd) {
 	this->fd = fd;
 }
 
-inline int FileDescriptor::getSize() {
+inline int FileDescriptor::GetSize() {
 	return sizeof(fd);
 }
 
@@ -40,8 +40,8 @@ class SimpleServer {
 public:
 	SimpleServer();
 	virtual ~SimpleServer();
-	bool getRunning();
-	void setRunning(bool running);
+	bool GetRunning();
+	void SetRunning(bool running);
 	void RestrictAccess(const char *addr);
 	void Start(const char *addr, int port, int maxThreads, bool wait);
 	void ProcessRequests();

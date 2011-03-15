@@ -57,7 +57,7 @@ void SimpleHTTPConn::Clear() {
 /**
  * Only make sense after header has been read
  */
-bool SimpleHTTPConn::isKeepAlive() {
+bool SimpleHTTPConn::IsKeepAlive() {
 	return keep_alive;
 }
 
@@ -227,15 +227,15 @@ bool SimpleHTTPConn::ReadRequest() {
 	return false;
 }
 
-string SimpleHTTPConn::getRequestMethod() {
+string SimpleHTTPConn::GetRequestMethod() {
 	return request_method;
 }
 
-string SimpleHTTPConn::getRequestArgs() {
+string SimpleHTTPConn::GetRequestArgs() {
 	return request_args;
 }
 
-string SimpleHTTPConn::getRequestHeaderField(string &field) {
+string SimpleHTTPConn::GetRequestHeaderField(string &field) {
 	if (header_fields == NULL)
 		return NULL;
 	
@@ -245,48 +245,48 @@ string SimpleHTTPConn::getRequestHeaderField(string &field) {
 	return NULL;
 }
 
-string SimpleHTTPConn::getRequestBody() {
+string SimpleHTTPConn::GetRequestBody() {
 	if (request_body_offset < 0)
 		return NULL;
 	return request_body_length >= 0 ? request_buffer.substr(request_body_offset, request_body_length) : request_buffer.substr(request_body_offset);
 }
 
 void SimpleHTTPConn::ErrorResponse(int code, const char *description, const char *message) {
-	setResponseCode(code, description);
+	SetResponseCode(code, description);
 	char s[1000];
 	snprintf(s, sizeof(s), "<html><head><title>%d - %s</title></head><body>%s</body></html>\r\n", code, description, message);
-	clearResponseBody();
-	appendResponseBody(s, strlen(s));
+	ClearResponseBody();
+	AppendResponseBody(s, strlen(s));
 }
 
-void SimpleHTTPConn::setResponseCode(int code, const char *description) {
+void SimpleHTTPConn::SetResponseCode(int code, const char *description) {
 	response_code = code;
 	response_str = description;
 }
 
-void SimpleHTTPConn::clearResponseHeader() {
+void SimpleHTTPConn::ClearResponseHeader() {
 	response_header.clear();
 }
 
-void SimpleHTTPConn::appendResponseHeader(const std::string &s) {
+void SimpleHTTPConn::AppendResponseHeader(const std::string &s) {
 	response_header.append(s);
 	response_header.append("\r\n");
 }
 
-void SimpleHTTPConn::appendResponseHeader(const char *s, int size) {
+void SimpleHTTPConn::AppendResponseHeader(const char *s, int size) {
 	response_header.append(s, size);
 	response_header.append("\r\n");
 }
 
-void SimpleHTTPConn::clearResponseBody() {
+void SimpleHTTPConn::ClearResponseBody() {
 	response_body.clear();
 }
 
-void SimpleHTTPConn::appendResponseBody(const std::string &s) {
+void SimpleHTTPConn::AppendResponseBody(const std::string &s) {
 	response_body.append(s);
 }
 
-void SimpleHTTPConn::appendResponseBody(const char *s, int size) {
+void SimpleHTTPConn::AppendResponseBody(const char *s, int size) {
 	response_body.append(s, size);
 }
 

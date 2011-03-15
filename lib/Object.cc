@@ -44,7 +44,7 @@ const char *Object::GetLogLevelStr(log4cxx::LoggerPtr logger) {
 	return "unknown";
 }
 
-bool Object::setLogLevel(const char *logLevel) {
+bool Object::SetLogLevel(const char *logLevel) {
 	if (!strcmp(logLevel, "TRACE")) {
 		this->logger->setLevel(log4cxx::Level::getTrace());
 	} else if (!strcmp(logLevel, "DEBUG")) {

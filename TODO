@@ -1,8 +1,14 @@
+- interface pro Clone (taky delat pres resourceregistry, aby byly spravne id)
+	- ted to v podstate nefunguje!
+- lepsi api pro hash (keys + values at once)
+- neni mozne mit shared resource v Perlu/Pythonu (kvuli deadlockum)
+
 - navrhnout API pro resource
 	- zakladni metody: type, id, status, flags, (de-)serialization, attached resource, size, toString(Short), 
 	- GetAttrString(ai) a GetAttrString("name")
+	- zrusit resource registry z Resource
 
-- PythonModule a reference counting -- je to spravne? Zkontrolovat
+- PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje
 
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
 	robot/test6+

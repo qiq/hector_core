@@ -38,7 +38,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		SV *_object = get_sv("_object", TRUE);
 		sv_setsv(_object, perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0));
 		char s[1024];
-		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, getId(), threadIndex);
+		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, GetId(), threadIndex);
 		eval_pv(s, FALSE);
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR(this, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
@@ -91,7 +91,7 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 	return result;
 }
 
-Module::Type PerlModule::getType() {
+Module::Type PerlModule::GetType() {
 	ObjectLockWrite();
 	perl->SetContext();
 	Module::Type result = Module::INVALID;
@@ -100,16 +100,16 @@ Module::Type PerlModule::getType() {
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
-	int count = call_method("getType", G_SCALAR|G_EVAL);
+	int count = call_method("GetType", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling getType (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling GetType (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling getType (no result)");
+		LOG_ERROR(this, "Error calling GetType (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR(this, "Error calling getType (invalid result)");
+			LOG_ERROR(this, "Error calling GetType (invalid result)");
 		} else {
 			result = (Module::Type)SvIV(resultSV);
 		}
@@ -235,7 +235,7 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	SV *resourceSV;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 		if (!resourceSV)
 			return NULL;
@@ -291,7 +291,7 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	if (resource) {
 		// create new instance of a resource (of given type)
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 		if (!resourceSV)
 			return NULL;
@@ -352,7 +352,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 		while (inputResources->size() > 0) {
 			Resource *resource = inputResources->front();
 			char buffer[100];
-			snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+			snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
 			SV *resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 			if (!resourceSV)
 				return 0;
@@ -420,7 +420,8 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	// create back inputResource and outputResource from Perl objects & DISOWN them
 	// inputResources queue was cleaned before, outputResource was not
 	SV *sv;
-	while ((sv = av_shift((AV*)SvRV(inputResourcesSV))) != &PL_sv_undef) {
+	AV *a = (AV*)SvRV(inputResourcesSV);
+	while ((sv = av_shift(a)) != &PL_sv_undef) {
 		void *r = NULL;
 		if (perl->ConvertPtr(sv, &r, "Resource *", 0x01) >= 0) {
 			inputResources->push(reinterpret_cast<Resource*>(r));
@@ -428,7 +429,8 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 			LOG_ERROR(this, "Error calling ProcessMulti: invalid input resource");
 		}
 	}
-	while ((sv = av_shift((AV*)SvRV(outputResourcesSV))) != &PL_sv_undef) {
+	a = (AV*)SvRV(outputResourcesSV);
+	while ((sv = av_shift(a)) != &PL_sv_undef) {
 		void *r = NULL;
 		if (perl->ConvertPtr(sv, &r, "Resource *", 0x01) >= 0) {
 			outputResources->push(reinterpret_cast<Resource*>(r));

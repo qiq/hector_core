@@ -33,7 +33,7 @@ class TestSimple:
 	except:
 	    return False
 
-    def getType(self):
+    def GetType(self):
 	return Hector.Module.SIMPLE
 
     def Start(self):
@@ -74,13 +74,13 @@ class TestSimple:
 	self._object.log_info("RestoreCheckpoint(path, id)");
 
     def ProcessSimple(self, resource):
-	if (resource is None or resource.getTypeStr() != "TestResource"):
-		self._object.log_error("Invalid resource: "+resource.getTypeStr())
+	if (resource is None or resource.GetTypeString() != "TestResource"):
+		self._object.log_error("Invalid resource: "+resource.GetTypeString())
 		return resource
-	self._object.log_info(resource.toStringShort()+" Processing ("+resource.getStr()+")")
+	self._object.log_info(resource.ToStringShort()+" Processing ("+resource.GetStr()+")")
 	if self.values['flipStatus']:
-		resource.setStatus(1 if resource.getStatus() == 0 else 0)
+		resource.SetStatus(1 if resource.GetStatus() == 0 else 0)
 	if self.values['setStatus'] >= 0:
-		resource.setStatus(self.values['setStatus'])
+		resource.SetStatus(self.values['setStatus'])
 	self.values['items'] += 1
 	return resource

@@ -28,6 +28,7 @@
 %include ProtobufResource.i
 %include TestResource.i
 %include TestProtobufResource.i
+%include ResourceAttrInfo.i
 
 %{
 /* We need some local symbols to be exported, so we wrap them */

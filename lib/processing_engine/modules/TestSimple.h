@@ -27,7 +27,7 @@ public:
 	TestSimple(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestSimple();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	Resource *ProcessSimpleSync(Resource *resource);
 
 private:
@@ -36,13 +36,13 @@ private:
 	bool flipStatus;	// ObjectLock
 	int setStatus;		// ObjectLock
 
-	char *getItems(const char *name);
-	char *getFoo(const char *name);
-	void setFoo(const char *name, const char *value);
-	char *getFlipStatus(const char *name);
-	void setFlipStatus(const char *name, const char *value);
-	char *getSetStatus(const char *name);
-	void setSetStatus(const char *name, const char *value);
+	char *GetItems(const char *name);
+	char *GetFoo(const char *name);
+	void SetFoo(const char *name, const char *value);
+	char *GetFlipStatus(const char *name);
+	void SetFlipStatus(const char *name, const char *value);
+	char *GetSetStatus(const char *name);
+	void SetSetStatus(const char *name, const char *value);
 
 	ObjectValues<TestSimple> *values;
 	char *GetValueSync(const char *name);
@@ -50,7 +50,7 @@ private:
 	std::vector<std::string> *ListNamesSync();
 };
 
-inline 	Module::Type TestSimple::getType() {
+inline 	Module::Type TestSimple::GetType() {
 	return SIMPLE;
 }
 

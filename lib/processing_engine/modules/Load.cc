@@ -27,11 +27,11 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	stream = NULL;
 
 	values = new ObjectValues<Load>(this);
-	values->AddGetter("items", &Load::getItems);
-	values->AddGetter("maxItems", &Load::getMaxItems);
-	values->AddSetter("maxItems", &Load::setMaxItems);
-	values->AddGetter("filename", &Load::getFilename);
-	values->AddSetter("filename", &Load::setFilename);
+	values->AddGetter("items", &Load::GetItems);
+	values->AddGetter("maxItems", &Load::GetMaxItems);
+	values->AddSetter("maxItems", &Load::SetMaxItems);
+	values->AddGetter("filename", &Load::GetFilename);
+	values->AddSetter("filename", &Load::SetFilename);
 }
 
 Load::~Load() {
@@ -43,23 +43,23 @@ Load::~Load() {
 	delete values;
 }
 
-char *Load::getItems(const char *name) {
+char *Load::GetItems(const char *name) {
 	return int2str(items);
 }
 
-char *Load::getMaxItems(const char *name) {
+char *Load::GetMaxItems(const char *name) {
 	return int2str(maxItems);
 }
 
-void Load::setMaxItems(const char *name, const char *value) {
+void Load::SetMaxItems(const char *name, const char *value) {
 	maxItems = str2int(value);
 }
 
-char *Load::getFilename(const char *name) {
+char *Load::GetFilename(const char *name) {
 	return filename ? strdup(filename) : NULL;
 }
 
-void Load::setFilename(const char *name, const char *value) {
+void Load::SetFilename(const char *name, const char *value) {
 	fileCond.Lock();
 	free(filename);
 	filename = strdup(value);
@@ -116,7 +116,7 @@ Resource *Load::ProcessInputSync(bool sleep) {
 
 bool Load::SaveCheckpointSync(const char *path) {
 	char buffer1[1024];
-	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
+	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, GetId());
 	FILE *fw = fopen(buffer1, "w");
 	if (!fw) {
 		LOG_ERROR(this, "Cannot open file: " << buffer1);
@@ -135,7 +135,7 @@ bool Load::SaveCheckpointSync(const char *path) {
 
 bool Load::RestoreCheckpointSync(const char *path) {
 	char buffer1[1024];
-	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, getId());
+	snprintf(buffer1, sizeof(buffer1), "%s.%s", path, GetId());
 	FILE *fr = fopen(buffer1, "r");
 	if (!fr) {
 		LOG_ERROR(this, "Cannot open file: " << buffer1);
@@ -155,7 +155,7 @@ bool Load::RestoreCheckpointSync(const char *path) {
 		LOG_ERROR(this, "Cannot parse data: " << buffer1);
 		return false;
 	}
-	setFilename(NULL, fn);
+	SetFilename(NULL, fn);
 	if (!stream->Skip(offset)) {
 		LOG_ERROR(this, "Cannot seek in file: " << filename);
 		return false;

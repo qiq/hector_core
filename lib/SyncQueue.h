@@ -39,17 +39,17 @@ public:
 	~SimpleQueue();
 	void deleteAllItems();
 	
-	int getPriority();
+	int GetPriority();
 
-	bool isSpaceFor(int itemSize);
-	void putItem(T *r);
-	bool isReady();
-	T *getItem();
+	bool IsSpaceFor(int itemSize);
+	void PutItem(T *r);
+	bool IsReady();
+	T *GetItem();
 
-	int getCurrentSize();
-	int getCurrentItems();
-	int getMaxSize();
-	int getMaxItems();
+	int GetCurrentSize();
+	int GetCurrentItems();
+	int GetMaxSize();
+	int GetMaxItems();
 	static bool comp(SimpleQueue<T> *a, SimpleQueue<T> *b);
 
 private:
@@ -87,60 +87,60 @@ void SimpleQueue<T>::deleteAllItems() {
 }
 
 template <class T>
-int SimpleQueue<T>::getPriority() {
+int SimpleQueue<T>::GetPriority() {
 	return priority;
 }
 
 template <class T>
-bool SimpleQueue<T>::isSpaceFor(int itemSize) {
+bool SimpleQueue<T>::IsSpaceFor(int itemSize) {
 	return ((maxItems == 0 || (int)queue->size() < maxItems) && (maxSize == 0 || queueSize+itemSize <= maxSize)) ? true : false;
 }
 
 template <class T>
-void SimpleQueue<T>::putItem(T *r) {
+void SimpleQueue<T>::PutItem(T *r) {
 	queue->push_back(r);
-	queueSize += r->getSize();
+	queueSize += r->GetSize();
 }
 
 template <class T>
-bool SimpleQueue<T>::isReady() {
+bool SimpleQueue<T>::IsReady() {
 	return (queue->size() > 0) ? true : false;
 }
 
 template <class T>
-T *SimpleQueue<T>::getItem() {
+T *SimpleQueue<T>::GetItem() {
 	if (queue->size() == 0)
 		return NULL;
 	T *r = (*queue)[0];
 	queue->pop_front();
-	queueSize -= r->getSize();
+	queueSize -= r->GetSize();
 	return r;
 }
 
 template <class T>
-int SimpleQueue<T>::getCurrentSize() {
+int SimpleQueue<T>::GetCurrentSize() {
 	return queueSize;
 }
 
 template <class T>
-int SimpleQueue<T>::getCurrentItems() {
+int SimpleQueue<T>::GetCurrentItems() {
 	return queue->size();
 }
 
 template <class T>
-int SimpleQueue<T>::getMaxSize() {
+int SimpleQueue<T>::GetMaxSize() {
 	return maxSize;
 }
 
 template <class T>
-int SimpleQueue<T>::getMaxItems() {
+int SimpleQueue<T>::GetMaxItems() {
 	return maxItems;
 }
 
 template <class T>
 bool SimpleQueue<T>::comp(SimpleQueue<T> *a, SimpleQueue<T> *b) {
 	// reversed, so that we have descending numbers (higher priority first)
-	return a->getPriority() > b->getPriority();
+	return a->GetPriority() > b->GetPriority();
 }
 
 // By default, no sub-queue is created, they may be added using addQueue()
@@ -152,18 +152,18 @@ public:
 	~SyncQueue();
 	void addQueue(int priority, int maxItems, int maxSize);
 	bool hasQueue(int priority);
-	int getQueuesCount();
+	int GetQueuesCount();
 	void Stop();
 	void Start();
 	void Pause();
 	void Resume();
 
-	bool isSpace(T *r, int priority = 0);
-	bool putItem(T *r, struct timeval *timeout, int priority = 0);
-	int putItems(T **r, int size, struct timeval *timeout, int priority = 0);
-	bool isReady();
-	T *getItem(struct timeval *timeout);
-	int getItems(T **r, int size, struct timeval *timeout);
+	bool IsSpace(T *r, int priority = 0);
+	bool PutItem(T *r, struct timeval *timeout, int priority = 0);
+	int PutItems(T **r, int size, struct timeval *timeout, int priority = 0);
+	bool IsReady();
+	T *GetItem(struct timeval *timeout);
+	int GetItems(T **r, int size, struct timeval *timeout);
 	int queueItems(int priority = 0);
 
 	int firstNonEmptyQueueIndex();
@@ -216,7 +216,7 @@ bool SyncQueue<T>::hasQueue(int priority) {
 }
 
 template <class T>
-int SyncQueue<T>::getQueuesCount() {
+int SyncQueue<T>::GetQueuesCount() {
 	return queues.size();
 }
 
@@ -261,20 +261,20 @@ void SyncQueue<T>::Resume() {
 }
 
 template <class T>
-bool SyncQueue<T>::isSpace(T *r, int priority) {
+bool SyncQueue<T>::IsSpace(T *r, int priority) {
 	bool result = false;
 	queueLock.Lock();
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = *iter;
-	result = q->isSpaceFor(r->getSize());
+	result = q->IsSpaceFor(r->GetSize());
 	queueLock.Unlock();
 	return result;
 }
 
 // returns false if canceled
 template <class T>
-bool SyncQueue<T>::putItem(T *r, struct timeval *timeout, int priority) {
+bool SyncQueue<T>::PutItem(T *r, struct timeval *timeout, int priority) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -285,8 +285,8 @@ bool SyncQueue<T>::putItem(T *r, struct timeval *timeout, int priority) {
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = iter->second;
-	int itemSize = r->getSize();
-	while (!q->isSpaceFor(itemSize)) {
+	int itemSize = r->GetSize();
+	while (!q->IsSpaceFor(itemSize)) {
 		if (!timeout) {
 			queueLock.Unlock();
 			return false;
@@ -300,7 +300,7 @@ bool SyncQueue<T>::putItem(T *r, struct timeval *timeout, int priority) {
 		}
 	}
 
-	q->putItem(r);
+	q->PutItem(r);
 
 	queueLock.SignalRecv();
 	queueLock.Unlock();
@@ -308,7 +308,7 @@ bool SyncQueue<T>::putItem(T *r, struct timeval *timeout, int priority) {
 }
 
 template <class T>
-int SyncQueue<T>::putItems(T **r, int size, struct timeval *timeout , int priority) {
+int SyncQueue<T>::PutItems(T **r, int size, struct timeval *timeout , int priority) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -319,8 +319,8 @@ int SyncQueue<T>::putItems(T **r, int size, struct timeval *timeout , int priori
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
 	SimpleQueue<T> *q = *iter;
-	int itemSize = r[0]->getSize();
-	while ((q->getMaxItems() > 0 && q->getCurrentItems() == q->getMaxItems()) || (q->getMaxSize() > 0 && q->getCurrentSize()+itemSize > q->getMaxSize()))  {
+	int itemSize = r[0]->GetSize();
+	while ((q->GetMaxItems() > 0 && q->GetCurrentItems() == q->GetMaxItems()) || (q->GetMaxSize() > 0 && q->GetCurrentSize()+itemSize > q->GetMaxSize()))  {
 		if (!timeout) {
 			queueLock.Unlock();
 			return 0;
@@ -334,13 +334,13 @@ int SyncQueue<T>::putItems(T **r, int size, struct timeval *timeout , int priori
 		}
 	}
 
-	int max = q->getMaxItems() > 0 ? (q->getMaxItems() - q->getCurrentItems()) : 0;
+	int max = q->GetMaxItems() > 0 ? (q->GetMaxItems() - q->GetCurrentItems()) : 0;
 	if (max == 0 || max > size)
 		max = size;
 
 	int i;	
-	for (i = 0; i < max && q->getCurrentSize() + r[i]->getSize() <= q->getMaxSize(); i++) {
-		q->putItem(r[i]);
+	for (i = 0; i < max && q->GetCurrentSize() + r[i]->GetSize() <= q->GetMaxSize(); i++) {
+		q->PutItem(r[i]);
 	}
 
 	queueLock.SignalRecv();
@@ -349,7 +349,7 @@ int SyncQueue<T>::putItems(T **r, int size, struct timeval *timeout , int priori
 }
 
 template <class T>
-bool SyncQueue<T>::isReady() {
+bool SyncQueue<T>::IsReady() {
 	bool result = false;
 	queueLock.Lock();
 	if (firstNonEmptyQueueIndex() >= 0)
@@ -359,7 +359,7 @@ bool SyncQueue<T>::isReady() {
 }
 
 template <class T>
-T *SyncQueue<T>::getItem(struct timeval *timeout) {
+T *SyncQueue<T>::GetItem(struct timeval *timeout) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -382,7 +382,7 @@ T *SyncQueue<T>::getItem(struct timeval *timeout) {
 		}
 	}
 
-	T *r = queues[firstNonEmptyQueueIndex()]->getItem();
+	T *r = queues[firstNonEmptyQueueIndex()]->GetItem();
 
 	queueLock.SignalSend();
 	queueLock.Unlock();
@@ -391,7 +391,7 @@ T *SyncQueue<T>::getItem(struct timeval *timeout) {
 }
 
 template <class T>
-int SyncQueue<T>::getItems(T **r, int size, struct timeval *timeout) {
+int SyncQueue<T>::GetItems(T **r, int size, struct timeval *timeout) {
 	pauseLock.Lock();
 	pauseLock.Unlock();
 	queueLock.Lock();
@@ -414,8 +414,8 @@ int SyncQueue<T>::getItems(T **r, int size, struct timeval *timeout) {
 	}
 	int i = 0;
 	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end() && i < size; ++iter) {
-		while ((*iter)->getCurrentItems() > 0 && i < size) {
-			r[i] = (*iter)->getItem();
+		while ((*iter)->GetCurrentItems() > 0 && i < size) {
+			r[i] = (*iter)->GetItem();
 			i++;
 		}
 	}
@@ -430,14 +430,14 @@ template <class T>
 int SyncQueue<T>::queueItems(int priority) {
 	typename std::tr1::unordered_map<int, SimpleQueue<T>*>::iterator iter = priority2queue.find(priority);
 	assert(iter != priority2queue.end());
-	return iter->second->getCurrentItems();
+	return iter->second->GetCurrentItems();
 }
 
 template <class T>
 int SyncQueue<T>::firstNonEmptyQueueIndex() {
 	int i = 0;
 	for (typename vector<SimpleQueue<T>*>::iterator iter = queues.begin(); iter != queues.end(); ++iter) {
-		if ((*iter)->getCurrentItems() > 0)
+		if ((*iter)->GetCurrentItems() > 0)
 			return i;
 		i++;
 	}

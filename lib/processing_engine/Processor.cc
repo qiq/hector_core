@@ -27,8 +27,8 @@ Processor::Processor(ObjectRegistry *objects, ProcessingEngine *engine, const ch
 	pauseInput = false;
 
 	values = new ObjectValues<Processor>(this);
-	values->AddGetter("pauseInput", &Processor::getPauseInput);
-	values->AddSetter("pauseInput", &Processor::setPauseInput);
+	values->AddGetter("pauseInput", &Processor::GetPauseInput);
+	values->AddSetter("pauseInput", &Processor::SetPauseInput);
 }
 
 Processor::~Processor() {
@@ -57,7 +57,7 @@ Processor::~Processor() {
 	delete values;
 }
 
-char *Processor::getPauseInput(const char *name) {
+char *Processor::GetPauseInput(const char *name) {
 	ObjectUnlock();
 	pauseInputCond.Lock();
 	char *result = bool2str(pauseInput);
@@ -66,7 +66,7 @@ char *Processor::getPauseInput(const char *name) {
 	return result;
 }
 
-void Processor::setPauseInput(const char *name, const char *value) {
+void Processor::SetPauseInput(const char *name, const char *value) {
 	ObjectUnlock();
 	pauseInputCond.Lock();
 	bool old = pauseInput;
@@ -94,7 +94,7 @@ bool Processor::Init(Config *config) {
 	vector<string> *v;
 
 	// threads
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/threads", getId());
+	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/threads", GetId());
 	s = config->GetFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1 || nThreads <= 0 || nThreads > 100) {
 		LOG_ERROR(this, "Invalid number of threads: " << s);
@@ -105,7 +105,7 @@ bool Processor::Init(Config *config) {
 	modules = new vector<ModuleInfo*>[nThreads];
 
 	// module(s)
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/modules/Module/@id", getId());
+	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/modules/Module/@id", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
@@ -179,8 +179,8 @@ bool Processor::Init(Config *config) {
 				if (!mi->module->Init(c))
 					return false;
 				if (logLevel.length() > 0)
-					mi->module->setLogLevel(logLevel.c_str());
-				mi->type = mi->module->getType();
+					mi->module->SetLogLevel(logLevel.c_str());
+				mi->type = mi->module->GetType();
 				if (mi->type == Module::MULTI) {
 					mi->processingResources = 0;
 					mi->inputResources = new queue<Resource*>();
@@ -197,7 +197,7 @@ bool Processor::Init(Config *config) {
 
 	// input queue(s)
 	inputQueue = new SyncQueue<Resource>();
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue", getId());
+	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
@@ -205,7 +205,7 @@ bool Processor::Init(Config *config) {
 		for (int i = 0; i < n; i++) {
 			// priority
 			int priority = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@priority", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@priority", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &priority) != 1) {
@@ -216,7 +216,7 @@ bool Processor::Init(Config *config) {
 			}
 			// maxItems
 			int maxItems = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxItems", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxItems", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxItems) != 1) {
@@ -227,7 +227,7 @@ bool Processor::Init(Config *config) {
 			}
 			// maxSize
 			int maxSize = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxSize", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxSize", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxSize) != 1) {
@@ -240,12 +240,12 @@ bool Processor::Init(Config *config) {
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			values->AddGetter(buffer, &Processor::getInputQueueItems);
+			values->AddGetter(buffer, &Processor::GetInputQueueItems);
 		}
 	}
 
 	// output queue(s)
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor", getId());
+	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
@@ -254,16 +254,16 @@ bool Processor::Init(Config *config) {
 			OutputFilter *f = new OutputFilter();
 			outputFilters.push_back(f);
 			// reference
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@ref", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@ref", GetId(), i+1);
 			char *ref = config->GetFirstValue(buffer);
 			if (!ref) {
 				LOG_ERROR(this, "Missing reference: " << s);
 				return false;
 			}
-			f->setProcessor(ref);
+			f->SetProcessor(ref);
 			free(ref);
 			// priority
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@priority", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@priority", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				int priority;
@@ -271,19 +271,19 @@ bool Processor::Init(Config *config) {
 					LOG_ERROR(this, "Invalid priority: " << s);
 					return false;
 				}
-				f->setPriority(priority);
+				f->SetPriority(priority);
 				free(s);
 			}
 			// copy
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@copy", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@copy", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (!strcmp(s, "1") || !strcasecmp(s, "true"))
-					f->setCopy(true);
+					f->SetCopy(true);
 				free(s);
 			}
 			// filter
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@filter", getId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@filter", GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				int filter;
@@ -291,7 +291,7 @@ bool Processor::Init(Config *config) {
 					LOG_ERROR(this, "Invalid filter: " << s);
 					return false;
 				}
-				f->setFilter(filter);
+				f->SetFilter(filter);
 				free(s);
 			}
 		}
@@ -307,7 +307,7 @@ bool Processor::Init(Config *config) {
 					LOG_ERROR(this, "Input module must be first");
 					return false;
 				}
-				if (inputQueue->getQueuesCount() > 0) {
+				if (inputQueue->GetQueuesCount() > 0) {
 					LOG_ERROR(this, "queue and input module must not be used together");
 					return false;
 				}
@@ -324,7 +324,7 @@ bool Processor::Init(Config *config) {
 				break;
 			case Module::SIMPLE:
 			case Module::MULTI:
-				if (i == 0 && inputQueue->getQueuesCount() == 0) {
+				if (i == 0 && inputQueue->GetQueuesCount() == 0) {
 					LOG_ERROR(this, "No input queue defined");
 					return false;
 				} else if (i == n-1 && outputFilters.size() == 0) {
@@ -345,20 +345,20 @@ bool Processor::Init(Config *config) {
 // connect processors to other processors
 bool Processor::Connect() {
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin(); iter != outputFilters.end(); ++iter) {
-		int priority = (*iter)->getPriority();
-		const char *ref = (*iter)->getProcessor();
+		int priority = (*iter)->GetPriority();
+		const char *ref = (*iter)->GetProcessor();
 		assert(ref != NULL);
 		SyncQueue<Resource> *q;
 		Processor *p = dynamic_cast<Processor*>(objects->GetObject(ref));
 		if (p) {
-			q = p->getInputQueue();
+			q = p->GetInputQueue();
 		} else {
 			ProcessingEngine *pe = dynamic_cast<ProcessingEngine*>(objects->GetObject(ref));
 			if (!pe) {
 				LOG_ERROR(this, "Processor or ProcessingEngine not found: " << ref);
 				return false;
 			}
-			q = pe->getOutputQueue();
+			q = pe->GetOutputQueue();
 			if (!q)
 				q = pe->CreateOutputQueue();
 		}
@@ -372,16 +372,16 @@ bool Processor::Connect() {
 			LOG_ERROR(this, "No input queue with priority " << priority << " for Processor/ProcessingEngine: " << ref);
 			return false;
 		}
-		(*iter)->setQueue(q);
+		(*iter)->SetQueue(q);
 	}
 
 	// either PE's outputQueue or NULL
-	engineOutputQueue = engine->getOutputQueue();
+	engineOutputQueue = engine->GetOutputQueue();
 
 	return true;
 }
 
-bool Processor::isRunning() {
+bool Processor::IsRunning() {
 	bool result;
 	ObjectLockRead();
 	result = running;
@@ -405,19 +405,19 @@ void *run_thread(void *ptr) {
 
 // returns: false if would sleep or cancelled
 bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterIndex) {
-	int status = r->getStatus();
+	int status = r->GetStatus();
 	bool appended = false;
 	for (vector<OutputFilter*>::iterator iter = outputFilters.begin()+(filterIndex ? *filterIndex : 0); iter != outputFilters.end(); ++iter) {
 		OutputFilter *f = *iter;
-		if (f->isEmptyFilter() || f->getFilter() == status) {
-			Resource *copy = (*iter)->getCopy() ? r->Clone() : NULL;
-			if (!f->processResource(copy ? copy : r, timeout))
+		if (f->IsEmptyFilter() || f->GetFilter() == status) {
+			Resource *copy = (*iter)->GetCopy() ? r->Clone() : NULL;
+			if (!f->ProcessResource(copy ? copy : r, timeout))
 				return false;	// cancelled or no space available
 			if (filterIndex)
 				*filterIndex++;
 			if (!copy) {
 				appended = true;
-				if (f->getQueue() == engineOutputQueue)
+				if (f->GetQueue() == engineOutputQueue)
 					engine->UpdateResourceCount(-1);
 				break;
 			}
@@ -425,8 +425,8 @@ bool Processor::QueueResource(Resource *r, struct timeval *timeout, int *filterI
 		}
 	}
 	if (!appended) {
-		LOG_ERROR(this, "Lost resource (id: " << r->getId() << ")");
-		Resource::registry.ReleaseResource(r);
+		LOG_ERROR(this, "Lost resource (id: " << r->GetId() << ")");
+		Resource::registry->ReleaseResource(r);
 		engine->UpdateResourceCount(-1);
 	}
 
@@ -447,7 +447,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 					LOG_TRACE_R(minfo->module, resource, "I >")
 				else
 					LOG_TRACE(minfo->module, "I > 0");
-				if (!resource || !resource->isSetFlag(Resource::DELETED))
+				if (!resource || !resource->IsSetFlag(Resource::DELETED))
 					break;				// OK: no more resources or resource was not deleted
 				deletedResources.push(resource);	// deleted resource
 			}
@@ -461,12 +461,12 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 		case Module::OUTPUT:
 			LOG_TRACE_R(minfo->module, resource, "O <");
 			resource = minfo->module->ProcessOutput(resource);
-			Resource::registry.ReleaseResource(resource);
+			Resource::registry->ReleaseResource(resource);
 			engine->UpdateResourceCount(-1);
 			resource = NULL;
 			break;
 		case Module::SIMPLE:
-			if (!resource->isSetFlag(Resource::SKIP)) {
+			if (!resource->IsSetFlag(Resource::SKIP)) {
 				LOG_TRACE_R(minfo->module, resource, "<");
 				resource = minfo->module->ProcessSimple(resource);
 				if (resource)
@@ -478,7 +478,7 @@ Resource *Processor::ApplyModules(vector<ModuleInfo*> *mis, Resource *resource, 
 				LOG_ERROR(this, "Resource lost");
 				return NULL;
 			}
-			if (resource->isSetFlag(Resource::DELETED)) {
+			if (resource->IsSetFlag(Resource::DELETED)) {
 				// deleted resource
 				deletedResources.push(resource);
 				return NULL;
@@ -511,7 +511,7 @@ void Processor::runThread(int threadId) {
 	// block while reading/writing resources from/to a queue?
 	bool block = true;	
 	struct timeval timeout = { 0, 0 };
-	while (isRunning()) {
+	while (IsRunning()) {
 		// process modules up-to first multi module
 		int multiIndex = this->NextMultiModuleIndex(mis, 0);
 		int resourcesRead = 0;
@@ -519,14 +519,14 @@ void Processor::runThread(int threadId) {
 			Resource *resource = NULL;
 			if ((*mis)[0]->type != Module::INPUT) {
 				// get resource from the input queue
-				resource = inputQueue->getItem((block && resourcesRead == 0) ? &timeout : NULL);
+				resource = inputQueue->GetItem((block && resourcesRead == 0) ? &timeout : NULL);
 				if (!resource) {
 					if (block && resourcesRead == 0)
 						return; // cancelled
 					else
 						break; // no more resources available
 				}
-				if (inputQueue == engine->getInputQueue())
+				if (inputQueue == engine->GetInputQueue())
 					engine->UpdateResourceCount(1);
 				resourcesRead++;
 			} else {
@@ -542,7 +542,7 @@ void Processor::runThread(int threadId) {
 					while (pauseInput) {
 						pauseInputCond.WaitSend(NULL);
 						pauseInputCond.Unlock();
-						if (!isRunning())
+						if (!IsRunning())
 							return;	// cancelled
 						pauseInputCond.Lock();
 					}
@@ -594,7 +594,7 @@ void Processor::runThread(int threadId) {
 			// some resources were added
 			if (delta != 0) {
 				if (delta > 0) {
-					LOG_ERROR(this, "Some resources were deleted in " << minfo->module->getId() << "::ProcessMulti(), which is prohibited. Just mark them deleted.");
+					LOG_ERROR(this, "Some resources were deleted in " << minfo->module->GetId() << "::ProcessMulti(), which is prohibited. Just mark them deleted.");
 				}
 				// resources must not be deleted in ProcessMulti(), just marked as deleted
 				assert(delta < 0);
@@ -607,7 +607,7 @@ void Processor::runThread(int threadId) {
 			while (minfo->outputResources->size() > 0) {
 				Resource *resource = minfo->outputResources->front();
 				minfo->outputResources->pop();
-				if (resource->isSetFlag(Resource::DELETED)) {
+				if (resource->IsSetFlag(Resource::DELETED)) {
 					// deleted resource: do not process it any more
 					deletedResources.push(resource);
 					continue;
@@ -616,7 +616,7 @@ void Processor::runThread(int threadId) {
 				if (resource) {
 					if (nextMultiIndex >= 0) {
 						// next multi module
-						if (!resource->isSetFlag(Resource::SKIP))
+						if (!resource->IsSetFlag(Resource::SKIP))
 							(*mis)[nextMultiIndex]->inputResources->push(resource);
 						else
 							(*mis)[nextMultiIndex]->outputResources->push(resource);
@@ -656,7 +656,7 @@ void Processor::runThread(int threadId) {
 		// any more resources
 		while (deletedResources.size() > 0) {
 			if (engineOutputQueue) {
-				if (!engineOutputQueue->putItem(deletedResources.front(), NULL, 0)) {
+				if (!engineOutputQueue->PutItem(deletedResources.front(), NULL, 0)) {
 					readMax = 0;
 					break;
 				}
@@ -665,7 +665,7 @@ void Processor::runThread(int threadId) {
 				// no output queue => no need to store anything, we just
 				// discard the resource (and notify PE)
 				LOG_TRACE_R(this, deletedResources.front(), "Deleted");
-				Resource::registry.ReleaseResource(deletedResources.front());
+				Resource::registry->ReleaseResource(deletedResources.front());
 				engine->UpdateResourceCount(-1);
 			}
 			deletedResources.pop();
@@ -768,7 +768,7 @@ bool Processor::RestoreCheckpointSync(const char *path) {
 	return true;
 }
 
-char *Processor::getInputQueueItems(const char *name) {
+char *Processor::GetInputQueueItems(const char *name) {
 	// get queue priority first
 	string n(name);
 	size_t dot = n.find_last_of('.');

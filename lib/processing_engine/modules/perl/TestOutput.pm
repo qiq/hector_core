@@ -41,7 +41,7 @@ sub Init {
 	return 1;
 }
 
-sub getType {
+sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::OUTPUT;
 }
@@ -101,10 +101,10 @@ sub RestoreCheckpoint {
 sub ProcessOutput() {
 	my ($self, $resource) = @_;
 
-	if (not defined $resource or $resource->getTypeStr() ne 'TestResource') {
-		$self->{'_object'}->log_error("Invalid resource: ".$resource->getTypeStr());
+	if (not defined $resource or $resource->GetTypeString() ne 'TestResource') {
+		$self->{'_object'}->log_error("Invalid resource: ".$resource->GetTypeString());
 	} else {
-		$self->{'_object'}->log_info($resource->toStringShort()." Resource arrived (".$resource->getStr().")");
+		$self->{'_object'}->log_info($resource->ToStringShort()." Resource arrived (".$resource->GetStr().")");
 		$self->{'items'}++;
 	}
 	return $resource;

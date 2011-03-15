@@ -13,7 +13,7 @@ perl_LTLIBRARIES = Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.pm
 Hector_wrap.cc Hector.pm: $(top_srcdir)/lib/Hector.i
-	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -DSWIG_TYPE_TABLE=hector -c++ -perl -o Hector_wrap.cc $<
+	$(SWIG) -Wall -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -DSWIG_TYPE_TABLE=hector -c++ -perl -o Hector_wrap.cc $<
 
 Hector_la_SOURCES = \
 	Hector_wrap.cc

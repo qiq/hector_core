@@ -17,12 +17,12 @@ void SimpleHTTPServer::Request(int fd) {
 			break;
 		if (!HandleRequest(conn)) {
 			char s[1000];
-			snprintf(s, sizeof(s), "Method %s not implemented", conn->getRequestMethod().c_str());
+			snprintf(s, sizeof(s), "Method %s not implemented", conn->GetRequestMethod().c_str());
 			conn->ErrorResponse(501, "Not implemented", s);
 		}
 
 		conn->SendResponse();
-		if (!conn->isKeepAlive())
+		if (!conn->IsKeepAlive())
 			break; 
 		conn->Clear();
 	}

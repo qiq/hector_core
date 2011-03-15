@@ -24,24 +24,24 @@ public:
 	SimpleHTTPConn(int sock);
 	~SimpleHTTPConn();
 	void Clear();
-	bool isKeepAlive();
+	bool IsKeepAlive();
 
 	bool ReadRequest();
 	void SendResponse();
 
-	string getRequestMethod();
-	string getRequestArgs();
-	string getRequestHeaderField(string &field);
-	string getRequestBody();
+	string GetRequestMethod();
+	string GetRequestArgs();
+	string GetRequestHeaderField(string &field);
+	string GetRequestBody();
 
 	void ErrorResponse(int code, const char *description, const char *message);
-	void setResponseCode(int code, const char *description);
-	void clearResponseHeader();
-	void appendResponseHeader(const std::string &s);
-	void appendResponseHeader(const char *s, int size);
-	void clearResponseBody();
-	void appendResponseBody(const std::string &s);
-	void appendResponseBody(const char *s, int size);
+	void SetResponseCode(int code, const char *description);
+	void ClearResponseHeader();
+	void AppendResponseHeader(const std::string &s);
+	void AppendResponseHeader(const char *s, int size);
+	void ClearResponseBody();
+	void AppendResponseBody(const std::string &s);
+	void AppendResponseBody(const char *s, int size);
 
 private:
 	int socket;			// socket used

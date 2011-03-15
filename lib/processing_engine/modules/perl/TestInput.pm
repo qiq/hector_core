@@ -45,7 +45,7 @@ sub Init {
 	return 1;
 }
 
-sub getType {
+sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::INPUT;
 }
@@ -111,9 +111,9 @@ sub ProcessInput() {
 	}
 	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
 	$resource = Hector::TestResource->new();
-	$resource->setId($self->{'_threadIndex'}*10000+$self->{'items'});
-	$resource->setStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}));
-	$self->{'_object'}->log_info($resource->toStringShort()." Loading resource (".$resource->getStr().")");
+	$resource->SetId($self->{'_threadIndex'}*10000+$self->{'items'});
+	$resource->SetStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}));
+	$self->{'_object'}->log_info($resource->ToStringShort()." Loading resource (".$resource->GetStr().")");
 	$self->{'items'}++;
 
 	return $resource;

@@ -21,13 +21,13 @@ public:
 	TestOutput(ObjectRegistry *objects, const char *id, int threadIndex);
 	~TestOutput();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
-	Module::Type getType();
+	Module::Type GetType();
 	Resource *ProcessOutputSync(Resource *resource);
 
 private:
 	int items;		// ObjectLock
 
-	char *getItems(const char *name);
+	char *GetItems(const char *name);
 
 	ObjectValues<TestOutput> *values;
 	char *GetValueSync(const char *name);
@@ -35,7 +35,7 @@ private:
 	std::vector<std::string> *ListNamesSync();
 };
 
-inline Module::Type TestOutput::getType() {
+inline Module::Type TestOutput::GetType() {
 	return OUTPUT;
 }
 

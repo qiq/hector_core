@@ -27,16 +27,16 @@ public:
 	Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id);
 	~Processor();
 	bool Init(Config *config);
-	bool isRunning();
+	bool IsRunning();
 	void runThread(int id);
 	void Start();
 	void Stop();
 	void Pause();
 	void Resume();
 
-	SyncQueue<Resource> *getInputQueue();
+	SyncQueue<Resource> *GetInputQueue();
 
-	char *getInputQueueItems(const char *name);
+	char *GetInputQueueItems(const char *name);
 
 protected:
 	typedef struct {
@@ -60,8 +60,8 @@ protected:
 	std::queue<Resource*> deletedResources;	// deleted resources to be appended to the engine's output queue
 	SyncQueue<Resource> *engineOutputQueue;	// used only for appending deleted resources to engine's output queue
 
-	char *getPauseInput(const char *name);
-	void setPauseInput(const char *name, const char *value);
+	char *GetPauseInput(const char *name);
+	void SetPauseInput(const char *name, const char *value);
 
 	ObjectValues<Processor> *values;
 	char *GetValueSync(const char *name);
@@ -83,7 +83,7 @@ protected:
 	bool AppendResource(vector<ModuleInfo*> *mis, Resource *resource, int multiIndex, struct timeval *timeout, int *outputFilterIndex);
 };
 
-inline SyncQueue<Resource> *Processor::getInputQueue() {
+inline SyncQueue<Resource> *Processor::GetInputQueue() {
 	return inputQueue;
 }
 

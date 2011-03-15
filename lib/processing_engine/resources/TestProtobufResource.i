@@ -11,22 +11,25 @@ public:
         TestProtobufResource();
         ~TestProtobufResource();
         Resource *Clone();
+        void Clear();
         std::string *Serialize();
         int GetSerializedSize();
         bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output);
         bool Deserialize(const char *data, int size);
         bool Deserialize(google::protobuf::io::CodedInputStream *input);
-        int getTypeId();
-        const char *getTypeStr();
-        const char *getModuleStr();
-        int getId();
-        void setId(int id);
-        int getStatus();
-        void setStatus(int status);
-        int getSize();
-        std::string toString(Object::LogLevel logLevel);
+        std::vector<ResourceAttrInfo*> *GetAttrInfoList();
+        int GetTypeId();
+        const char *GetTypeString(bool terse = false);
+        int GetSize();
+        std::string ToString(Object::LogLevel logLevel);
 
-        void setStr(const std::string &str);
-        const std::string &getStr();
+        int GetId();
+        void SetId(int id);
+        int GetStatus();
+        void SetStatus(int status);
 
+        void SetStr(const std::string &str);
+        const std::string GetStr();
+
+        static bool IsTestProtobufResource(Resource *resource);
 };

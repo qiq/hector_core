@@ -2,7 +2,7 @@
 %include "std_vector.i"
 %include "std_string.i"
 
-%newobject Object::getValue(const char *name);
+%newobject Object::GetValue(const char *name);
 
 %{
 #include "Object.h"
@@ -17,7 +17,7 @@ public:
         void ObjectLockRead();
         void ObjectLockWrite();
         void ObjectUnlock();
-        const char *getId();
+        const char *GetId();
         char *GetValue(const char *name);
         bool SetValue(const char *name, const char *value);
         std::vector<std::string> *ListNames();

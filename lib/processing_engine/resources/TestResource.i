@@ -11,18 +11,17 @@ public:
         TestResource();
         ~TestResource();
         Resource *Clone();
+        void Clear();
         std::string *Serialize();
         bool Deserialize(const char *data, int size);
-        int getTypeId();
-        const char *getTypeStr();
-        const char *getModuleStr();
-        int getId();
-        void setId(int id);
-        int getStatus();
-        void setStatus(int status);
-        int getSize();
-        std::string toString(Object::LogLevel logLevel);
+        std::vector<ResourceAttrInfo*> *GetAttrInfoList();
+        int GetTypeId();
+        const char *GetTypeString(bool terse = false);
+        int GetSize();
+        std::string ToString(Object::LogLevel logLevel);
 
-        void setStr(const std::string &str);
-        const std::string &getStr();
+        void SetStr(const std::string &str);
+        const std::string GetStr();
+
+        static bool IsTestResource(Resource *resource);
 };

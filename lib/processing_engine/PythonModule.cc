@@ -47,7 +47,7 @@ bool PythonModule::Init(vector<pair<string, string> > *c) {
 	if (c) {
 		// load python module
 		obj = python->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0);
-		module = python->LoadModule(name, "(Osi)", obj, getId(), threadIndex);
+		module = python->LoadModule(name, "(Osi)", obj, GetId(), threadIndex);
 		if (module) {
 			// create c vector (list of pairs) in Python	
 			args = PyList_New(c->size());
@@ -77,15 +77,15 @@ bool PythonModule::Init(vector<pair<string, string> > *c) {
 	return result;
 }
 
-Module::Type PythonModule::getType() {
+Module::Type PythonModule::GetType() {
 	PyGILState_STATE gstate = python->Lock();
 	Module::Type result = Module::INVALID;
 
-	PyObject *r = python->CallMethod(module, "getType", "()");
+	PyObject *r = python->CallMethod(module, "GetType", "()");
 	if (!r) {
-		LOG_ERROR(this, "Error calling getType");
+		LOG_ERROR(this, "Error calling GetType");
 	} else if (!PyInt_Check(r)) {
-		LOG_ERROR(this, "Error calling getType: invalid result");
+		LOG_ERROR(this, "Error calling GetType: invalid result");
 		Py_DECREF(r);
 	} else {
 		result = (Module::Type)PyLong_AsLong(r);
@@ -193,7 +193,7 @@ Resource *PythonModule::ProcessOutputSync(Resource *resource) {
 	PyObject *in;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
 		in = python->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 	} else {
 		Py_INCREF(Py_None);
@@ -224,7 +224,7 @@ Resource *PythonModule::ProcessSimpleSync(Resource *resource) {
 	PyObject *in;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
 		in = python->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 	} else {
 		Py_INCREF(Py_None);
@@ -256,7 +256,7 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	int i = 0;
 	while (inputResources->size() > 0) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", inputResources->front()->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", inputResources->front()->GetTypeString());
 		PyList_SetItem(inRes, i, python->NewPointerObj(const_cast<void*>(static_cast<const void*>(inputResources->front())), buffer, 0x01));
 		inputResources->pop();
 		i++;
@@ -265,7 +265,7 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	i = 0;
 	while (outputResources->size() > 0) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", outputResources->front()->getTypeStr());
+		snprintf(buffer, sizeof(buffer), "%s *", outputResources->front()->GetTypeString());
 		PyList_SetItem(outRes, i, python->NewPointerObj(const_cast<void*>(static_cast<const void*>(outputResources->front())), buffer, 0x01));
 		outputResources->pop();
 		i++;

@@ -28,14 +28,14 @@ bool BaseServer::Init(std::vector<std::pair<std::string, std::string> > *params)
 		return false;
 	}
 	for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
-		name2engine[(*iter)->getId()] = *iter;
+		name2engine[(*iter)->GetId()] = *iter;
 	}
 	return true;
 }
 
 bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
-	string method = conn->getRequestMethod();
-	string args = conn->getRequestArgs();
+	string method = conn->GetRequestMethod();
+	string args = conn->GetRequestArgs();
 	if (args.substr(0, 1) == "/")
 		args = args.substr(1);
 	if (method == "GET") {
@@ -48,8 +48,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				char *value = objects->GetObjectValue(object.c_str(), property.c_str());
 				if (value) {
 					LOG4CXX_INFO(logger, "GET " << args << " = " << value);
-					conn->setResponseCode(200, "OK");
-					conn->appendResponseBody(value);
+					conn->SetResponseCode(200, "OK");
+					conn->AppendResponseBody(value);
 				} else {
 					LOG4CXX_ERROR(logger, "GET " << args << ": Object not found");
 					conn->ErrorResponse(400, "Object/property not found", "");
@@ -62,8 +62,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 					vector<string> *names = object->ListNames();
 					string s;
 					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
-						conn->appendResponseBody(iter->c_str());
-						conn->appendResponseBody("\r\n");
+						conn->AppendResponseBody(iter->c_str());
+						conn->AppendResponseBody("\r\n");
 						if (s.length() > 0)
 							s += ", ";
 						s += *iter;
@@ -79,11 +79,11 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		} else {
 			// list objects
 			vector<string> *all = objects->GetIds();
-			conn->setResponseCode(200, "OK");
+			conn->SetResponseCode(200, "OK");
 			string s;
 			for (vector<string>::iterator iter = all->begin(); iter != all->end(); ++iter) {
-				conn->appendResponseBody(iter->c_str());
-				conn->appendResponseBody("\r\n");
+				conn->AppendResponseBody(iter->c_str());
+				conn->AppendResponseBody("\r\n");
 				if (s.length() > 0)
 					s += ", ";
 				s += *iter;
@@ -98,12 +98,12 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			if (dot != string::npos) {
 				string object = args.substr(0, dot);
 				string property = args.substr(dot+1);
-				string body = conn->getRequestBody();
+				string body = conn->GetRequestBody();
 				size_t eoln = body.find_first_of("\r\n");
 				string value = eoln != string::npos ? body.substr(0, eoln): body;
 				if (objects->SetObjectValue(object.c_str(), property.c_str(), value.c_str())) {
 					LOG4CXX_INFO(logger, "SET " << args << " = " << value);
-					conn->setResponseCode(200, "OK");
+					conn->SetResponseCode(200, "OK");
 				} else {
 					LOG4CXX_ERROR(logger, "SET " << args << " = " << value << ": Object/property not found");
 					conn->ErrorResponse(400, "Object/property not found", "");
@@ -125,23 +125,23 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		tr1::unordered_map<string, ProcessingEngine*>::iterator iter = name2engine.find(args);
 		if (iter == name2engine.end()) {
 			LOG4CXX_ERROR(logger, "ProcessingEngine " << args << " not found");
-			conn->setResponseCode(500, "ProcessorEngine not found");
+			conn->SetResponseCode(500, "ProcessorEngine not found");
 			return true;
 		}
 		
 		ProcessingEngine *engine = iter->second;
 
 		// check that PROCESS/PASS is correct for given PE
-		if ((process && !engine->getOutputQueue()) || (!process && engine->getOutputQueue())) {
+		if ((process && !engine->GetOutputQueue()) || (!process && engine->GetOutputQueue())) {
 			LOG4CXX_ERROR(logger, "Invalid method for ProcessingEngine: " << method);
-			conn->setResponseCode(500, "Invalid method for ProcessorEngine");
+			conn->SetResponseCode(500, "Invalid method for ProcessorEngine");
 			return true;
 		}
 
 		// create all resources
 		tr1::unordered_set<int> resourceIds;
 		vector<int> resourceIdsOrdered;
-		string body = conn->getRequestBody();
+		string body = conn->GetRequestBody();
 		const char *data = body.data();
 		struct timeval timeout = { 0, 0 };
 		int i = 0;
@@ -150,17 +150,17 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			i += 4;
 			uint8_t typeId = *(uint8_t*)(data+i);
 			i++;
-			Resource *r = Resource::registry.AcquireResource(typeId);
+			Resource *r = Resource::registry->AcquireResource(typeId);
 			if (!r) {
 				char buf[1024];
 				snprintf(buf, sizeof(buf), "Cannot create resource of type %d", typeId);
-				conn->setResponseCode(500, buf);
+				conn->SetResponseCode(500, buf);
 				return true;
 			}
 			if (!r->Deserialize(data+i, size))
 				return true;
 			i+= size;
-			int id = r->getId();
+			int id = r->GetId();
 			if (!engine->ProcessResource(r, &timeout))
 				break;
 			resourceIdsOrdered.push_back(id);
@@ -168,7 +168,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		}
 
 		if (i < (int)body.length()) {
-			conn->setResponseCode(500, "Error passing data to ProcessingEngine");
+			conn->SetResponseCode(500, "Error passing data to ProcessingEngine");
 			return true;
 		}
 
@@ -179,55 +179,55 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			// reorder back to the original order (we wait for all resources anyway)
 			tr1::unordered_map<int, Resource*> map;
 			for (int i = 0; i < (int)result.size(); i++) {
-				map[result[i]->getId()] = result[i];
+				map[result[i]->GetId()] = result[i];
 			}
 			for (int i = 0; i < (int)resourceIdsOrdered.size(); i++) {
 				Resource *r = map[resourceIdsOrdered[i]];
 				string *s = r->Serialize();
 				uint32_t size = s->length();
-				conn->appendResponseBody((char*)&size, 4);
-				uint8_t type = r->getTypeId();
-				conn->appendResponseBody((char*)&type, 1);
-				conn->appendResponseBody(*s);
+				conn->AppendResponseBody((char*)&size, 4);
+				uint8_t type = r->GetTypeId();
+				conn->AppendResponseBody((char*)&type, 1);
+				conn->AppendResponseBody(*s);
 				delete s;
-				Resource::registry.ReleaseResource(r);
+				Resource::registry->ReleaseResource(r);
 			}
 			if (result.size() == resourceIdsOrdered.size())
-				conn->setResponseCode(200, "OK");
+				conn->SetResponseCode(200, "OK");
 			else
-				conn->setResponseCode(500, "Error getting data from ProcessingEngine");
+				conn->SetResponseCode(500, "Error getting data from ProcessingEngine");
 		} else {
-			conn->setResponseCode(200, "OK");
+			conn->SetResponseCode(200, "OK");
 		}
 		return true;
 	} else if (method == "SAVE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
 			if (!(*iter)->SaveCheckpoint(args.c_str())) {
-				conn->setResponseCode(500, "Error saving checkpoint");
+				conn->SetResponseCode(500, "Error saving checkpoint");
 				return true;
 			}
 		}
-		conn->setResponseCode(200, "OK");
+		conn->SetResponseCode(200, "OK");
 		return true;
 	} else if (method == "RESTORE_CHECKPOINT") {
 		LOG4CXX_INFO(logger, method << " " << args);
 		for (vector<ProcessingEngine*>::iterator iter = engines->begin(); iter != engines->end(); ++iter) {
 			if (!(*iter)->RestoreCheckpoint(args.c_str())) {
-				conn->setResponseCode(500, "Error restoring checkpoint");
+				conn->SetResponseCode(500, "Error restoring checkpoint");
 				return true;
 			}
 		}
-		conn->setResponseCode(200, "OK");
+		conn->SetResponseCode(200, "OK");
 		return true;
 	} else if (method == "SHUTDOWN") {
 		LOG4CXX_INFO(logger, "SHUTDOWN");
-		conn->setResponseCode(200, "OK");
-		conn->appendResponseBody("Shutting down\r\n");
-		conn->appendResponseBody(conn->getRequestArgs().c_str());
-		conn->appendResponseBody("\r\n");
+		conn->SetResponseCode(200, "OK");
+		conn->AppendResponseBody("Shutting down\r\n");
+		conn->AppendResponseBody(conn->GetRequestArgs().c_str());
+		conn->AppendResponseBody("\r\n");
 
-		this->setRunning(false);
+		this->SetRunning(false);
 		return true;
 	} else {
 		return HandleExtension(conn);

@@ -7,12 +7,12 @@
 using namespace std;
 
 bool Module::Init(vector<pair<string, string> > *args) {
-	LOG_ERROR(this, "Unimplemented module " << getId() << " (Init)");
+	LOG_ERROR(this, "Unimplemented module " << GetId() << " (Init)");
 	return false;
 }
 
-Module::Type Module::getType() {
-	LOG_ERROR(this, "Unimplemented module " << getId() << " (getType)");
+Module::Type Module::GetType() {
+	LOG_ERROR(this, "Unimplemented module " << GetId() << " (GetType)");
 	return Module::INVALID;
 }
 

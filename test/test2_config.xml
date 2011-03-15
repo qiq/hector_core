@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test2: multithreaded read-write: one reader(5), one writer(5)
+Also testing another parameter value usage.
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<resources>
+			<Resource id="R_test" lib="TestResource.la"/>
+		</resources>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_input" lib="TestInput.la">
+						<param name="maxItems">1000</param>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_output"/>
+				</output>
+			</Processor>
+			<Processor id="P_output">
+				<threads>5</threads>
+				<modules>
+					<Module id="M_output" lib="TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

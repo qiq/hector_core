@@ -30,9 +30,9 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 	if (tmpInputResource && running <= maxRequests) {
 		if (engine->ProcessResource(tmpInputResource, running == 0 ? tv : NULL)) {
 			if (ordered)
-				runningSet.insert(tmpInputResource->getId());
+				runningSet.insert(tmpInputResource->GetId());
 			else
-				runningVector.push_back(tmpInputResource->getId());
+				runningVector.push_back(tmpInputResource->GetId());
 			running++;
 			tmpInputResource = NULL;
 			changed = true;
@@ -49,9 +49,9 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 		if (tmpInputResource) {
 			if (engine->ProcessResource(tmpInputResource, running == 0 ? tv : NULL)) {
 				if (ordered)
-					runningSet.insert(tmpInputResource->getId());
+					runningSet.insert(tmpInputResource->GetId());
 				else
-					runningVector.push_back(tmpInputResource->getId());
+					runningVector.push_back(tmpInputResource->GetId());
 				running++;
 				tmpInputResource = NULL;
 				changed = true;
@@ -89,7 +89,7 @@ bool CallProcessingEngine::ReadWrite(queue<Resource*> *inputResources, queue<Res
 }
 
 int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int timeTick) {
-	assert(engine->getOutputQueue() != NULL);
+	assert(engine->GetOutputQueue() != NULL);
 	struct timeval tv = ConstructTimeout(timeTick);
 
 	// do not block
@@ -114,7 +114,7 @@ int CallProcessingEngine::Process(queue<Resource*> *inputResources, queue<Resour
 }
 
 void CallProcessingEngine::Pass(queue<Resource*> *inputResources, int timeTick) {
-	assert(engine->getOutputQueue() == NULL);
+	assert(engine->GetOutputQueue() == NULL);
 	struct timeval tv = ConstructTimeout(timeTick);
 
 	ReadWrite(inputResources, NULL, &tv);

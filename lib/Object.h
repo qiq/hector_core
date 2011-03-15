@@ -15,11 +15,11 @@
 #include "ObjectRegistry.h"
 #include "RWLock.h"
 
-#define LOG_TRACE(o, ...) { LOG4CXX_TRACE(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
-#define LOG_DEBUG(o, ...) { LOG4CXX_DEBUG(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
-#define LOG_INFO(o, ...) { LOG4CXX_INFO(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
-#define LOG_ERROR(o, ...) { LOG4CXX_ERROR(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
-#define LOG_FATAL(o, ...) { LOG4CXX_FATAL(o->getLogger(), o->getId() << ": " << __VA_ARGS__) }
+#define LOG_TRACE(o, ...) { LOG4CXX_TRACE(o->getLogger(), o->GetId() << ": " << __VA_ARGS__) }
+#define LOG_DEBUG(o, ...) { LOG4CXX_DEBUG(o->getLogger(), o->GetId() << ": " << __VA_ARGS__) }
+#define LOG_INFO(o, ...) { LOG4CXX_INFO(o->getLogger(), o->GetId() << ": " << __VA_ARGS__) }
+#define LOG_ERROR(o, ...) { LOG4CXX_ERROR(o->getLogger(), o->GetId() << ": " << __VA_ARGS__) }
+#define LOG_FATAL(o, ...) { LOG4CXX_FATAL(o->getLogger(), o->GetId() << ": " << __VA_ARGS__) }
 
 class Object {
 public:
@@ -30,7 +30,7 @@ public:
 	void ObjectLockRead();
 	void ObjectLockWrite();
 	void ObjectUnlock();
-	const char *getId();
+	const char *GetId();
 	char *GetValue(const char *name);
 	bool SetValue(const char *name, const char *value);
 	std::vector<std::string> *ListNames();
@@ -50,7 +50,7 @@ public:
 	void log_fatal(const char *s);
 	void log_fatal(const std::string &s);
 
-	bool setLogLevel(const char *logLevel);
+	bool SetLogLevel(const char *logLevel);
 
 	enum LogLevel {
 		TRACE = 0,
@@ -105,7 +105,7 @@ inline ObjectRegistry *Object::GetObjectRegistry() {
 	return objects;
 }
 
-inline const char *Object::getId() {
+inline const char *Object::GetId() {
 	return id;
 }
 
@@ -132,7 +132,7 @@ inline char *Object::GetValue(const char *name) {
 
 inline bool Object::SetValue(const char *name, const char *value) {
 	if (!strcmp(name, "logLevel"))
-		return this->setLogLevel(value);
+		return this->SetLogLevel(value);
 	ObjectLockWrite();
 	bool result = SetValueSync(name, value);
 	ObjectUnlock();

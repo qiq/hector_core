@@ -39,7 +39,7 @@ sub Init {
 	return 1;
 }
 
-sub getType {
+sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::SIMPLE;
 }
@@ -99,7 +99,7 @@ sub RestoreCheckpoint {
 sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
-	$self->{'_object'}->log_debug($resource->toString($Hector::Object::INFO));
+	$self->{'_object'}->log_debug($resource->ToString($Hector::Object::INFO));
 
 	return $resource;
 }

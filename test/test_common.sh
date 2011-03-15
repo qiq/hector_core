@@ -35,7 +35,7 @@ function test_finish {
 
 function test_server_start {
 	ln -s $base/test/test.log.props . 2>/dev/null
-	hector_server_start $base/test/${id}-config.xml test $@
+	hector_server_start $base/test/${id}_config.xml test $@
 	hector_client_wait_dontfail PE_test.run 0
 }
 

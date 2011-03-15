@@ -240,6 +240,8 @@ AC_CONFIG_FILES([Makefile
 		lib/processing_engine/modules/java/Makefile
 		lib/processing_engine/modules/python/Makefile
 		lib/processing_engine/resources/Makefile
+		lib/processing_engine/resources/perl/Makefile
+		lib/processing_engine/resources/python/Makefile
 		lib/processing_engine/servers/Makefile
 		lib/server/Makefile
 		lib/perl/Makefile

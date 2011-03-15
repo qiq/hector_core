@@ -25,66 +25,51 @@ public:
 	std::string *Serialize();
 	bool Deserialize(const char *data, int size);
 	// return ResourceAttrInfo describing one field
-	ResourceAttrInfo *GetAttrInfo(const char *name);
+	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	int getTypeId();
+	int GetTypeId();
 	// type string of a resource
-	const char *getTypeStr();
-	const char *getTypeStrShort();
-	// module prefix (e.g. Hector for Hector::TestResource)
-	const char *getModuleStr();
+	const char *GetTypeString(bool terse = false);
 	// used by queues in case there is limit on queue size
-	int getSize();
+	int GetSize();
 	// return string representation of the resource (e.g. for debugging purposes)
-	std::string toString(Object::LogLevel logLevel);
+	std::string ToString(Object::LogLevel logLevel);
 
-	void setStr(const std::string &s);
-	const std::string &getStr();
+	void SetStr(const std::string &s);
+	const std::string GetStr();
 
-	static const int typeId = 1;
+	static bool IsTestResource(Resource *resource);
 
 protected:
+	static const int typeId = 1;
+
 	std::string str;
-
-	static std::vector<ResourceAttrInfoT<TestResource> > info;
-	static std::tr1::unordered_map<std::string, ResourceAttrInfoT<TestResource>*> infoMap;
-
-	static bool init;
-	static bool Init();
 
 	static log4cxx::LoggerPtr logger;
 };
 
-//inline ResourceFieldInfo *TestResource::getFieldInfo(const char *name) {
-//	return new ResourceFieldInfoT<TestResource>(name);
-//}
-
-inline int TestResource::getTypeId() {
-	return typeId;
+inline int TestResource::GetTypeId() {
+	return typeId; 
 }
 
-inline const char *TestResource::getTypeStr() {
-	return "TestResource";
+inline const char *TestResource::GetTypeString(bool terse) {
+	return terse ? "TR" : "TestResource";
 }
 
-inline const char *TestResource::getTypeStrShort() {
-	return "TR";
-}
-
-inline const char *TestResource::getModuleStr() {
-	return "Hector";
-}
-
-inline int TestResource::getSize() {
+inline int TestResource::GetSize() {
 	return 1;
 }
 
-inline const std::string &TestResource::getStr() {
+inline const std::string TestResource::GetStr() {
 	return str;
 }
 
-inline void TestResource::setStr(const std::string &str) {
+inline void TestResource::SetStr(const std::string &str) {
 	this->str = str;
+}
+
+inline bool TestResource::IsTestResource(Resource *resource) {
+	return resource->GetTypeId() == typeId;
 }
 
 #endif

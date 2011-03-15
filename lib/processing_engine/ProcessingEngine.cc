@@ -23,11 +23,11 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Obj
 
 	values = new ObjectValues<ProcessingEngine>(this);
 
-	values->AddGetter("run", &ProcessingEngine::getRun);
-	values->AddSetter("run", &ProcessingEngine::setRun);
-	values->AddGetter("pause", &ProcessingEngine::getPause);
-	values->AddSetter("pause", &ProcessingEngine::setPause);
-	values->AddGetter("resourceCount", &ProcessingEngine::getResourceCount);
+	values->AddGetter("run", &ProcessingEngine::GetRun);
+	values->AddSetter("run", &ProcessingEngine::SetRun);
+	values->AddGetter("pause", &ProcessingEngine::GetPause);
+	values->AddSetter("pause", &ProcessingEngine::SetPause);
+	values->AddGetter("resourceCount", &ProcessingEngine::GetResourceCount);
 }
 
 ProcessingEngine::~ProcessingEngine() {
@@ -53,7 +53,7 @@ bool ProcessingEngine::Init(Config *config) {
 	vector<string> *v;
 
 	// create children: processors
-	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/Processor/@id", getId());
+	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/Processor/@id", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		// create and initialize all Processors
@@ -70,7 +70,7 @@ bool ProcessingEngine::Init(Config *config) {
 	}
 
 	// input queue(s)
-	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/inputProcessor/@ref", getId());
+	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/inputProcessor/@ref", GetId());
 	char *ref = config->GetFirstValue(buffer);
 	if (ref) {
 		Processor *p = dynamic_cast<Processor*>(objects->GetObject(ref));
@@ -78,7 +78,7 @@ bool ProcessingEngine::Init(Config *config) {
 			LOG_ERROR(this, "Processor not found: " << ref);
 			return false;
 		}
-		inputQueue = p->getInputQueue();
+		inputQueue = p->GetInputQueue();
 		if (!inputQueue) {
 			LOG_ERROR(this, "No input queue defined for processor: " << ref);
 			return false;
@@ -93,7 +93,7 @@ bool ProcessingEngine::Init(Config *config) {
 bool ProcessingEngine::ProcessResource(Resource *resource, struct timeval *timeout) {
 	if (!inputQueue)
 		return false;
-	return inputQueue->putItem(resource, timeout, 0);
+	return inputQueue->PutItem(resource, timeout, 0);
 }
 
 // get processed resource from the processing engine, false: cancelled or timeout
@@ -137,7 +137,7 @@ bool ProcessingEngine::GetProcessedResources(tr1::unordered_set<int> *ids, vecto
 		} else {
 			waitingInQueue = true;
 			finishedLock.Unlock();
-			Resource *r = outputQueue->getItem(timeout);
+			Resource *r = outputQueue->GetItem(timeout);
 			finishedLock.Lock();
 			waitingInQueue = false;
 			if (!r) {
@@ -151,7 +151,7 @@ bool ProcessingEngine::GetProcessedResources(tr1::unordered_set<int> *ids, vecto
 			bool found_my = false;
 			bool found_foreign = false;
 			while (r) {
-				id = r->getId();
+				id = r->GetId();
 				if (ids->find(id) != ids->end()) {
 					output->push_back(r);
 					ids->erase(id);
@@ -160,7 +160,7 @@ bool ProcessingEngine::GetProcessedResources(tr1::unordered_set<int> *ids, vecto
 					finishedResources[id] = r;
 					found_foreign = true;
 				}
-				r = outputQueue->getItem(NULL);
+				r = outputQueue->GetItem(NULL);
 			}
 			// re-set iterator if we deleted some of ids
 			if (found_my)
@@ -208,7 +208,7 @@ bool ProcessingEngine::GetProcessedResourcesOrdered(vector<int> *ids, vector<Res
 		} else {
 			waitingInQueue = true;
 			finishedLock.Unlock();
-			Resource *r = outputQueue->getItem(timeout);
+			Resource *r = outputQueue->GetItem(timeout);
 			finishedLock.Lock();
 			waitingInQueue = false;
 			if (!r) {
@@ -219,7 +219,7 @@ bool ProcessingEngine::GetProcessedResourcesOrdered(vector<int> *ids, vector<Res
 			}
 			bool found_foreign = false;
 			while (r) {
-				id = r->getId();
+				id = r->GetId();
 				if ((*ids)[index] == id) {
 					output->push_back(r);
 					index++;
@@ -227,7 +227,7 @@ bool ProcessingEngine::GetProcessedResourcesOrdered(vector<int> *ids, vector<Res
 					finishedResources[id] = r;
 					found_foreign = true;
 				}
-				r = outputQueue->getItem(NULL);
+				r = outputQueue->GetItem(NULL);
 			}
 			if (found_foreign) {
 				finishedLock.SignalSend();
@@ -277,10 +277,10 @@ Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout
 			}
 			Resource *found = NULL;
 			while (r) {
-				if (r->getId() == id)
+				if (r->GetId() == id)
 					found = r;
 				else
-					finishedResources[r->getId()] = r;
+					finishedResources[r->GetId()] = r;
 				r = outputQueue->getItem(NULL);
 			}
 			finishedLock.SignalSend();
@@ -380,11 +380,11 @@ vector<string> *ProcessingEngine::ListNamesSync() {
 	return values->ListNames();
 }
 
-char *ProcessingEngine::getRun(const char *name) {
+char *ProcessingEngine::GetRun(const char *name) {
 	return bool2str(propRun);
 }
 
-void ProcessingEngine::setRun(const char *name, const char *value) {
+void ProcessingEngine::SetRun(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		StopSync();
@@ -397,11 +397,11 @@ void ProcessingEngine::setRun(const char *name, const char *value) {
 	}
 }
 
-char *ProcessingEngine::getPause(const char *name) {
+char *ProcessingEngine::GetPause(const char *name) {
 	return bool2str(propPause);
 }
 
-void ProcessingEngine::setPause(const char *name, const char *value) {
+void ProcessingEngine::SetPause(const char *name, const char *value) {
 	switch (str2bool(value)) {
 	case 0:
 		ResumeSync();
@@ -414,7 +414,7 @@ void ProcessingEngine::setPause(const char *name, const char *value) {
 	}
 }
 
-char *ProcessingEngine::getResourceCount(const char *name) {
+char *ProcessingEngine::GetResourceCount(const char *name) {
 	return int2str(resourceCount);
 }
 
