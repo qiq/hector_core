@@ -30,6 +30,8 @@ public:
 	int GetTypeId();
 	// type string of a resource
 	const char *GetTypeString(bool terse = false);
+	// object name (for construction of an object or a reference)
+	const char *GetObjectName();
 	// used by queues in case there is limit on queue size
 	int GetSize();
 	// return string representation of the resource (e.g. for debugging purposes)
@@ -54,6 +56,10 @@ inline int TestResource::GetTypeId() {
 
 inline const char *TestResource::GetTypeString(bool terse) {
 	return terse ? "TR" : "TestResource";
+}
+
+inline const char *TestResource::GetObjectName() {
+	return "TestResource";
 }
 
 inline int TestResource::GetSize() {

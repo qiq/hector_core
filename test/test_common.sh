@@ -17,7 +17,7 @@ function test_init {
 	base=`readlink -f "$base"`
 	export PATH=$base/src:$PATH
 	export LD_LIBRARY_PATH=$base/lib:$base/lib/processing_engine/servers:$base/lib/processing_engine/resources:$base/lib/processing_engine/modules:$base/lib/perl/.libs:$base/lib/python/.libs:$LD_LIBRARY_PATH
-	export PERL5LIB=$base/lib/perl:$base/lib/processing_engine/modules/perl:$PERL5LIB
+	export PERL5LIB=$base/lib/perl:$base/lib/processing_engine/modules/perl:$base/lib/processing_engine/resources/perl:$PERL5LIB
 	export PYTHONPATH=$base/lib/python:$base/lib/python/.libs:$base/lib/processing_engine/modules/python:$PYTHONPATH
 	HECTOR_HOST=localhost:1101
 

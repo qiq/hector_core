@@ -20,6 +20,8 @@ Server::~Server() {
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		delete *iter;
 	}
+	delete Resource::registry;
+	Resource::registry = NULL;
 	delete simpleHTTPServer;
 	delete objects;
 	objects = NULL;

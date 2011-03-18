@@ -23,25 +23,34 @@ class EmbeddedPerl {
 public:
 	EmbeddedPerl();
 	~EmbeddedPerl();
-	void SetContext();
+	void *GetContext();
+	void SetContext(void *ctx = NULL);
 	bool Init();
 
 	SV *NewPointerObj(void *ptr, const char *type, int flags);
 	int ConvertPtr(SV *obj, void **ptr, const char *type, int flags);
 
 private:
-	static swig_type_info *(*Perl_TypeQuery)(const char *type);
-	static SV *(*Perl_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
-	static int (*Perl_ConvertPtr)(SV *obj, void **ptr, swig_type_info *ty, int flags);
-	static std::tr1::unordered_map<std::string, swig_type_info*> typeInfoCache;
-
 	PerlInterpreter *my_perl;
+
+	swig_type_info *(*Perl_TypeQuery)(const char *type);
+	SV *(*Perl_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
+	int (*Perl_ConvertPtr)(SV *obj, void **ptr, swig_type_info *ty, int flags);
+	std::tr1::unordered_map<std::string, swig_type_info*> typeInfoCache;
 
 	static log4cxx::LoggerPtr logger;
 };
 
-inline void EmbeddedPerl::SetContext() {
-	PERL_SET_CONTEXT(my_perl);
+inline void *EmbeddedPerl::GetContext() {
+	return PERL_GET_CONTEXT;
+}
+
+// ctx == NULL: set current perl as a context
+inline void EmbeddedPerl::SetContext(void *ctx) {
+	if (ctx)
+		PERL_SET_CONTEXT(ctx);
+	else
+		PERL_SET_CONTEXT(my_perl);
 }
 
 #endif

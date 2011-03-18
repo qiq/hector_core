@@ -57,15 +57,17 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 			av_push(row, newSVpv(iter->second.c_str(), 0));
 			av_push(table, newRV_noinc((SV*)row ));
 		}
-		sv = newRV_noinc((SV*)table);
+		sv = sv_2mortal(newRV_noinc((SV*)table));
+		
 	}
 	// call Init()
 	bool result = false;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
-        XPUSHs(sv_2mortal(sv));
+        XPUSHs(sv);
         PUTBACK;
 	int count = call_method("Init", G_SCALAR|G_EVAL);
 	SPAGAIN;
@@ -97,6 +99,7 @@ Module::Type PerlModule::GetType() {
 	Module::Type result = Module::INVALID;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -125,6 +128,7 @@ void PerlModule::StartSync() {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -141,6 +145,7 @@ void PerlModule::StopSync() {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -157,6 +162,7 @@ void PerlModule::PauseSync() {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -173,6 +179,7 @@ void PerlModule::ResumeSync() {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -192,6 +199,7 @@ Resource *PerlModule::ProcessInputSync(bool sleep) {
 	// call Process method: $module->Process($resource)
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -235,7 +243,7 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	SV *resourceSV;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 		if (!resourceSV)
 			return NULL;
@@ -246,9 +254,10 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	// call Process method: $module->Process($resource)
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
-        XPUSHs(sv_2mortal(resourceSV));
+        XPUSHs(resourceSV);
         PUTBACK;
 	int count = call_method("ProcessOutput", G_SCALAR|G_EVAL);
 	SPAGAIN;
@@ -259,7 +268,7 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 		LEAVE;
 		return result;
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling ProcessSimple");
+		LOG_ERROR(this, "Error calling ProcessOutput");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
@@ -291,7 +300,7 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	if (resource) {
 		// create new instance of a resource (of given type)
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 		if (!resourceSV)
 			return NULL;
@@ -302,9 +311,10 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	// call Process method: $module->Process($resource)
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
-        XPUSHs(sv_2mortal(resourceSV));
+        XPUSHs(resourceSV);
         PUTBACK;
 	int count = call_method("ProcessSimple", G_SCALAR|G_EVAL);
 	SPAGAIN;
@@ -352,7 +362,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 		while (inputResources->size() > 0) {
 			Resource *resource = inputResources->front();
 			char buffer[100];
-			snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
+			snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 			SV *resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 			if (!resourceSV)
 				return 0;
@@ -374,6 +384,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	// call Process method: $module->Process($resource)
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(inputResourcesSV);
@@ -454,6 +465,7 @@ char *PerlModule::GetValueSync(const char *name) {
 	char *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
@@ -494,6 +506,7 @@ bool PerlModule::SetValueSync(const char *name, const char *value) {
 	bool result = false;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
@@ -526,6 +539,7 @@ vector<string> *PerlModule::ListNamesSync() {
 	vector<string> *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -564,6 +578,7 @@ void PerlModule::SaveCheckpointSync(const char *path, const char *id) {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(path, 0)));
@@ -582,6 +597,7 @@ void PerlModule::RestoreCheckpointSync(const char *path, const char *id) {
 	perl->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(path, 0)));

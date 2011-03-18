@@ -14,7 +14,7 @@
 #include <log4cxx/logger.h>
 #include "EmbeddedPerl.h"
 #include "IpAddr.h"
-#include "PerlInterpreters.h"
+#include "PerlResourceInterpreter.h"
 #include "PlainLock.h"
 #include "Resource.h"
 
@@ -35,7 +35,9 @@ public:
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
 	int GetTypeId();
 	// type string of a resource
-	const char *GetTypeString(bool terse);
+	const char *GetTypeString(bool terse = false);
+	// object name (for construction of an object or a reference)
+	const char *GetObjectName();
 	// used by queues in case there is limit on queue size
 	int GetSize();
 	// return string representation of the resource (e.g. for debugging purposes)
@@ -76,6 +78,8 @@ public:
 	std::vector<long> *LongValues(const std::string&);
 	std::vector<IpAddr> *IpAddrValues(const std::string&);
 
+	PerlResourceInterpreter *GetPerlResourceInterpreter();
+
 protected:
 	char *name;
 
@@ -101,5 +105,13 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
+
+inline const char *PerlResource::GetObjectName() {
+	return "PerlResource";
+}
+
+inline PerlResourceInterpreter *PerlResource::GetPerlResourceInterpreter() {
+	return perl;
+}
 
 #endif

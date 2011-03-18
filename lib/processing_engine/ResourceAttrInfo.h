@@ -37,6 +37,8 @@ public:
 	void SetType(FieldType type);
 	int GetTypeId();
 	void SetTypeId(int id);
+	std::string &GetName();
+	void SetName(std::string &name);
 
 	virtual const std::string GetString(Resource*) = 0;
 	virtual int GetInt(Resource*) = 0;
@@ -94,6 +96,14 @@ inline int ResourceAttrInfo::GetTypeId() {
 
 inline void ResourceAttrInfo::SetTypeId(int typeId) {
 	this->typeId = typeId;
+}
+
+inline std::string &ResourceAttrInfo::GetName() {
+	return name;
+}
+
+inline void ResourceAttrInfo::SetName(std::string &name) {
+	this->name = name;
 }
 
 #endif

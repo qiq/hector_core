@@ -193,7 +193,7 @@ Resource *PythonModule::ProcessOutputSync(Resource *resource) {
 	PyObject *in;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		in = python->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 	} else {
 		Py_INCREF(Py_None);
@@ -224,7 +224,7 @@ Resource *PythonModule::ProcessSimpleSync(Resource *resource) {
 	PyObject *in;
 	if (resource) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", resource->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		in = python->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 	} else {
 		Py_INCREF(Py_None);
@@ -256,7 +256,7 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	int i = 0;
 	while (inputResources->size() > 0) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", inputResources->front()->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", inputResources->front()->GetObjectName());
 		PyList_SetItem(inRes, i, python->NewPointerObj(const_cast<void*>(static_cast<const void*>(inputResources->front())), buffer, 0x01));
 		inputResources->pop();
 		i++;
@@ -265,7 +265,7 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	i = 0;
 	while (outputResources->size() > 0) {
 		char buffer[100];
-		snprintf(buffer, sizeof(buffer), "%s *", outputResources->front()->GetTypeString());
+		snprintf(buffer, sizeof(buffer), "%s *", outputResources->front()->GetObjectName());
 		PyList_SetItem(outRes, i, python->NewPointerObj(const_cast<void*>(static_cast<const void*>(outputResources->front())), buffer, 0x01));
 		outputResources->pop();
 		i++;

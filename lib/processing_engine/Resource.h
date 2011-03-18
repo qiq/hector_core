@@ -67,6 +67,8 @@ public:
 	virtual int GetTypeId() = 0;
 	// type string of a resource
 	virtual const char *GetTypeString(bool terse = false) = 0;
+	// object name (for construction of an object or a reference)
+	virtual const char *GetObjectName() = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int GetSize() = 0;

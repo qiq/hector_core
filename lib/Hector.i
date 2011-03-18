@@ -26,6 +26,7 @@
 %include ResourceRegistry.i
 %include Resource.i
 %include ProtobufResource.i
+%include PerlResource.i
 %include TestResource.i
 %include TestProtobufResource.i
 %include ResourceAttrInfo.i

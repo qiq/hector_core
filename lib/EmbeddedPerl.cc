@@ -12,10 +12,6 @@ EXTERN_C void xs_init (pTHX);
 
 using namespace std;
 
-swig_type_info *(*EmbeddedPerl::Perl_TypeQuery)(const char *type);
-SV *(*EmbeddedPerl::Perl_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
-int (*EmbeddedPerl::Perl_ConvertPtr)(SV *obj, void **ptr, swig_type_info *ty, int flags);
-tr1::unordered_map<std::string, swig_type_info*> EmbeddedPerl::typeInfoCache;
 log4cxx::LoggerPtr EmbeddedPerl::logger(log4cxx::Logger::getLogger("lib.EmbeddedPerl"));
 
 EmbeddedPerl::EmbeddedPerl() {
@@ -72,6 +68,8 @@ SV *EmbeddedPerl::NewPointerObj(void *ptr, const char *type, int flags) {
 		info = iter->second;
 	} else {
 		info = (*Perl_TypeQuery)(type);
+		if (!info)
+			return NULL;
 		typeInfoCache[type] = info;
 	}
 	return (*Perl_NewPointerObj)(ptr, info, flags);
@@ -86,6 +84,8 @@ int EmbeddedPerl::ConvertPtr(SV *obj, void **ptr, const char *type, int flags) {
 		info = iter->second;
 	} else {
 		info = (*Perl_TypeQuery)(type);
+		if (!info)
+			return -1;
 		typeInfoCache[type] = info;
 	}
 	return (*Perl_ConvertPtr)(obj, ptr, info, flags);

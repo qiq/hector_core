@@ -23,8 +23,20 @@ ResourceRegistry::~ResourceRegistry() {
 	for (tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.begin(); iter != id2info.end(); ++iter) {
 		vector<Resource*> *v = &iter->second->available;
 		for (vector<Resource*>::iterator iter2 = v->begin(); iter2 != v->end(); ++iter2) {
-			delete *iter2;
+			if (iter->second->perl) {
+				PerlResource *pr = static_cast<PerlResource*>(*iter2);
+				perl->ReleasePerl(pr->GetPerlResourceInterpreter());
+				delete pr;
+			} else if (iter->second->python) {
+				// TODO
+			} else {
+				delete *iter2;
+			}
 		}
+		for (vector<ResourceAttrInfo*>::iterator iter2 = iter->second->attrInfo->begin(); iter2 != iter->second->attrInfo->end(); ++iter2)
+			delete *iter2;
+		delete iter->second->attrInfo;
+		free(iter->second->library);
 		delete iter->second;
 	}
 	delete perl;
@@ -48,6 +60,7 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 
 			ResourceInfo *info = new ResourceInfo();
 			info->create = NULL;
+			info->library = NULL;
 			info->perl = false;
 			info->python = false;
 			Resource *r;
@@ -61,9 +74,14 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 			} else if (!strcmp(type, "perl")) {
 				// Perl resource
 				info->perl = true;
+				info->library = strdup(lib);
 				if (!perl)
 					perl = new PerlInterpreters();
 				PerlResourceInterpreter *pi = perl->AcquirePerl();
+				if (!pi) {
+					LOG4CXX_ERROR(logger, "Cannot create perl Instance");
+					return false;
+				}
 				PerlResource *pr = new PerlResource(pi, lib);
 				if (!pr->Init()) {
 					LOG4CXX_ERROR(logger, "Cannot create resource of type: " << lib);
@@ -86,7 +104,7 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 			info->typeId = r->GetTypeId();
 			info->attrInfo = r->GetAttrInfoList();
 			for (vector<ResourceAttrInfo*>::iterator iter = info->attrInfo->begin(); iter != info->attrInfo->end(); ++iter)
-				info->attrMap[info->typeStr] = *iter;
+				info->attrMap[(*iter)->GetName()] = *iter;
 			name2id[info->typeStr] = info->typeId;
 			id2info[info->typeId] = info;
 			info->available.push_back(r);
@@ -104,94 +122,11 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 	return true;
 }
 
-/*bool ResourceRegistry::Load(vector<pair<string, string> > *libs) {
-	for (vector<pair<string, string> >::iterator iter = libs->begin(); iter != libs->end(); ++iter) {
-		ResourceInfo *info = new ResourceInfo();
-		info->typeStr = iter->first;
-		info->create = NULL;
-		info->perl = false;
-		info->python = false;
-		const char *type = iter->second.c_str();
-		Resource *r;
-		if (!strcmp(type, "") || !strcmp(type, "native")) {
-			info->create = (Resource*(*)())LibraryLoader::LoadLibrary(info->typeStr.c_str(), "create");
-			if (!info->create) {
-				LOG4CXX_ERROR(logger, "Resource/lib not found: " << info->typeStr);
-				return false;
-			}
-			r = (*info->create)();
-		} else if (!strcmp(type, "perl")) {
-			// Perl resource
-			info->perl = true;
-			if (!perl)
-				perl = new PerlInterpreters();
-			PerlResourceInterpreter *pi = perl->AcquirePerl();
-			PerlResource *pr = new PerlResource(pi, info->typeStr.c_str());
-			if (!pr->Init()) {
-				LOG4CXX_ERROR(logger, "Cannot create resource of type: " << info->typeStr);
-				return false;
-			}
-			r = pr;
-		} else if (!strcmp(type, "python")) {
-			// Python resource
-			info->python = true;
-//			PythonResorce *pr = new PythonResource(info->typeStr);
-//			if (!pr->Init()) {
-//				LOG4CXX_ERROR(logger, "Cannot create resource of type: " << info->typeStr);
-//				return false;
-//			}
-		} else {
-			LOG4CXX_ERROR(logger, "Unknown resource type (" << info->typeStr << ", " << type << ")");
-			return false;
-		}
-		info->typeId = r->GetTypeId();
-		info->attrInfo = r->GetAttrInfoList();
-		for (vector<ResourceAttrInfo*>::iterator iter = info->attrInfo->begin(); iter != info->attrInfo->end(); ++iter)
-			info->attrMap[info->typeStr] = *iter;
-		name2id[info->typeStr] = info->typeId;
-		id2info[info->typeId] = info;
-		info->available.push_back(r);
-	}
-	return true;
-}*/
-
-// Must be called with lock locked
-// Either name or id must be non-NULL/0
-/*int ResourceRegistry::LoadResourceLibrary(const char *name, int id) {
-	// try to load library
-	char s[1024];
-	if (name)
-		snprintf(s, sizeof(s), "%s.la", name);
-	else
-		snprintf(s, sizeof(s), "%d.la", id);
-	Resource *(*create)() = (Resource*(*)())LibraryLoader::LoadLibrary(s, "create");
-	if (!create) {
-		if (name) {
-			LOG4CXX_ERROR(logger, "Invalid Resource name: " << name);
-		} else {
-			LOG4CXX_ERROR(logger, "Invalid Resource Id: " << id);
-		}
-		return false;
-	}
-	// get id and save it into name2id
-	Resource *r = (*create)();
-	id = r->getTypeId();
-	name = r->getTypeStr();
-	name2id[name] = id;
-	ResourceInfo *info = new ResourceInfo();
-	// save constructor reference and store first available resource
-	info->create = create;
-	info->available.push_back(r);
-	id2info[id] = info;
-	return true;
-}*/
-
 int ResourceRegistry::NameToId(const char *name) {
 	tr1::unordered_map<string, int>::iterator iter = name2id.find(name);
 	if (iter != name2id.end())
 		return iter->second;
 
-//	LOG4CXX_ERROR(logger, "Invalid Resource name: " << name);
 	return -1;
 }
 
@@ -199,20 +134,37 @@ Resource *ResourceRegistry::AcquireResource(int typeId) {
 	if (typeId < 0)
 		return NULL;
 	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(typeId);
-	if (iter == id2info.end()) {
-//		LOG4CXX_ERROR(logger, "Unknown resource type: " << typeId);
+	if (iter == id2info.end())
 		return NULL;
-	}
 	Resource *result;
 	infoLock.Lock();
-	if (iter->second->available.size() > 0) {
-		result = iter->second->available.back();
-		iter->second->available.pop_back();
-		result->SetId(NextResourceId());
+	ResourceInfo *info = iter->second;
+	// previously created resource?
+	if (info->available.size() > 0) {
+		result = info->available.back();
+		info->available.pop_back();
 		infoLock.Unlock();
+		result->SetId(NextResourceId());
 	} else {
 		infoLock.Unlock();
- 		result = iter->second->create();
+		// previously created resource not available
+		if (info->perl) {
+			PerlResourceInterpreter *pi = perl->AcquirePerl();
+			if (!pi) {
+				LOG4CXX_ERROR(logger, "Cannot create perl instance");
+				return false;
+			}
+			PerlResource *pr = new PerlResource(pi, info->library);
+			if (!pr->Init()) {
+				LOG4CXX_ERROR(logger, "Cannot create resource of type: " << info->library);
+				return false;
+			}
+			result = pr;
+		} else if (info->python) {
+			// TODO
+		} else {
+ 			result = iter->second->create();
+		}
 	}
 	return result;
 }
@@ -227,13 +179,22 @@ void ResourceRegistry::ReleaseResource(Resource *resource) {
 		return;
 	}
 	infoLock.Lock();
-	if (iter->second->available.size() < AVAILABLE_SIZE_MAX) {
+	ResourceInfo *info = iter->second;
+	if (info->available.size() < AVAILABLE_SIZE_MAX) {
 		resource->Clear();
-		iter->second->available.push_back(resource);
+		info->available.push_back(resource);
 		infoLock.Unlock();
 	} else {
 		infoLock.Unlock();
-		delete resource;
+		if (info->perl) {
+			PerlResource *pr = static_cast<PerlResource*>(resource);
+			perl->ReleasePerl(pr->GetPerlResourceInterpreter());
+			delete pr;
+		} else if (info->python) {
+			// TODO
+		} else {
+			delete resource;
+		}
 	}
 }
 
@@ -242,7 +203,7 @@ ResourceAttrInfo *ResourceRegistry::GetAttrInfo(int typeId, const char *name) {
 	if (iter == id2info.end())
 		return NULL;
 	ResourceInfo *info = iter->second;
-	tr1::unordered_map<string, ResourceAttrInfo*>::iterator iter2 = info->attrMap.find(info->typeStr.c_str());
+	tr1::unordered_map<string, ResourceAttrInfo*>::iterator iter2 = info->attrMap.find(name);
 	if (iter2 == info->attrMap.end())
 		return NULL;
 	return iter2->second;

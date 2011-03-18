@@ -11,6 +11,7 @@
 using namespace std;
 
 PerlResourceInterpreter::~PerlResourceInterpreter() {
+	delete lock;
 	delete perl;
 }
 

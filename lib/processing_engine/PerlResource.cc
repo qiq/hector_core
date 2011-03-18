@@ -20,31 +20,54 @@ PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	if (dot)
 		*dot = '\0';
 	ref = NULL;
+	typeIdSet = false;
+	typeStringSet = false;
+	typeStringShortSet = false;
 }
 
 PerlResource::~PerlResource() {
+	// delete object in Perl interpreter
+	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
+	perl->GetPerl()->SetContext();
+	char s[1024];
+	snprintf(s, sizeof(s), "$_resource%d = undef;", GetId());
+	eval_pv(s, FALSE);
+	if (SvTRUE(ERRSV))
+		LOG4CXX_ERROR(logger, "Error destroying resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
+	perl->GetPerl()->SetContext(old);
+	perl->Unlock();
+	
 	free(name);
+	free(typeString);
+	free(typeStringShort);
 }
 
 bool PerlResource::Init() {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	char id[20];
-	snprintf(id, sizeof(id), "_%d", GetId());
+	snprintf(id, sizeof(id), "_resource%d", GetId());
 	SV *_object = get_sv("_object", TRUE);
 	sv_setsv(_object, perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Resource *", 0));
 	char s[1024];
-	snprintf(s, sizeof(s), "use %s; $_%s = %s->new($_object);", name, id, name);
+	snprintf(s, sizeof(s), "use %s; $%s = %s->new($_object);", name, id, name);
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		perl->GetPerl()->SetContext(old);
+		perl->Unlock();
+		LOG4CXX_ERROR(logger, "Error initialize resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
 		return false;
 	}
 	ref = get_sv(id, 0);
 	if (!SvOK(ref)) {
-		LOG4CXX_ERROR(logger, "Error initialize module " << name);
+		perl->GetPerl()->SetContext(old);
+		perl->Unlock();
+		LOG4CXX_ERROR(logger, "Error initialize resource " << name);
 		return false;
 	}
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	return true;
@@ -57,28 +80,33 @@ Resource *PerlResource::Clone() {
 void PerlResource::Clear() {
 	Resource::Clear();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
 	call_method("Clear", G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG4CXX_ERROR(logger, "Error calling Clear()");
+		LOG4CXX_ERROR(logger, "Error calling Clear() (" << SvPV_nolen(ERRSV) << ")");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 string *PerlResource::Serialize() {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	string *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -101,6 +129,7 @@ string *PerlResource::Serialize() {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	return result;
@@ -108,10 +137,12 @@ string *PerlResource::Serialize() {
 
 bool PerlResource::Deserialize(const char *data, int size) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	bool result = false;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(data, size)));
@@ -133,6 +164,7 @@ bool PerlResource::Deserialize(const char *data, int size) {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -143,9 +175,11 @@ vector<ResourceAttrInfo*> *PerlResource::GetAttrInfoList() {
 	int tid = GetTypeId();
 
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -214,6 +248,7 @@ vector<ResourceAttrInfo*> *PerlResource::GetAttrInfoList() {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	return result;
@@ -230,9 +265,11 @@ int PerlResource::GetTypeId() {
 
 	// call Perl
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -253,6 +290,7 @@ int PerlResource::GetTypeId() {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	if (result != -1) {
@@ -279,10 +317,12 @@ const char *PerlResource::GetTypeString(bool terse) {
 
 	// call Perl
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	int count;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSViv(terse ? 1 : 0)));
@@ -306,6 +346,7 @@ const char *PerlResource::GetTypeString(bool terse) {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	if (result) {
@@ -326,9 +367,11 @@ int PerlResource::GetSize() {
 
 	// call Perl
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -349,6 +392,7 @@ int PerlResource::GetSize() {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	return result;
@@ -356,10 +400,12 @@ int PerlResource::GetSize() {
 
 string PerlResource::ToString(Object::LogLevel logLevel) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	string result;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -381,6 +427,7 @@ string PerlResource::ToString(Object::LogLevel logLevel) {
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
 	return result;
@@ -390,17 +437,18 @@ SV *PerlResource::GetValue(const char *prefix, const char *name) {
 	SV *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "%s%s", prefix, name);
+	snprintf(method, sizeof(method), "%s_%s", prefix, name);
 	int count = call_method(method, G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error calling " << prefix << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling " << prefix << "_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG4CXX_ERROR(logger, "Error calling " << prefix << name << " (no result)");
+		LOG4CXX_ERROR(logger, "Error calling " << prefix << "_" << name << " (no result)");
 	} else {
 		result = SvREFCNT_inc(POPs);
 	}
@@ -415,18 +463,19 @@ SV *PerlResource::GetArrayValue(const char *name, int index) {
 	SV *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSViv(index)));
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "Get%s", name);
+	snprintf(method, sizeof(method), "Get_%s", name);
 	int count = call_method(method, G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error calling Get" << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling Get_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG4CXX_ERROR(logger, "Error calling Get" << name << " (no result)");
+		LOG4CXX_ERROR(logger, "Error calling Get_" << name << " (no result)");
 	} else {
 		result = SvREFCNT_inc(POPs);
 	}
@@ -441,18 +490,19 @@ SV *PerlResource::GetHashValue(const char *name, const string &index) {
 	SV *result = NULL;
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(index.data(), index.length())));
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "Get%s", name);
+	snprintf(method, sizeof(method), "Get_%s", name);
 	int count = call_method(method, G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG4CXX_ERROR(logger, "Error calling Get" << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling Get_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG4CXX_ERROR(logger, "Error calling Get" << name << " (no result)");
+		LOG4CXX_ERROR(logger, "Error calling Get_" << name << " (no result)");
 	} else {
 		result = SvREFCNT_inc(POPs);
 	}
@@ -466,16 +516,17 @@ SV *PerlResource::GetHashValue(const char *name, const string &index) {
 void PerlResource::SetValue(const char *name, SV *sv) {
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(sv));
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "Set%s", name);
+	snprintf(method, sizeof(method), "Set_%s", name);
 	call_method(method, G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG4CXX_ERROR(logger, "Error calling Set" << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling Set_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -484,17 +535,18 @@ void PerlResource::SetValue(const char *name, SV *sv) {
 void PerlResource::SetArrayValue(const char *name, int index, SV *sv) {
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSViv(index)));
         XPUSHs(sv_2mortal(sv));
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "Set%s", name);
+	snprintf(method, sizeof(method), "Set_%s", name);
 	call_method(method, G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG4CXX_ERROR(logger, "Error calling Set" << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling Set_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -503,17 +555,18 @@ void PerlResource::SetArrayValue(const char *name, int index, SV *sv) {
 void PerlResource::SetHashValue(const char *name, const string &index, SV *sv) {
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(index.data(), index.length())));
         XPUSHs(sv_2mortal(sv));
         PUTBACK;
 	char method[100];
-	snprintf(method, sizeof(method), "Set%s", name);
+	snprintf(method, sizeof(method), "Set_%s", name);
 	call_method(method, G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG4CXX_ERROR(logger, "Error calling Set" << name << " (" << SvPV_nolen(ERRSV) << ")");
+		LOG4CXX_ERROR(logger, "Error calling Set_" << name << " (" << SvPV_nolen(ERRSV) << ")");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -522,6 +575,7 @@ void PerlResource::SetHashValue(const char *name, const string &index, SV *sv) {
 string PerlResource::GetString(const string &name) {
 	string result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("Get", name.c_str());
 	if (SvPOK(sv)) {
@@ -531,6 +585,7 @@ string PerlResource::GetString(const string &name) {
 		LOG4CXX_ERROR(logger, "Error calling GetString (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -538,6 +593,7 @@ string PerlResource::GetString(const string &name) {
 int PerlResource::GetInt(const string &name) {
 	int result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("Get", name.c_str());
 	if (SvIOK(sv)) {
@@ -546,6 +602,7 @@ int PerlResource::GetInt(const string &name) {
 		LOG4CXX_ERROR(logger, "Error calling GetInt (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -553,6 +610,7 @@ int PerlResource::GetInt(const string &name) {
 long PerlResource::GetLong(const string &name) {
 	long result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("Get", name.c_str());
 	if (SvIOK(sv)) {
@@ -561,6 +619,7 @@ long PerlResource::GetLong(const string &name) {
 		LOG4CXX_ERROR(logger, "Error calling GetLong (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -568,6 +627,7 @@ long PerlResource::GetLong(const string &name) {
 IpAddr PerlResource::GetIpAddr(const string &name) {
 	IpAddr result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("Get", name.c_str());
 	if (SvIOK(sv)) {
@@ -583,6 +643,7 @@ IpAddr PerlResource::GetIpAddr(const string &name) {
 		LOG4CXX_ERROR(logger, "Error calling GetIpAddr (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -590,15 +651,17 @@ IpAddr PerlResource::GetIpAddr(const string &name) {
 string PerlResource::GetArrayString(const string &name, int index) {
 	string result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetArrayValue(name.c_str(), index);
 	if (SvPOK(sv)) {
 		STRLEN len;
 		result = SvPV(sv, len);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetString (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetArrayString (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -606,14 +669,16 @@ string PerlResource::GetArrayString(const string &name, int index) {
 int PerlResource::GetArrayInt(const string &name, int index) {
 	int result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetArrayValue(name.c_str(), index);
 	if (SvIOK(sv)) {
 		result = SvIV(sv);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetInt (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetArrayInt (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -621,14 +686,16 @@ int PerlResource::GetArrayInt(const string &name, int index) {
 long PerlResource::GetArrayLong(const string &name, int index) {
 	long result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetArrayValue(name.c_str(), index);
 	if (SvIOK(sv)) {
 		result = SvIV(sv);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetLong (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetArrayLong (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -636,6 +703,7 @@ long PerlResource::GetArrayLong(const string &name, int index) {
 IpAddr PerlResource::GetArrayIpAddr(const string &name, int index) {
 	IpAddr result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetArrayValue(name.c_str(), index);
 	if (SvIOK(sv)) {
@@ -645,12 +713,13 @@ IpAddr PerlResource::GetArrayIpAddr(const string &name, int index) {
 			result = *addr;
 			delete addr;
 		} else {
-			LOG4CXX_ERROR(logger, "Error calling GetIpAddr (cannot covert result to IpAddr*)");
+			LOG4CXX_ERROR(logger, "Error calling GetArrayIpAddr (cannot covert result to IpAddr*)");
 		}
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetIpAddr (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetArrayIpAddr (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -658,15 +727,17 @@ IpAddr PerlResource::GetArrayIpAddr(const string &name, int index) {
 string PerlResource::GetHashString(const string &name, const string &index) {
 	string result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetHashValue(name.c_str(), index);
 	if (SvPOK(sv)) {
 		STRLEN len;
 		result = SvPV(sv, len);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetString (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetHashString (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -674,14 +745,16 @@ string PerlResource::GetHashString(const string &name, const string &index) {
 int PerlResource::GetHashInt(const string &name, const string &index) {
 	int result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetHashValue(name.c_str(), index);
 	if (SvIOK(sv)) {
 		result = SvIV(sv);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetInt (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetHashInt (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -689,14 +762,16 @@ int PerlResource::GetHashInt(const string &name, const string &index) {
 long PerlResource::GetHashLong(const string &name, const string &index) {
 	long result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetHashValue(name.c_str(), index);
 	if (SvIOK(sv)) {
 		result = SvIV(sv);
 	} else {
-		LOG4CXX_ERROR(logger, "Error calling GetLong (invalid result type)");
+		LOG4CXX_ERROR(logger, "Error calling GetHashLong (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -704,6 +779,7 @@ long PerlResource::GetHashLong(const string &name, const string &index) {
 IpAddr PerlResource::GetHashIpAddr(const string &name, const string &index) {
 	IpAddr result;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetHashValue(name.c_str(), index);
 	if (SvIOK(sv)) {
@@ -713,121 +789,147 @@ IpAddr PerlResource::GetHashIpAddr(const string &name, const string &index) {
 			result = *addr;
 			delete addr;
 		} else {
-			LOG4CXX_ERROR(logger, "Error calling GetIpAddr (cannot covert result to IpAddr*)");
+			LOG4CXX_ERROR(logger, "Error calling GetHashIpAddr (cannot covert result to IpAddr*)");
 		}
 	} else {
 		LOG4CXX_ERROR(logger, "Error calling GetIpAddr (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
 
 void PerlResource::SetString(const string &name, const string &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSVpv(value.c_str(), 0);
 	SetValue(name.c_str(), sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetInt(const string &name, int value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetValue(name.c_str(), sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetLong(const string &name, long value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetValue(name.c_str(), sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetIpAddr(const string &name, IpAddr &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&value)), "IpAddr *", 0x01);
 	if (!sv)
 		return;
 	SetValue(name.c_str(), sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetArrayString(const string &name, int index, const string &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSVpv(value.data(), value.length());
 	SetArrayValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetArrayInt(const string &name, int index, int value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetArrayValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetArrayLong(const string &name, int index, long value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetArrayValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetArrayIpAddr(const string &name, int index, IpAddr &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&value)), "IpAddr *", 0x01);
 	if (!sv)
 		return;
 	SetArrayValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetHashString(const string &name, const string &index, const string &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSVpv(value.data(), value.length());
 	SetHashValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetHashInt(const string &name, const string &index, int value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetHashValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetHashLong(const string &name, const string &index, long value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = newSViv(value);
 	SetHashValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::SetHashIpAddr(const string &name, const string &index, IpAddr &value) {
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&value)), "IpAddr *", 0x01);
 	if (!sv)
 		return;
 	SetHashValue(name.c_str(), index, sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 }
 
 void PerlResource::Clear(const string &name) {
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
@@ -845,6 +947,7 @@ void PerlResource::Clear(const string &name) {
 int PerlResource::Count(const string &name) {
 	int result = 0;
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("Count", name.c_str());
 	if (SvIOK(sv)) {
@@ -853,6 +956,7 @@ int PerlResource::Count(const string &name) {
 		LOG4CXX_ERROR(logger, "Error calling GetInt (invalid result type)");
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -860,6 +964,7 @@ int PerlResource::Count(const string &name) {
 void PerlResource::DeleteItem(const string &name, const string &index) {
 	dSP;
 	ENTER;
+	SAVETMPS;
         PUSHMARK(SP);
 	XPUSHs(newSVpv(index.data(), index.length()));
         XPUSHs(ref);
@@ -878,6 +983,7 @@ void PerlResource::DeleteItem(const string &name, const string &index) {
 vector<string> *PerlResource::Keys(const string &name) {
 	vector<string> *result = new vector<string>();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("GetKeys%s", name.c_str());
 	AV *a = (AV*)SvRV(sv);
@@ -893,6 +999,7 @@ vector<string> *PerlResource::Keys(const string &name) {
 		}
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -900,6 +1007,7 @@ vector<string> *PerlResource::Keys(const string &name) {
 vector<string> *PerlResource::StringValues(const string &name) {
 	vector<string> *result = new vector<string>();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("GetValues%s", name.c_str());
 	AV *a = (AV*)SvRV(sv);
@@ -915,6 +1023,7 @@ vector<string> *PerlResource::StringValues(const string &name) {
 		}
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -922,6 +1031,7 @@ vector<string> *PerlResource::StringValues(const string &name) {
 vector<int> *PerlResource::IntValues(const string &name) {
 	vector<int> *result = new vector<int>();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("GetValues%s", name.c_str());
 	AV *a = (AV*)SvRV(sv);
@@ -934,6 +1044,7 @@ vector<int> *PerlResource::IntValues(const string &name) {
 		}
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -941,6 +1052,7 @@ vector<int> *PerlResource::IntValues(const string &name) {
 vector<long> *PerlResource::LongValues(const string &name) {
 	vector<long> *result = new vector<long>();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("GetValues%s", name.c_str());
 	AV *a = (AV*)SvRV(sv);
@@ -953,6 +1065,7 @@ vector<long> *PerlResource::LongValues(const string &name) {
 		}
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }
@@ -960,6 +1073,7 @@ vector<long> *PerlResource::LongValues(const string &name) {
 vector<IpAddr> *PerlResource::IpAddrValues(const string &name) {
 	vector<IpAddr> *result = new vector<IpAddr>();
 	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
 	SV *sv = GetValue("GetValues%s", name.c_str());
 	AV *a = (AV*)SvRV(sv);
@@ -979,6 +1093,7 @@ vector<IpAddr> *PerlResource::IpAddrValues(const string &name) {
 		}
 	}
 	SvREFCNT_dec(sv);
+	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 	return result;
 }

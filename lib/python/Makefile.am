@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @PYTHON_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
-AM_LDFLAGS = @LOG4CXX_LIBS@ @PYTHON_LDFLAGS@ @PROTOBUF_LIBS@ -module -avoid-version
+AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @PYTHON_CFLAGS@ @PERL_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
+AM_LDFLAGS = @LOG4CXX_LIBS@ @PYTHON_LDFLAGS@ @PERL_LDFLAGS@ @PROTOBUF_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
 BUILT_SOURCES =

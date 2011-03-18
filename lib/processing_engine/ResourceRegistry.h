@@ -49,6 +49,7 @@ protected:
 		Resource *(*create)();
 		bool perl;
 		bool python;
+		char *library;
 		std::vector<ResourceAttrInfo*> *attrInfo;
 		std::tr1::unordered_map<std::string, ResourceAttrInfo*> attrMap;
 		std::vector<Resource*> available;

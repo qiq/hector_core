@@ -6,6 +6,39 @@
 #include "Resource.h"
 %}
 
+%ignore Resource::GetAttrString(ResourceAttrInfo *ai);
+%ignore GetAttrInt(ResourceAttrInfo *ai);
+%ignore GetAttrLong(ResourceAttrInfo *ai);
+%ignore GetAttrIpAddr(ResourceAttrInfo *ai);
+%ignore GetAttrArrayString(ResourceAttrInfo *ai, int index);
+%ignore GetAttrArrayInt(ResourceAttrInfo *ai, int index);
+%ignore GetAttrArrayLong(ResourceAttrInfo *ai, int index);
+%ignore GetAttrArrayIpAddr(ResourceAttrInfo *ai, int index);
+%ignore GetAttrHashString(ResourceAttrInfo *ai, const std::string &index);
+%ignore GetAttrHashInt(ResourceAttrInfo *ai, const std::string &index);
+%ignore GetAttrHashLong(ResourceAttrInfo *ai, const std::string &index);
+%ignore GetAttrHashIpAddr(ResourceAttrInfo *ai, const std::string &index);
+%ignore SetAttrString(ResourceAttrInfo *ai, const std::string &value);
+%ignore SetAttrInt(ResourceAttrInfo *ai, int value);
+%ignore SetAttrLong(ResourceAttrInfo *ai, long value);
+%ignore SetAttrIpAddr(ResourceAttrInfo *ai, IpAddr &value);
+%ignore SetAttrArrayString(ResourceAttrInfo *ai, int index, const std::string &value);
+%ignore SetAttrArrayInt(ResourceAttrInfo *ai, int index, int value);
+%ignore SetAttrArrayLong(ResourceAttrInfo *ai, int index, long value);
+%ignore SetAttrArrayIpAddr(ResourceAttrInfo *ai, int index, IpAddr &value);
+%ignore SetAttrHashString(ResourceAttrInfo *ai, const std::string &index, const std::string &value);
+%ignore SetAttrHashInt(ResourceAttrInfo *ai, const std::string &index, int value);
+%ignore SetAttrHashLong(ResourceAttrInfo *ai, const std::string &index, long value);
+%ignore SetAttrHashIpAddr(ResourceAttrInfo *ai, const std::string &index, IpAddr &value);
+%ignore Clear(ResourceAttrInfo *ai);
+%ignore DeleteHashItem(ResourceAttrInfo *ai, const std::string&);
+%ignore GetCount(ResourceAttrInfo *ai);
+%ignore GetKeys(ResourceAttrInfo *ai);
+%ignore GetValuesString(ResourceAttrInfo *ai);
+%ignore GetValuesInt(ResourceAttrInfo *ai);
+%ignore GetValuesLong(ResourceAttrInfo *ai);
+%ignore GetValuesIpAddr(ResourceAttrInfo *ai);
+
 class Resource {
 public:
         enum Flag {
@@ -23,6 +56,7 @@ public:
         virtual std::vector<ResourceAttrInfo*> *GetAttrInfoList() = 0;
         virtual int GetTypeId() = 0;
         virtual const char *GetTypeString(bool terse = false) = 0;
+        virtual const char *GetObjectName() = 0;
         virtual int GetSize() = 0;
         virtual std::string ToString(Object::LogLevel logLevel) = 0;
         virtual int GetId();

@@ -19,9 +19,6 @@ public:
 	ResourceAttrInfoP(int typeId): ResourceAttrInfo(typeId) {};
 	~ResourceAttrInfoP() {};
 
-	std::string &GetName();
-	void SetName(std::string &name);
-
 	const std::string GetString(Resource*);
 	int GetInt(Resource*);
 	long GetLong(Resource*);
@@ -74,8 +71,6 @@ public:
 	void InitHashIpAddr(const char *name, IpAddr (T::*get)(const std::string&, const std::string&), void (T::*set)(const std::string&, const std::string&, IpAddr&), void (T::*clear)(const std::string&), void (T::*deleteItem)(const std::string&, const std::string&), int (T::*count)(const std::string&), std::vector<std::string> *(T::*keys)(const std::string&), std::vector<IpAddr> *(T::*values)(const std::string&));
 
 protected:
-	std::string name;
-	
 	union {
 		std::string (T::*s)(const std::string&);
 		int (T::*i)(const std::string&);
@@ -127,16 +122,6 @@ protected:
 	// delete hash item
 	void (T::*delete_hash_item)(const std::string&, const std::string&);
 };
-
-template <class T>
-inline std::string &ResourceAttrInfoP<T>::GetName() {
-	return name;
-}
-
-template <class T>
-inline void ResourceAttrInfoP<T>::SetName(std::string &name) {
-	this->name = name;
-}
 
 template <class T>
 const std::string ResourceAttrInfoP<T>::GetString(Resource *resource) {

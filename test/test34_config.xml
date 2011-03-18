@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+test34: read-write with TestPerl module interacting with TestPerlResource
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig>test.log.props</logConfig>
+		<resources>
+			<Resource id="R_test" type="perl" lib="TestPerlResource.pm"/>
+		</resources>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_test">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_input" lib="TestInput.la">
+						<param name="maxItems" value="1000"/>
+						<param name="resourceType" value="TestPerlResource"/>
+					</Module>
+					<Module id="M_test" type="perl" lib="TestPerl.pm"/>
+					<Module id="M_output" lib="TestOutput.la"/>
+				</modules>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

@@ -17,6 +17,7 @@ public:
         std::vector<ResourceAttrInfo*> *GetAttrInfoList();
         int GetTypeId();
         const char *GetTypeString(bool terse = false);
+        const char *GetObjectName();
         int GetSize();
         std::string ToString(Object::LogLevel logLevel);
 
