@@ -74,7 +74,7 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 		resourceType = strdup("TestResource");
 	if (maxItems)
 		LOG_INFO(this, "Going to produce " << maxItems << " resources of type " << resourceType << ".");
-	typeId = Resource::registry->NameToId(resourceType);
+	typeId = Resource::GetRegistry()->NameToId(resourceType);
 	if (typeId < 0) {
 		LOG_ERROR(this, "Resource " << resourceType << " not configured.");
 		return false;
@@ -85,9 +85,9 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 Resource *TestInput::ProcessInputSync(bool sleep) {
 	if (maxItems && items >= maxItems)
 		return NULL;
-	Resource *r = Resource::registry->AcquireResource(typeId);
+	Resource *r = Resource::GetRegistry()->AcquireResource(typeId);
 	r->SetId(GetThreadIndex()*10000+items);
-	if (TestResource::IsTestResource(r)) {
+	if (TestResource::IsInstance(r)) {
 		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
 		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", GetThreadIndex(), items);

@@ -27,6 +27,8 @@ public:
         void SetType(FieldType type);
         int GetTypeId();
         void SetTypeId(int id);
+        std::string &GetName();
+        void SetName(std::string &name);
 
         virtual const std::string GetString(Resource*) = 0;
         virtual int GetInt(Resource*) = 0;

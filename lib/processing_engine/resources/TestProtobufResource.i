@@ -32,5 +32,5 @@ public:
         void SetStr(const std::string &str);
         const std::string GetStr();
 
-        static bool IsTestProtobufResource(Resource *resource);
+        static bool IsInstance(Resource *resource);
 };

@@ -9,7 +9,7 @@ IpAddr IpAddr::emptyIpAddr;
 bool IpAddr::ParseIp4Addr(const string &s) {
 	ip4Addr = true;
 	if (!inet_pton(AF_INET, s.c_str(), &addr.ip4.s_addr)) {
-		setEmpty();
+		SetEmpty();
 		return false;
 	}
 	return true;
@@ -18,7 +18,7 @@ bool IpAddr::ParseIp4Addr(const string &s) {
 bool IpAddr::ParseIp6Addr(const string &s) {
 	ip4Addr = false;
 	if (!inet_pton(AF_INET6, s.c_str(), &addr.ip6.s6_addr)) {
-		setEmpty();
+		SetEmpty();
 		return false;
 	}
 	return true;
@@ -54,13 +54,13 @@ void IpAddr::ApplyPrefix(int prefix) {
 bool IpAddr::Compare(IpAddr *other, int prefix) {
 	if (ip4Addr) {
 		return (ntohl(addr.ip4.s_addr) & (uint32_t)0xffffffff << (32-prefix)) == 
-			(ntohl(other->getIp4Addr()) & (uint32_t)0xffffffff << (32-prefix));
+			(ntohl(other->GetIp4Addr()) & (uint32_t)0xffffffff << (32-prefix));
 	} else {
 		in6_addr ip6 = this->addr.ip6;
 		ReverseIp6Addr(&ip6);
 		in6_addr oip6;
-		*(((uint64_t*)&oip6.s6_addr)) = other->getIp6Addr(true);
-		*(((uint64_t*)&oip6.s6_addr) + 1) = other->getIp6Addr(false);
+		*(((uint64_t*)&oip6.s6_addr)) = other->GetIp6Addr(true);
+		*(((uint64_t*)&oip6.s6_addr) + 1) = other->GetIp6Addr(false);
 		ReverseIp6Addr(&oip6);
 		return (*(((uint64_t*)&ip6.s6_addr)) == *(((uint64_t*)&oip6.s6_addr))
 			 && *(((uint64_t*)&ip6.s6_addr) + 1) == *(((uint64_t*)&oip6.s6_addr) + 1));
@@ -84,7 +84,7 @@ bool IpAddr::Match(const std::string &addr) {
 }
 
 
-string IpAddr::toString() {
+string IpAddr::ToString() {
 	char s[INET6_ADDRSTRLEN];
 	if (ip4Addr) {
 		if (!inet_ntop(AF_INET, (const void*)&addr.ip4.s_addr, s, INET_ADDRSTRLEN))

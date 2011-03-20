@@ -80,7 +80,7 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestSimple::ProcessSimpleSync(Resource *resource) {
-	if (!TestResource::IsTestResource(resource))
+	if (!TestResource::IsInstance(resource))
 		return resource;
 	TestResource *tr = static_cast<TestResource*>(resource);
 	LOG_DEBUG_R(this, tr, "Processing (" << tr->GetStr() << ")");

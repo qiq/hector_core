@@ -33,7 +33,7 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 }
 
 Resource *TestOutput::ProcessOutputSync(Resource *resource) {
-	if (TestResource::IsTestResource(resource)) {
+	if (TestResource::IsInstance(resource)) {
 		TestResource *tr = static_cast<TestResource*>(resource);
 		LOG_INFO_R(this, tr, "Resource arrived (" << tr->GetStr() << ")");
 	} else {

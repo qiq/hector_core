@@ -60,15 +60,15 @@ public:
 	void InitLong(const char *name, long (T::*get)(), void (T::*set)(long));
 	void InitIpAddr(const char *name, IpAddr (T::*get)(), void (T::*set)(IpAddr&));
 
-	void InitArrayString(const char *name, const std::string get(int), void set(int, const std::string&), void clear(), int count());
-	void InitArrayInt(const char *name, int get(int), void set(int, int), void clear(), int count());
-	void InitArrayLong(const char *name, long get(int), void set(int, long), void clear(), int count());
-	void InitArrayIpAddr(const char *name, IpAddr get(int), void set(int, IpAddr&), void clear(), int count());
+	void InitArrayString(const char *name, const std::string (T::*get)(int), void (T::*set)(int, const std::string&), void (T::*clear)(), int (T::*count)());
+	void InitArrayInt(const char *name, int (T::*get)(int), void (T::*set)(int, int), void (T::*clear)(), int (T::*count)());
+	void InitArrayLong(const char *name, long (T::*get)(int), void (T::*set)(int, long), void (T::*clear)(), int (T::*count)());
+	void InitArrayIpAddr(const char *name, IpAddr (T::*get)(int), void (T::*set)(int, IpAddr&), void (T::*clear)(), int (T::*count)());
 
-	void InitHashString(const char *name, const std::string get(const std::string&), void set(const std::string, int, const std::string&), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<std::string> *values());
-	void InitHashInt(const char *name, int get(const std::string&), void set(const std::string, int, int), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<int> *values());
-	void InitHashLong(const char *name, long get(const std::string&), void set(const std::string, int, long), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<long> *values());
-	void InitHashIpAddr(const char *name, IpAddr get(const std::string&), void set(const std::string, int, IpAddr&), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<IpAddr> *values());
+	void InitHashString(const char *name, const std::string (T::*get)(const std::string&), void (T::*set)(const std::string&, const std::string&), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<std::string> *(T::*values)());
+	void InitHashInt(const char *name, int (T::*get)(const std::string&), void (T::*set)(const std::string&, int), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<int> *(T::*values)());
+	void InitHashLong(const char *name, long (T::*get)(const std::string&), void (T::*set)(const std::string&, long), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<long> *(T::*values)());
+	void InitHashIpAddr(const char *name, IpAddr (T::*get)(const std::string&), void (T::*set)(const std::string&, IpAddr&), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<IpAddr> *(T::*values)());
 
 protected:
 	union {
@@ -377,7 +377,7 @@ void ResourceAttrInfoT<T>::InitIpAddr(const char *name, IpAddr (T::*get)(), void
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitArrayString(const char *name, const std::string get(int), void set(int, const std::string&), void clear(), int count()) {
+void ResourceAttrInfoT<T>::InitArrayString(const char *name, const std::string (T::*get)(int), void (T::*set)(int, const std::string&), void (T::*clear)(), int (T::*count)()) {
 	type = ARRAY_STRING;
 	this->name = name;
 	get_u.as = get;
@@ -387,7 +387,7 @@ void ResourceAttrInfoT<T>::InitArrayString(const char *name, const std::string g
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitArrayInt(const char *name, int get(int), void set(int, int), void clear(), int count()) {
+void ResourceAttrInfoT<T>::InitArrayInt(const char *name, int (T::*get)(int), void (T::*set)(int, int), void (T::*clear)(), int (T::*count)()) {
 	type = ARRAY_INT;
 	this->name = name;
 	get_u.ai = get;
@@ -397,7 +397,7 @@ void ResourceAttrInfoT<T>::InitArrayInt(const char *name, int get(int), void set
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitArrayLong(const char *name, long get(int), void set(int, long), void clear(), int count()) {
+void ResourceAttrInfoT<T>::InitArrayLong(const char *name, long (T::*get)(int), void (T::*set)(int, long), void (T::*clear)(), int (T::*count)()) {
 	type = ARRAY_LONG;
 	this->name = name;
 	get_u.al = get;
@@ -407,7 +407,7 @@ void ResourceAttrInfoT<T>::InitArrayLong(const char *name, long get(int), void s
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitArrayIpAddr(const char *name, IpAddr get(int), void set(int, IpAddr&), void clear(), int count()) {
+void ResourceAttrInfoT<T>::InitArrayIpAddr(const char *name, IpAddr (T::*get)(int), void (T::*set)(int, IpAddr&), void (T::*clear)(), int (T::*count)()) {
 	type = ARRAY_IP;
 	this->name = name;
 	get_u.aip = get;
@@ -417,7 +417,7 @@ void ResourceAttrInfoT<T>::InitArrayIpAddr(const char *name, IpAddr get(int), vo
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitHashString(const char *name, const std::string get(const std::string&), void set(const std::string, int, const std::string&), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<std::string> *values()) {
+void ResourceAttrInfoT<T>::InitHashString(const char *name, const std::string (T::*get)(const std::string&), void (T::*set)(const std::string&, const std::string&), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<std::string> *(T::*values)()) {
 	type = HASH_STRING;
 	this->name = name;
 	get_u.hs = get;
@@ -430,7 +430,7 @@ void ResourceAttrInfoT<T>::InitHashString(const char *name, const std::string ge
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitHashInt(const char *name, int get(const std::string&), void set(const std::string, int, int), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<int> *values()) {
+void ResourceAttrInfoT<T>::InitHashInt(const char *name, int (T::*get)(const std::string&), void (T::*set)(const std::string&, int), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<int> *(T::*values)()) {
 	type = HASH_INT;
 	this->name = name;
 	get_u.hi = get;
@@ -443,7 +443,7 @@ void ResourceAttrInfoT<T>::InitHashInt(const char *name, int get(const std::stri
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitHashLong(const char *name, long get(const std::string&), void set(const std::string, int, long), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<long> *values()) {
+void ResourceAttrInfoT<T>::InitHashLong(const char *name, long (T::*get)(const std::string&), void (T::*set)(const std::string&, long), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<long> *(T::*values)()) {
 	type = HASH_LONG;
 	this->name = name;
 	get_u.hl = get;
@@ -456,7 +456,7 @@ void ResourceAttrInfoT<T>::InitHashLong(const char *name, long get(const std::st
 }
 
 template <class T>
-void ResourceAttrInfoT<T>::InitHashIpAddr(const char *name, IpAddr get(const std::string&), void set(const std::string, int, IpAddr&), void clear(), void deleteItem(const std::string&), int count(), std::vector<std::string> *keys(), std::vector<IpAddr> *values()) {
+void ResourceAttrInfoT<T>::InitHashIpAddr(const char *name, IpAddr (T::*get)(const std::string&), void (T::*set)(const std::string&, IpAddr&), void (T::*clear)(), void (T::*deleteItem)(const std::string&), int (T::*count)(), std::vector<std::string> *(T::*keys)(), std::vector<IpAddr> *(T::*values)()) {
 	type = HASH_IP;
 	this->name = name;
 	get_u.hip = get;

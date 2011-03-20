@@ -163,7 +163,9 @@ public:
 	std::string ToStringShort();
 
 	// resource registry, all resources should be registered there
-	static ResourceRegistry *registry;
+	static void CreateRegistry();
+	static void DeleteRegistry();
+	static ResourceRegistry *GetRegistry();
 
 	// serializes resource (together with size and type), returns total bytes written
 	static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
@@ -178,6 +180,9 @@ protected:
 	int id;
 	int status;
 	Resource *attachedResource;
+
+	// resource registry, all resources should be registered there
+	static ResourceRegistry *registry;
 
 	// helper, so that we can return empty string reference
 	static std::string empty;
@@ -535,6 +540,20 @@ inline std::vector<IpAddr> *Resource::GetValuesIpAddr(ResourceAttrInfo *ai) {
 inline std::vector<IpAddr> *Resource::GetValuesIpAddr(const char *name) {
 	ResourceAttrInfo *ai = registry->GetAttrInfo(GetTypeId(), name);
 	return ai ? ai->GetValuesIpAddr(this) : NULL;
+}
+
+inline void Resource::CreateRegistry() {
+	if (!registry)
+		registry = new ResourceRegistry();
+}
+
+inline void Resource::DeleteRegistry() {
+	delete registry;
+	registry = NULL;
+}
+
+inline ResourceRegistry *Resource::GetRegistry() {
+	return registry;
 }
 
 #endif

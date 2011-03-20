@@ -8,8 +8,10 @@ noinst_LTLIBRARIES = libhector_processing_engine.la
 hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = Server.h ProcessingEngine.h Processor.h Module.h ResourceRegistry.h Resource.h \
 	ProtobufResource.h ResourceAttrInfo.h ResourceAttrInfoT.h ResourceAttrInfoP.h \
+	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
+	PythonModule.h \
 	CallProcessingEngine.h BaseServer.h \
-	ResourceRegistry.i Resource.i ProtobufResource.i PerlResource.i Module.i
+	ResourceRegistry.i Resource.i ProtobufResource.i ResourceAttrInfo.i PerlResource.i Module.i
 
 BUILT_SOURCES =
 

@@ -20,8 +20,7 @@ Server::~Server() {
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		delete *iter;
 	}
-	delete Resource::registry;
-	Resource::registry = NULL;
+	Resource::DeleteRegistry();
 	delete simpleHTTPServer;
 	delete objects;
 	objects = NULL;
@@ -59,13 +58,12 @@ bool Server::Init(Config *config) {
 	free(s);
 
 	// resources to be loaded
-	if (!Resource::registry)
-		Resource::registry = new ResourceRegistry();
+	Resource::CreateRegistry();
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/resources/Resource/@id", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			if (!Resource::registry->Load(iter->c_str(), config)) {
+			if (!Resource::GetRegistry()->Load(iter->c_str(), config)) {
 				LOG_ERROR(this, "Cannot initialize resources");
 				return false;
 			}

@@ -150,7 +150,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			i += 4;
 			uint8_t typeId = *(uint8_t*)(data+i);
 			i++;
-			Resource *r = Resource::registry->AcquireResource(typeId);
+			Resource *r = Resource::GetRegistry()->AcquireResource(typeId);
 			if (!r) {
 				char buf[1024];
 				snprintf(buf, sizeof(buf), "Cannot create resource of type %d", typeId);
@@ -190,7 +190,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				conn->AppendResponseBody((char*)&type, 1);
 				conn->AppendResponseBody(*s);
 				delete s;
-				Resource::registry->ReleaseResource(r);
+				Resource::GetRegistry()->ReleaseResource(r);
 			}
 			if (result.size() == resourceIdsOrdered.size())
 				conn->SetResponseCode(200, "OK");

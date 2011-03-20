@@ -135,7 +135,7 @@ void PerlModule::StartSync() {
 	call_method("Start", G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG_ERROR(this, "Error calling RestoreCheckpont");
+		LOG_ERROR(this, "Error calling Start");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -152,7 +152,7 @@ void PerlModule::StopSync() {
 	call_method("Stop", G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG_ERROR(this, "Error calling RestoreCheckpont");
+		LOG_ERROR(this, "Error calling Stop");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -169,7 +169,7 @@ void PerlModule::PauseSync() {
 	call_method("Pause", G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG_ERROR(this, "Error calling RestoreCheckpont");
+		LOG_ERROR(this, "Error calling Pause");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -186,7 +186,7 @@ void PerlModule::ResumeSync() {
 	call_method("Resume", G_DISCARD|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV))
-		LOG_ERROR(this, "Error calling RestoreCheckpont");
+		LOG_ERROR(this, "Error calling Resume");
 	PUTBACK;
 	FREETMPS;
 	LEAVE;

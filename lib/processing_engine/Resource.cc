@@ -87,3 +87,4 @@ Resource *Resource::Deserialize(google::protobuf::io::CodedInputStream *stream, 
 		*totalSize = size+5;
 	return r;
 }
+

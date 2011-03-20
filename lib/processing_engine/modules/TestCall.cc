@@ -20,13 +20,13 @@ Call::Call(int maxResources, int typeId) : CallProcessingEngine(maxResources, tr
 
 Resource *Call::PrepareResource(Resource *src) {
 	src->SetStatus(1);
-	Resource *r = Resource::registry->AcquireResource(typeId);
+	Resource *r = Resource::GetRegistry()->AcquireResource(typeId);
 	if (!r) {
 		LOG4CXX_ERROR_R(logger, r, "Cannot generate resource of type: " << typeId);
 		return NULL;
 	}
 	r->SetId(src->GetId()+10000);
-	if (TestResource::IsTestResource(r)) {
+	if (TestResource::IsInstance(r)) {
 		TestResource *tr = static_cast<TestResource*>(r);
 		char s[1024];
 		snprintf(s, sizeof(s), "pe-%d", src->GetId()+10000);
@@ -41,7 +41,7 @@ Resource *Call::FinishResource(Resource *tmp) {
 
 	r->SetStatus(0);
 
-	Resource::registry->ReleaseResource(tmp);
+	Resource::GetRegistry()->ReleaseResource(tmp);
 	return r;
 }
 
@@ -138,7 +138,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 		LOG_ERROR(this, "resourceType is not defined");
 		return false;
 	}
-	int typeId = Resource::registry->NameToId(resourceType);
+	int typeId = Resource::GetRegistry()->NameToId(resourceType);
 	if (typeId < 0) {
 		LOG_ERROR(this, "Cannot load " << resourceType << " library");
 		return false;

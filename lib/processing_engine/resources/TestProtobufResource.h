@@ -31,7 +31,7 @@ public:
 	bool Deserialize(google::protobuf::io::CodedInputStream *input);
 	// return ResourceAttrInfo describing all attributes
 	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
-	// type id of a resource (to be used by Resources::AcquireResource(typeid))
+	// type id of a resource (to be used by ResourceRegistry::AcquireResource(typeid))
 	int GetTypeId();
 	// type string of a resource
 	const char *GetTypeString(bool terse = false);
@@ -45,7 +45,7 @@ public:
 	void SetStr(const std::string &s);
 	const std::string GetStr();
 
-	static bool IsTestProtobufResource(Resource *resource);
+	static bool IsInstance(Resource *resource);
 
 protected:
 	static const int typeId = 2;
@@ -117,7 +117,7 @@ inline void TestProtobufResource::SetStr(const std::string &str) {
 	r.set_str(str);
 }
 
-inline bool TestProtobufResource::IsTestProtobufResource(Resource *resource) {
+inline bool TestProtobufResource::IsInstance(Resource *resource) {
 	return resource->GetTypeId() == typeId;
 }
 

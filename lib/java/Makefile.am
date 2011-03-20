@@ -1,5 +1,5 @@
-AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @JAVA_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
-AM_LDFLAGS = @LOG4CXX_LIBS@ @JAVA_LDFLAGS@ @PROTOBUF_LIBS@
+AM_CXXFLAGS = @LOG4CXX_CFLAGS@ @JAVA_CFLAGS@ @PERL_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources
+AM_LDFLAGS = @LOG4CXX_LIBS@ @JAVA_LDFLAGS@ @PERL_LDFLAGS@ @PROTOBUF_LIBS@
 
 BUILT_SOURCES =
 

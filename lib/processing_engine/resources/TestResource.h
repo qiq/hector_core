@@ -40,7 +40,7 @@ public:
 	void SetStr(const std::string &s);
 	const std::string GetStr();
 
-	static bool IsTestResource(Resource *resource);
+	static bool IsInstance(Resource *resource);
 
 protected:
 	static const int typeId = 1;
@@ -74,7 +74,7 @@ inline void TestResource::SetStr(const std::string &str) {
 	this->str = str;
 }
 
-inline bool TestResource::IsTestResource(Resource *resource) {
+inline bool TestResource::IsInstance(Resource *resource) {
 	return resource->GetTypeId() == typeId;
 }
 

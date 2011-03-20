@@ -142,6 +142,9 @@ public:
         std::string ToStringShort();
 
         // static methods common to all Resources
+        static void CreateRegistry();
+        static void DeleteRegistry();
+        static ResourceRegistry *GetRegistry();
         static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
         static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
 };

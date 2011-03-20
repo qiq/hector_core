@@ -66,7 +66,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
 	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
-		if (TestResource::IsTestResource(r))
+		if (TestResource::IsInstance(r))
 			resources.push(static_cast<TestResource*>(r));
 		inputResources->pop();
 	}
