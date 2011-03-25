@@ -7,7 +7,9 @@
 
 using namespace std;
 
-Server::Server(const char *id) : Object(NULL, id) {
+Server::Server(const char *id, bool batch) : Object(NULL, id) {
+	this->batch = batch;
+	sleepingProcessingEngines = 0;
 	serverHost = NULL;
 	simpleHTTPServer = NULL;
 	// not done in constructor
@@ -77,7 +79,7 @@ bool Server::Init(Config *config) {
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *peid = iter->c_str();
-			ProcessingEngine *p = new ProcessingEngine(objects, peid);
+			ProcessingEngine *p = new ProcessingEngine(objects, peid, this, batch);
 			if (!p->Init(config))
 				return false;
 			processingEngines.push_back(p);
@@ -116,9 +118,9 @@ bool Server::Init(Config *config) {
 	return true;
 }
 
-void Server::Start(bool autostart, bool wait) {
-	// start processing engines (if requested, othewise they may be started using hector_client)
-	if (autostart) {
+void Server::Start(bool wait) {
+	// start processing engines (if requested, otherwise they may be started using hector_client)
+	if (batch) {
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Start();
 		}
@@ -148,4 +150,33 @@ void Server::Pause() {
 }
 
 void Server::Resume() {
+}
+
+void Server::ProcessingEngineSleeping() {
+	bool finished = false;
+	ObjectLockWrite();
+	sleepingProcessingEngines++;
+//LOG_ERROR(this, "PE sleeping");
+	if ((unsigned)sleepingProcessingEngines == processingEngines.size()) {
+		usingWokenUp.Lock();
+		wokenUp = false;
+		ObjectUnlock();
+		for (int i = 0; i < 10; i++)
+			pthread_yield();
+		ObjectLockWrite();
+		if (!wokenUp)
+			finished = true;
+		usingWokenUp.Unlock();
+	}
+	ObjectUnlock();
+	if (finished)
+		simpleHTTPServer->SetRunning(false);
+}
+
+void Server::ProcessingEngineWakeup() {
+	ObjectLockWrite();
+//LOG_ERROR(this, "PE wakeup");
+	sleepingProcessingEngines--;
+	wokenUp = true;
+	ObjectUnlock();
 }

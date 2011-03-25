@@ -27,11 +27,9 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	stream = NULL;
 
 	values = new ObjectValues<Load>(this);
-	values->AddGetter("items", &Load::GetItems);
-	values->AddGetter("maxItems", &Load::GetMaxItems);
-	values->AddSetter("maxItems", &Load::SetMaxItems);
-	values->AddGetter("filename", &Load::GetFilename);
-	values->AddSetter("filename", &Load::SetFilename);
+	values->Add("items", &Load::GetItems);
+	values->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
+	values->Add("filename", &Load::GetFilename, &Load::SetFilename);
 }
 
 Load::~Load() {

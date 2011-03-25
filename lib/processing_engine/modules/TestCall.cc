@@ -53,15 +53,11 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	targetEngine = NULL;
 
 	values = new ObjectValues<TestCall>(this);
-	values->AddGetter("items", &TestCall::GetItems);
-	values->AddGetter("maxRequests", &TestCall::GetMaxRequests);
-	values->AddSetter("maxRequests", &TestCall::SetMaxRequests, true);
-	values->AddGetter("timeTick", &TestCall::GetTimeTick);
-	values->AddSetter("timeTick", &TestCall::SetTimeTick);
-	values->AddGetter("resourceType", &TestCall::GetResourceType);
-	values->AddSetter("resourceType", &TestCall::SetResourceType, true);
-	values->AddGetter("targetEngine", &TestCall::GetTargetEngine);
-	values->AddSetter("targetEngine", &TestCall::SetTargetEngine);
+	values->Add("items", &TestCall::GetItems);
+	values->Add("maxRequests", &TestCall::GetMaxRequests, &TestCall::SetMaxRequests, true);
+	values->Add("timeTick", &TestCall::GetTimeTick, &TestCall::SetTimeTick);
+	values->Add("resourceType", &TestCall::GetResourceType, &TestCall::SetResourceType, true);
+	values->Add("targetEngine", &TestCall::GetTargetEngine, &TestCall::SetTargetEngine);
 }
 
 TestCall::~TestCall() {

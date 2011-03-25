@@ -39,6 +39,11 @@ function test_server_start {
 	hector_client_wait_dontfail PE_test.run 0
 }
 
+function test_server_batch {
+	ln -s $base/test/test.log.props . 2>/dev/null
+	hector_server_start $base/test/${id}_config.xml -f -b test $@
+}
+
 function test_compare_result {
 	diff -u $base/test/$id.log.correct $id.log.test
 }

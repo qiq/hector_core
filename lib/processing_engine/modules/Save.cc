@@ -24,9 +24,8 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	stream = NULL;
 
 	values = new ObjectValues<Save>(this);
-	values->AddGetter("items", &Save::GetItems);
-	values->AddGetter("filename", &Save::GetFilename);
-	values->AddSetter("filename", &Save::SetFilename, true);
+	values->Add("items", &Save::GetItems);
+	values->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
 }
 
 Save::~Save() {

@@ -9,10 +9,13 @@
 #include "Config.h"
 #include "ProcessingEngine.h"
 #include "Processor.h"
+#include "Server.h"
 
 using namespace std;
 
-ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Object(objects, id) {
+ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id, Server *server, bool batch): Object(objects, id) {
+	this->server = server;
+	this->batch = batch;
 	propRun = false;
 	propPause = false;
 	inputQueue = NULL;
@@ -20,14 +23,13 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id): Obj
 	waitingInQueue = false;
 	waiting = 0;
 	cancel = false;
+	processorsSleeping = 0;
+	sleeping = false;
 
 	values = new ObjectValues<ProcessingEngine>(this);
-
-	values->AddGetter("run", &ProcessingEngine::GetRun);
-	values->AddSetter("run", &ProcessingEngine::SetRun);
-	values->AddGetter("pause", &ProcessingEngine::GetPause);
-	values->AddSetter("pause", &ProcessingEngine::SetPause);
-	values->AddGetter("resourceCount", &ProcessingEngine::GetResourceCount);
+	values->Add("run", &ProcessingEngine::GetRun, &ProcessingEngine::SetRun);
+	values->Add("pause", &ProcessingEngine::GetPause, &ProcessingEngine::SetPause);
+	values->Add("resourceCount", &ProcessingEngine::GetResourceCount);
 }
 
 ProcessingEngine::~ProcessingEngine() {
@@ -59,7 +61,7 @@ bool ProcessingEngine::Init(Config *config) {
 		// create and initialize all Processors
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
-			Processor *p = new Processor(objects, this, pid);
+			Processor *p = new Processor(objects, pid, this, batch);
 			if (!p->Init(config))
 				return false;
 			processors.push_back(p);
@@ -241,62 +243,6 @@ bool ProcessingEngine::GetProcessedResourcesOrdered(vector<int> *ids, vector<Res
 	return true;
 }
 
-// get processed resource from the processing engine, false: not available or cancelled
-/*
-Resource *ProcessingEngine::GetProcessedResource(int id, struct timeval *timeout) {
-	if (!outputQueue)
-		return NULL;
-
-	pauseLock.Lock();
-	pauseLock.Unlock();
-	finishedLock.Lock();
-	tr1::unordered_map<int, Resource*>::iterator iter;
-	while ((iter = finishedResources.find(id)) == finishedResources.end()) {
-		if (!timeout) {
-			finishedLock.Unlock();
-			return NULL;		// not available
-		}
-		if (waitingInQueue) {
-			waiting++;
-			bool timedOut = !finishedLock.WaitSend(timeout);
-			waiting--;
-			if (cancel || timedOut) {
-				finishedLock.Unlock();
-				return NULL;	// cancelled or timeout
-			}
-		} else {
-			waitingInQueue = true;
-			finishedLock.Unlock();
-			Resource *r = outputQueue->getItem(timeout);
-			finishedLock.Lock();
-			waitingInQueue = false;
-			if (!r) {
-				finishedLock.SignalSend();
-				finishedLock.Unlock();
-				return NULL;	// cancelled or timeout
-			}
-			Resource *found = NULL;
-			while (r) {
-				if (r->GetId() == id)
-					found = r;
-				else
-					finishedResources[r->GetId()] = r;
-				r = outputQueue->getItem(NULL);
-			}
-			finishedLock.SignalSend();
-			finishedLock.Unlock();
-			if (found)
-				return found;
-			sched_yield();
-			finishedLock.Lock();
-		}
-	}
-	Resource *result = iter->second;
-	finishedResources.erase(id);
-	finishedLock.Unlock();
-	return result;
-}*/
-
 void ProcessingEngine::StartSync() {
 	if (!propRun) {
 		cancel = false;
@@ -313,7 +259,7 @@ void ProcessingEngine::StartSync() {
 void ProcessingEngine::StopSync() {
 	if (propRun) {
 		if (propPause) {
-			doResume();
+			DoResume();
 			propPause = false;
 		}
 
@@ -340,14 +286,14 @@ void ProcessingEngine::StopSync() {
 
 void ProcessingEngine::PauseSync() {
 	if (propRun && !propPause) {
-		doPause();
+		DoPause();
 		propPause = true;
 	}
 }
 
 void ProcessingEngine::ResumeSync() {
 	if (propPause) {
-		doResume();
+		DoResume();
 		propPause = false;
 	}
 }
@@ -418,7 +364,7 @@ char *ProcessingEngine::GetResourceCount(const char *name) {
 	return int2str(resourceCount);
 }
 
-void ProcessingEngine::doPause() {
+void ProcessingEngine::DoPause() {
 	pauseLock.Lock();
 	if (outputQueue)
 		outputQueue->Pause();
@@ -427,7 +373,7 @@ void ProcessingEngine::doPause() {
 	}
 }
 
-void ProcessingEngine::doResume() {
+void ProcessingEngine::DoResume() {
 	pauseLock.Unlock();
 	if (outputQueue)
 		outputQueue->Resume();
@@ -436,3 +382,24 @@ void ProcessingEngine::doResume() {
 	}
 }
 
+void ProcessingEngine::CheckSleeping() {
+	ObjectLockWrite();
+	bool report_sleeping = false;
+	bool report_wakeup = false;
+	if (!sleeping) {
+		if ((unsigned)processorsSleeping == processors.size() && resourceCount == 0) {
+			report_sleeping = true;
+			sleeping = true;
+		}
+	} else {
+		if ((unsigned)processorsSleeping != processors.size() || resourceCount > 0) {
+			report_wakeup = true;
+			sleeping = false;
+		}
+	}
+	ObjectUnlock();
+	if (report_sleeping)
+		server->ProcessingEngineSleeping();
+	if (report_wakeup)
+		server->ProcessingEngineWakeup();
+}

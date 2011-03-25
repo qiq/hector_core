@@ -12,19 +12,24 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Config.h"
+#include "PlainLock.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
 #include "SimpleHTTPServer.h"
 
 class Server : public Object {
 public:
-	Server(const char *id);
+	Server(const char *id, bool batch);
 	~Server();
 	bool Init(Config *config);
-	void Start(bool autostart, bool wait);
+	void Start(bool wait);
 	void Stop();
 	void Pause();
 	void Resume();
+
+	// called by processing engine when all threads are sleeping (or not)
+	void ProcessingEngineSleeping();
+	void ProcessingEngineWakeup();
 
 protected:
 	char *serverHost;
@@ -35,6 +40,10 @@ protected:
 
 	bool waitForFinish;
 	bool isRunning;
+	bool batch;	// batch mode
+	int sleepingProcessingEngines;
+	bool wokenUp;
+	PlainLock usingWokenUp;
 };
 
 #endif

@@ -120,8 +120,8 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 	} else if (method == "PROCESS" || method == "PASS") {
 		bool process = method == "PROCESS" ? true : false;
 		LOG4CXX_INFO(logger, method << " " << args);
-		skipWs(&args);
-		chomp(&args);
+		skipWs(args);
+		chomp(args);
 		tr1::unordered_map<string, ProcessingEngine*>::iterator iter = name2engine.find(args);
 		if (iter == name2engine.end()) {
 			LOG4CXX_ERROR(logger, "ProcessingEngine " << args << " not found");

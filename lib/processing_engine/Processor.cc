@@ -20,15 +20,19 @@
 
 using namespace std;
 
-Processor::Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id): Object(objects, id) {
+Processor::Processor(ObjectRegistry *objects, const char *id, ProcessingEngine *engine, bool batch): Object(objects, id) {
 	this->engine = engine;
+	this->batch = batch;
+	nThreads = 0;
 	threads = NULL;
 	running = false;
+	sleeping = false;
+	runningThreads = 0;
+	sleepingThreads = 0;
 	pauseInput = false;
 
 	values = new ObjectValues<Processor>(this);
-	values->AddGetter("pauseInput", &Processor::GetPauseInput);
-	values->AddSetter("pauseInput", &Processor::SetPauseInput);
+	values->Add("pauseInput", &Processor::GetPauseInput, &Processor::SetPauseInput);
 }
 
 Processor::~Processor() {
@@ -240,7 +244,7 @@ bool Processor::Init(Config *config) {
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			values->AddGetter(buffer, &Processor::GetInputQueueItems);
+			values->Add(buffer, &Processor::GetInputQueueItems);
 		}
 	}
 
@@ -399,8 +403,20 @@ void *run_thread(void *ptr) {
 	Processor *p = t->p;
 	int id = t->id;
 	delete t;
-	p->runThread(id);
+	p->RunThread(id);
+	p->ThreadFinished();
 	return NULL;
+}
+
+void Processor::ThreadFinished() {
+	ObjectLockWrite();
+	runningThreads--;
+	bool finished = runningThreads == 0;
+	ObjectUnlock();
+	if (batch && finished) //{
+//LOG_ERROR(this, "P sleeping (finished)");
+		engine->ProcessorSleeping();
+//}
 }
 
 // returns: false if would sleep or cancelled
@@ -500,7 +516,10 @@ int Processor::NextMultiModuleIndex(vector<ModuleInfo*> *mis, int index) {
 	return index == (int)mis->size() ? -1 : index;
 }
 
-void Processor::runThread(int threadId) {
+void Processor::RunThread(int threadId) {
+	ObjectLockWrite();
+	runningThreads++;
+	ObjectUnlock();
 	vector<ModuleInfo*> *mis = &this->modules[threadId];
 	// number of resources to read from input module/input queue
 	int readMax = 1;
@@ -519,7 +538,11 @@ void Processor::runThread(int threadId) {
 			Resource *resource = NULL;
 			if ((*mis)[0]->type != Module::INPUT) {
 				// get resource from the input queue
+				if (batch && block && resourcesRead == 0)
+					UpdateSleeping(1);
 				resource = inputQueue->GetItem((block && resourcesRead == 0) ? &timeout : NULL);
+				if (batch && block && resourcesRead == 0)
+					UpdateSleeping(-1);
 				if (!resource) {
 					if (block && resourcesRead == 0)
 						return; // cancelled
@@ -785,3 +808,28 @@ char *Processor::GetInputQueueItems(const char *name) {
 	return strdup(s2);
 }
 
+inline void Processor::UpdateSleeping(int count) {
+	assert(count != 0);
+	bool reportSleeping = false;
+	bool reportWakeup = false;
+	ObjectLockWrite();
+	sleepingThreads += count;
+	if (sleeping) {
+		if (sleepingThreads < runningThreads) {
+			reportWakeup = true;
+			sleeping = false;
+//LOG_ERROR(this, "P wakeup");
+		}
+	} else {
+		if (sleepingThreads == runningThreads) {
+//LOG_ERROR(this, "P sleeping");
+			reportSleeping = true;
+			sleeping = true;
+		}
+	}
+	ObjectUnlock();
+	if (reportWakeup)
+		engine->ProcessorWakeup();
+	else if (reportSleeping)
+		engine->ProcessorSleeping();
+}

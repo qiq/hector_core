@@ -31,8 +31,8 @@ inline void die(const char *msg, ...) {
 	exit(EXIT_FAILURE);
 }
 
-void skipWs(std::string *data);
-void chomp(std::string *data);
+std::string &skipWs(std::string &data);
+std::string &chomp(std::string &data);
 
 /*void to_lowercase(string &s) {
 	for (string::iterator i = s.begin(); i != s.end(); i++)

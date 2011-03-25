@@ -1,7 +1,4 @@
 /* template-based value getters/setters implementation
- *
- * N.B.: properties must be locked when accessed from Process* methods. Anyway,
- * init-only properties that are not changed outside Init() need not to be locked.
  */
 
 #ifndef _LIB_OBJECT_VALUES_
@@ -22,8 +19,7 @@ public:
 	ObjectValues(T *module): module(module) {};
 	~ObjectValues() {};
 
-	void AddGetter(const char *name, char *(T::*f)(const char*));
-	void AddSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly = false);
+	void Add(const char *name, char *(T::*get)(const char*), void (T::*set)(const char*, const char*) = NULL, bool initOnly = false);
 	bool InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown = false);
 	bool InitValue(const char *name, const char *value, bool ignoreUnknown = false);
 
@@ -54,7 +50,24 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 			if (iter2 != initOnly.end()) {
 				(module->*iter2->second)(iter->first.c_str(), iter->second.c_str());
 			} else if (!ignoreUnknown) {
-				LOG4CXX_ERROR(logger, module->GetId() << ": Invalid value name: " << iter->first);
+				std::string s;
+				s.append(module->GetId());
+				s.append(": Invalid value name: ");
+				s.append(iter->first);
+				s.append(" (available: ");
+				bool first = true;
+				for (typename std::tr1::unordered_map<std::string, char*(T::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
+					typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
+					if (first)
+						first = false;
+					else
+						s.append(", ");
+					if (iter2 == setters.end())
+						s.append("*");
+					s.append(iter->first);
+				}
+				s.append(")");
+				LOG4CXX_ERROR(logger, s);
 				return false;
 			}
 		}
@@ -81,17 +94,14 @@ bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignore
 }
 
 template<class T>
-void ObjectValues<T>::AddGetter(const char *name, char *(T::*f)(const char*)) {
-	getters[name] = f;
-}
-
-// initOnly: cannot set value outside of InitValue()/InitValues() -- does not require locking at all
-template<class T>
-void ObjectValues<T>::AddSetter(const char *name, void (T::*f)(const char*, const char*), bool initOnly) {
-	if (!initOnly)
-		setters[name] = f;
-	else
-		this->initOnly[name] = f;
+void ObjectValues<T>::Add(const char *name, char *(T::*get)(const char*), void (T::*set)(const char*, const char*), bool initOnly) {
+	getters[name] = get;
+	if (set) {
+		if (!initOnly)
+			setters[name] = set;
+		else
+			this->initOnly[name] = set;
+	}
 }
 
 template<class T>

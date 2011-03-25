@@ -9,8 +9,11 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <log4cxx/helpers/properties.h>
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
 #include "common.h"
@@ -21,7 +24,7 @@ log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("bin.server");
 
 const char *configFile = "config.xml";
 const char *baseDir = PREFIX "/lib/hector";
-bool autostart = false;
+bool batch = false;
 bool foreground = false;
 bool help = false;
 int verbose = 0;
@@ -32,8 +35,8 @@ void printHelp() {
 usage: hector_server [options] serverId [args]\n\
 options:\n\
   --config, -c		Config file path (%s)\n\
-  --base, -b		Base dir (%s)\n\
-  --autostart, -a	Start processing engines immediately\n\
+  --base, -B		Base dir (%s)\n\
+  --batch, -b		Batch mode, start processing engines immediately and wait for finish\n\
   --foreground, -f	Do not fork\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
@@ -52,8 +55,8 @@ int processOptions(int argc, char *argv[]) {
 		int option_index = 0;
 		static struct option long_options[] = {
 			{ "config", 1, NULL, 'c' },
-			{ "base", 1, NULL, 'b'},
-			{ "autostart", 0, NULL, 'a'},
+			{ "base", 1, NULL, 'B'},
+			{ "batch", 0, NULL, 'b'},
 			{ "foreground", 0, NULL, 'f'},
 			{ "verbose", 0, NULL, 'v' },
 			{ "help", 0, NULL, 'h' },
@@ -61,7 +64,7 @@ int processOptions(int argc, char *argv[]) {
 			{ NULL, 0, NULL, 0 }
 		};
 
-		int c = getopt_long(argc, argv, "c:b:afvhV", long_options, &option_index);
+		int c = getopt_long(argc, argv, "c:B:bfvhV", long_options, &option_index);
 		if (c == -1)
 			break;
 
@@ -69,11 +72,11 @@ int processOptions(int argc, char *argv[]) {
 		case 'c':
 			configFile = strdup(optarg);
 			break;
-		case 'b':
+		case 'B':
 			baseDir = strdup(optarg);
 			break;
-		case 'a':
-			autostart = true;
+		case 'b':
+			batch = true;
 			break;
 		case 'f':
 			foreground = true;
@@ -134,16 +137,46 @@ int main(int argc, char *argv[]) {
 	free(s);
 
 	// set up logging
-	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/logConfig", serverId);
-	char *logConfig = config->GetFirstValue(buffer);
-	if (!logConfig)
-		die("logConfig not found\n");
+	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/logConfig/@filename", serverId);
+	char *logFilename = config->GetFirstValue(buffer);
+	if (logFilename) {
+		log4cxx::PropertyConfigurator::configure(logFilename);
+		free(logFilename);
+	} else {
+		snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']/logConfig", serverId);
+		char *logConfig = config->GetFirstValue(buffer);
+		if (!logConfig)
+			die("logConfig not found\n");
 
-	log4cxx::PropertyConfigurator::configure(logConfig);
-	free(logConfig);
+		log4cxx::helpers::Properties props;
+		string data(logConfig);
+		stringstream ss(logConfig);
+		string line;
+		while (getline(ss, line, '\n')) {
+			skipWs(line);
+			chomp(line);
+			if (line.length() == 0)
+				continue;
+			size_t pos = line.find_first_of("=");
+			if (pos == string::npos) {
+				fprintf(stderr, "Warning: Invalid config line ignored: %s\n", line.c_str());
+				continue;
+			}
+			string name = line.substr(0, pos);
+			skipWs(name);
+			chomp(name);
+			string value = line.substr(pos+1);
+			skipWs(value);
+			chomp(value);
+			props.setProperty(name, value);
+		}
+		log4cxx::PropertyConfigurator::configure(props);
+
+		free(logConfig);
+	}
 
 	// create and initialize the Server object
-	Server *server = new Server(serverId);
+	Server *server = new Server(serverId, batch);
 	if (!server->Init(config))
 		die("Cannot initialize server, sorry.\n");
 
@@ -176,7 +209,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// run server
-	server->Start(autostart, true);
+	server->Start(true);
 
 	delete server;
 	delete config;

@@ -18,10 +18,11 @@
 #include "Processor.h"
 
 class Config;
+class Server;
 
 class ProcessingEngine : public Object {
 public:
-	ProcessingEngine(ObjectRegistry *objects, const char *id);
+	ProcessingEngine(ObjectRegistry *objects, const char *id, Server *server, bool batch);
 	~ProcessingEngine();
 	bool Init(Config *config);
 	void Start();
@@ -34,9 +35,6 @@ public:
 	// get processed resources from the processing engine, result: cancelled or timeout
 	bool GetProcessedResources(std::tr1::unordered_set<int> *ids, vector<Resource*> *output, struct timeval *timeout);
 	bool GetProcessedResourcesOrdered(std::vector<int> *ids, vector<Resource*> *output, struct timeval *timeout);
-	// get processed resource from the processing engine, result: available/not available
-	// TODO: remove
-	//Resource *GetProcessedResource(int id, struct timeval *timeout);
 
 	// helper methods for Processor::Connect()
 	SyncQueue<Resource> *CreateOutputQueue();
@@ -49,8 +47,16 @@ public:
 	// Update number of resources processed in a PE. This method is
 	// thread-safe.
 	void UpdateResourceCount(int n);
+	// Called by a Processor in batch mode, that is going to sleep as there
+	// are no more Resources. This method is thread-safe.
+	void ProcessorSleeping();
+	// Called by a Processor in batch mode, that just woke up, because
+	// there were more Resources to be processed. This method is
+	// thread-safe.
+	void ProcessorWakeup();
 
 protected:
+	Server *server;
 	std::vector<Processor*> processors;
 	SyncQueue<Resource> *inputQueue;	// just a reference
 	SyncQueue<Resource> *outputQueue;	// we own this queue
@@ -61,11 +67,15 @@ protected:
 	int waiting;
 	bool cancel;
 
+	bool batch;				// report sleeping to Server
+	int processorsSleeping;
+	bool sleeping;				// all processors are sleeping, etc., guarded by ObjectLock
+
 	ObjectValues<ProcessingEngine> *values;
 
-	bool propRun;		// ObjectLock
-	bool propPause;		// ObjectLock
-	int resourceCount;	// ObjectLock
+	bool propRun;
+	bool propPause;
+	int resourceCount;
 
 	char *GetRun(const char *name);
 	void SetRun(const char *name, const char *value);
@@ -78,8 +88,8 @@ protected:
 	void PauseSync();
 	void ResumeSync();
 
-	void doPause();
-	void doResume();
+	void DoPause();
+	void DoResume();
 
 	char *GetValueSync(const char *name);
 	bool SetValueSync(const char *name, const char *value);
@@ -87,6 +97,8 @@ protected:
 
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);
+
+	void CheckSleeping();
 };
 
 inline void ProcessingEngine::Start() {
@@ -133,6 +145,22 @@ inline void ProcessingEngine::UpdateResourceCount(int n) {
 	ObjectLockWrite();
 	resourceCount += n;
 	ObjectUnlock();
+	if (batch)
+		CheckSleeping();
+}
+
+inline void ProcessingEngine::ProcessorSleeping() {
+	ObjectLockWrite();
+	processorsSleeping++;
+	ObjectUnlock();
+	CheckSleeping();
+}
+
+inline void ProcessingEngine::ProcessorWakeup() {
+	ObjectLockWrite();
+	processorsSleeping--;
+	ObjectUnlock();
+	CheckSleeping();
 }
 
 #endif

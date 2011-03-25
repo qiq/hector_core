@@ -24,11 +24,12 @@ class ProcessingEngine;
 
 class Processor : public Object {
 public:
-	Processor(ObjectRegistry *objects, ProcessingEngine *engine, const char *id);
+	Processor(ObjectRegistry *objects, const char *id, ProcessingEngine *engine, bool batch);
 	~Processor();
 	bool Init(Config *config);
 	bool IsRunning();
-	void runThread(int id);
+	void RunThread(int id);
+	void ThreadFinished();
 	void Start();
 	void Stop();
 	void Pause();
@@ -47,10 +48,14 @@ protected:
 		std::queue<Resource*> *outputResources;
 	} ModuleInfo;
 
-	int nThreads;				// properties, guarded by object lock
+	int nThreads;				// total threads (some may be already finished)
 	pthread_t *threads;
 	bool running;
-	bool pauseInput;			// guarded by ObjectLock and pauseInputCond
+	bool batch;				// batch mode: report sleeping Processors to PE
+	bool sleeping;				// whether we reported sleeping to PE
+	int runningThreads;			// number of threads currently running (and sleeping)
+	int sleepingThreads;			// number of sleeping threads
+	bool pauseInput;			// guarded by pauseInputCond
 	CondLock pauseInputCond;		// here we wait if pauseInput == true
 
 	ProcessingEngine *engine;		// parent, beware you call only thread-safe methods!
@@ -70,6 +75,9 @@ protected:
 
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);
+
+	// update sleeping thread count (and possibly notify PE)
+	void UpdateSleeping(int count);
 
 	// connect processors to other processors
 	bool Connect();

@@ -16,15 +16,11 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	setStatus = -1;
 
 	values = new ObjectValues<TestSimple>(this);
-	values->AddGetter("items", &TestSimple::GetItems);
-	values->AddGetter("foo", &TestSimple::GetFoo);
-	values->AddSetter("foo", &TestSimple::SetFoo);
-	values->AddGetter("alias", &TestSimple::GetFoo);
-	values->AddSetter("alias", &TestSimple::SetFoo);
-	values->AddGetter("flipStatus", &TestSimple::GetFlipStatus);
-	values->AddSetter("flipStatus", &TestSimple::SetFlipStatus);
-	values->AddGetter("setStatus", &TestSimple::GetSetStatus);
-	values->AddSetter("setStatus", &TestSimple::SetSetStatus);
+	values->Add("items", &TestSimple::GetItems);
+	values->Add("foo", &TestSimple::GetFoo, &TestSimple::SetFoo);
+	values->Add("alias", &TestSimple::GetFoo, &TestSimple::SetFoo);
+	values->Add("flipStatus", &TestSimple::GetFlipStatus, &TestSimple::SetFlipStatus);
+	values->Add("setStatus", &TestSimple::GetSetStatus, &TestSimple::SetSetStatus);
 }
 
 TestSimple::~TestSimple() {
