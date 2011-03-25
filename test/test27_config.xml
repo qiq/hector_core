@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Config SYSTEM "hector_config.dtd">
 <!--
-test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
+test27: copy of a resource: one reader(1), one simple module(1), two writers(1)
 -->
 <Config>
 	<Server id="test" lib="TestServer.la">
@@ -11,8 +11,8 @@ test7: copy of a resource: one reader(1), one simple module(1), two writers(1)
 		<logConfig><![CDATA[
 			log4j.rootLogger=DEBUG, LOGFILE
 			log4j.appender.LOGFILE=org.apache.log4j.FileAppender
-			log4j.appender.LOGFILE.File=test.log
-			log4j.appender.LOGFILE.Append=true
+			log4j.appender.LOGFILE.File=test27.log
+			log4j.appender.LOGFILE.Append=false
 			log4j.appender.LOGFILE.Threshold=DEBUG
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>

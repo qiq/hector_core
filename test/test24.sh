@@ -1,11 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 . test_common.sh
 
-test_init
-test_server_batch
-
-grep "Processing " test.log|sed -e 's|M_simple\[[0-9]\+\]:.*Processing (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.test
-test_finish
-test_compare_result
+id=test24
+test_server_batch $id
+grep "Processing " $id.log|sed -e 's|M_simple\[[0-9]\+\]:.*Processing (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.result
+test_compare_result $id
 exit $?

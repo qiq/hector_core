@@ -11,8 +11,8 @@ test5: two readers(1), one simple intermediates(1), one writer(1)
 		<logConfig><![CDATA[
 			log4j.rootLogger=DEBUG, LOGFILE
 			log4j.appender.LOGFILE=org.apache.log4j.FileAppender
-			log4j.appender.LOGFILE.File=test.log
-			log4j.appender.LOGFILE.Append=true
+			log4j.appender.LOGFILE.File=test5.log
+			log4j.appender.LOGFILE.Append=false
 			log4j.appender.LOGFILE.Threshold=DEBUG
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>

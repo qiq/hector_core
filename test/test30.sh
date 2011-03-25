@@ -1,19 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 . test_common.sh
 
-test_init
-rm -f test30.data.out
-ln -s $base/test/test30.data.in . 2>/dev/null
-test_server_start test30.data.in test30.data.out
+id=test30
+rm -f $id.data.out
+ln -s "$test_base/test/$id.data.in" . 2>/dev/null
+test_server_start $id $id.data.in $id.data.out
 hector_client_set PE_test.run 1
 hector_client_wait M_save[0].items 2000
-hector_server_shutdown
+test_server_shutdown
 
-md5sum <test30.data.out >$id.log.test
-if [ -L test30.data.in ]; then
-	rm test30.data.in
+md5sum <$id.data.out >$id.log.result
+if [ -L $id.data.in ]; then
+	rm $id.data.in
 fi
-test_finish
-test_compare_result
+test_compare_result $id
 exit $?

@@ -31,6 +31,7 @@
 <!ELEMENT resources	(Resource+) >
 <!ELEMENT Resource 	EMPTY >
 <!ATTLIST Resource
+	id		ID		#REQUIRED
 	lib		CDATA		#REQUIRED
 	type		CDATA		"native" >
 
