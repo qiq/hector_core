@@ -1,4 +1,4 @@
-TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(top_builddir)/lib/perl/.libs:$(top_builddir)/lib/python/.libs:$(LD_LIBRARY_PATH) PERL5LIB=$(top_builddir)/lib/perl PYTHONPATH=$(top_builddir)/lib/python $(SHELL)
+TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIBRARY_PATH=$(top_builddir)/lib/processing_engine/modules:$(top_builddir)/lib/processing_engine/resources:$(top_builddir)/lib/processing_engine/servers:$(top_builddir)/lib/perl/.libs:$(top_builddir)/lib/python/.libs:$(LD_LIBRARY_PATH) PERL5LIB=$(top_builddir)/lib/perl PYTHONPATH=$(top_builddir)/lib/python:$(top_builddir)/lib/python/.libs $(SHELL)
 
 TESTS =
 EXTRA_DIST = test_common.sh

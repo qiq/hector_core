@@ -13,7 +13,7 @@ python_LTLIBRARIES = _Hector.la
 
 BUILT_SOURCES += Hector_wrap.cc Hector.py
 Hector_wrap.cc Hector.py: $(top_srcdir)/lib/Hector.i
-	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -DSWIG_TYPE_TABLE=hector -c++ -python -threads -o $@ $<
+	$(SWIG) -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processing_engine -I$(top_srcdir)/lib/processing_engine/resources -DSWIG_TYPE_TABLE=hector -c++ -python -threads -o Hector_wrap.cc $<
 
 _Hector_la_SOURCES = \
 	Hector_wrap.cc
