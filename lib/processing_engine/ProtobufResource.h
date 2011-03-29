@@ -18,7 +18,7 @@ class ProtobufResource : public Resource {
 public:
 	ProtobufResource() {};
 	virtual ~ProtobufResource() {};
-	bool isProtobufResource();
+	bool IsProtobufResource();
 
 	// save and restore resource
 	virtual int GetSerializedSize() = 0;
@@ -30,7 +30,7 @@ private:
 
 };
 
-inline bool ProtobufResource::isProtobufResource() {
+inline bool ProtobufResource::IsProtobufResource() {
 	return true;
 }
 

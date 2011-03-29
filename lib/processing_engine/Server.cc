@@ -156,7 +156,6 @@ void Server::ProcessingEngineSleeping() {
 	bool finished = false;
 	ObjectLockWrite();
 	sleepingProcessingEngines++;
-//LOG_ERROR(this, "PE sleeping");
 	if ((unsigned)sleepingProcessingEngines == processingEngines.size()) {
 		usingWokenUp.Lock();
 		wokenUp = false;
@@ -175,7 +174,6 @@ void Server::ProcessingEngineSleeping() {
 
 void Server::ProcessingEngineWakeup() {
 	ObjectLockWrite();
-//LOG_ERROR(this, "PE wakeup");
 	sleepingProcessingEngines--;
 	wokenUp = true;
 	ObjectUnlock();

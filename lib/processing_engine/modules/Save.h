@@ -7,6 +7,7 @@ Dependencies: protobuf
 Parameters:
 items		r/o		Total items processed
 filename	initOnly	File to save resources to.
+overwrite	initOnly	Should we overwrite output file?
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -34,10 +35,13 @@ public:
 private:
 	int items;		// ObjectLock
 	char *filename;		// initOnly
+	bool overwrite;		// initOnly
 
 	char *GetItems(const char *name);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
+	char *GetOverwrite(const char *name);
+	void SetOverwrite(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
 	char *GetValueSync(const char *name);

@@ -11,7 +11,8 @@ hectorinclude_HEADERS = Server.h ProcessingEngine.h Processor.h Module.h Resourc
 	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
 	PythonModule.h \
 	CallProcessingEngine.h BaseServer.h \
-	ResourceRegistry.i Resource.i ProtobufResource.i ResourceAttrInfo.i PerlResource.i Module.i
+	ResourceRegistry.i Resource.i ProtobufResource.i ResourceAttrInfo.i PerlResource.i Module.i \
+	binaryheap.h
 
 BUILT_SOURCES =
 

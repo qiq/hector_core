@@ -413,10 +413,8 @@ void Processor::ThreadFinished() {
 	runningThreads--;
 	bool finished = runningThreads == 0;
 	ObjectUnlock();
-	if (batch && finished) //{
-//LOG_ERROR(this, "P sleeping (finished)");
+	if (batch && finished)
 		engine->ProcessorSleeping();
-//}
 }
 
 // returns: false if would sleep or cancelled
@@ -818,11 +816,9 @@ inline void Processor::UpdateSleeping(int count) {
 		if (sleepingThreads < runningThreads) {
 			reportWakeup = true;
 			sleeping = false;
-//LOG_ERROR(this, "P wakeup");
 		}
 	} else {
 		if (sleepingThreads == runningThreads) {
-//LOG_ERROR(this, "P sleeping");
 			reportSleeping = true;
 			sleeping = true;
 		}

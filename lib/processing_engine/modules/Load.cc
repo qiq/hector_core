@@ -21,6 +21,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	items = 0;
 	maxItems = 0;
 	filename = NULL;
+	wait = false;
 	byteCount = 0;
 	fd = -1;
 	file = NULL;
@@ -30,6 +31,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values->Add("items", &Load::GetItems);
 	values->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
 	values->Add("filename", &Load::GetFilename, &Load::SetFilename);
+	values->Add("wait", &Load::GetWait, &Load::SetWait);
 }
 
 Load::~Load() {
@@ -75,6 +77,14 @@ void Load::SetFilename(const char *name, const char *value) {
 	fileCond.Unlock();
 }
 
+char *Load::GetWait(const char *name) {
+	return bool2str(wait);
+}
+
+void Load::SetWait(const char *name, const char *value) {
+	wait = str2bool(value);
+}
+
 bool Load::Init(vector<pair<string, string> > *params) {
 	// second stage?
 	if (!params)
@@ -98,7 +108,7 @@ Resource *Load::ProcessInputSync(bool sleep) {
 			byteCount += size;
 			break;
 		}
-		if (!sleep)
+		if (!sleep || !wait)
 			return NULL;
 		ObjectUnlock();
 		fileCond.Lock();

@@ -23,7 +23,7 @@ function test_server_start {
 		return
 	fi
 	shift
-	hector_server_start "$test_base/test/${id}_config.xml" test $@
+	hector_server_start "$test_base/test/${id}_config.xml" -B "$test_base" test $@
 	hector_client_wait_dontfail PE_test.run 0
 }
 
@@ -38,7 +38,7 @@ function test_server_batch {
 		return
 	fi
 	shift
-	hector_server_start "$test_base/test/${id}_config.xml" -f -b test $@
+	hector_server_start "$test_base/test/${id}_config.xml" -B "$test_base" -f -b test $@
 }
 
 function test_compare_result {

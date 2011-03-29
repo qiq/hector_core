@@ -10,7 +10,7 @@ class ProtobufResource : public Resource {
 public:
         ProtobufResource();
         virtual ~ProtobufResource();
-        bool isProtobufResource();
+        bool IsProtobufResource();
 
         virtual int GetSerializedSize() = 0;
         virtual bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output) = 0;

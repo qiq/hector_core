@@ -7,7 +7,8 @@ Dependencies: protobuf
 Parameters:
 items		r/o	Total items processed
 maxItems	r/w	Number of items to load
-filename	r/w	File to load. Change it to process another file
+filename	r/w	File to load. Change it to process another file (and set wait)
+wait		r/w	Wait for another file when current one is exhausted?
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
@@ -42,12 +43,15 @@ private:
 	int items;		// ObjectLock
 	int maxItems;		// ObjectLock
 	char *filename;		// ObjectLock
+	bool wait;		// ObjectLock
 
 	char *GetItems(const char *name);
 	char *GetMaxItems(const char *name);
 	void SetMaxItems(const char *name, const char *value);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
+	char *GetWait(const char *name);
+	void SetWait(const char *name, const char *value);
 
 	ObjectValues<Load> *values;
 	char *GetValueSync(const char *name);

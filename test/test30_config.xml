@@ -37,9 +37,9 @@ test30: test of loading/saving module, using both TestResource and TestProtobufR
 			<Processor id="P_save">
 				<threads>1</threads>
 				<modules>
-<Module id="M_dumpX" lib="Dump.la"/>
 					<Module id="M_save" lib="Save.la">
 						<param name="filename" value="$2"/>
+						<param name="overwrite" value="true"/>
 					</Module>
 				</modules>
 				<input>

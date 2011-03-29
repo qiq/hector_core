@@ -19,6 +19,7 @@ using namespace std;
 Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	filename = NULL;
 	items = 0;
+	overwrite = false;
 	fd = -1;
 	file = NULL;
 	stream = NULL;
@@ -26,6 +27,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values = new ObjectValues<Save>(this);
 	values->Add("items", &Save::GetItems);
 	values->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
+	values->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
 }
 
 Save::~Save() {
@@ -50,6 +52,14 @@ void Save::SetFilename(const char *name, const char *value) {
 	filename = strdup(value);
 }
 
+char *Save::GetOverwrite(const char *name) {
+	return bool2str(overwrite);
+}
+
+void Save::SetOverwrite(const char *name, const char *value) {
+	overwrite = str2bool(value);
+}
+
 bool Save::Init(vector<pair<string, string> > *params) {
 	// second stage?
 	if (!params)
@@ -63,7 +73,12 @@ bool Save::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	fd = open(filename, O_WRONLY|O_APPEND|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	int flags = O_WRONLY|O_CREAT;
+	if (!overwrite)
+		flags |= O_APPEND;
+	else
+		flags |= O_TRUNC;
+	fd = open(filename, flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
 		return false;

@@ -77,9 +77,9 @@ void int2bytes(uint32_t n, char (*bytes)[4]) {
 */
 
 int str2bool(const char *value) {
-        if (!strcmp(value, "0") || !strcmp(value, "false"))
+        if (!strcmp(value, "0") || value[0] == 'f' || value[0] == 'F')
 		return 0;
-        if (!strcmp(value, "1") || !strcmp(value, "true"))
+        if (!strcmp(value, "1") || value[0] == 't' || value[0] == 'T')
 		return 1;
 	return -1;
 }
