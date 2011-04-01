@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -37,8 +38,10 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 Load::~Load() {
 	delete stream;
 	delete file;
-	if (fd >= 0)
+	if (fd >= 0) {
+		flock(fd, LOCK_UN);
 		close(fd);
+	}
 	free(filename);
 	delete values;
 }
@@ -68,6 +71,11 @@ void Load::SetFilename(const char *name, const char *value) {
 	int fd = open(filename, O_RDONLY);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
+		fileCond.Unlock();
+		return;
+	}
+	if (flock(fd, LOCK_SH) < 0) {
+		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
 		fileCond.Unlock();
 		return;
 	}

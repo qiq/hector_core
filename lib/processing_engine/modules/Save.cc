@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -33,8 +34,10 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 Save::~Save() {
 	delete stream;
 	delete file;
-	if (fd >= 0)
+	if (fd >= 0) {
+		flock(fd, LOCK_UN);
 		close(fd);
+	}
 	free(filename);
 	delete values;
 }
@@ -81,6 +84,10 @@ bool Save::Init(vector<pair<string, string> > *params) {
 	fd = open(filename, flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
+		return false;
+	}
+	if (flock(fd, LOCK_EX) < 0) {
+		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
 		return false;
 	}
 	file = new google::protobuf::io::FileOutputStream(fd);
