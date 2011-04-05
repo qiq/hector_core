@@ -29,6 +29,7 @@
 %include PerlResource.i
 %include TestResource.i
 %include TestProtobufResource.i
+%include MarkerResource.i
 %include ResourceAttrInfo.i
 
 %{
