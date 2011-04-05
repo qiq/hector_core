@@ -10,6 +10,6 @@
 
 #include "Resource.h"
 
-extern "C" Resource* hector_resource_create();
+extern "C" Resource* create();
 
 #endif

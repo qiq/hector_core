@@ -10,11 +10,12 @@ CLEANFILES =
 ALIASES =
 
 resourcesdir = $(libdir)/hector/resources
-resources_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la
+resources_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la libMarkerResource.la MarkerResource.la
 
 hectorincludedir = $(includedir)/hector
-hectorinclude_HEADERS = TestResource.h TestProtobufResource.h TestProtobufResource.pb.h \
-	TestResource.i TestProtobufResource.i
+hectorinclude_HEADERS = TestResource.h TestResource.i \
+	TestProtobufResource.h TestProtobufResource.pb.h TestProtobufResource.i \
+	MarkerResource.h MarkerResource.i
 
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
 libTestResource_la_LDFLAGS = $(AM_LDFLAGS)
@@ -42,3 +43,13 @@ TestProtobufResource_la_LIBADD = libTestProtobufResource.la
 EXTRA_DIST += TestProtobufResource.i TestProtobufResource.proto
 CLEANFILES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 ALIASES += TestProtobufResource.la
+
+libMarkerResource_la_SOURCES = MarkerResource.h MarkerResource.cc
+libMarkerResource_la_LDFLAGS = $(AM_LDFLAGS)
+
+MarkerResource_la_SOURCES = MarkerResourceWrapper.h MarkerResourceWrapper.cc
+MarkerResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
+MarkerResource_la_LIBADD = libMarkerResource.la
+
+EXTRA_DIST += MarkerResource.i
+ALIASES += MarkerResource.la
