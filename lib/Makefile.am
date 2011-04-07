@@ -8,10 +8,11 @@ lib_LTLIBRARIES = libhector.la
 hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = common.h Connection.h StdioConnection.h PlainLock.h RWLock.h CondLock.h MemoryPool.h \
 	IpAddr.h IpAddr.i LibraryLoader.h SyncQueue.h Object.h ObjectRegistry.h ObjectValues.h \
-	Hector.i Object.i ObjectRegistry.i Connection.i StdioConnection.i
+	Hector.i Object.i ObjectRegistry.i Connection.i StdioConnection.i MD5.h
 
 libhector_la_SOURCES = \
 		common.h common.cc \
+		MD5.h MD5.cc \
 		PlainLock.h RWLock.h CondLock.h MemoryPool.h \
 		IpAddr.h IpAddr.cc \
 		Config.h Config.cc \

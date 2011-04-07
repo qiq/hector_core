@@ -10,11 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "common.h"
-#include "ProtobufResource.h"
 #include "Load.h"
-#include "TestResource.h"
 
 using namespace std;
 
@@ -23,9 +20,10 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	maxItems = 0;
 	filename = NULL;
 	wait = false;
+	resourceType = 0;
+	resourceTypeName = NULL;
 	byteCount = 0;
 	fd = -1;
-	file = NULL;
 	stream = NULL;
 
 	values = new ObjectValues<Load>(this);
@@ -33,16 +31,17 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
 	values->Add("filename", &Load::GetFilename, &Load::SetFilename);
 	values->Add("wait", &Load::GetWait, &Load::SetWait);
+	values->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
 }
 
 Load::~Load() {
 	delete stream;
-	delete file;
 	if (fd >= 0) {
 		flock(fd, LOCK_UN);
 		close(fd);
 	}
 	free(filename);
+	free(resourceTypeName);
 	delete values;
 }
 
@@ -67,6 +66,10 @@ void Load::SetFilename(const char *name, const char *value) {
 	free(filename);
 	filename = strdup(value);
 	delete stream;
+	if (fd >= 0) {
+		flock(fd, LOCK_UN);
+		close(fd);
+	}
 	byteCount = 0;
 	int fd = open(filename, O_RDONLY);
 	if (fd < 0) {
@@ -79,8 +82,7 @@ void Load::SetFilename(const char *name, const char *value) {
 		fileCond.Unlock();
 		return;
 	}
-	file = new google::protobuf::io::FileInputStream(fd);
-	stream = new google::protobuf::io::CodedInputStream(file);
+	stream = new ResourceInputStream(fd);
 	fileCond.SignalSend();
 	fileCond.Unlock();
 }
@@ -91,6 +93,19 @@ char *Load::GetWait(const char *name) {
 
 void Load::SetWait(const char *name, const char *value) {
 	wait = str2bool(value);
+}
+
+char *Load::GetResourceType(const char *name) {
+	return strdup(resourceTypeName);
+}
+
+void Load::SetResourceType(const char *name, const char *value) {
+	int type = Resource::GetRegistry()->NameToId(value);
+	if (type > 0) {
+		free(resourceTypeName);
+		resourceTypeName = strdup(value);
+		resourceType = type;
+	}
 }
 
 bool Load::Init(vector<pair<string, string> > *params) {
@@ -111,7 +126,7 @@ Resource *Load::ProcessInputSync(bool sleep) {
 		return NULL;
 	while (1) {
 		int size = 0;
-		r = stream ? Resource::Deserialize(stream, &size) : NULL;
+		r = stream ? Resource::Deserialize(*stream, resourceType, &size) : NULL;
 		if (r) {
 			byteCount += size;
 			break;

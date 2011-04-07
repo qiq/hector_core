@@ -15,30 +15,9 @@
 #include "ResourceAttrInfo.h"
 #include "ResourceRegistry.h"
 
-// logger helper macros (print short info about the resource)
-
-#define LOG4CXX_TRACE_R(logger, r, ...) { LOG4CXX_TRACE(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG4CXX_DEBUG_R(logger, r, ...) { LOG4CXX_DEBUG(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG4CXX_INFO_R(logger, r, ...) { LOG4CXX_INFO(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-
-#define LOG_TRACE_R(o, r, ...) { LOG4CXX_TRACE(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG_DEBUG_R(o, r, ...) { LOG4CXX_DEBUG(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG_INFO_R(o, r, ...) { LOG4CXX_INFO(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG_ERROR_R(o, r, ...) { LOG4CXX_ERROR(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-#define LOG_FATAL_R(o, r, ...) { LOG4CXX_FATAL(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
-
 class ResourceAttrInfo;
-class ResourceInfo;
-namespace google {
-	namespace protobuf {
-		namespace io {
-	class CodedInputStream;
-	class CodedOutputStream;
-		}
-	}
-}
+class ResourceInputStream;
+class ResourceOutputStream;
 
 class Resource {
 public:
@@ -54,13 +33,9 @@ public:
 	virtual Resource *Clone() = 0;
 	// Clear current resource (as delete + new would do, except id is set to 0)
 	virtual void Clear();
-	// Returns true if resource is serialized using Protocol Buffers. We
-	// cannot rely on the dynamic_cast as we use shared libraries and dlopen.
-	virtual bool IsProtobufResource();
 	// save and restore resource
-	virtual std::string *Serialize() = 0;
-	// data need not be nul-terminated
-	virtual bool Deserialize(const char *data, int size) = 0;
+	virtual bool Serialize(ResourceOutputStream &output) = 0;
+	virtual bool Deserialize(ResourceInputStream &input) = 0;
 	// get info about a resource field
 	virtual std::vector<ResourceAttrInfo*> *GetAttrInfoList() = 0;
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
@@ -74,6 +49,7 @@ public:
 	virtual int GetSize() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string ToString(Object::LogLevel = Object::INFO) = 0;
+
 	// id should be unique across all in-memory resources
 	virtual int GetId();
 	virtual void SetId(int id);
@@ -149,7 +125,7 @@ public:
 	virtual std::vector<IpAddr> *GetValuesIpAddr(ResourceAttrInfo *ai);
 	virtual std::vector<IpAddr> *GetValuesIpAddr(const char *name);
 	
-	// flags 
+	// flags (only used in Processor)
 	void SetFlag(Flag flag);
 	void ResetFlag(Flag flag);
 	bool IsSetFlag(Flag flag);
@@ -168,31 +144,29 @@ public:
 	static ResourceRegistry *GetRegistry();
 
 	// serializes resource (together with size and type), returns total bytes written
-	static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
-	static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
+	static bool Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
+	static Resource *Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize);
 
 protected:
-	// memory-only, used just in Processor
-	int flags;
-	// these are memory-only, some resources may decide to keep them
-	// on-disk too
+	// following resource properties are usually memory-only
+	// id of the resource, should be unique in run-time
 	// N.B.: id should not be overwritten in Deserialize()
 	int id;
+	// status that can be used for filtering in PE filters
 	int status;
+	// only used in Processor
+	int flags;
+	// resource attached to this one
 	Resource *attachedResource;
-
-	// resource registry, all resources should be registered there
-	static ResourceRegistry *registry;
 
 	// helper, so that we can return empty string reference
 	static std::string empty;
 
+	// resource registry, all resources should be registered there
+	static ResourceRegistry *registry;
+
 	static log4cxx::LoggerPtr logger;
 };
-
-inline bool Resource::IsProtobufResource() {
-	return false;
-}
 
 inline int Resource::GetId() {
 	return id;
@@ -555,5 +529,19 @@ inline void Resource::DeleteRegistry() {
 inline ResourceRegistry *Resource::GetRegistry() {
 	return registry;
 }
+
+// logger helper macros (print short info about the resource)
+
+#define LOG4CXX_TRACE_R(logger, r, ...) { LOG4CXX_TRACE(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_DEBUG_R(logger, r, ...) { LOG4CXX_DEBUG(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_INFO_R(logger, r, ...) { LOG4CXX_INFO(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_ERROR_R(logger, r, ...) { LOG4CXX_ERROR(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG4CXX_FATAL_R(logger, r, ...) { LOG4CXX_FATAL(logger, "[" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+
+#define LOG_TRACE_R(o, r, ...) { LOG4CXX_TRACE(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_DEBUG_R(o, r, ...) { LOG4CXX_DEBUG(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_INFO_R(o, r, ...) { LOG4CXX_INFO(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_ERROR_R(o, r, ...) { LOG4CXX_ERROR(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
+#define LOG_FATAL_R(o, r, ...) { LOG4CXX_FATAL(o->getLogger(), o->GetId() << ": [" << r->GetTypeString(true) << " " << r->GetId() << " " << r->GetStatus() << (r->IsSetFlag(Resource::DELETED) ? "d" : "") << "] " << __VA_ARGS__) }
 
 #endif

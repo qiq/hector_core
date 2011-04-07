@@ -11,7 +11,10 @@
 #include <vector>
 #include <log4cxx/logger.h>
 #include "Resource.h"
-#include "ResourceAttrInfoT.h"
+
+class ResourceAttrInfo;
+class ResourceInputStream;
+class ResourceOutputStream;
 
 class TestResource : public Resource {
 public:
@@ -22,8 +25,8 @@ public:
 	// Clear current resource (as would delete + new do)
 	void Clear();
 	// save and restore resource
-	std::string *Serialize();
-	bool Deserialize(const char *data, int size);
+	bool Serialize(ResourceOutputStream &output);
+	bool Deserialize(ResourceInputStream &input);
 	// return ResourceAttrInfo describing one field
 	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
@@ -32,7 +35,7 @@ public:
 	const char *GetTypeString(bool terse = false);
 	// object name (for construction of an object or a reference)
 	const char *GetObjectName();
-	// used by queues in case there is limit on queue size
+	// used by queues in case there is a limit on queue size
 	int GetSize();
 	// return string representation of the resource (e.g. for debugging purposes)
 	std::string ToString(Object::LogLevel logLevel);
@@ -40,6 +43,7 @@ public:
 	void SetStr(const std::string &s);
 	const std::string GetStr();
 
+	// We cannot rely on the dynamic_cast as we use shared libraries and dlopen.
 	static bool IsInstance(Resource *resource);
 
 protected:
@@ -63,7 +67,7 @@ inline const char *TestResource::GetObjectName() {
 }
 
 inline int TestResource::GetSize() {
-	return 1;
+	return str.length();
 }
 
 inline const std::string TestResource::GetStr() {

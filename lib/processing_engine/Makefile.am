@@ -1,18 +1,20 @@
 SUBDIRS = resources modules servers
 
-AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/server
-AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@
+AM_CXXFLAGS = @LIBXML2_CFLAGS@ @LOG4CXX_CFLAGS@ @PROTOBUF_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/server
+AM_LDFLAGS = @LIBXML2_LIBS@ @LOG4CXX_LIBS@ @PROTOBUF_LIBS@
 
 noinst_LTLIBRARIES = libhector_processing_engine.la
 
 hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = Server.h ProcessingEngine.h Processor.h Module.h ResourceRegistry.h Resource.h \
-	ProtobufResource.h ResourceAttrInfo.h ResourceAttrInfoT.h ResourceAttrInfoP.h \
+	ResourceAttrInfo.h ResourceAttrInfoT.h ResourceAttrInfoP.h \
+	ResourceInputStream.h ResourceOutputStream.h \
 	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
 	PythonModule.h \
 	CallProcessingEngine.h BaseServer.h \
-	ResourceRegistry.i Resource.i ProtobufResource.i ResourceAttrInfo.i PerlResource.i Module.i \
 	binaryheap.h
+	ResourceRegistry.i Resource.i ResourceAttrInfo.i ResourceInputStream.i ResourceOutputStream.i \
+	PerlResource.i Module.i
 
 BUILT_SOURCES =
 
@@ -23,7 +25,7 @@ libhector_processing_engine_la_SOURCES = \
 	Module.h Module.cc \
 	OutputFilter.h \
 	ResourceRegistry.h ResourceRegistry.cc \
-	Resource.h Resource.cc ProtobufResource.h ProtobufResource.cc \
+	Resource.h Resource.cc \
 	ResourceAttrInfo.h ResourceAttrInfoT.h ResourceAttrInfoP.h \
 	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
 	PythonModule.h \
@@ -50,6 +52,6 @@ endif
 endif
 
 # SWIG interface
-EXTRA_DIST = Resource.i ProtobufResource.i Module.i
+EXTRA_DIST = Resource.i Module.i ResourceInputStream.i ResourceOutputStream.i
 
 CLEANFILES = $(BUILT_SOURCES)

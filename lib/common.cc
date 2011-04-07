@@ -18,6 +18,7 @@ string &skipWs(string &data) {
 		data.erase(0, offset);
 	else
 		data.clear();
+	return data;
 }
 
 string &chomp(string &data) {
@@ -26,6 +27,7 @@ string &chomp(string &data) {
 		data.erase(offset+1);
 	else
 		data.clear();
+	return data;
 }
 
 int WriteBytes(int fd, const char *data, int size) {

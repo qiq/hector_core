@@ -12,7 +12,10 @@
 #include <vector>
 #include <log4cxx/logger.h>
 #include "Resource.h"
-#include "ResourceAttrInfoT.h"
+
+class ResourceAttrInfo;
+class ResourceInputStream;
+class ResourceOutputStream;
 
 class MarkerResource : public Resource {
 public:
@@ -23,8 +26,8 @@ public:
 	// Clear current resource (as would delete + new do)
 	void Clear();
 	// save and restore resource
-	std::string *Serialize();
-	bool Deserialize(const char *data, int size);
+	bool Serialize(ResourceOutputStream &output);
+	bool Deserialize(ResourceInputStream &input);
 	// return ResourceAttrInfo describing one field
 	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// type id of a resource (to be used by Resources::AcquireResource(typeid))
@@ -64,7 +67,7 @@ inline const char *MarkerResource::GetObjectName() {
 }
 
 inline int MarkerResource::GetSize() {
-	return 1;
+	return sizeof(int);
 }
 
 inline int MarkerResource::GetMark() {

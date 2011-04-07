@@ -13,8 +13,8 @@ public:
         bool Init();
         Resource *Clone();
         void Clear();
-        std::string *Serialize();
-        bool Deserialize(const char *data, int size);
+        bool Serialize(ResourceOutputStream &output);
+        bool Deserialize(ResourceInputStream &input);
         std::vector<ResourceAttrInfo*> *GetAttrInfoList();
         int GetTypeId();
         const char *GetTypeString(bool terse = false);

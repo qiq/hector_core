@@ -99,16 +99,17 @@ void PerlResource::Clear() {
 	perl->Unlock();
 }
 
-string *PerlResource::Serialize() {
+bool PerlResource::Serialize(ResourceOutputStream &output) {
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
-	string *result = NULL;
+	bool result = false;
 	dSP;
 	ENTER;
 	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
+        XPUSHs(sv_2mortal(perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&output)), "ResourceOutputStream", 0x01)));
         PUTBACK;
 	int count = call_method("Serialize", G_SCALAR|G_EVAL);
 	SPAGAIN;
@@ -117,13 +118,11 @@ string *PerlResource::Serialize() {
 	} else if (count != 1) {
 		LOG4CXX_ERROR(logger, "Error calling Serialize (no result)");
 	} else {
-		SV *sv = POPs;
-		if (SvPOK(sv)) {
-			STRLEN len;
-			char *s = SvPV(sv, len);
-			result = new string(s, len);
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG4CXX_ERROR(logger, "Error calling Serialize (invalid result)");
 		} else {
-			LOG4CXX_ERROR(logger, "Error calling Serialize (invalid result type)");
+			result = (SvIV(resultSV) != 0);
 		}
 	}
 	PUTBACK;
@@ -135,7 +134,7 @@ string *PerlResource::Serialize() {
 	return result;
 }
 
-bool PerlResource::Deserialize(const char *data, int size) {
+bool PerlResource::Deserialize(ResourceInputStream &input) {
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
@@ -145,7 +144,7 @@ bool PerlResource::Deserialize(const char *data, int size) {
 	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
-        XPUSHs(sv_2mortal(newSVpv(data, size)));
+        XPUSHs(sv_2mortal(perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&input)), "ResourceInputStream", 0x01)));
         PUTBACK;
 	int count = call_method("Deserialize", G_SCALAR|G_EVAL);
 	SPAGAIN;

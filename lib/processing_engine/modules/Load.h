@@ -9,6 +9,7 @@ items		r/o	Total items processed
 maxItems	r/w	Number of items to load
 filename	r/w	File to load. Change it to process another file (and set wait)
 wait		r/w	Wait for another file when current one is exhausted?
+resourceType	r/w	Resource type to load (we suppose there is only one resource type in the file)
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
@@ -19,12 +20,11 @@ wait		r/w	Wait for another file when current one is exhausted?
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <google/protobuf/message.h>
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "CondLock.h"
 #include "Module.h"
 #include "ObjectValues.h"
+#include "Resource.h"
+#include "ResourceInputStream.h"
 
 class Load : public Module {
 public:
@@ -40,10 +40,12 @@ public:
 	void StopSync();
 
 private:
-	int items;		// ObjectLock
-	int maxItems;		// ObjectLock
-	char *filename;		// ObjectLock
-	bool wait;		// ObjectLock
+	int items;
+	int maxItems;
+	char *filename;
+	bool wait;
+	int resourceType;
+	char *resourceTypeName;
 
 	char *GetItems(const char *name);
 	char *GetMaxItems(const char *name);
@@ -52,6 +54,8 @@ private:
 	void SetFilename(const char *name, const char *value);
 	char *GetWait(const char *name);
 	void SetWait(const char *name, const char *value);
+	char *GetResourceType(const char *name);
+	void SetResourceType(const char *name, const char *value);
 
 	ObjectValues<Load> *values;
 	char *GetValueSync(const char *name);
@@ -62,8 +66,7 @@ private:
 	bool cancel;
 	unsigned long long byteCount;
 	int fd;
-	google::protobuf::io::FileInputStream *file;
-	google::protobuf::io::CodedInputStream *stream;
+	ResourceInputStream *stream;
 	CondLock fileCond;	// for pause when source file is exhausted
 };
 

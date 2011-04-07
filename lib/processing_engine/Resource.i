@@ -50,15 +50,15 @@ public:
         virtual ~Resource();
         virtual Resource *Clone() = 0;
         virtual void Clear();
-        virtual bool IsProtobufResource();
-        virtual std::string *Serialize() = 0;
-        virtual bool Deserialize(const char *data, int size) = 0;
+        virtual bool Serialize(ResourceOutputStream &output) = 0;
+        virtual bool Deserialize(ResourceInputStream &input) = 0;
         virtual std::vector<ResourceAttrInfo*> *GetAttrInfoList() = 0;
         virtual int GetTypeId() = 0;
         virtual const char *GetTypeString(bool terse = false) = 0;
         virtual const char *GetObjectName() = 0;
         virtual int GetSize() = 0;
         virtual std::string ToString(Object::LogLevel logLevel) = 0;
+
         virtual int GetId();
         virtual void SetId(int id);
         virtual int GetStatus();
@@ -145,6 +145,6 @@ public:
         static void CreateRegistry();
         static void DeleteRegistry();
         static ResourceRegistry *GetRegistry();
-        static bool Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream);
-        static Resource *Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize);
+        static bool Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
+        static Resource *Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize);
 };

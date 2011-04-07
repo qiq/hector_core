@@ -8,6 +8,8 @@
 #include "BaseServer.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
+#include "ResourceInputStream.h"
+#include "ResourceOutputStream.h"
 
 using namespace std;
 
@@ -142,24 +144,17 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		tr1::unordered_set<int> resourceIds;
 		vector<int> resourceIdsOrdered;
 		string body = conn->GetRequestBody();
-		const char *data = body.data();
 		struct timeval timeout = { 0, 0 };
-		int i = 0;
-		while (body.length() > 5 && i < (int)body.length()) {
-			uint32_t size = *(uint32_t*)(data+i);
-			i += 4;
-			uint8_t typeId = *(uint8_t*)(data+i);
-			i++;
-			Resource *r = Resource::GetRegistry()->AcquireResource(typeId);
+		ResourceInputStream stream(body);
+		uint32_t typeId;
+		while (stream.ReadVarint32(&typeId)) {
+			Resource *r = Resource::Deserialize(stream, typeId, NULL);
 			if (!r) {
 				char buf[1024];
-				snprintf(buf, sizeof(buf), "Cannot create resource of type %d", typeId);
+				snprintf(buf, sizeof(buf), "Cannot deserialize resource of type %d", typeId);
 				conn->SetResponseCode(500, buf);
 				return true;
 			}
-			if (!r->Deserialize(data+i, size))
-				return true;
-			i+= size;
 			int id = r->GetId();
 			if (!engine->ProcessResource(r, &timeout))
 				break;
@@ -167,7 +162,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			resourceIds.insert(id);
 		}
 
-		if (i < (int)body.length()) {
+		if (stream.ByteCount() < (int)body.length()) {
 			conn->SetResponseCode(500, "Error passing data to ProcessingEngine");
 			return true;
 		}
@@ -181,17 +176,15 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			for (int i = 0; i < (int)result.size(); i++) {
 				map[result[i]->GetId()] = result[i];
 			}
+			string response;
+			ResourceOutputStream *stream = new ResourceOutputStream(&response);
 			for (int i = 0; i < (int)resourceIdsOrdered.size(); i++) {
 				Resource *r = map[resourceIdsOrdered[i]];
-				string *s = r->Serialize();
-				uint32_t size = s->length();
-				conn->AppendResponseBody((char*)&size, 4);
-				uint8_t type = r->GetTypeId();
-				conn->AppendResponseBody((char*)&type, 1);
-				conn->AppendResponseBody(*s);
-				delete s;
+				Resource::Serialize(r, *stream, true);
 				Resource::GetRegistry()->ReleaseResource(r);
 			}
+			delete stream;
+			conn->AppendResponseBody(response);
 			if (result.size() == resourceIdsOrdered.size())
 				conn->SetResponseCode(200, "OK");
 			else

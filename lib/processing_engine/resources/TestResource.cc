@@ -4,6 +4,9 @@
 #include <string.h>
 #include "common.h"
 #include "TestResource.h"
+#include "ResourceAttrInfoT.h"
+#include "ResourceInputStream.h"
+#include "ResourceOutputStream.h"
 
 using namespace std;
 
@@ -18,29 +21,22 @@ void TestResource::Clear() {
 	str.clear();
 }
 
-string *TestResource::Serialize() {
-	string *strcopy = new string(str);
+bool TestResource::Serialize(ResourceOutputStream &output) {
+	string strcopy(str);
 	size_t idx;
-	while ((idx = strcopy->find('\n')) != string::npos) {
-		strcopy->replace(idx, 1, " ");
+	while ((idx = strcopy.find('\n')) != string::npos) {
+		strcopy.replace(idx, 1, " ");
 	}
-	char s[1024];
-	snprintf(s, sizeof(s), "%d\n%d\n%s\n", id, status, strcopy->c_str());
-	delete strcopy;
-	return new string(s);
+	output.WriteVarint32(strcopy.size());
+	output.WriteString(strcopy);
+	return true;
 }
 
-bool TestResource::Deserialize(const char *data, int size) {
-	char s[1024+1];
-	strncpy(s, data, size > 1024 ? 1024 : size);
-	s[size] = '\0';
-	char buf[size > 1024 ? 1024 : size];
-	int notused;	// do not load (change) resource id
-	if (sscanf(s, "%d\n%d\n%1023s\n", &notused, &status, (char*)&buf) != 3) {
-		LOG4CXX_ERROR_R(logger, this, "Cannot deserialize TestResource: " << s);
-		return false;
-	}
-	str.assign(buf);
+bool TestResource::Deserialize(ResourceInputStream &input) {
+	uint32_t len;
+	input.ReadVarint32(&len);
+	str.clear();
+	input.ReadString(&str, len);
 	return true;
 }
 

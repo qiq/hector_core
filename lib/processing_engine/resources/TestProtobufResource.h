@@ -11,24 +11,24 @@
 #include <string>
 #include <log4cxx/logger.h>
 #include "common.h"
-#include "ProtobufResource.h"
-#include "ResourceAttrInfoT.h"
+#include "Resource.h"
 #include "TestProtobufResource.pb.h"
 
-class TestProtobufResource : public ProtobufResource {
+class ResourceAttrInfo;
+class ResourceInputStream;
+class ResourceOutputStream;
+
+class TestProtobufResource : public Resource {
 public:
 	TestProtobufResource() {};
 	~TestProtobufResource() {};
 	// create copy of a resource
-	ProtobufResource *Clone();
+	Resource *Clone();
 	// Clear current resource (as would delete + new do)
 	void Clear();
 	// save and restore resource
-	std::string *Serialize();
-	int GetSerializedSize();
-	bool SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output);
-	bool Deserialize(const char *data, int size);
-	bool Deserialize(google::protobuf::io::CodedInputStream *input);
+	bool Serialize(ResourceOutputStream &output);
+	bool Deserialize(ResourceInputStream &input);
 	// return ResourceAttrInfo describing all attributes
 	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// type id of a resource (to be used by ResourceRegistry::AcquireResource(typeid))
@@ -55,44 +55,6 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
-inline std::string *TestProtobufResource::Serialize() {
-	r.set_id(GetId());
-	r.set_status(GetStatus());
-
-	std::string *result = new std::string();
-	r.SerializeToString(result);
-	return result;
-}
-
-inline int TestProtobufResource::GetSerializedSize() {
-	r.set_id(GetId());
-	r.set_status(GetStatus());
-
-	return r.ByteSize();
-}
-
-inline bool TestProtobufResource::SerializeWithCachedSize(google::protobuf::io::CodedOutputStream *output) {
-	// r.id and r.status were set in GetSerializedSize() already
-	r.SerializeWithCachedSizes(output);
-	return true;
-}
-
-inline bool TestProtobufResource::Deserialize(const char *data, int size) {
-	bool result = r.ParseFromArray((void*)data, size);
-
-	// we keep id
-	SetStatus(r.status());
-	return result;
-}
-
-bool TestProtobufResource::Deserialize(google::protobuf::io::CodedInputStream *input) {
-	return r.ParseFromCodedStream(input);
-}
-
-//inline ResourceFieldInfo *TestProtobufResource::GetFieldInfo(const char *name) {
-//	return new ResourceFieldInfoT<TestProtobufResource>(name);
-//}
-
 inline int TestProtobufResource::GetTypeId() {
 	return typeId;
 }
@@ -106,7 +68,7 @@ inline const char *TestProtobufResource::GetObjectName() {
 }
 
 inline int TestProtobufResource::GetSize() {
-	return 1;
+	return r.str().size();
 }
 
 inline const std::string TestProtobufResource::GetStr() {

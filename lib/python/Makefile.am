@@ -19,7 +19,7 @@ _Hector_la_SOURCES = \
 	Hector_wrap.cc
 # set SWIGINTERN to emtpy string, so that SWIG functions are not declared static and we may call them
 _Hector_la_CXXFLAGS = $(AM_CXXFLAGS) -DSWIGINTERN=
-_Hector_la_LIBADD = $(top_builddir)/lib/libhector.la $(top_builddir)/lib/processing_engine/resources/libTestResource.la $(top_builddir)/lib/processing_engine/resources/libTestProtobufResource.la
+_Hector_la_LIBADD = $(top_builddir)/lib/libhector.la $(top_builddir)/lib/processing_engine/resources/libTestResource.la $(top_builddir)/lib/processing_engine/resources/libTestProtobufResource.la $(top_builddir)/lib/processing_engine/resources/libMarkerResource.la
 
 endif
 endif

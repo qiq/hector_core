@@ -4,6 +4,12 @@ AM_CXXFLAGS = @LOG4CXX_CFLAGS@ -I$(top_srcdir)/lib -I$(top_srcdir)/lib/processin
 AM_LDFLAGS = @LOG4CXX_LIBS@ -module -avoid-version
 AM_LIBTOOLFLAGS = --tag=disable-static
 
+BUILT_SOURCES =
+
+BUILT_SOURCES += ResourceHead.pb.h ResourceHead.pb.cc
+TestProtobfuResource.pb.cc ResourceHead.pb.h: ResourceHead.proto
+	$(PROTOC) ResourceHead.proto --cpp_out=.
+
 modulesdir = $(libdir)/hector/modules
 modules_LTLIBRARIES = TestInput.la TestOutput.la TestSimple.la TestMulti.la Load.la Save.la Dump.la TestCall.la
 

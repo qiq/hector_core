@@ -1,16 +1,19 @@
-- nefunguje nacitani/ukladani protobuf resourcu bez protobuf -- vyzkouset!
+- type id (1B), nejvyssi bit rika, jestli je tam id + status
+	- id (optional, 4B) + status (optional, 4B)
+---- resource ----
+	- size (4B) -- natvrdo nebo vubec
+	- serialized resource
 
-- navrhnout API pro resource
-	- zakladni metody: type, id, status, flags, (de-)serialization, attached resource, size, toString(Short), 
-	- GetAttrString(ai) a GetAttrString("name")
+- dodelat + zprovoznit testy,
+- dodelat spravne cteni/zapis resources do baseserveru
+
+ObjectValues -> ObjectProperties..!
 
 - PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje
 
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
 	robot/test6+
 
-- deleted vysledek v process -- jak predat na vystup?
-	- nechat tak -- da se to otestovat :)
 - dodelat save/restore checkpoint do vsech modulu (kde je to potreba)
 	- Save.la -- aby se prepsala cast souboru, co se udelala od posledniho checkpointu
 
@@ -26,6 +29,13 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+Save: - saveType, saveIdStatus
+Load: - resourceType, loadIdStatus
+- navrhnout API pro resource
+	- zakladni metody: type, id, status, flags, (de-)serialization, attached resource, size, toString(Short), 
+	- GetAttrString(ai) a GetAttrString("name")
+- deleted vysledek v process -- jak predat na vystup?
+	- nechat tak -- da se to otestovat :)
 - jmena metod na velka pismena (krome getteru/setteru)
 - python:
 	- zrusit -threads pro SWIG a python (ne, budeme pouzivat jen jeden interpret)

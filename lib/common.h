@@ -34,6 +34,11 @@ inline void die(const char *msg, ...) {
 std::string &skipWs(std::string &data);
 std::string &chomp(std::string &data);
 
+inline uint32_t NativeEndian(uint32_t le) {
+	// Big-endian: convert from little endian (default) to native Big-endian
+	return htons(0xabcd) == 0xabcd ? htonl(le) : le;
+}
+
 /*void to_lowercase(string &s) {
 	for (string::iterator i = s.begin(); i != s.end(); i++)
 		*i = tolower(*i);
@@ -47,39 +52,6 @@ std::string &chomp(std::string &data);
 
 int WriteBytes(int fd, const char *data, int size);
 int ReadBytes(int fd, char *data, int size);
-
-/*
-#define LOG_CONFIG_ERROR0(logger, line, column, msg) \
-{ \
-	char s[1024]; \
-	snprintf(s, sizeof(s)-30, msg); \
-	snprintf(s+strlen(s), 30, " [%d, %d]", line, column); \
-	LOG4CXX_ERROR(logger, s); \
-}
-
-#define LOG_CONFIG_ERROR1(logger, line, column, msg, a) \
-{ \
-	char s[1024]; \
-	snprintf(s, sizeof(s)-30, msg, a); \
-	snprintf(s+strlen(s), 30, " [%d, %d]", line, column); \
-	LOG4CXX_ERROR(logger, s); \
-}
-
-#define LOG_CONFIG_INFO0(logger, line, column, msg) \
-{ \
-	char s[1024]; \
-	snprintf(s, sizeof(s)-30, msg); \
-	snprintf(s+strlen(s), 30, " [%d, %d]", line, column); \
-	LOG4CXX_INFO(logger, s); \
-}
-
-#define LOG_CONFIG_INFO1(logger, line, column, msg, a) \
-{ \
-	char s[1024]; \
-	snprintf(s, sizeof(s)-30, msg, a); \
-	snprintf(s+strlen(s), 30, " [%d, %d]", line, column); \
-	LOG4CXX_INFO(logger, s); \
-}*/
 
 //uint32_t bytes2int(char (*bytes)[4]);
 //void int2bytes(uint32_t n, char (*bytes)[4]);

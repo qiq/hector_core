@@ -2,10 +2,9 @@
 #include <config.h>
 
 #include <assert.h>
-#include <google/protobuf/message.h>
-#include <google/protobuf/io/coded_stream.h>
 #include "Resource.h"
-#include "ProtobufResource.h"
+#include "ResourceInputStream.h"
+#include "ResourceOutputStream.h"
 
 using namespace std;
 
@@ -21,7 +20,7 @@ Resource::Resource() {
 	attachedResource = NULL;
 }
 
-Resource::Resource(const Resource &r) : flags(r.flags), status(r.status), attachedResource(r.attachedResource) {
+Resource::Resource(const Resource &r) : status(r.status), flags(r.flags), attachedResource(r.attachedResource) {
 	SetId(registry->NextResourceId());
 }
 
@@ -32,59 +31,54 @@ void Resource::Clear() {
 	attachedResource = NULL;
 }
 
-bool Resource::Serialize(Resource *resource, google::protobuf::io::CodedOutputStream *stream) {
-	char buffer[5];
-	*(uint8_t*)(buffer+4) = resource->GetTypeId();
-	if (resource->IsProtobufResource()) {
-		ProtobufResource *pr = static_cast<ProtobufResource*>(resource);
-		*(uint32_t*)buffer = pr->GetSerializedSize();
-		stream->WriteRaw(buffer, 5);
-		if (!pr->SerializeWithCachedSize(stream))
-			return false;
-	} else {
-		string *serial = resource->Serialize();
-		if (!serial)
-			return false;
-		*(uint32_t*)buffer = serial->length();
-		stream->WriteRaw(buffer, 5);
-		stream->WriteRaw(serial->data(), *(uint32_t*)buffer);
-		delete serial;
+bool Resource::Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType, bool saveIdStatus) {
+	if (saveType) {
+		int type = resource->GetTypeId();
+		if (saveIdStatus)
+			type |= 0x128;
+		stream.WriteVarint32(type);
+		if (saveIdStatus) {
+			stream.WriteVarint32(resource->GetId());
+			stream.WriteVarint32(resource->GetStatus());
+		}
 	}
+	if (!resource->Serialize(stream))
+		return false;
 	return true;
 }
 
-Resource *Resource::Deserialize(google::protobuf::io::CodedInputStream *stream, int *totalSize) {
-	char buffer[5];
-	if (!stream->ReadRaw(buffer, 5))
-		return NULL;
-	uint32_t size = *(uint32_t*)buffer;
-	uint8_t typeId = *(uint8_t*)(buffer+4);
-	Resource *r = registry->AcquireResource(typeId);
-	if (!r) {
-		LOG4CXX_ERROR(logger, "Cannot create resource of type: " << (int)typeId);
-		return NULL;
-	}
-	if (r->IsProtobufResource()) {
-		ProtobufResource *pr = static_cast<ProtobufResource*>(r);
-		google::protobuf::io::CodedInputStream::Limit l = stream->PushLimit(size);
-		pr->Deserialize(stream);
-		stream->PopLimit(l);
-	} else {
-		char *data = (char*)malloc(size);
-		if (!stream->ReadRaw(data, size)) {
-			free(data);
-			registry->ReleaseResource(r);
-			return NULL;
-		}
-		if (!r->Deserialize(data, size)) {
-			free(data);
-			registry->ReleaseResource(r);
-			return NULL;
-		}
-		free(data);
-	}
+Resource *Resource::Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize) {
+	long current;
 	if (totalSize)
-		*totalSize = size+5;
+		current = stream.ByteCount();
+	bool readIdStatus = false;
+	if (!resourceType) {
+		uint32_t type;
+		if (!stream.ReadVarint32(&type))
+			return NULL;
+		if (type & 0x128)
+			readIdStatus = true;
+		resourceType = type & 0x127;
+	}
+	Resource *r = registry->AcquireResource(resourceType);
+	if (!r) {
+		LOG4CXX_ERROR(logger, "Cannot create resource of type: " << resourceType);
+		return NULL;
+	}
+	if (readIdStatus) {
+		uint32_t id;
+		uint32_t status;
+		if (!stream.ReadVarint32(&id) || !stream.ReadVarint32(&status)) {
+			delete r;
+			return NULL;
+		}
+		r->SetId(id);
+		r->SetStatus(status);
+	}
+
+	r->Deserialize(stream);
+	if (totalSize)
+		*totalSize = stream.ByteCount()-current;
 	return r;
 }
 

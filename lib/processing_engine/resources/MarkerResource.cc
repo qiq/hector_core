@@ -4,6 +4,9 @@
 #include <string.h>
 #include "common.h"
 #include "MarkerResource.h"
+#include "ResourceAttrInfoT.h"
+#include "ResourceInputStream.h"
+#include "ResourceOutputStream.h"
 
 using namespace std;
 
@@ -18,22 +21,13 @@ void MarkerResource::Clear() {
 	mark = 0;
 }
 
-string *MarkerResource::Serialize() {
-	char s[1024];
-	snprintf(s, sizeof(s), "%d\n%d\n%d\n", id, status, mark);
-	return new string(s);
+bool MarkerResource::Serialize(ResourceOutputStream &output) {
+	output.WriteVarint32((uint32_t)mark);
+	return true;
 }
 
-bool MarkerResource::Deserialize(const char *data, int size) {
-	char s[1024+1];
-	strncpy(s, data, size > 1024 ? 1024 : size);
-	s[size] = '\0';
-	int notused;	// do not load (change) resource id
-	if (sscanf(s, "%d\n%d\n%d\n", &notused, &status, &mark) != 3) {
-		LOG4CXX_ERROR_R(logger, this, "Cannot deserialize MarkerResource: " << s);
-		return false;
-	}
-	return true;
+bool MarkerResource::Deserialize(ResourceInputStream &input) {
+	return input.ReadVarint32((uint32_t*)&mark);
 }
 
 string MarkerResource::ToString(Object::LogLevel logLevel) {

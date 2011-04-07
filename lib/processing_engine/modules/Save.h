@@ -8,6 +8,8 @@ Parameters:
 items		r/o		Total items processed
 filename	initOnly	File to save resources to.
 overwrite	initOnly	Should we overwrite output file?
+saveType	r/w		Save type info (necessary if we are writing different resource types to one file)
+saveIdStatus	r/w		Save Id & Status attributes to the file (usualy not desirable)
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -18,11 +20,10 @@ overwrite	initOnly	Should we overwrite output file?
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <google/protobuf/message.h>
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include "Module.h"
 #include "ObjectValues.h"
+#include "Resource.h"
+#include "ResourceOutputStream.h"
 
 class Save : public Module {
 public:
@@ -33,15 +34,21 @@ public:
 	Resource *ProcessOutputSync(Resource *resource);
 
 private:
-	int items;		// ObjectLock
-	char *filename;		// initOnly
-	bool overwrite;		// initOnly
+	int items;
+	char *filename;
+	bool overwrite;
+	bool saveType;
+	bool saveIdStatus;
 
 	char *GetItems(const char *name);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
 	char *GetOverwrite(const char *name);
 	void SetOverwrite(const char *name, const char *value);
+	char *GetSaveType(const char *name);
+	void SetSaveType(const char *name, const char *value);
+	char *GetSaveIdStatus(const char *name);
+	void SetSaveIdStatus(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
 	char *GetValueSync(const char *name);
@@ -49,8 +56,7 @@ private:
 	std::vector<std::string> *ListNamesSync();
 
 	int fd;
-	google::protobuf::io::ZeroCopyOutputStream *file;
-	google::protobuf::io::CodedOutputStream *stream;
+	ResourceOutputStream *stream;
 };
 
 inline Module::Type Save::GetType() {
