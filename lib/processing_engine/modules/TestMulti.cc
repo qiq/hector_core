@@ -18,15 +18,15 @@ TestMulti::TestMulti(ObjectRegistry *objects, const char *id, int threadIndex): 
 	foo = NULL;
 	timeTick = DEFAULT_TIMETICK;
 
-	values = new ObjectValues<TestMulti>(this);
-	values->Add("items", &TestMulti::GetItems);
-	values->Add("foo", &TestMulti::GetFoo, &TestMulti::SetFoo);
-	values->Add("alias", &TestMulti::GetFoo, &TestMulti::SetFoo);
-	values->Add("timeTick", &TestMulti::GetTimeTick, &TestMulti::SetTimeTick);
+	props = new ObjectProperties<TestMulti>(this);
+	props->Add("items", &TestMulti::GetItems);
+	props->Add("foo", &TestMulti::GetFoo, &TestMulti::SetFoo);
+	props->Add("alias", &TestMulti::GetFoo, &TestMulti::SetFoo);
+	props->Add("timeTick", &TestMulti::GetTimeTick, &TestMulti::SetTimeTick);
 }
 
 TestMulti::~TestMulti() {
-	delete values;
+	delete props;
 	free(foo);
 }
 
@@ -56,7 +56,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	values->InitValues(params);
+	props->InitProperties(params);
 	return true;
 }
 

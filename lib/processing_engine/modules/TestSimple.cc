@@ -15,16 +15,16 @@ TestSimple::TestSimple(ObjectRegistry *objects, const char *id, int threadIndex)
 	flipStatus = false;
 	setStatus = -1;
 
-	values = new ObjectValues<TestSimple>(this);
-	values->Add("items", &TestSimple::GetItems);
-	values->Add("foo", &TestSimple::GetFoo, &TestSimple::SetFoo);
-	values->Add("alias", &TestSimple::GetFoo, &TestSimple::SetFoo);
-	values->Add("flipStatus", &TestSimple::GetFlipStatus, &TestSimple::SetFlipStatus);
-	values->Add("setStatus", &TestSimple::GetSetStatus, &TestSimple::SetSetStatus);
+	props = new ObjectProperties<TestSimple>(this);
+	props->Add("items", &TestSimple::GetItems);
+	props->Add("foo", &TestSimple::GetFoo, &TestSimple::SetFoo);
+	props->Add("alias", &TestSimple::GetFoo, &TestSimple::SetFoo);
+	props->Add("flipStatus", &TestSimple::GetFlipStatus, &TestSimple::SetFlipStatus);
+	props->Add("setStatus", &TestSimple::GetSetStatus, &TestSimple::SetSetStatus);
 }
 
 TestSimple::~TestSimple() {
-	delete values;
+	delete props;
 	free(foo);
 }
 
@@ -71,7 +71,7 @@ bool TestSimple::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	values->InitValues(params);
+	props->InitProperties(params);
 	return true;
 }
 

@@ -457,7 +457,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	return processingResources;
 }
 
-char *PerlModule::GetValueSync(const char *name) {
+char *PerlModule::GetPropertySync(const char *name) {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	perl->SetContext();
@@ -470,12 +470,12 @@ char *PerlModule::GetValueSync(const char *name) {
         XPUSHs(ref);
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         PUTBACK;
-	count = call_method("GetValue", G_SCALAR|G_EVAL);
+	count = call_method("GetProperty", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling GetValue (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling GetProperty (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling GetValue (no result)");
+		LOG_ERROR(this, "Error calling GetProperty (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvPOK(sv)) {
@@ -491,7 +491,7 @@ char *PerlModule::GetValueSync(const char *name) {
 			snprintf(s, sizeof(s), "%lf", SvNV(sv));
 			result = strdup(s);
 		} else {
-			LOG_ERROR(this, "Error calling GetValue (invalid result type)");
+			LOG_ERROR(this, "Error calling GetProperty (invalid result type)");
 		}
 	}
 	PUTBACK;
@@ -501,7 +501,7 @@ char *PerlModule::GetValueSync(const char *name) {
 	return result;
 }
 
-bool PerlModule::SetValueSync(const char *name, const char *value) {
+bool PerlModule::SetPropertySync(const char *name, const char *value) {
 	perl->SetContext();
 	bool result = false;
 	dSP;
@@ -512,16 +512,16 @@ bool PerlModule::SetValueSync(const char *name, const char *value) {
         XPUSHs(sv_2mortal(newSVpv(name, 0)));
         XPUSHs(sv_2mortal(newSVpv(value, 0)));
         PUTBACK;
-	int count = call_method("SetValue", G_SCALAR|G_EVAL);
+	int count = call_method("SetProperty", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling SetValue (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling SetProperty (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling SetValue (no result)");
+		LOG_ERROR(this, "Error calling SetProperty (no result)");
 	} else {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
-			LOG_ERROR(this, "Error calling SetValue (invalid result)");
+			LOG_ERROR(this, "Error calling SetProperty (invalid result)");
 		} else {
 			result = (SvIV(resultSV) != 0);
 		}
@@ -532,7 +532,7 @@ bool PerlModule::SetValueSync(const char *name, const char *value) {
 	return result;
 }
 
-vector<string> *PerlModule::ListNamesSync() {
+vector<string> *PerlModule::ListPropertiesSync() {
 	ObjectUnlock();
 	ObjectLockWrite();	// we need write lock for Perl
 	perl->SetContext();
@@ -543,16 +543,16 @@ vector<string> *PerlModule::ListNamesSync() {
         PUSHMARK(SP);
         XPUSHs(ref);
         PUTBACK;
-	int count = call_method("ListNames", G_SCALAR|G_EVAL);
+	int count = call_method("ListProperties", G_SCALAR|G_EVAL);
 	SPAGAIN;
 	if (SvTRUE(ERRSV)) {
-		LOG_ERROR(this, "Error calling ListNames (" << SvPV_nolen(ERRSV) << ")");
+		LOG_ERROR(this, "Error calling ListProperties (" << SvPV_nolen(ERRSV) << ")");
 	} else if (count != 1) {
-		LOG_ERROR(this, "Error calling ListNames (no result)");
+		LOG_ERROR(this, "Error calling ListProperties (no result)");
 	} else {
 		SV *sv = POPs;
 		if (SvTYPE(SvRV(sv)) != SVt_PVAV) {
-			LOG_ERROR(this, "Error calling ListNames (invalid result)");
+			LOG_ERROR(this, "Error calling ListProperties (invalid result)");
 		} else {
 			result = new vector<string>();
 			AV *av = (AV*)SvRV(sv);

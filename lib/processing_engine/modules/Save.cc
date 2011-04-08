@@ -24,12 +24,12 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	fd = -1;
 	stream = NULL;
 
-	values = new ObjectValues<Save>(this);
-	values->Add("items", &Save::GetItems);
-	values->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
-	values->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
-	values->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
-	values->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
+	props = new ObjectProperties<Save>(this);
+	props->Add("items", &Save::GetItems);
+	props->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
+	props->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
+	props->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
+	props->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
 }
 
 Save::~Save() {
@@ -39,7 +39,7 @@ Save::~Save() {
 		close(fd);
 	}
 	free(filename);
-	delete values;
+	delete props;
 }
 
 char *Save::GetItems(const char *name) {
@@ -104,7 +104,7 @@ bool Save::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	if (!values->InitValues(params))
+	if (!props->InitProperties(params))
 		return false;
 
 	if (!filename) {

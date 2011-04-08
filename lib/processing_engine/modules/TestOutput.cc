@@ -11,12 +11,12 @@ using namespace std;
 TestOutput::TestOutput(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
 	items = 0;
 
-	values = new ObjectValues<TestOutput>(this);
-	values->Add("items", &TestOutput::GetItems, NULL);
+	props = new ObjectProperties<TestOutput>(this);
+	props->Add("items", &TestOutput::GetItems, NULL);
 }
 
 TestOutput::~TestOutput() {
-	delete values;
+	delete props;
 }
 
 char *TestOutput::GetItems(const char *name) {
@@ -28,7 +28,7 @@ bool TestOutput::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	values->InitValues(params);
+	props->InitProperties(params);
 	return true;
 }
 

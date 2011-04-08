@@ -14,7 +14,7 @@
 #include "Object.h"
 #include "ObjectRegistry.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 #include "Resource.h"
 #include "SyncQueue.h"
 
@@ -68,10 +68,10 @@ protected:
 	char *GetPauseInput(const char *name);
 	void SetPauseInput(const char *name, const char *value);
 
-	ObjectValues<Processor> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<Processor> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);
@@ -95,16 +95,16 @@ inline SyncQueue<Resource> *Processor::GetInputQueue() {
 	return inputQueue;
 }
 
-inline char *Processor::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *Processor::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool Processor::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool Processor::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *Processor::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *Processor::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

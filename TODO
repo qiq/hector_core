@@ -1,5 +1,3 @@
-- zprovoznit testy, ktere ctou/zapisuji resources
-
 ObjectValues -> ObjectProperties... prejmenovat
 
 - PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje

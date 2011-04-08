@@ -21,7 +21,7 @@ saveResourceIdStatus	r/w		Save Id & Status attributes to the file (usualy not de
 #include <stdio.h>
 #include <string.h>
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 #include "Resource.h"
 #include "ResourceOutputStream.h"
 
@@ -50,10 +50,10 @@ private:
 	char *GetSaveResourceIdStatus(const char *name);
 	void SetSaveResourceIdStatus(const char *name, const char *value);
 
-	ObjectValues<Save> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<Save> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	int fd;
 	ResourceOutputStream *stream;
@@ -63,16 +63,16 @@ inline Module::Type Save::GetType() {
 	return OUTPUT;
 }
 
-inline char *Save::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *Save::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool Save::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool Save::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *Save::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *Save::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

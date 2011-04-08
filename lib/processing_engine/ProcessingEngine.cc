@@ -26,7 +26,7 @@ ProcessingEngine::ProcessingEngine(ObjectRegistry *objects, const char *id, Serv
 	processorsSleeping = 0;
 	sleeping = false;
 
-	values = new ObjectValues<ProcessingEngine>(this);
+	values = new ObjectProperties<ProcessingEngine>(this);
 	values->Add("run", &ProcessingEngine::GetRun, &ProcessingEngine::SetRun);
 	values->Add("pause", &ProcessingEngine::GetPause, &ProcessingEngine::SetPause);
 	values->Add("resourceCount", &ProcessingEngine::GetResourceCount);
@@ -314,16 +314,16 @@ bool ProcessingEngine::RestoreCheckpointSync(const char *path) {
 	return true;
 }
 
-char *ProcessingEngine::GetValueSync(const char *name) {
-	return values->GetValue(name);
+char *ProcessingEngine::GetPropertySync(const char *name) {
+	return values->GetProperty(name);
 }
 
-bool ProcessingEngine::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+bool ProcessingEngine::SetPropertySync(const char *name, const char *value) {
+	return values->SetProperty(name, value);
 }
 
-vector<string> *ProcessingEngine::ListNamesSync() {
-	return values->ListNames();
+vector<string> *ProcessingEngine::ListPropertiesSync() {
+	return values->ListProperties();
 }
 
 char *ProcessingEngine::GetRun(const char *name) {

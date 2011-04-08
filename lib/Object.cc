@@ -6,15 +6,15 @@
 
 using namespace std;
 
-char *Object::GetValueSync(const char *name) {
+char *Object::GetPropertySync(const char *name) {
 	return NULL;
 }
 
-bool Object::SetValueSync(const char *name, const char *value) {
+bool Object::SetPropertySync(const char *name, const char *value) {
 	return false;
 }
 
-vector<string> *Object::ListNamesSync() {
+vector<string> *Object::ListPropertiesSync() {
 	return new vector<string>();
 }
 

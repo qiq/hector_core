@@ -21,7 +21,7 @@ targetEngine;	init	engine to be called
 #include "CallProcessingEngine.h"
 #include "common.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 #include "ProcessingEngine.h"
 
 class Call : public CallProcessingEngine {
@@ -62,10 +62,10 @@ private:
 	char *GetTargetEngine(const char *name);
 	void SetTargetEngine(const char *name, const char *value);
 
-	ObjectValues<TestCall> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<TestCall> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	Call *call;
 };
@@ -74,16 +74,16 @@ inline Module::Type TestCall::GetType() {
 	return MULTI;
 }
 
-inline char *TestCall::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *TestCall::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool TestCall::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool TestCall::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *TestCall::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *TestCall::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

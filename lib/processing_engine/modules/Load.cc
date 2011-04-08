@@ -26,12 +26,12 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	fd = -1;
 	stream = NULL;
 
-	values = new ObjectValues<Load>(this);
-	values->Add("items", &Load::GetItems);
-	values->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
-	values->Add("filename", &Load::GetFilename, &Load::SetFilename);
-	values->Add("wait", &Load::GetWait, &Load::SetWait);
-	values->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
+	props = new ObjectProperties<Load>(this);
+	props->Add("items", &Load::GetItems);
+	props->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
+	props->Add("filename", &Load::GetFilename, &Load::SetFilename);
+	props->Add("wait", &Load::GetWait, &Load::SetWait);
+	props->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
 }
 
 Load::~Load() {
@@ -42,7 +42,7 @@ Load::~Load() {
 	}
 	free(filename);
 	free(resourceTypeName);
-	delete values;
+	delete props;
 }
 
 char *Load::GetItems(const char *name) {
@@ -113,7 +113,7 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	if (!values->InitValues(params))
+	if (!props->InitProperties(params))
 		return false;
 	if (maxItems)
 		LOG_INFO(this, "Going to load " << maxItems << " resources.");

@@ -18,6 +18,6 @@ public:
         Object *GetObject(const char *id);
         std::vector<std::string> *GetIds();
 
-        char *GetObjectValue(const char *id, const char *name);
-        bool SetObjectValue(const char *id, const char *name, const char *value);
+        char *GetObjectProperty(const char *id, const char *name);
+        bool SetObjectProperty(const char *id, const char *name, const char *value);
 };

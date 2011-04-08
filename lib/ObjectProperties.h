@@ -1,8 +1,8 @@
 /* template-based value getters/setters implementation
  */
 
-#ifndef _LIB_OBJECT_VALUES_
-#define _LIB_OBJECT_VALUES_
+#ifndef _LIB_OBJECT_PROPERTIES_
+#define _LIB_OBJECT_PROPERTIES_
 
 #include <config.h>
 
@@ -14,18 +14,18 @@
 #include <log4cxx/logger.h>
 
 template <class T>
-class ObjectValues {
+class ObjectProperties {
 public:
-	ObjectValues(T *module): module(module) {};
-	~ObjectValues() {};
+	ObjectProperties(T *module): module(module) {};
+	~ObjectProperties() {};
 
 	void Add(const char *name, char *(T::*get)(const char*), void (T::*set)(const char*, const char*) = NULL, bool initOnly = false);
-	bool InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown = false);
-	bool InitValue(const char *name, const char *value, bool ignoreUnknown = false);
+	bool InitProperties(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown = false);
+	bool InitProperty(const char *name, const char *value, bool ignoreUnknown = false);
 
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	std::vector<std::string> *ListNames();
+	char *GetProperty(const char *name);
+	bool SetProperty(const char *name, const char *value);
+	std::vector<std::string> *ListProperties();
 
 private:
 	T *module;
@@ -37,10 +37,10 @@ private:
 	static log4cxx::LoggerPtr logger;
 };
 
-template <class T> log4cxx::LoggerPtr ObjectValues<T>::logger(log4cxx::Logger::getLogger("lib.ObjectValues"));
+template <class T> log4cxx::LoggerPtr ObjectProperties<T>::logger(log4cxx::Logger::getLogger("lib.ObjectProperties"));
 
 template<class T>
-bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown) {
+bool ObjectProperties<T>::InitProperties(std::vector<std::pair<std::string, std::string> > *params, bool ignoreUnknown) {
 	for (std::vector<std::pair<std::string, std::string> >::iterator iter = params->begin(); iter != params->end(); ++iter) {
 		typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter2 = setters.find(iter->first);
 		if (iter2 != setters.end()) {
@@ -52,7 +52,7 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 			} else if (!ignoreUnknown) {
 				std::string s;
 				s.append(module->GetId());
-				s.append(": Invalid value name: ");
+				s.append(": Invalid property name: ");
 				s.append(iter->first);
 				s.append(" (available: ");
 				bool first = true;
@@ -76,7 +76,7 @@ bool ObjectValues<T>::InitValues(std::vector<std::pair<std::string, std::string>
 }
 
 template<class T>
-bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignoreUnknown) {
+bool ObjectProperties<T>::InitProperty(const char *name, const char *value, bool ignoreUnknown) {
 	typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(module->*iter->second)(name, value);
@@ -87,14 +87,14 @@ bool ObjectValues<T>::InitValue(const char *name, const char *value, bool ignore
 			(module->*iter->second)(name, value);
 			return true;
 		} else if (!ignoreUnknown) {
-			LOG4CXX_ERROR(logger, module->GetId() << ": Invalid value name: " << iter->first);
+			LOG4CXX_ERROR(logger, module->GetId() << ": Invalid property name: " << iter->first);
 			return false;
 		}
 	}
 }
 
 template<class T>
-void ObjectValues<T>::Add(const char *name, char *(T::*get)(const char*), void (T::*set)(const char*, const char*), bool initOnly) {
+void ObjectProperties<T>::Add(const char *name, char *(T::*get)(const char*), void (T::*set)(const char*, const char*), bool initOnly) {
 	getters[name] = get;
 	if (set) {
 		if (!initOnly)
@@ -105,7 +105,7 @@ void ObjectValues<T>::Add(const char *name, char *(T::*get)(const char*), void (
 }
 
 template<class T>
-char *ObjectValues<T>::GetValue(const char *name) {
+char *ObjectProperties<T>::GetProperty(const char *name) {
 	typename std::tr1::unordered_map<std::string, char*(T::*)(const char*)>::iterator iter = getters.find(name);
 	if (iter != getters.end())
 		return (module->*iter->second)(name);
@@ -113,7 +113,7 @@ char *ObjectValues<T>::GetValue(const char *name) {
 }
 
 template<class T>
-bool ObjectValues<T>::SetValue(const char *name, const char *value) {
+bool ObjectProperties<T>::SetProperty(const char *name, const char *value) {
 	typename std::tr1::unordered_map<std::string, void(T::*)(const char*, const char*)>::iterator iter = setters.find(name);
 	if (iter != setters.end()) {
 		(module->*iter->second)(name, value);
@@ -123,7 +123,7 @@ bool ObjectValues<T>::SetValue(const char *name, const char *value) {
 }
 
 template<class T>
-std::vector<std::string> *ObjectValues<T>::ListNames() {
+std::vector<std::string> *ObjectProperties<T>::ListProperties() {
 	std::vector<std::string> *result = new std::vector<std::string>();
 	for (typename std::tr1::unordered_map<std::string, char*(T::*)(const char*)>::iterator iter = getters.begin(); iter != getters.end(); ++iter) {
 		result->push_back(iter->first);

@@ -52,18 +52,18 @@ TestCall::TestCall(ObjectRegistry *objects, const char *id, int threadIndex): Mo
 	resourceType = NULL;
 	targetEngine = NULL;
 
-	values = new ObjectValues<TestCall>(this);
-	values->Add("items", &TestCall::GetItems);
-	values->Add("maxRequests", &TestCall::GetMaxRequests, &TestCall::SetMaxRequests, true);
-	values->Add("timeTick", &TestCall::GetTimeTick, &TestCall::SetTimeTick);
-	values->Add("resourceType", &TestCall::GetResourceType, &TestCall::SetResourceType, true);
-	values->Add("targetEngine", &TestCall::GetTargetEngine, &TestCall::SetTargetEngine);
+	props = new ObjectProperties<TestCall>(this);
+	props->Add("items", &TestCall::GetItems);
+	props->Add("maxRequests", &TestCall::GetMaxRequests, &TestCall::SetMaxRequests, true);
+	props->Add("timeTick", &TestCall::GetTimeTick, &TestCall::SetTimeTick);
+	props->Add("resourceType", &TestCall::GetResourceType, &TestCall::SetResourceType, true);
+	props->Add("targetEngine", &TestCall::GetTargetEngine, &TestCall::SetTargetEngine);
 }
 
 TestCall::~TestCall() {
 	free(targetEngine);
 	free(resourceType);
-	delete values;
+	delete props;
 	delete call;
 }
 
@@ -117,7 +117,7 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 		return true;
 	}
 
-	if (!values->InitValues(params))
+	if (!props->InitProperties(params))
 		return false;
 
 	if (maxRequests <= 0) {

@@ -12,7 +12,7 @@
 #include <log4cxx/logger.h>
 #include "common.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 #include "ProcessingEngine.h"
 
 class CallProcessingEngine {

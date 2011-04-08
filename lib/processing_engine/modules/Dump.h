@@ -14,7 +14,7 @@ Parameters: none
 #include <string>
 #include "common.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 
 class Dump : public Module {
 public:
@@ -25,26 +25,26 @@ public:
 	Resource *ProcessSimpleSync(Resource *resource);
 
 private:
-	ObjectValues<Dump> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<Dump> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 };
 
 inline 	Module::Type Dump::GetType() {
 	return SIMPLE;
 }
 
-inline char *Dump::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *Dump::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool Dump::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool Dump::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *Dump::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *Dump::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

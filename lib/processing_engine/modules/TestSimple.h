@@ -20,7 +20,7 @@ setStatus	r/w	Whether to set status to an arbitrary value (setStatus >= 0)
 #include <tr1/unordered_map>
 #include "common.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 
 class TestSimple : public Module {
 public:
@@ -44,26 +44,26 @@ private:
 	char *GetSetStatus(const char *name);
 	void SetSetStatus(const char *name, const char *value);
 
-	ObjectValues<TestSimple> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<TestSimple> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 };
 
 inline 	Module::Type TestSimple::GetType() {
 	return SIMPLE;
 }
 
-inline char *TestSimple::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *TestSimple::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool TestSimple::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool TestSimple::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *TestSimple::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *TestSimple::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

@@ -47,7 +47,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				// get value
 				string object = args.substr(0, dot);
 				string property = args.substr(dot+1);
-				char *value = objects->GetObjectValue(object.c_str(), property.c_str());
+				char *value = objects->GetObjectProperty(object.c_str(), property.c_str());
 				if (value) {
 					LOG4CXX_INFO(logger, "GET " << args << " = " << value);
 					conn->SetResponseCode(200, "OK");
@@ -61,7 +61,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				// list object properties
 				Object *object = objects->GetObject(args.c_str());
 				if (object) {
-					vector<string> *names = object->ListNames();
+					vector<string> *names = object->ListProperties();
 					string s;
 					for (vector<string>::iterator iter = names->begin(); iter != names->end(); ++iter) {
 						conn->AppendResponseBody(iter->c_str());
@@ -103,7 +103,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				string body = conn->GetRequestBody();
 				size_t eoln = body.find_first_of("\r\n");
 				string value = eoln != string::npos ? body.substr(0, eoln): body;
-				if (objects->SetObjectValue(object.c_str(), property.c_str(), value.c_str())) {
+				if (objects->SetObjectProperty(object.c_str(), property.c_str(), value.c_str())) {
 					LOG4CXX_INFO(logger, "SET " << args << " = " << value);
 					conn->SetResponseCode(200, "OK");
 				} else {

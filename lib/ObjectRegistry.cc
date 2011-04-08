@@ -44,19 +44,19 @@ vector<string> *ObjectRegistry::GetIds() {
 	return result;
 }
 
-char *ObjectRegistry::GetObjectValue(const char *id, const char *name) {
+char *ObjectRegistry::GetObjectProperty(const char *id, const char *name) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
 		Object *obj = iter->second;
-		return obj->GetValue(name);
+		return obj->GetProperty(name);
 	}
 	return NULL;
 }
 
-bool ObjectRegistry::SetObjectValue(const char *id, const char *name, const char *value) {
+bool ObjectRegistry::SetObjectProperty(const char *id, const char *name, const char *value) {
 	tr1::unordered_map<string, Object*>::iterator iter = objects.find(id);
 	if (iter != objects.end()) {
-		return iter->second->SetValue(name, value);
+		return iter->second->SetProperty(name, value);
 	}
 	return false;
 }

@@ -14,7 +14,7 @@ items		r/o	Total items processed
 #include <config.h>
 
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 
 class TestOutput : public Module {
 public:
@@ -29,26 +29,26 @@ private:
 
 	char *GetItems(const char *name);
 
-	ObjectValues<TestOutput> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<TestOutput> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 };
 
 inline Module::Type TestOutput::GetType() {
 	return OUTPUT;
 }
 
-inline char *TestOutput::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *TestOutput::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool TestOutput::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool TestOutput::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *TestOutput::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *TestOutput::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

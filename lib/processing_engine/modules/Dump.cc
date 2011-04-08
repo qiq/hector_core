@@ -9,11 +9,11 @@
 using namespace std;
 
 Dump::Dump(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
-	values = new ObjectValues<Dump>(this);
+	props = new ObjectProperties<Dump>(this);
 }
 
 Dump::~Dump() {
-	delete values;
+	delete props;
 }
 
 bool Dump::Init(vector<pair<string, string> > *params) {
@@ -21,7 +21,7 @@ bool Dump::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	values->InitValues(params);
+	props->InitProperties(params);
 	return true;
 }
 

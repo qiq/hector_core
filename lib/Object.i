@@ -2,7 +2,7 @@
 %include "std_vector.i"
 %include "std_string.i"
 
-%newobject Object::GetValue(const char *name);
+%newobject Object::GetProperty(const char *name);
 
 %{
 #include "Object.h"
@@ -18,9 +18,9 @@ public:
         void ObjectLockWrite();
         void ObjectUnlock();
         const char *GetId();
-        char *GetValue(const char *name);
-        bool SetValue(const char *name, const char *value);
-        std::vector<std::string> *ListNames();
+        char *GetProperty(const char *name);
+        bool SetProperty(const char *name, const char *value);
+        std::vector<std::string> *ListProperties();
         void SaveCheckpoint(const char *path);
         void RestoreCheckpoint(const char *path);
 

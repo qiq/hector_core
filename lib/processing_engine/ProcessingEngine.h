@@ -71,7 +71,7 @@ protected:
 	int processorsSleeping;
 	bool sleeping;				// all processors are sleeping, etc., guarded by ObjectLock
 
-	ObjectValues<ProcessingEngine> *values;
+	ObjectProperties<ProcessingEngine> *values;
 
 	bool propRun;
 	bool propPause;
@@ -91,9 +91,9 @@ protected:
 	void DoPause();
 	void DoResume();
 
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	bool SaveCheckpointSync(const char *path);
 	bool RestoreCheckpointSync(const char *path);

@@ -17,7 +17,7 @@ resourceType	init	What resource to genereate.
 #include <config.h>
 
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 
 class TestInput : public Module {
 public:
@@ -41,10 +41,10 @@ private:
 	char *GetResourceType(const char *name);
 	void SetResourceType(const char *name, const char *value);
 
-	ObjectValues<TestInput> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<TestInput> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	int typeId;		// to create TestResource
 };
@@ -53,16 +53,16 @@ inline Module::Type TestInput::GetType() {
 	return INPUT;
 }
 
-inline char *TestInput::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *TestInput::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool TestInput::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool TestInput::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *TestInput::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *TestInput::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

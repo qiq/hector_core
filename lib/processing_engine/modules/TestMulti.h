@@ -20,7 +20,7 @@ timeTick	r/w	Max time to spend in ProcessMulti()
 #include <tr1/unordered_map>
 #include "common.h"
 #include "Module.h"
-#include "ObjectValues.h"
+#include "ObjectProperties.h"
 #include "TestResource.h"
 
 class TestMulti : public Module {
@@ -42,10 +42,10 @@ private:
 	char *GetTimeTick(const char *name);
 	void SetTimeTick(const char *name, const char *value);
 
-	ObjectValues<TestMulti> *values;
-	char *GetValueSync(const char *name);
-	bool SetValueSync(const char *name, const char *value);
-	std::vector<std::string> *ListNamesSync();
+	ObjectProperties<TestMulti> *props;
+	char *GetPropertySync(const char *name);
+	bool SetPropertySync(const char *name, const char *value);
+	std::vector<std::string> *ListPropertiesSync();
 
 	std::queue<TestResource*> resources;
 };
@@ -54,16 +54,16 @@ inline Module::Type TestMulti::GetType() {
 	return MULTI;
 }
 
-inline char *TestMulti::GetValueSync(const char *name) {
-	return values->GetValue(name);
+inline char *TestMulti::GetPropertySync(const char *name) {
+	return props->GetProperty(name);
 }
 
-inline bool TestMulti::SetValueSync(const char *name, const char *value) {
-	return values->SetValue(name, value);
+inline bool TestMulti::SetPropertySync(const char *name, const char *value) {
+	return props->SetProperty(name, value);
 }
 
-inline std::vector<std::string> *TestMulti::ListNamesSync() {
-	return values->ListNames();
+inline std::vector<std::string> *TestMulti::ListPropertiesSync() {
+	return props->ListProperties();
 }
 
 #endif

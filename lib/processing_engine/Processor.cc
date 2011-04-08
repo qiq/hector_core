@@ -31,8 +31,8 @@ Processor::Processor(ObjectRegistry *objects, const char *id, ProcessingEngine *
 	sleepingThreads = 0;
 	pauseInput = false;
 
-	values = new ObjectValues<Processor>(this);
-	values->Add("pauseInput", &Processor::GetPauseInput, &Processor::SetPauseInput);
+	props = new ObjectProperties<Processor>(this);
+	props->Add("pauseInput", &Processor::GetPauseInput, &Processor::SetPauseInput);
 }
 
 Processor::~Processor() {
@@ -58,7 +58,7 @@ Processor::~Processor() {
 		deletedResources.pop();
 	}
 
-	delete values;
+	delete props;
 }
 
 char *Processor::GetPauseInput(const char *name) {
@@ -244,7 +244,7 @@ bool Processor::Init(Config *config) {
 
 			// so that we can get actual size of a queue
 			snprintf(buffer, sizeof(buffer), "queue_size.%d", priority);
-			values->Add(buffer, &Processor::GetInputQueueItems);
+			props->Add(buffer, &Processor::GetInputQueueItems);
 		}
 	}
 

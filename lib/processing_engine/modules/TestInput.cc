@@ -17,18 +17,18 @@ TestInput::TestInput(ObjectRegistry *objects, const char *id, int threadIndex): 
 	idPrefix = NULL;
 	resourceType = NULL;
 
-	values = new ObjectValues<TestInput>(this);
-	values->Add("items", &TestInput::GetItems);
-	values->Add("maxItems", &TestInput::GetMaxItems, &TestInput::SetMaxItems, true);
-	values->Add("idPrefix", &TestInput::GetIdPrefix, &TestInput::SetIdPrefix);
-	values->Add("resourceType", &TestInput::GetResourceType, &TestInput::SetResourceType, true);
+	props = new ObjectProperties<TestInput>(this);
+	props->Add("items", &TestInput::GetItems);
+	props->Add("maxItems", &TestInput::GetMaxItems, &TestInput::SetMaxItems, true);
+	props->Add("idPrefix", &TestInput::GetIdPrefix, &TestInput::SetIdPrefix);
+	props->Add("resourceType", &TestInput::GetResourceType, &TestInput::SetResourceType, true);
 }
 
 TestInput::~TestInput() {
 	free(idPrefix);
 	free(resourceType);
 
-	delete values;
+	delete props;
 }
 
 char *TestInput::GetItems(const char *name) {
@@ -66,7 +66,7 @@ bool TestInput::Init(vector<pair<string, string> > *params) {
 	if (!params)
 		return true;
 
-	if (!values->InitValues(params))
+	if (!props->InitProperties(params))
 		return false;
 	if (!resourceType)
 		resourceType = strdup("TestResource");

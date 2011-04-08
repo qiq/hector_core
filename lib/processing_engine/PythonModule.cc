@@ -324,53 +324,53 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	return result;
 }
 
-char *PythonModule::GetValueSync(const char *name) {
+char *PythonModule::GetPropertySync(const char *name) {
 	PyGILState_STATE gstate = python->Lock();
 	assert(name != NULL);
 
 	char *result = NULL;
-	PyObject *out = python->CallMethod(module, "GetValue", "(s)", name);
+	PyObject *out = python->CallMethod(module, "GetProperty", "(s)", name);
 	if (out) {
 		if (PyString_Check(out) >= 0) {
 			result = strdup(PyString_AsString(out));
 		} else {
-			LOG_ERROR(this, "Error calling GetValue");
+			LOG_ERROR(this, "Error calling GetProperty");
 		}
 		Py_DECREF(out);
 	} else {
-		LOG_ERROR(this, "Error calling GetValue");
+		LOG_ERROR(this, "Error calling GetProperty");
 	}
 
 	python->Unlock(gstate);
 	return result;
 }
 
-bool PythonModule::SetValueSync(const char *name, const char *value) {
+bool PythonModule::SetPropertySync(const char *name, const char *value) {
 	PyGILState_STATE gstate = python->Lock();
 	assert(name != NULL);
 
 	bool result = false;
-	PyObject *out = python->CallMethod(module, "SetValue", "(ss)", name, value);
+	PyObject *out = python->CallMethod(module, "SetProperty", "(ss)", name, value);
 	if (out) {
 		if (PyInt_Check(out) >= 0) {
 			result = PyInt_AsLong(out) != 0;
 		} else {
-			LOG_ERROR(this, "Error calling SetValue");
+			LOG_ERROR(this, "Error calling SetProperty");
 		}
 		Py_DECREF(out);
 	} else {
-		LOG_ERROR(this, "Error calling SetValue");
+		LOG_ERROR(this, "Error calling SetProperty");
 	}
 
 	python->Unlock(gstate);
 	return result;
 }
 
-vector<string> *PythonModule::ListNamesSync() {
+vector<string> *PythonModule::ListPropertiesSync() {
 	PyGILState_STATE gstate = python->Lock();
 
 	vector<string> *result = new vector<string>();
-	PyObject *out = python->CallMethod(module, "ListNames", "()");
+	PyObject *out = python->CallMethod(module, "ListProperties", "()");
 	if (out) {
 		for (int i = 0; i < PyList_Size(out); i++) {
 			PyObject *item = PyList_GetItem(out, i);
@@ -382,7 +382,7 @@ vector<string> *PythonModule::ListNamesSync() {
 		}
 		Py_DECREF(out);
 	} else {
-		LOG_ERROR(this, "Error calling ListNames");
+		LOG_ERROR(this, "Error calling ListProperties");
 	}
 
 	python->Unlock(gstate);

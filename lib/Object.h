@@ -31,9 +31,9 @@ public:
 	void ObjectLockWrite();
 	void ObjectUnlock();
 	const char *GetId();
-	char *GetValue(const char *name);
-	bool SetValue(const char *name, const char *value);
-	std::vector<std::string> *ListNames();
+	char *GetProperty(const char *name);
+	bool SetProperty(const char *name, const char *value);
+	std::vector<std::string> *ListProperties();
 	bool SaveCheckpoint(const char *path);
 	bool RestoreCheckpoint(const char *path);
 
@@ -65,9 +65,9 @@ protected:
 	char *id;
 	RWLock rwlock;
 
-	virtual char *GetValueSync(const char *name);
-	virtual bool SetValueSync(const char *name, const char *value);
-	virtual std::vector<std::string> *ListNamesSync();
+	virtual char *GetPropertySync(const char *name);
+	virtual bool SetPropertySync(const char *name, const char *value);
+	virtual std::vector<std::string> *ListPropertiesSync();
 
 	virtual bool SaveCheckpointSync(const char *path);
 	virtual bool RestoreCheckpointSync(const char *path);
@@ -121,28 +121,28 @@ inline void Object::ObjectUnlock() {
 	rwlock.Unlock();
 }
 
-inline char *Object::GetValue(const char *name) {
+inline char *Object::GetProperty(const char *name) {
 	if (!strcmp(name, "logLevel"))
 		return strdup(this->GetLogLevelStr(this->logger));
 	ObjectLockRead();
-	char *result = GetValueSync(name);
+	char *result = GetPropertySync(name);
 	ObjectUnlock();
 	return result;
 }
 
-inline bool Object::SetValue(const char *name, const char *value) {
+inline bool Object::SetProperty(const char *name, const char *value) {
 	if (!strcmp(name, "logLevel"))
 		return this->SetLogLevel(value);
 	ObjectLockWrite();
-	bool result = SetValueSync(name, value);
+	bool result = SetPropertySync(name, value);
 	ObjectUnlock();
 	return result;
 }
 
-inline std::vector<std::string> *Object::ListNames() {
+inline std::vector<std::string> *Object::ListProperties() {
 	std::vector<std::string> *result;
 	ObjectLockRead();
-	result = ListNamesSync();
+	result = ListPropertiesSync();
 	ObjectUnlock();
 	result->push_back("logLevel");
 	return result;
