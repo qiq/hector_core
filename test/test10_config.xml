@@ -37,6 +37,7 @@ test10: test of loading/saving module
 				<modules>
 					<Module id="M_save" lib="Save.la">
 						<param name="filename" value="test10.data.out"/>
+						<param name="saveResourceType" value="true"/>
 					</Module>
 				</modules>
 				<input>

@@ -19,6 +19,7 @@ test31: accessing processing chain from the server
 		</logConfig>
 		<resources>
 			<Resource id="R_test" lib="TestResource.la"/>
+			<Resource id="R_pbtest" lib="TestProtobufResource.la"/>
 		</resources>
 		<ProcessingEngine id="PE_test">
 			<inputProcessor ref="P_simple"/>

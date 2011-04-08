@@ -40,6 +40,7 @@ test30: test of loading/saving module, using both TestResource and TestProtobufR
 					<Module id="M_save" lib="Save.la">
 						<param name="filename" value="$2"/>
 						<param name="overwrite" value="true"/>
+						<param name="saveResourceType" value="true"/>
 					</Module>
 				</modules>
 				<input>

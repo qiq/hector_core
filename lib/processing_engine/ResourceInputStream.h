@@ -92,7 +92,7 @@ inline google::protobuf::io::CodedInputStream::Limit ResourceInputStream::PushLi
 }
 
 inline void ResourceInputStream::PopLimit(google::protobuf::io::CodedInputStream::Limit limit) {
-	PopLimit(limit);
+	stream->PopLimit(limit);
 }
 
 inline google::protobuf::io::CodedInputStream *ResourceInputStream::GetCodedInputStream() {

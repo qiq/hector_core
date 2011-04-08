@@ -19,8 +19,8 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	filename = NULL;
 	items = 0;
 	overwrite = false;
-	saveType = false;
-	saveIdStatus = false;
+	saveResourceType = false;
+	saveResourceIdStatus = false;
 	fd = -1;
 	stream = NULL;
 
@@ -28,8 +28,8 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	values->Add("items", &Save::GetItems);
 	values->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
 	values->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
-	values->Add("saveType", &Save::GetSaveType, &Save::SetSaveType, true);
-	values->Add("saveIdStatus", &Save::GetSaveIdStatus, &Save::SetSaveIdStatus, true);
+	values->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
+	values->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
 }
 
 Save::~Save() {
@@ -72,6 +72,7 @@ void Save::SetFilename(const char *name, const char *value) {
 		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
 		return;
 	}
+	stream = new ResourceOutputStream(fd);
 }
 
 char *Save::GetOverwrite(const char *name) {
@@ -82,20 +83,20 @@ void Save::SetOverwrite(const char *name, const char *value) {
 	overwrite = str2bool(value);
 }
 
-char *Save::GetSaveType(const char *name) {
-	return bool2str(saveType);
+char *Save::GetSaveResourceType(const char *name) {
+	return bool2str(saveResourceType);
 }
 
-void Save::SetSaveType(const char *name, const char *value) {
-	saveType = str2bool(value);
+void Save::SetSaveResourceType(const char *name, const char *value) {
+	saveResourceType = str2bool(value);
 }
 
-char *Save::GetSaveIdStatus(const char *name) {
-	return bool2str(saveIdStatus);
+char *Save::GetSaveResourceIdStatus(const char *name) {
+	return bool2str(saveResourceIdStatus);
 }
 
-void Save::SetSaveIdStatus(const char *name, const char *value) {
-	saveIdStatus = str2bool(value);
+void Save::SetSaveResourceIdStatus(const char *name, const char *value) {
+	saveResourceIdStatus = str2bool(value);
 }
 
 bool Save::Init(vector<pair<string, string> > *params) {
@@ -111,22 +112,6 @@ bool Save::Init(vector<pair<string, string> > *params) {
 		return false;
 	}
 
-	int flags = O_WRONLY|O_CREAT;
-	if (!overwrite)
-		flags |= O_APPEND;
-	else
-		flags |= O_TRUNC;
-	fd = open(filename, flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-	if (fd < 0) {
-		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
-		return false;
-	}
-	if (flock(fd, LOCK_EX) < 0) {
-		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
-		return false;
-	}
-	stream = new ResourceOutputStream(fd);
-
 	return true;
 }
 
@@ -136,7 +121,7 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 		LOG_ERROR_R(this, resource, "File not opened");
 		return resource;
 	}
-	bool res = Resource::Serialize(resource, *stream, saveType, saveIdStatus);
+	bool res = Resource::Serialize(resource, *stream, saveResourceType, saveResourceIdStatus);
 	if (res)
 		++items;
 	if (!res)

@@ -52,6 +52,7 @@ endif
 endif
 
 # SWIG interface
-EXTRA_DIST = Resource.i Module.i ResourceInputStream.i ResourceOutputStream.i
+EXTRA_DIST = Resource.i ResourceRegistry.i ResourceAttrInfo.i PerlResource.i \
+	ResourceInputStream.i ResourceOutputStream.i Module.i
 
 CLEANFILES = $(BUILT_SOURCES)

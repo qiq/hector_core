@@ -8,8 +8,8 @@ Parameters:
 items		r/o		Total items processed
 filename	initOnly	File to save resources to.
 overwrite	initOnly	Should we overwrite output file?
-saveType	r/w		Save type info (necessary if we are writing different resource types to one file)
-saveIdStatus	r/w		Save Id & Status attributes to the file (usualy not desirable)
+saveResourceType	r/w		Save type info (necessary if we are writing different resource types to one file)
+saveResourceIdStatus	r/w		Save Id & Status attributes to the file (usualy not desirable)
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -37,18 +37,18 @@ private:
 	int items;
 	char *filename;
 	bool overwrite;
-	bool saveType;
-	bool saveIdStatus;
+	bool saveResourceType;
+	bool saveResourceIdStatus;
 
 	char *GetItems(const char *name);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
 	char *GetOverwrite(const char *name);
 	void SetOverwrite(const char *name, const char *value);
-	char *GetSaveType(const char *name);
-	void SetSaveType(const char *name, const char *value);
-	char *GetSaveIdStatus(const char *name);
-	void SetSaveIdStatus(const char *name, const char *value);
+	char *GetSaveResourceType(const char *name);
+	void SetSaveResourceType(const char *name, const char *value);
+	char *GetSaveResourceIdStatus(const char *name);
+	void SetSaveResourceIdStatus(const char *name, const char *value);
 
 	ObjectValues<Save> *values;
 	char *GetValueSync(const char *name);

@@ -7,6 +7,7 @@
 #include "ProcessingEngine.h"
 #include "TestInput.h"
 #include "TestResource.h"
+#include "TestProtobufResource.h"
 
 using namespace std;
 
@@ -90,6 +91,12 @@ Resource *TestInput::ProcessInputSync(bool sleep) {
 		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", GetThreadIndex(), items);
 		tr->SetStr(s);
 		LOG_INFO_R(this, tr, "Creating TestResource (" << tr->GetStr() << ")");
+	} else if (TestProtobufResource::IsInstance(r)) {
+		TestProtobufResource *tr = static_cast<TestProtobufResource*>(r);
+		char s[1024];
+		snprintf(s, sizeof(s), "%s%d-%d", idPrefix ? idPrefix : "", GetThreadIndex(), items);
+		tr->SetStr(s);
+		LOG_INFO_R(this, tr, "Creating TestProtobufResource (" << tr->GetStr() << ")");
 	} else {
 		LOG_INFO_R(this, r, "Creating resource");
 	}
