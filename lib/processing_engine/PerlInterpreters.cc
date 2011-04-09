@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include "binaryheap.h"
+#include "heapplus.h"
 #include "common.h"
 #include "PerlInterpreters.h"
 #include "EmbeddedPerl.h"

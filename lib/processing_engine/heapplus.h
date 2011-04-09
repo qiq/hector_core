@@ -204,7 +204,7 @@ __down_heap(_RandomAccessIterator __first, _RandomAccessIterator __last, _Random
 		  }
 		else
 		  {
-			__largest = __index;
+			__largest = __len;
 		  }
 
         if (__largest < __len && __comp(__value, *(__first + __largest))) 

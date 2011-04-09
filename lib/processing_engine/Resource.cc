@@ -76,7 +76,10 @@ Resource *Resource::Deserialize(ResourceInputStream &stream, int resourceType, i
 		r->SetStatus(status);
 	}
 
-	r->Deserialize(stream);
+	if (!r->Deserialize(stream)) {
+		registry->ReleaseResource(r);
+		return NULL;
+	}
 	if (totalSize)
 		*totalSize = stream.ByteCount()-current;
 	return r;

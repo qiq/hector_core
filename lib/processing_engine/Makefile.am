@@ -12,11 +12,9 @@ hectorinclude_HEADERS = Server.h ProcessingEngine.h Processor.h Module.h Resourc
 	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
 	PythonModule.h \
 	CallProcessingEngine.h BaseServer.h \
-	binaryheap.h
+	heapplus.h \
 	ResourceRegistry.i Resource.i ResourceAttrInfo.i ResourceInputStream.i ResourceOutputStream.i \
 	PerlResource.i Module.i
-
-BUILT_SOURCES =
 
 libhector_processing_engine_la_SOURCES = \
 	Server.h Server.cc \
@@ -54,5 +52,3 @@ endif
 # SWIG interface
 EXTRA_DIST = Resource.i ResourceRegistry.i ResourceAttrInfo.i PerlResource.i \
 	ResourceInputStream.i ResourceOutputStream.i Module.i
-
-CLEANFILES = $(BUILT_SOURCES)

@@ -21,7 +21,9 @@ PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 		*dot = '\0';
 	ref = NULL;
 	typeIdSet = false;
+	typeString = NULL;
 	typeStringSet = false;
+	typeStringShort = NULL;
 	typeStringShortSet = false;
 }
 

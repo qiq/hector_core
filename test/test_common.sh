@@ -23,6 +23,7 @@ function test_server_start {
 		return
 	fi
 	shift
+	hector_server_shutdown 2>/dev/null
 	hector_server_start "$test_base/test/${id}_config.xml" -B "$test_base" test $@
 	hector_client_wait_dontfail PE_test.run 0
 }

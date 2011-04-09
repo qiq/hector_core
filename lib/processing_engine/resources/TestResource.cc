@@ -34,10 +34,10 @@ bool TestResource::Serialize(ResourceOutputStream &output) {
 
 bool TestResource::Deserialize(ResourceInputStream &input) {
 	uint32_t len;
-	input.ReadVarint32(&len);
+	if (!input.ReadVarint32(&len))
+		return false;
 	str.clear();
-	input.ReadString(&str, len);
-	return true;
+	return input.ReadString(&str, len);
 }
 
 string TestResource::ToString(Object::LogLevel logLevel) {

@@ -1,5 +1,3 @@
-ObjectValues -> ObjectProperties... prejmenovat
-
 - PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje
 
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat
@@ -20,6 +18,8 @@ Coding style:
 	- client: zrychlit nabihani, implementovat reconnect
 
 DONE
+ObjectValues -> ObjectProperties... prejmenovat
+
 Format souboru s resources:
 - type id (1B), nejvyssi bit rika, jestli je tam id + status
 	- id (optional, 4B) + status (optional, 4B)
