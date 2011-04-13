@@ -17,6 +17,11 @@ class ResourceAttrInfo;
 class ResourceInputStream;
 class ResourceOutputStream;
 
+class MarkerResourceInfo : public ResourceInfo {
+public:
+	MarkerResourceInfo();
+};
+
 class MarkerResource : public Resource {
 public:
 	MarkerResource() {};
@@ -28,16 +33,10 @@ public:
 	// save and restore resource
 	bool Serialize(ResourceOutputStream &output);
 	bool Deserialize(ResourceInputStream &input);
-	// return ResourceAttrInfo describing one field
-	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
-	// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	int GetTypeId();
-	// type string of a resource
-	const char *GetTypeString(bool terse = false);
-	// object name (for construction of an object or a reference)
-	const char *GetObjectName();
 	// used by queues in case there is limit on queue size
 	int GetSize();
+	// get info about this resource
+	ResourceInfo *GetResourceInfo();
 	// return string representation of the resource (e.g. for debugging purposes)
 	std::string ToString(Object::LogLevel logLevel);
 
@@ -47,27 +46,19 @@ public:
 	static bool IsInstance(Resource *resource);
 
 protected:
-	static const int typeId = 3;
-
 	int mark;
 
+	static MarkerResourceInfo resourceInfo;
 	static log4cxx::LoggerPtr logger;
 };
 
-inline int MarkerResource::GetTypeId() {
-	return typeId; 
-}
-
-inline const char *MarkerResource::GetTypeString(bool terse) {
-	return terse ? "MR" : "MarkerResource";
-}
-
-inline const char *MarkerResource::GetObjectName() {
-	return "MarkerResource";
-}
 
 inline int MarkerResource::GetSize() {
 	return sizeof(int);
+}
+
+inline ResourceInfo *MarkerResource::GetResourceInfo() {
+	return &MarkerResource::resourceInfo;
 }
 
 inline int MarkerResource::GetMark() {
@@ -79,7 +70,7 @@ inline void MarkerResource::SetMark(int mark) {
 }
 
 inline bool MarkerResource::IsInstance(Resource *resource) {
-	return resource->GetTypeId() == typeId;
+	return resource->GetTypeId() == resourceInfo.GetTypeId();
 }
 
 #endif

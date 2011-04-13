@@ -39,6 +39,15 @@
 %ignore GetValuesLong(ResourceAttrInfo *ai);
 %ignore GetValuesIpAddr(ResourceAttrInfo *ai);
 
+class ResourceInfo {
+public:
+        int typeId;
+        const char *typeString;
+        const char *typeStringTerse;
+        const char *objectName;
+        std::vector<ResourceAttrInfo*> *attrInfoList;
+};
+
 class Resource {
 public:
         enum Flag {
@@ -52,11 +61,8 @@ public:
         virtual void Clear();
         virtual bool Serialize(ResourceOutputStream &output) = 0;
         virtual bool Deserialize(ResourceInputStream &input) = 0;
-        virtual std::vector<ResourceAttrInfo*> *GetAttrInfoList() = 0;
-        virtual int GetTypeId() = 0;
-        virtual const char *GetTypeString(bool terse = false) = 0;
-        virtual const char *GetObjectName() = 0;
         virtual int GetSize() = 0;
+        virtual ResourceInfo *GetResourceInfo() = 0;
         virtual std::string ToString(Object::LogLevel logLevel) = 0;
 
         virtual int GetId();
@@ -139,6 +145,10 @@ public:
         void SetAttachedResource(Resource *attachedResource);
         void ClearAttachedResource();
 
+        int GetTypeId();
+        const char *GetTypeString(bool terse = false);
+        const char *GetObjectName();
+        std::vector<ResourceAttrInfo*> *GetAttrInfoList();
         std::string ToStringShort();
 
         // static methods common to all Resources

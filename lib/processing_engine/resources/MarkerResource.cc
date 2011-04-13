@@ -11,6 +11,31 @@
 using namespace std;
 
 log4cxx::LoggerPtr MarkerResource::logger(log4cxx::Logger::getLogger("resources.MarkerResource"));
+MarkerResourceInfo MarkerResource::resourceInfo;
+
+MarkerResourceInfo::MarkerResourceInfo() {
+	SetTypeId(3);
+	SetTypeString("MarkerResource");
+	SetTypeStringTerse("MR");
+	SetObjectName("MarkerResource");
+
+	vector<ResourceAttrInfo*> *l = new vector<ResourceAttrInfo*>();
+	ResourceAttrInfoT<MarkerResource> *ai;
+
+	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
+	ai->InitInt("id", &MarkerResource::GetId, &MarkerResource::SetId);
+	l->push_back(ai);
+
+	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
+	ai->InitInt("status", &MarkerResource::GetStatus, &MarkerResource::SetStatus);
+	l->push_back(ai);
+
+	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
+	ai->InitInt("mark", &MarkerResource::GetMark, &MarkerResource::SetMark);
+	l->push_back(ai);
+
+	SetAttrInfoList(l);
+}
 
 Resource *MarkerResource::Clone() {
 	return new MarkerResource(*this);
@@ -34,23 +59,4 @@ string MarkerResource::ToString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "[TR %d %d] %d", id, IsSetFlag(DELETED) ? -1 : status, mark);
 	return buf;
-}
-
-vector<ResourceAttrInfo*> *MarkerResource::GetAttrInfoList() {
-	vector<ResourceAttrInfo*> *result = new vector<ResourceAttrInfo*>();
-	ResourceAttrInfoT<MarkerResource> *ai;
-
-	ai = new ResourceAttrInfoT<MarkerResource>(typeId);
-	ai->InitInt("id", &MarkerResource::GetId, &MarkerResource::SetId);
-	result->push_back(ai);
-
-	ai = new ResourceAttrInfoT<MarkerResource>(typeId);
-	ai->InitInt("status", &MarkerResource::GetStatus, &MarkerResource::SetStatus);
-	result->push_back(ai);
-
-	ai = new ResourceAttrInfoT<MarkerResource>(typeId);
-	ai->InitInt("mark", &MarkerResource::GetMark, &MarkerResource::SetMark);
-	result->push_back(ai);
-
-	return result;
 }

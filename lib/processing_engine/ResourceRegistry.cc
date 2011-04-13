@@ -20,7 +20,7 @@ ResourceRegistry::ResourceRegistry() {
 }
 
 ResourceRegistry::~ResourceRegistry() {
-	for (tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.begin(); iter != id2info.end(); ++iter) {
+	for (tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.begin(); iter != id2info.end(); ++iter) {
 		vector<Resource*> *v = &iter->second->available;
 		for (vector<Resource*>::iterator iter2 = v->begin(); iter2 != v->end(); ++iter2) {
 			if (iter->second->perl) {
@@ -33,9 +33,6 @@ ResourceRegistry::~ResourceRegistry() {
 				delete *iter2;
 			}
 		}
-		for (vector<ResourceAttrInfo*>::iterator iter2 = iter->second->attrInfo->begin(); iter2 != iter->second->attrInfo->end(); ++iter2)
-			delete *iter2;
-		delete iter->second->attrInfo;
 		free(iter->second->library);
 		delete iter->second;
 	}
@@ -58,7 +55,7 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 				return false;
 			}
 
-			ResourceInfo *info = new ResourceInfo();
+			ResourceRegistryInfo *info = new ResourceRegistryInfo();
 			info->create = NULL;
 			info->library = NULL;
 			info->perl = false;
@@ -100,10 +97,13 @@ bool ResourceRegistry::Load(const char *id, Config *config) {
 				LOG4CXX_ERROR(logger, "Unknown resource type (" << lib << ", " << type << ")");
 				return false;
 			}
-			info->typeStr = r->GetTypeString();
-			info->typeId = r->GetTypeId();
-			info->attrInfo = r->GetAttrInfoList();
-			for (vector<ResourceAttrInfo*>::iterator iter = info->attrInfo->begin(); iter != info->attrInfo->end(); ++iter)
+			ResourceInfo *ri = r->GetResourceInfo();
+			if (!ri)
+				return false;
+			info->typeStr = ri->GetTypeString();
+			info->typeId = ri->GetTypeId();
+			vector<ResourceAttrInfo*> *attrInfo = ri->GetAttrInfoList();
+			for (vector<ResourceAttrInfo*>::iterator iter = attrInfo->begin(); iter != attrInfo->end(); ++iter)
 				info->attrMap[(*iter)->GetName()] = *iter;
 			name2id[info->typeStr] = info->typeId;
 			id2info[info->typeId] = info;
@@ -133,12 +133,12 @@ int ResourceRegistry::NameToId(const char *name) {
 Resource *ResourceRegistry::AcquireResource(int typeId) {
 	if (typeId < 0)
 		return NULL;
-	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(typeId);
+	tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.find(typeId);
 	if (iter == id2info.end())
 		return NULL;
 	Resource *result;
 	infoLock.Lock();
-	ResourceInfo *info = iter->second;
+	ResourceRegistryInfo *info = iter->second;
 	// previously created resource?
 	if (info->available.size() > 0) {
 		result = info->available.back();
@@ -173,13 +173,13 @@ Resource *ResourceRegistry::AcquireResource(int typeId) {
 void ResourceRegistry::ReleaseResource(Resource *resource) {
 	if (!resource)
 		return;
-	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(resource->GetTypeId());
+	tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.find(resource->GetTypeId());
 	if (iter == id2info.end()) {
 		LOG4CXX_ERROR(logger, "Unknown resource type: " << resource->GetTypeId());
 		return;
 	}
 	infoLock.Lock();
-	ResourceInfo *info = iter->second;
+	ResourceRegistryInfo *info = iter->second;
 	if (info->available.size() < AVAILABLE_SIZE_MAX) {
 		resource->Clear();
 		info->available.push_back(resource);
@@ -199,10 +199,10 @@ void ResourceRegistry::ReleaseResource(Resource *resource) {
 }
 
 ResourceAttrInfo *ResourceRegistry::GetAttrInfo(int typeId, const char *name) {
-	tr1::unordered_map<int, ResourceInfo*>::iterator iter = id2info.find(typeId);
+	tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.find(typeId);
 	if (iter == id2info.end())
 		return NULL;
-	ResourceInfo *info = iter->second;
+	ResourceRegistryInfo *info = iter->second;
 	tr1::unordered_map<string, ResourceAttrInfo*>::iterator iter2 = info->attrMap.find(name);
 	if (iter2 == info->attrMap.end())
 		return NULL;

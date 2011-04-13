@@ -18,6 +18,25 @@
 #include "PlainLock.h"
 #include "Resource.h"
 
+class PerlResourceInfo : public ResourceInfo {
+public:
+	PerlResourceInfo();
+	~PerlResourceInfo() {};
+};
+
+class PerlInfoMap {
+public:
+	PerlInfoMap() {};
+	~PerlInfoMap();
+	void Lock();
+	void Unlock();
+	ResourceInfo *GetResourceInfo(int typeId);
+	void SetResourceInfo(ResourceInfo *info);
+private:
+	PlainLock infoLock;
+	std::tr1::unordered_map<int, ResourceInfo*> infoMap;
+};
+
 class PerlResource : public Resource {
 public:
 	PerlResource(PerlResourceInterpreter *perl, const char *name);
@@ -30,16 +49,10 @@ public:
 	// save and restore resource
 	bool Serialize(ResourceOutputStream &output);
 	bool Deserialize(ResourceInputStream &input);
-	// return ResourceAttrInfo describing one field
-	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
-	// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	int GetTypeId();
-	// type string of a resource
-	const char *GetTypeString(bool terse = false);
-	// object name (for construction of an object or a reference)
-	const char *GetObjectName();
 	// used by queues in case there is limit on queue size
 	int GetSize();
+	// get info about this resource
+	ResourceInfo *GetResourceInfo();
 	// return string representation of the resource (e.g. for debugging purposes)
 	std::string ToString(Object::LogLevel logLevel);
 
@@ -88,13 +101,8 @@ protected:
 	// reference to the resource
 	SV *ref;
 
-	PlainLock typeLock;
-	bool typeIdSet;
 	int typeId;
-	bool typeStringSet;
-	char *typeString;
-	bool typeStringShortSet;
-	char *typeStringShort;
+	static PerlInfoMap infoMap;
 
 	SV *GetValue(const char *prefix, const char *name);
 	SV *GetArrayValue(const char *name, int index);
@@ -105,10 +113,6 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
-
-inline const char *PerlResource::GetObjectName() {
-	return "PerlResource";
-}
 
 inline PerlResourceInterpreter *PerlResource::GetPerlResourceInterpreter() {
 	return perl;

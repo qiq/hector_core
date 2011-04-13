@@ -19,16 +19,43 @@ class ResourceAttrInfo;
 class ResourceInputStream;
 class ResourceOutputStream;
 
+// static info of a Resource
+class ResourceInfo {
+public:
+	ResourceInfo(): typeId(0), typeString(NULL), typeStringTerse(NULL), objectName(NULL), attrInfoList(NULL) {};
+	~ResourceInfo();
+	int GetTypeId();
+	void SetTypeId(int typeId);
+	const char *GetTypeString();
+	void SetTypeString(const char *typeString);
+	const char *GetTypeStringTerse();
+	void SetTypeStringTerse(const char *typeStringTerse);
+	const char *GetObjectName();
+	void SetObjectName(const char *typeId);
+	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
+	void SetAttrInfoList(std::vector<ResourceAttrInfo*> *attrInfoList);
+private:
+	int typeId;					// type id of a resource (to be used by Resources::AcquireResource(typeid))
+	char *typeString; 			// type string of a resource
+	char *typeStringTerse;			// terse version (e.g. TR for TestResource)
+	char *objectName;				// object name (for construction of an object or a reference)
+	std::vector<ResourceAttrInfo*> *attrInfoList;	// info about a resource fields
+};
+
 class Resource {
 public:
 	enum Flag {
-		DELETED = 1,		// resource will be deleted
-		SKIP = 2,		// the rest of processor modules should be skipped, resource is just appended to the queue
+		DELETED = 1,	// resource will be deleted
+		SKIP = 2,	// the rest of processor modules should be skipped, resource is just appended to the queue
 	};
-	
+
 	Resource();
 	Resource(const Resource &r);
 	virtual ~Resource() {};
+
+	// Following methods are expected to be overriden in ancestor Resources
+	// (they are made pure virtual)
+
 	// Create copy of a resource
 	virtual Resource *Clone() = 0;
 	// Clear current resource (as delete + new would do, except id is set to 0)
@@ -36,19 +63,17 @@ public:
 	// save and restore resource
 	virtual bool Serialize(ResourceOutputStream &output) = 0;
 	virtual bool Deserialize(ResourceInputStream &input) = 0;
-	// get info about a resource field
-	virtual std::vector<ResourceAttrInfo*> *GetAttrInfoList() = 0;
-	// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	virtual int GetTypeId() = 0;
-	// type string of a resource
-	virtual const char *GetTypeString(bool terse = false) = 0;
-	// object name (for construction of an object or a reference)
-	virtual const char *GetObjectName() = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int GetSize() = 0;
+	// get info about this resource
+	virtual ResourceInfo *GetResourceInfo() = 0;
 	// return string representation of the resource (e.g. for debugging purposes)
 	virtual std::string ToString(Object::LogLevel = Object::INFO) = 0;
+
+	// Following methods are common to all Resources: id and status are
+	// always present in memory, generic API for getting/setting
+	// attributes, getting/setting flag and attachedResource
 
 	// id should be unique across all in-memory resources
 	virtual int GetId();
@@ -135,8 +160,21 @@ public:
 	void SetAttachedResource(Resource *attachedResource);
 	void ClearAttachedResource();
 
+	// Following methods are helper methods to be used by other objects
+	// (basically wrappers around GetResourceInfo)
+
+	// type id of a resource (to be used by Resources::AcquireResource(typeid))
+	int GetTypeId();
+	// type string of a resource
+	const char *GetTypeString(bool terse = false);
+	// object name (for construction of an object or a reference)
+	const char *GetObjectName();
+	// return ResourceAttrInfo describing one field
+	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	// return terse resource info, intended for logging
 	std::string ToStringShort();
+
+	// Static helpers (Resource registry and Serialization/Deserialization)
 
 	// resource registry, all resources should be registered there
 	static void CreateRegistry();
@@ -150,7 +188,7 @@ public:
 protected:
 	// following resource properties are usually memory-only
 	// id of the resource, should be unique in run-time
-	// N.B.: id should not be overwritten in Deserialize()
+	// N.B.: id should never be overwritten in Deserialize()
 	int id;
 	// status that can be used for filtering in PE filters
 	int status;
@@ -167,6 +205,62 @@ protected:
 
 	static log4cxx::LoggerPtr logger;
 };
+
+inline ResourceInfo::~ResourceInfo() {
+	if (attrInfoList) {
+		for (std::vector<ResourceAttrInfo*>::iterator iter = attrInfoList->begin(); iter != attrInfoList->end(); ++iter)
+			delete *iter;
+		delete attrInfoList;
+	}
+}
+
+inline int ResourceInfo::GetTypeId() {
+	return typeId;
+}
+
+inline void ResourceInfo::SetTypeId(int typeId) {
+	this->typeId = typeId;
+}
+
+inline const char *ResourceInfo::GetTypeString() {
+	return typeString;
+}
+
+inline void ResourceInfo::SetTypeString(const char *typeString) {
+	free(this->typeString);
+	this->typeString = strdup(typeString);
+}
+
+inline const char *ResourceInfo::GetTypeStringTerse() {
+	return typeStringTerse;
+}
+
+inline void ResourceInfo::SetTypeStringTerse(const char *typeStringTerse) {
+	free(this->typeStringTerse);
+	this->typeStringTerse = strdup(typeStringTerse);
+}
+
+inline const char *ResourceInfo::GetObjectName() {
+	return objectName;
+}
+
+inline void ResourceInfo::SetObjectName(const char *objectName) {
+	free(this->objectName);
+	this->objectName = strdup(objectName);
+}
+
+inline std::vector<ResourceAttrInfo*> *ResourceInfo::GetAttrInfoList() {
+	return attrInfoList;
+}
+
+inline void ResourceInfo::SetAttrInfoList(std::vector<ResourceAttrInfo*> *attrInfoList) {
+	if (this->attrInfoList) {
+		for (std::vector<ResourceAttrInfo*>::iterator iter = this->attrInfoList->begin(); iter != this->attrInfoList->end(); ++iter)
+			delete *iter;
+		delete this->attrInfoList;
+	}
+	this->attrInfoList = attrInfoList;
+}
 
 inline int Resource::GetId() {
 	return id;
@@ -206,6 +300,23 @@ inline Resource *Resource::GetAttachedResource() {
 
 inline void Resource::ClearAttachedResource() {
 	attachedResource = NULL;
+}
+
+inline int Resource::GetTypeId() {
+	return GetResourceInfo()->GetTypeId();
+}
+
+inline const char *Resource::GetTypeString(bool terse) {
+	ResourceInfo *ri = GetResourceInfo();
+	return terse ? ri->GetTypeStringTerse() : ri->GetTypeString();
+}
+
+inline const char *Resource::GetObjectName() {
+	return GetResourceInfo()->GetObjectName();
+}
+
+inline std::vector<ResourceAttrInfo*> *Resource::GetAttrInfoList() {
+	return GetResourceInfo()->GetAttrInfoList();
 }
 
 inline std::string Resource::ToStringShort() {

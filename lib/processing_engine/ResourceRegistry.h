@@ -43,7 +43,7 @@ public:
 	static int NextResourceId();
 
 protected:
-	struct ResourceInfo {
+	struct ResourceRegistryInfo {
 		int typeId;
 		std::string typeStr;
 		Resource *(*create)();
@@ -59,7 +59,7 @@ protected:
 	static int nextId;
 	PlainLock infoLock;
 	std::tr1::unordered_map<std::string, int> name2id;
-	std::tr1::unordered_map<int, ResourceInfo*> id2info;
+	std::tr1::unordered_map<int, ResourceRegistryInfo*> id2info;
 
 	PerlInterpreters *perl;
 

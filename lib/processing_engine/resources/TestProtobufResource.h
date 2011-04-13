@@ -18,6 +18,11 @@ class ResourceAttrInfo;
 class ResourceInputStream;
 class ResourceOutputStream;
 
+class TestProtobufResourceInfo : public ResourceInfo {
+public:
+	TestProtobufResourceInfo();
+};
+
 class TestProtobufResource : public Resource {
 public:
 	TestProtobufResource() {};
@@ -29,16 +34,10 @@ public:
 	// save and restore resource
 	bool Serialize(ResourceOutputStream &output);
 	bool Deserialize(ResourceInputStream &input);
-	// return ResourceAttrInfo describing all attributes
-	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
-	// type id of a resource (to be used by ResourceRegistry::AcquireResource(typeid))
-	int GetTypeId();
-	// type string of a resource
-	const char *GetTypeString(bool terse = false);
-	// object name (for construction of an object or a reference)
-	const char *GetObjectName();
 	// used by queues in case there is limit on queue size
 	int GetSize();
+	// get info about this resource
+	ResourceInfo *GetResourceInfo();
 	// return string representation of the resource (e.g. for debugging purposes)
 	std::string ToString(Object::LogLevel logLevel);
 
@@ -48,27 +47,18 @@ public:
 	static bool IsInstance(Resource *resource);
 
 protected:
-	static const int typeId = 2;
-
 	hector::resources::TestProtobufResource r;
 
+	static TestProtobufResourceInfo resourceInfo;
 	static log4cxx::LoggerPtr logger;
 };
 
-inline int TestProtobufResource::GetTypeId() {
-	return typeId;
-}
-
-inline const char *TestProtobufResource::GetTypeString(bool terse) {
-	return terse ? "TPR" : "TestProtobufResource";
-}
-
-inline const char *TestProtobufResource::GetObjectName() {
-	return "TestProtobufResource";
-}
-
 inline int TestProtobufResource::GetSize() {
 	return r.str().size();
+}
+
+inline ResourceInfo *TestProtobufResource::GetResourceInfo() {
+	return &TestProtobufResource::resourceInfo;
 }
 
 inline const std::string TestProtobufResource::GetStr() {
@@ -80,7 +70,7 @@ inline void TestProtobufResource::SetStr(const std::string &str) {
 }
 
 inline bool TestProtobufResource::IsInstance(Resource *resource) {
-	return resource->GetTypeId() == typeId;
+	return resource->GetTypeId() == resourceInfo.GetTypeId();
 }
 
 #endif

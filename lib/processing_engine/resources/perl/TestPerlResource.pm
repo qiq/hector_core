@@ -71,34 +71,28 @@ sub Deserialize {
 	return 1;
 }
 
-# returns [ [name_1, type_1], [name_2, type_2], ... ]
-sub GetAttrInfoList {
-	my ($self) = @_;
-
-	my @result;
-	foreach my $key (keys %{$self}) {
-		next if ($key =~ /^_/);
-		push(@result, [ $key, $self->{$key}->{'type'} ]);
-	}
-	return \@result;
-}
-
-sub GetTypeId {
-	my ($self) = @_;
-
-	return 3;
-}
-
-sub GetTypeString {
-	my ($self, $terse) = @_;
-
-	return $terse ? "TPerlR" : "TestPerlResource";
-}
-
 sub GetSize {
 	my ($self) = @_;
 
 	return 1;
+}
+
+sub GetResourceInfo {
+	my ($self) = @_;
+
+	# construct attribute info list: [ [name_1, type_1], [name_2, type_2], ... ]
+	my @a;
+	foreach my $key (keys %{$self}) {
+		next if ($key =~ /^_/);
+		push(@a, [ $key, $self->{$key}->{'type'} ]);
+	}
+	my $info = {
+		'typeId' => 4,
+		'typeString' => 'TestPerlResource',
+		'typeStringTerse' => 'TPerlR',
+		'attrInfoList' => \@a,
+	};
+	return $info;
 }
 
 sub ToString {

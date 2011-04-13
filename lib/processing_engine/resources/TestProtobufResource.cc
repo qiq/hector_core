@@ -9,6 +9,31 @@
 using namespace std;
 
 log4cxx::LoggerPtr TestProtobufResource::logger(log4cxx::Logger::getLogger("resources.TestProtobufResource"));
+TestProtobufResourceInfo TestProtobufResource::resourceInfo;
+
+TestProtobufResourceInfo::TestProtobufResourceInfo() {
+	SetTypeId(2);
+	SetTypeString("TestProtobufResource");
+	SetTypeStringTerse("TPR");
+	SetObjectName("TestProtobufResource");
+
+	vector<ResourceAttrInfo*> *l = new vector<ResourceAttrInfo*>();
+	ResourceAttrInfoT<TestProtobufResource> *ai;
+
+	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());
+	ai->InitInt("id", &TestProtobufResource::GetId, &TestProtobufResource::SetId);
+	l->push_back(ai);
+
+	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());
+	ai->InitInt("status", &TestProtobufResource::GetStatus, &TestProtobufResource::SetStatus);
+	l->push_back(ai);
+
+	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());
+	ai->InitString("str", &TestProtobufResource::GetStr, &TestProtobufResource::SetStr);
+	l->push_back(ai);
+
+	SetAttrInfoList(l);
+}
 
 Resource *TestProtobufResource::Clone() {
 	return new TestProtobufResource(*this);
@@ -39,23 +64,4 @@ string TestProtobufResource::ToString(Object::LogLevel logLevel) {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", GetId(), IsSetFlag(DELETED) ? -1 : GetStatus(), GetStr().c_str());
 	return buf;
-}
-
-vector<ResourceAttrInfo*> *TestProtobufResource::GetAttrInfoList() {
-	vector<ResourceAttrInfo*> *result = new vector<ResourceAttrInfo*>();
-	ResourceAttrInfoT<TestProtobufResource> *ai;
-
-	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
-	ai->InitInt("id", &TestProtobufResource::GetId, &TestProtobufResource::SetId);
-	result->push_back(ai);
-
-	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
-	ai->InitInt("status", &TestProtobufResource::GetStatus, &TestProtobufResource::SetStatus);
-	result->push_back(ai);
-
-	ai = new ResourceAttrInfoT<TestProtobufResource>(typeId);
-	ai->InitString("str", &TestProtobufResource::GetStr, &TestProtobufResource::SetStr);
-	result->push_back(ai);
-
-	return result;
 }

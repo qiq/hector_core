@@ -11,6 +11,31 @@
 using namespace std;
 
 log4cxx::LoggerPtr PerlResource::logger(log4cxx::Logger::getLogger("PerlResource"));
+PerlInfoMap PerlResource::infoMap;
+
+PerlInfoMap::~PerlInfoMap() {
+	infoLock.Lock();
+	for (tr1::unordered_map<int, ResourceInfo*>::iterator iter = infoMap.begin(); iter != infoMap.end(); ++iter)
+		delete iter->second;
+	infoLock.Unlock();
+}
+
+void PerlInfoMap::Lock() {
+	infoLock.Lock();
+}
+
+void PerlInfoMap::Unlock() {
+	infoLock.Unlock();
+}
+
+ResourceInfo *PerlInfoMap::GetResourceInfo(int typeId) {
+	tr1::unordered_map<int, ResourceInfo*>::iterator iter = infoMap.find(typeId);
+	return iter == infoMap.end() ? NULL : iter->second;
+}
+
+void PerlInfoMap::SetResourceInfo(ResourceInfo *info) {
+	infoMap[info->GetTypeId()] = info;
+}
 
 PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	this->perl = perl;
@@ -19,12 +44,8 @@ PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	char *dot = strrchr(this->name, '.');
 	if (dot)
 		*dot = '\0';
+	typeId = 0;
 	ref = NULL;
-	typeIdSet = false;
-	typeString = NULL;
-	typeStringSet = false;
-	typeStringShort = NULL;
-	typeStringShortSet = false;
 }
 
 PerlResource::~PerlResource() {
@@ -41,8 +62,6 @@ PerlResource::~PerlResource() {
 	perl->Unlock();
 	
 	free(name);
-	free(typeString);
-	free(typeStringShort);
 }
 
 bool PerlResource::Init() {
@@ -170,6 +189,172 @@ bool PerlResource::Deserialize(ResourceInputStream &input) {
 	return result;
 }
 
+inline ResourceInfo *PerlResource::GetResourceInfo() {
+	ResourceInfo *result = NULL;
+	if (typeId) {
+		infoMap.Lock();
+		result = infoMap.GetResourceInfo(typeId);
+		if (result) {
+			infoMap.Unlock();
+			return result;
+		}
+	}
+
+	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
+	perl->GetPerl()->SetContext();
+	dSP;
+	ENTER;
+	SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	int count = call_method("GetResourceInfo", G_SCALAR|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV)) {
+		LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (" << SvPV_nolen(ERRSV) << ")");
+	} else if (count != 1) {
+		LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (no result)");
+	} else {
+		bool error = false;
+		result = new ResourceInfo();
+		result->SetObjectName("PerlResource");
+		while (true) {
+			SV *resultSV = POPs;
+			if (SvTYPE(SvRV(resultSV)) != SVt_PVHV) {
+				LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (expected hash reference)");
+				error = true;
+				break;
+			}
+			HV *h = (HV*)SvRV(resultSV);
+			SV **p;
+			STRLEN len;
+			char *s;
+
+			// typeId
+			p = hv_fetch(h, "typeId", strlen("typeId"), 0);
+			if (!p || !SvIOK(*p)) {
+				LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (typeId not present or non-integer)");
+				error = true;
+				break;
+			}
+			result->SetTypeId(SvIV(*p));
+
+			// typeString
+			p = hv_fetch(h, "typeString", strlen("typeString"), 0);
+			if (!p || !SvPOK(*p)) {
+				LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (typeString not present or non-string)");
+				error = true;
+				break;
+			}
+			s = SvPV(*p, len);
+			s = strndup(s, len);
+			result->SetTypeString(s);
+			free(s);
+	
+			// typeStringTerse
+			p = hv_fetch(h, "typeStringTerse", strlen("typeStringTerse"), 0);
+			if (!p || !SvPOK(*p)) {
+				LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (typeStringTerse not present or non-string)");
+				error = true;
+				break;
+			}
+			s = SvPV(*p, len);
+			s = strndup(s, len);
+			result->SetTypeStringTerse(s);
+			free(s);
+
+			// objectName
+			result->SetObjectName("PerlResource");
+
+			// attrInfoList
+			p = hv_fetch(h, "attrInfoList", strlen("attrInfoList"), 0);
+			if (!p || SvTYPE(SvRV(*p)) != SVt_PVAV) {
+				LOG4CXX_ERROR(logger, "Error calling GetResourceInfo (attrInfoList is not an array refrence)");
+				error = true;
+				break;
+			}
+			vector<ResourceAttrInfo*> *attrInfoList = new vector<ResourceAttrInfo*>();
+			AV *a = (AV*)SvRV(*p);
+			SV *sv;
+			while ((sv = av_shift(a)) != &PL_sv_undef) {
+				if (SvTYPE(SvRV(sv)) == SVt_PVAV) {
+					AV *item = (AV*)SvRV(sv);
+					SV *second = av_pop(item);
+					SV *first = av_pop(item);
+					if (SvPOK(first) && SvPOK(second)) {
+						ResourceAttrInfoP<PerlResource> *ai = new ResourceAttrInfoP<PerlResource>(result->GetTypeId());
+						STRLEN len;
+						char *s = SvPV(first, len);
+						char *name = strndup(s, len);
+						s = SvPV(second, len);
+						if (!strcmp(s, "STRING")) {
+							ai->InitString(name, &PerlResource::GetString, &PerlResource::SetString);
+						} else if (!strcmp(s, "INT")) {
+							ai->InitInt(name, &PerlResource::GetInt, &PerlResource::SetInt);
+						} else if (!strcmp(s, "LONG")) {
+							ai->InitLong(name, &PerlResource::GetLong, &PerlResource::SetLong);
+						} else if (!strcmp(s, "IP")) {
+							ai->InitIpAddr(name, &PerlResource::GetIpAddr, &PerlResource::SetIpAddr);
+						} else if (!strcmp(s, "ARRAY_STRING")) {
+							ai->InitArrayString(name, &PerlResource::GetArrayString, &PerlResource::SetArrayString, &PerlResource::Clear, &PerlResource::Count);
+						} else if (!strcmp(s, "ARRAY_INT")) {
+							ai->InitArrayInt(name, &PerlResource::GetArrayInt, &PerlResource::SetArrayInt, &PerlResource::Clear, &PerlResource::Count);
+						} else if (!strcmp(s, "ARRAY_LONG")) {
+							ai->InitArrayLong(name, &PerlResource::GetArrayLong, &PerlResource::SetArrayLong, &PerlResource::Clear, &PerlResource::Count);
+						} else if (!strcmp(s, "ARRAY_IP")) {
+							ai->InitArrayIpAddr(name, &PerlResource::GetArrayIpAddr, &PerlResource::SetArrayIpAddr, &PerlResource::Clear, &PerlResource::Count);
+						} else if (!strcmp(s, "HASH_STRING")) {
+							ai->InitHashString(name, &PerlResource::GetHashString, &PerlResource::SetHashString, &PerlResource::Clear, &PerlResource::DeleteItem, &PerlResource::Count, &PerlResource::Keys, &PerlResource::StringValues);
+						} else if (!strcmp(s, "HASH_INT")) {
+							ai->InitHashInt(name, &PerlResource::GetHashInt, &PerlResource::SetHashInt, &PerlResource::Clear, &PerlResource::DeleteItem, &PerlResource::Count, &PerlResource::Keys, &PerlResource::IntValues);
+						} else if (!strcmp(s, "HASH_LONG")) {
+							ai->InitHashLong(name, &PerlResource::GetHashLong, &PerlResource::SetHashLong, &PerlResource::Clear, &PerlResource::DeleteItem, &PerlResource::Count, &PerlResource::Keys, &PerlResource::LongValues);
+						} else if (!strcmp(s, "HASH_IP")) {
+							ai->InitHashIpAddr(name, &PerlResource::GetHashIpAddr, &PerlResource::SetHashIpAddr, &PerlResource::Clear, &PerlResource::DeleteItem, &PerlResource::Count, &PerlResource::Keys, &PerlResource::IpAddrValues);
+						} else {
+							LOG4CXX_ERROR(logger, "Unknown attribute type: " << s);
+							error = true;
+							break;
+						}
+						free(name);
+						attrInfoList->push_back(ai);
+					} else {
+						LOG4CXX_ERROR(logger, "Invalid array item in GetResourceInfo");
+						error = true;
+						break;
+					}
+				} else {
+					LOG4CXX_ERROR(logger, "Invalid array item in GetResourceInfo (expected reference to array of arrays)");
+					error = true;
+					break;
+				}
+			}
+			result->SetAttrInfoList(attrInfoList);
+			break;
+		}
+		// error occured
+		if (error) {
+			delete result;
+			result = NULL;
+		}
+	}
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	perl->GetPerl()->SetContext(old);
+	perl->Unlock();
+
+	if (result) {
+		typeId = result->GetTypeId();
+		infoMap.SetResourceInfo(result);
+	}
+	infoMap.Unlock();
+
+	return result;
+}
+
+#if 0
 vector<ResourceAttrInfo*> *PerlResource::GetAttrInfoList() {
 	vector<ResourceAttrInfo*> *result = new vector<ResourceAttrInfo*>();
 
@@ -362,6 +547,7 @@ const char *PerlResource::GetTypeString(bool terse) {
 	typeLock.Unlock();
 	return result;
 }
+#endif
 
 int PerlResource::GetSize() {
 	int result = 0;

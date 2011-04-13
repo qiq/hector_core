@@ -6,6 +6,11 @@
 #include "MarkerResource.h"
 %}
 
+class MarkerResourceInfo : public ResourceInfo {
+public:
+        MarkerResourceInfo();
+};
+
 class MarkerResource : public Resource {
 public:
         MarkerResource();
