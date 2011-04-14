@@ -35,10 +35,10 @@ public:
 	std::vector<ResourceAttrInfo*> *GetAttrInfoList();
 	void SetAttrInfoList(std::vector<ResourceAttrInfo*> *attrInfoList);
 private:
-	int typeId;					// type id of a resource (to be used by Resources::AcquireResource(typeid))
-	char *typeString; 			// type string of a resource
-	char *typeStringTerse;			// terse version (e.g. TR for TestResource)
-	char *objectName;				// object name (for construction of an object or a reference)
+	int typeId;		// type id of a resource (to be used by Resources::AcquireResource(typeid))
+	char *typeString; 	// type string of a resource
+	char *typeStringTerse;	// terse version (e.g. TR for TestResource)
+	char *objectName;	// object name (for construction of an object or a reference)
 	std::vector<ResourceAttrInfo*> *attrInfoList;	// info about a resource fields
 };
 

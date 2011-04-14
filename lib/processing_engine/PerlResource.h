@@ -18,12 +18,6 @@
 #include "PlainLock.h"
 #include "Resource.h"
 
-class PerlResourceInfo : public ResourceInfo {
-public:
-	PerlResourceInfo();
-	~PerlResourceInfo() {};
-};
-
 class PerlInfoMap {
 public:
 	PerlInfoMap() {};

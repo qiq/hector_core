@@ -41,11 +41,18 @@
 
 class ResourceInfo {
 public:
-        int typeId;
-        const char *typeString;
-        const char *typeStringTerse;
-        const char *objectName;
-        std::vector<ResourceAttrInfo*> *attrInfoList;
+        ResourceInfo();
+        ~ResourceInfo();
+        int GetTypeId();
+        void SetTypeId(int typeId);
+        const char *GetTypeString();
+        void SetTypeString(const char *typeString);
+        const char *GetTypeStringTerse();
+        void SetTypeStringTerse(const char *typeStringTerse);
+        const char *GetObjectName();
+        void SetObjectName(const char *typeId);
+        std::vector<ResourceAttrInfo*> *GetAttrInfoList();
+        void SetAttrInfoList(std::vector<ResourceAttrInfo*> *attrInfoList);
 };
 
 class Resource {
