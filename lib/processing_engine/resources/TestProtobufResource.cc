@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#ifndef WRAPPER
+
 log4cxx::LoggerPtr TestProtobufResource::logger(log4cxx::Logger::getLogger("resources.TestProtobufResource"));
 TestProtobufResourceInfo TestProtobufResource::resourceInfo;
 
@@ -65,3 +67,11 @@ string TestProtobufResource::ToString(Object::LogLevel logLevel) {
 	snprintf(buf, sizeof(buf), "[TPR %d %d] %s", GetId(), IsSetFlag(DELETED) ? -1 : GetStatus(), GetStr().c_str());
 	return buf;
 }
+
+#else
+
+extern "C" Resource* create() {
+	return (Resource*)new TestProtobufResource();
+}
+
+#endif

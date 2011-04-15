@@ -1,4 +1,5 @@
 
+#include "config.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +10,8 @@
 #include "ResourceOutputStream.h"
 
 using namespace std;
+
+#ifndef WRAPPER
 
 log4cxx::LoggerPtr TestResource::logger(log4cxx::Logger::getLogger("resources.TestResource"));
 TestResourceInfo TestResource::resourceInfo;
@@ -70,3 +73,11 @@ string TestResource::ToString(Object::LogLevel logLevel) {
 	snprintf(buf, sizeof(buf), "[TR %d %d] %s", id, IsSetFlag(DELETED) ? -1 : status, str.c_str());
 	return buf;
 }
+
+#else
+
+extern "C" Resource* create() {
+	return (Resource*)new TestResource();
+}
+
+#endif

@@ -20,7 +20,8 @@ hectorinclude_HEADERS = TestResource.h TestResource.i \
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
 libTestResource_la_LDFLAGS = $(AM_LDFLAGS)
 
-TestResource_la_SOURCES = TestResourceWrapper.h TestResourceWrapper.cc
+TestResource_la_SOURCES = TestResource.cc
+TestResource_la_CXXFLAGS = $(AM_CXXFLAGS) -DWRAPPER
 TestResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
 TestResource_la_LIBADD = libTestResource.la
 
@@ -33,7 +34,8 @@ BUILT_SOURCES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 TestProtobfuResource.pb.cc TestProtobufResource.pb.h: TestProtobufResource.proto
 	$(PROTOC) TestProtobufResource.proto --cpp_out=.
 
-TestProtobufResource_la_SOURCES = TestProtobufResourceWrapper.h TestProtobufResourceWrapper.cc
+TestProtobufResource_la_SOURCES = TestProtobufResource.cc
+TestProtobufResource_la_CXXFLAGS = $(AM_CXXFLAGS) -DWRAPPER
 TestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
 TestProtobufResource_la_LIBADD = libTestProtobufResource.la
 
@@ -44,7 +46,8 @@ ALIASES += TestProtobufResource.la
 libMarkerResource_la_SOURCES = MarkerResource.h MarkerResource.cc
 libMarkerResource_la_LDFLAGS = $(AM_LDFLAGS)
 
-MarkerResource_la_SOURCES = MarkerResourceWrapper.h MarkerResourceWrapper.cc
+MarkerResource_la_SOURCES = MarkerResource.cc
+MarkerResource_la_CXXFLAGS = $(AM_CXXFLAGS) -DWRAPPER
 MarkerResource_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version
 MarkerResource_la_LIBADD = libMarkerResource.la
 

@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#ifndef WRAPPER
+
 log4cxx::LoggerPtr MarkerResource::logger(log4cxx::Logger::getLogger("resources.MarkerResource"));
 MarkerResourceInfo MarkerResource::resourceInfo;
 
@@ -60,3 +62,11 @@ string MarkerResource::ToString(Object::LogLevel logLevel) {
 	snprintf(buf, sizeof(buf), "[TR %d %d] %d", id, IsSetFlag(DELETED) ? -1 : status, mark);
 	return buf;
 }
+
+#else
+
+extern "C" Resource* create() {
+	return (Resource*)new MarkerResource();
+}
+
+#endif
