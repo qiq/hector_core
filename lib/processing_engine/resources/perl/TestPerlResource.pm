@@ -22,7 +22,7 @@ sub new {
 			'value' => "",
 		},
 		'b' => {
-			'type' => "HASH_INT",
+			'type' => "HASH_INT32",
 			'value' => {},
 		},
 		'c' => {

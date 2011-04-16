@@ -23,11 +23,11 @@ TestProtobufResourceInfo::TestProtobufResourceInfo() {
 	ResourceAttrInfoT<TestProtobufResource> *ai;
 
 	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());
-	ai->InitInt("id", &TestProtobufResource::GetId, &TestProtobufResource::SetId);
+	ai->InitInt32("id", &TestProtobufResource::GetId, &TestProtobufResource::SetId);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());
-	ai->InitInt("status", &TestProtobufResource::GetStatus, &TestProtobufResource::SetStatus);
+	ai->InitInt32("status", &TestProtobufResource::GetStatus, &TestProtobufResource::SetStatus);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<TestProtobufResource>(GetTypeId());

@@ -8,6 +8,7 @@ AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(subdir-objects -Wall -Werror)
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
 

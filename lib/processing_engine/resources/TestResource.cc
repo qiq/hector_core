@@ -26,11 +26,11 @@ TestResourceInfo::TestResourceInfo() {
 	ResourceAttrInfoT<TestResource> *ai;
 
 	ai = new ResourceAttrInfoT<TestResource>(GetTypeId());
-	ai->InitInt("id", &TestResource::GetId, &TestResource::SetId);
+	ai->InitInt32("id", &TestResource::GetId, &TestResource::SetId);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<TestResource>(GetTypeId());
-	ai->InitInt("status", &TestResource::GetStatus, &TestResource::SetStatus);
+	ai->InitInt32("status", &TestResource::GetStatus, &TestResource::SetStatus);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<TestResource>(GetTypeId());

@@ -25,15 +25,15 @@ MarkerResourceInfo::MarkerResourceInfo() {
 	ResourceAttrInfoT<MarkerResource> *ai;
 
 	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
-	ai->InitInt("id", &MarkerResource::GetId, &MarkerResource::SetId);
+	ai->InitInt32("id", &MarkerResource::GetId, &MarkerResource::SetId);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
-	ai->InitInt("status", &MarkerResource::GetStatus, &MarkerResource::SetStatus);
+	ai->InitInt32("status", &MarkerResource::GetStatus, &MarkerResource::SetStatus);
 	l->push_back(ai);
 
 	ai = new ResourceAttrInfoT<MarkerResource>(GetTypeId());
-	ai->InitInt("mark", &MarkerResource::GetMark, &MarkerResource::SetMark);
+	ai->InitInt32("mark", &MarkerResource::GetMark, &MarkerResource::SetMark);
 	l->push_back(ai);
 
 	SetAttrInfoList(l);
