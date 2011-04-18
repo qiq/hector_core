@@ -304,6 +304,24 @@ inline void ResourceInfo::SetAttrInfoList(std::vector<ResourceAttrInfo*> *attrIn
 	this->attrInfoList = attrInfoList;
 }
 
+inline Resource::Resource() {
+	flags = 0;
+	SetId(registry->NextResourceId());
+	status = 0;
+	attachedResource = NULL;
+}
+
+inline Resource::Resource(const Resource &r) : status(r.status), flags(r.flags), attachedResource(r.attachedResource) {
+	SetId(registry->NextResourceId());
+}
+
+inline void Resource::Clear() {
+	flags = 0;
+	status = 0;
+	id = 0;
+	attachedResource = NULL;
+}
+
 inline int Resource::GetId() {
 	return id;
 }

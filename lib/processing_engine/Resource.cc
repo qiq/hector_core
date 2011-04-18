@@ -13,24 +13,6 @@ log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 ResourceRegistry *Resource::registry = NULL;
 string Resource::empty;
 
-Resource::Resource() {
-	flags = 0;
-	SetId(registry->NextResourceId());
-	status = 0;
-	attachedResource = NULL;
-}
-
-Resource::Resource(const Resource &r) : status(r.status), flags(r.flags), attachedResource(r.attachedResource) {
-	SetId(registry->NextResourceId());
-}
-
-void Resource::Clear() {
-	flags = 0;
-	status = 0;
-	id = 0;
-	attachedResource = NULL;
-}
-
 bool Resource::Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType, bool saveIdStatus) {
 	if (saveType) {
 		int type = resource->GetTypeId();

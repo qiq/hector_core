@@ -5,7 +5,7 @@
 #ifndef _LIB_PROCESSING_ENGINE_TEST_SERVER_
 #define _LIB_PROCESSING_ENGINE_TEST_SERVER_
 
-#include "config.h"
+#include <config.h>
 
 #include <vector>
 #include <tr1/unordered_map>
