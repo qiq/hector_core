@@ -1,3 +1,6 @@
+- allocate more Resources at a time (an array of resources and put them into
+  the available array), so that it does consume less memory (use MemoryPool).
+
 - PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje
 
 - jak je to s PE input/output queue v pripade, ze se pousti z jinych PE? A co jindy? Mozna nejak systematizovat

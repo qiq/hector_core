@@ -18,6 +18,7 @@ public:
 
 	// Clear current resource (as delete + new would do, except id is set to 0)
 	virtual void Clear();
+	virtual Resource *Clone() = 0;
 
 	// id should be unique across all in-memory resources
 	virtual int GetId();
@@ -27,14 +28,14 @@ public:
 	virtual void SetStatus(int status);
 
 	// flags (only used in Processor)
-	void SetFlag(Resource::Flag flag);
-	void ResetFlag(Resource::Flag flag);
-	bool IsSetFlag(Resource::Flag flag);
+	virtual void SetFlag(Resource::Flag flag);
+	virtual void ResetFlag(Resource::Flag flag);
+	virtual bool IsSetFlag(Resource::Flag flag);
 
 	// resource may contain link to other resource, it is only kept only in the memory
-	Resource *GetAttachedResource();
-	void SetAttachedResource(Resource *attachedResource);
-	void ClearAttachedResource();
+	virtual Resource *GetAttachedResource();
+	virtual void SetAttachedResource(Resource *attachedResource);
+	virtual void ClearAttachedResource();
 
 protected:
 	void LockRead();

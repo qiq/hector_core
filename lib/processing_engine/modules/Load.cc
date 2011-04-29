@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include "common.h"
 #include "Load.h"
+#include "MarkerResource.h"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	wait = false;
 	resourceType = 0;
 	resourceTypeName = NULL;
+	mark = false;
+	markEmmited = false;
 	byteCount = 0;
 	fd = -1;
 	stream = NULL;
@@ -32,6 +35,9 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("filename", &Load::GetFilename, &Load::SetFilename);
 	props->Add("wait", &Load::GetWait, &Load::SetWait);
 	props->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
+	props->Add("mark", &Load::GetMark, &Load::SetMark);
+
+	markerResourceTypeId = Resource::GetRegistry()->NameToId("MarkerResource");
 }
 
 Load::~Load() {
@@ -70,6 +76,7 @@ void Load::SetFilename(const char *name, const char *value) {
 		flock(fd, LOCK_UN);
 		close(fd);
 	}
+	markEmmited = false;
 	byteCount = 0;
 	int fd = open(filename, O_RDONLY);
 	if (fd < 0) {
@@ -108,6 +115,14 @@ void Load::SetResourceType(const char *name, const char *value) {
 	}
 }
 
+char *Load::GetMark(const char *name) {
+	return bool2str(mark);
+}
+
+void Load::SetMark(const char *name, const char *value) {
+	mark = str2bool(value);
+}
+
 bool Load::Init(vector<pair<string, string> > *params) {
 	// second stage?
 	if (!params)
@@ -122,8 +137,15 @@ bool Load::Init(vector<pair<string, string> > *params) {
 
 Resource *Load::ProcessInputSync(bool sleep) {
 	Resource *r = NULL;
-	if (maxItems && items >= maxItems)
+	if (maxItems && items >= maxItems) {
+		if (mark && !markEmmited) {
+			MarkerResource *mr = static_cast<MarkerResource*>(Resource::GetRegistry()->AcquireResource(markerResourceTypeId));
+			mr->SetMark(1);
+			markEmmited = true;
+			return mr;
+		}
 		return NULL;
+	}
 	while (1) {
 		int size = 0;
 		r = stream ? Resource::Deserialize(*stream, resourceType, &size) : NULL;
@@ -131,8 +153,15 @@ Resource *Load::ProcessInputSync(bool sleep) {
 			byteCount += size;
 			break;
 		}
-		if (!sleep || !wait)
+		if (!sleep || !wait) {
+			if (mark && !markEmmited) {
+				MarkerResource *mr = static_cast<MarkerResource*>(Resource::GetRegistry()->AcquireResource(markerResourceTypeId));
+				mr->SetMark(1);
+				markEmmited = true;
+				return mr;
+			}
 			return NULL;
+		}
 		ObjectUnlock();
 		fileCond.Lock();
 		fileCond.WaitSend(NULL);

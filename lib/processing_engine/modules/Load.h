@@ -46,6 +46,7 @@ private:
 	bool wait;
 	int resourceType;
 	char *resourceTypeName;
+	bool mark;
 
 	char *GetItems(const char *name);
 	char *GetMaxItems(const char *name);
@@ -56,6 +57,8 @@ private:
 	void SetWait(const char *name, const char *value);
 	char *GetResourceType(const char *name);
 	void SetResourceType(const char *name, const char *value);
+	char *GetMark(const char *name);
+	void SetMark(const char *name, const char *value);
 
 	ObjectProperties<Load> *props;
 	char *GetPropertySync(const char *name);
@@ -64,10 +67,12 @@ private:
 	std::vector<std::string> *ListPropertiesSync();
 
 	bool cancel;
+	bool markEmmited;
 	unsigned long long byteCount;
 	int fd;
 	ResourceInputStream *stream;
 	CondLock fileCond;	// for pause when source file is exhausted
+	int markerResourceTypeId; // MarkerResource typeId
 };
 
 inline Module::Type Load::GetType() {

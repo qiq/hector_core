@@ -25,6 +25,7 @@
 %include Module.i
 %include ResourceRegistry.i
 %include Resource.i
+%include SharedResource.i
 %include PerlResource.i
 %include TestResource.i
 %include TestProtobufResource.i

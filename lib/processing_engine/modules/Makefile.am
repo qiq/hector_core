@@ -26,6 +26,7 @@ TestMulti_la_LIBADD = ../resources/libTestResource.la
 Load_la_SOURCES = Load.h Load.cc
 Load_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
 Load_la_LDFLAGS = $(AM_LDFLAGS) @PROTOBUF_LIBS@
+Load_la_LIBADD = ../resources/libMarkerResource.la
 
 Save_la_SOURCES = Save.h Save.cc
 Save_la_CXXFLAGS = $(AM_CXXFLAGS) @PROTOBUF_CFLAGS@
