@@ -29,82 +29,14 @@ Config::~Config() {
 }
 
 bool Config::ParseFile(const char *fileName, vector<string> *args) {
-	// read entire document into memory
-	FILE *f = fopen(fileName, "r");
-	if (!f) {
-		fprintf(stderr, "%s: failed to open\n", fileName);
-		return false;
-	}
-	fseek(f, 0, SEEK_END);
-	long size = ftell(f);
-	if (size < 0) {
-		fprintf(stderr, "%s: failed to get file size\n", fileName);
-		fclose(f);
-		return false;
-	}
-	fseek(f, 0, SEEK_SET);
-	char *data = (char*)malloc(size);
-	if ((long)fread(data, 1, size, f) != size) {
-		fprintf(stderr, "%s: failed to read file\n", fileName);
-		free(data);
-		fclose(f);
-		return false;
-	}
-	fclose(f);
-	
-	// substitute $N by arguments
-	string s;
-	bool escape = false;
-	int lineno = 1;
-	for (int i = 0; i < size; i++) {
-		char c = data[i];
-		switch (c) {
-		case '\\':
-			if (!escape) {
-				escape = true;
-			} else {
-				s.append("\\");
-				escape = false;
-			}
-			break;
-		case '$':
-			if (!escape) {
-				i++;
-				// collect number
-				int start = i;
-				int n = 0;
-				while (i < size && data[i] >= '0' && data[i] <= '9') {
-					n = n*10+(data[i]-'0');
-					i++;
-				}
-				if (n == 0 || i-start == 0) {
-					fprintf(stderr, "Invalid argument, line %d: %.10s\n", lineno, data+(start >= 8 ? start-8 : 0));
-					return false;
-				}
-				if (!args || n > (int)args->size()) {
-					// invalid number -> error
-					fprintf(stderr, "Parameter %d missing, line %d: %.10s\n", n, lineno, data+(start >= 8 ? start-8 : 0));
-					return false;
-				}
-				// replace argument
-				s.append((*args)[n-1]);
-				i--;
-			} else {
-				s.append("$");
-			}
-			escape = false;
-			break;
-		case '\n':
-			lineno++;
-		default:
-			s.append(1, c);
-			escape = false;
-			break;
-		}
-	}
-	free(data);
+	// create copy of args
+	for (vector<string>::iterator iter = args->begin(); iter != args->end(); ++iter)
+		this->args.push_back(*iter);
 
-	if (!(doc = xmlParseDoc((const xmlChar*)s.c_str()))) {
+	// will show line numbers
+	xmlLineNumbersDefault(1);
+
+	if (!(doc = xmlParseFile(fileName))) {
 		fprintf(stderr, "%s: failed to parse\n", fileName);
 		return false;
 	}
@@ -146,14 +78,21 @@ vector<string> *Config::GetValues(const char *xpath) {
 		xmlNodePtr node = nodes->nodesetval->nodeTab[i];
 		if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
 			string val;
+			int line = -1;
 			do {
-				if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content)
+				if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content) {
+					if (line < 0)
+						line = xmlGetLineNo(node);
 					val += (char*)node->content;
+				}
 			} while ((node = node->next));
-			result->push_back(val);
+			if (SubstituteArgs(&val, line))
+				result->push_back(val);
 		} else {
 			xmlChar *item = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
-			result->push_back(item ? (char*)item : "");
+			string val = item ? (char*)item : "";
+			if (SubstituteArgs(&val, xmlGetLineNo(node)))
+				result->push_back(val);
 	        	xmlFree(item);
 		}
 	}
@@ -178,18 +117,27 @@ char *Config::GetFirstValue(const char *xpath) {
 	}
 
 	// at least one result found
-	char *result;
+	char *result = NULL;
 	xmlNodePtr node = nodes->nodesetval->nodeTab[0];
 	if (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) {
 		string val;
+		int line = -1;
 		do {
-			if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content)
+			if ((node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE) && node->content) {
+				if (line < 0)
+					line = xmlGetLineNo(node);
 				val += (char*)node->content;
+			}
 		} while ((node = node->next));
-		result = strdup(val.c_str());
+		if (SubstituteArgs(&val, line))
+			result = strdup(val.c_str());
 	} else {
 		xmlChar *item = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
-		result = item ? strdup((char*)item) : NULL;
+		if (item) {
+			string val = (char*)item;
+			if (SubstituteArgs(&val, xmlGetLineNo(node)))
+				result = strdup(val.c_str());
+		}
         	xmlFree(item);
 	}
 
@@ -214,3 +162,58 @@ int Config::GetInt(const char *s) {
 		return INT_MAX;
 	return i;
 }
+
+bool Config::SubstituteArgs(string *s, int lineno) {
+	// substitute $N by arguments
+	string tmp;
+	bool escape = false;
+	for (unsigned i = 0; i < s->length(); i++) {
+		char c = s->at(i);
+		switch (c) {
+		case '\\':
+			if (!escape) {
+				escape = true;
+			} else {
+				tmp.append("\\");
+				escape = false;
+			}
+			break;
+		case '$':
+			if (!escape) {
+				i++;
+				// collect number
+				int start = i;
+				int n = 0;
+				while (i < s->size() && s->at(i) >= '0' && s->at(i) <= '9') {
+					n = n*10+(s->at(i)-'0');
+					i++;
+				}
+				if (n == 0 || i-start == 0) {
+					fprintf(stderr, "Invalid argument, line %d: %.10s\n", lineno, s->data()+(start >= 8 ? start-8 : 0));
+					return false;
+				}
+				if (n > (int)args.size()) {
+					// invalid number -> error
+					fprintf(stderr, "Parameter %d missing, line %d: %.10s\n", n, lineno, s->data()+(start >= 8 ? start-8 : 0));
+					return false;
+				}
+				// replace argument
+				tmp.append(args.at(n-1));
+				i--;
+			} else {
+				tmp.append("$");
+			}
+			escape = false;
+			break;
+		case '\n':
+			lineno++;
+		default:
+			tmp.append(1, c);
+			escape = false;
+			break;
+		}
+	}
+	*s = tmp;
+	return true;
+}
+

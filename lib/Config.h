@@ -13,8 +13,6 @@
 #include "common.h"
 
 class Config {
-	xmlDocPtr doc;
-	xmlNodePtr root;
 public:
 	Config();
 	~Config();
@@ -24,6 +22,13 @@ public:
 	char *GetFirstValue(const char *XPath);
 	bool EvaluateXPath(const char *XPath);
 	int GetInt(const char *s);
+
+private:
+	std::vector<std::string> args;
+	xmlDocPtr doc;
+	xmlNodePtr root;
+
+	bool SubstituteArgs(std::string *s, int lineno);
 };
 
 #endif
