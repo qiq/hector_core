@@ -35,6 +35,8 @@ public:
 	void WriteString(const std::string &buffer);
 	void WriteLittleEndian32(uint32_t value);
 	void WriteVarint32(uint32_t value);
+	void WriteLittleEndian64(uint64_t value);
+	void WriteVarint64(uint64_t value);
 	bool Skip(int count);
 
 	// protobuf methods
@@ -74,6 +76,14 @@ inline void ResourceOutputStream::WriteLittleEndian32(uint32_t value) {
 
 inline void ResourceOutputStream::WriteVarint32(uint32_t value) {
 	stream->WriteVarint32(value);
+}
+
+inline void ResourceOutputStream::WriteLittleEndian64(uint64_t value) {
+	stream->WriteLittleEndian64(value);
+}
+
+inline void ResourceOutputStream::WriteVarint64(uint64_t value) {
+	stream->WriteVarint64(value);
 }
 
 inline bool ResourceOutputStream::Skip(int count) {

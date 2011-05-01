@@ -35,6 +35,8 @@ public:
 	bool ReadString(std::string *buffer, int size);
 	bool ReadLittleEndian32(uint32_t *value);
 	bool ReadVarint32(uint32_t *value);
+	bool ReadLittleEndian64(uint64_t *value);
+	bool ReadVarint64(uint64_t *value);
 	bool Skip(int count);
 	int ByteCount();
 
@@ -77,6 +79,14 @@ inline bool ResourceInputStream::ReadLittleEndian32(uint32_t *value) {
 
 inline bool ResourceInputStream::ReadVarint32(uint32_t *value) {
 	return stream->ReadVarint32(value);
+}
+
+inline bool ResourceInputStream::ReadLittleEndian64(uint64_t *value) {
+	return stream->ReadLittleEndian64(value);
+}
+
+inline bool ResourceInputStream::ReadVarint64(uint64_t *value) {
+	return stream->ReadVarint64(value);
 }
 
 inline bool ResourceInputStream::Skip(int count) {
