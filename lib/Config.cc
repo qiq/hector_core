@@ -86,13 +86,22 @@ vector<string> *Config::GetValues(const char *xpath) {
 					val += (char*)node->content;
 				}
 			} while ((node = node->next));
-			if (SubstituteArgs(&val, line))
-				result->push_back(val);
+			if (!SubstituteArgs(&val, line)) {
+				free(result);
+				result = NULL;
+				break;
+			}
+			result->push_back(val);
 		} else {
 			xmlChar *item = xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
 			string val = item ? (char*)item : "";
-			if (SubstituteArgs(&val, xmlGetLineNo(node)))
-				result->push_back(val);
+			if (!SubstituteArgs(&val, xmlGetLineNo(node))) {
+				xmlFree(item);
+				free(result);
+				result = NULL;
+				break;
+			}
+			result->push_back(val);
 	        	xmlFree(item);
 		}
 	}

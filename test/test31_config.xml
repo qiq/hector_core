@@ -17,10 +17,6 @@ test31: accessing processing chain from the server
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-			<Resource id="R_pbtest" lib="TestProtobufResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<inputProcessor ref="P_simple"/>
 			<Processor id="P_simple">

@@ -6,18 +6,16 @@
 
 class ResourceOutputStream {
 public:
-        ResourceOutputStream(int fd);
-        ResourceOutputStream(std::string *s);
+        ResourceOutputStream();
         ~ResourceOutputStream();
 
-        // generic methods
-        void WriteRaw(const void *buffer, int size);
-        void WriteString(const std::string &buffer);
-        void WriteLittleEndian32(uint32_t *value);
-        void WriteVarint32(uint32_t *value);
-        bool Skip(int count);
+        virtual void WriteString(const std::string &buffer) = 0;
+        virtual void WriteLittleEndian32(uint32_t *value) = 0;
+        virtual void WriteVarint32(uint32_t *value) = 0;
+        virtual void WriteLittleEndian64(uint64_t value) = 0;
+        virtual void WriteVarint64(uint64_t value) = 0;
+        virtual bool Skip(int count) = 0;
 
-        // protobuf methods
-        google::protobuf::io::CodedOutputStream *GetCodedOutputStream();
+        virtual void SerializeMessage(google::protobuf::Message &msg, bool saveSize = true) = 0;
 };
 

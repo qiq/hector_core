@@ -10,6 +10,7 @@ filename	initOnly	File to save resources to.
 overwrite	initOnly	Should we overwrite output file?
 saveResourceType	r/w		Save type info (necessary if we are writing different resource types to one file)
 saveResourceIdStatus	r/w		Save Id & Status attributes to the file (usualy not desirable)
+text		init		Should we write text or binary form?
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -20,6 +21,7 @@ saveResourceIdStatus	r/w		Save Id & Status attributes to the file (usualy not de
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
 #include "Module.h"
 #include "ObjectProperties.h"
 #include "Resource.h"
@@ -39,6 +41,7 @@ private:
 	bool overwrite;
 	bool saveResourceType;
 	bool saveResourceIdStatus;
+	bool text;
 
 	char *GetItems(const char *name);
 	char *GetFilename(const char *name);
@@ -49,13 +52,18 @@ private:
 	void SetSaveResourceType(const char *name, const char *value);
 	char *GetSaveResourceIdStatus(const char *name);
 	void SetSaveResourceIdStatus(const char *name, const char *value);
+	char *GetText(const char *name);
+	void SetText(const char *name, const char *value);
 
 	ObjectProperties<Save> *props;
 	char *GetPropertySync(const char *name);
 	bool SetPropertySync(const char *name, const char *value);
 	std::vector<std::string> *ListPropertiesSync();
 
+	bool ReopenFile();
+
 	int fd;
+	std::ofstream *ofs;
 	ResourceOutputStream *stream;
 };
 

@@ -167,7 +167,7 @@ bool Processor::Init(Config *config) {
 					val = config->GetFirstValue(buffer);
 					if (!val) {
 						LOG_ERROR(this, "No value for param: " << (*names)[i].c_str());
-						continue;
+						return false;
 					}
 				}
 				if ((*names)[i] == "logLevel")

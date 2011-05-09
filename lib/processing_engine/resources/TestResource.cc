@@ -56,17 +56,13 @@ bool TestResource::Serialize(ResourceOutputStream &output) {
 	while ((idx = strcopy.find('\n')) != string::npos) {
 		strcopy.replace(idx, 1, " ");
 	}
-	output.WriteVarint32(strcopy.size());
 	output.WriteString(strcopy);
 	return true;
 }
 
 bool TestResource::Deserialize(ResourceInputStream &input) {
-	uint32_t len;
-	if (!input.ReadVarint32(&len))
-		return false;
 	str.clear();
-	return input.ReadString(&str, len);
+	return input.ReadString(&str);
 }
 
 string TestResource::ToString(Object::LogLevel logLevel) {
@@ -77,7 +73,7 @@ string TestResource::ToString(Object::LogLevel logLevel) {
 
 #else
 
-extern "C" Resource* create() {
+extern "C" Resource* hector_resource_create() {
 	return (Resource*)new TestResource();
 }
 

@@ -6,19 +6,16 @@
 
 class ResourceInputStream {
 public:
-        ResourceInputStream(int fd);
-        ResourceInputStream(std::string &s);
+        ResourceInputStream();
         ~ResourceInputStream();
 
-        // generic methods
-        bool ReadRaw(void *buffer, int size);
-        bool ReadString(std::string *buffer, int size);
-        bool ReadLittleEndian32(uint32_t *value);
-        bool ReadVarint32(uint32_t *value);
-        bool Skip(int count);
+        virtual bool ReadString(std::string *buffer) = 0;
+        virtual bool ReadLittleEndian32(uint32_t *value) = 0;
+        virtual bool ReadVarint32(uint32_t *value) = 0;
+        virtual bool ReadLittleEndian64(uint64_t *value) = 0;
+        virtual bool ReadVarint64(uint64_t *value) = 0;
+        virtual bool Skip(int count) = 0;
+        virtual int ByteCount() = 0;
 
-        // protobuf methods
-        google::protobuf::io::CodedInputStream::Limit PushLimit(int byte_limit);
-        void PopLimit(google::protobuf::io::CodedInputStream::Limit limit);
-        google::protobuf::io::CodedInputStream *GetCodedInputStream();
+        virtual bool ParseMessage(google::protobuf::Message &msg, int size = 0) = 0;
 };

@@ -17,9 +17,6 @@ test32: call a processing engine from within another
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_second">
 			<inputProcessor ref="P_simple"/>
 			<Processor id="P_simple">

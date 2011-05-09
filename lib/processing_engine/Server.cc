@@ -61,6 +61,7 @@ bool Server::Init(Config *config) {
 
 	// resources to be loaded
 	Resource::CreateRegistry();
+#if 0
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/resources/Resource/@id", GetId());
 	v = config->GetValues(buffer);
 	if (v) {
@@ -72,6 +73,7 @@ bool Server::Init(Config *config) {
 		}
 		delete v;
 	}
+#endif
 
 	// create processing engine(s)
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine/@id", GetId());

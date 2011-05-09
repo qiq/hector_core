@@ -7,6 +7,7 @@
 
 #include <config.h>
 
+#include <deque>
 #include <limits>
 #include <string>
 #include <utility>
@@ -23,9 +24,6 @@ class ResourceRegistry {
 public:
 	ResourceRegistry();
 	~ResourceRegistry();
-
-	// load resource libraries (lib, type)
-	bool Load(const char *id, Config *config);
 
 	// translate resource name to resource id
 	int NameToId(const char *name);
@@ -55,15 +53,31 @@ protected:
 		std::vector<Resource*> available;
 	};
 
+	std::vector<std::string> *ParsePath(const char *path);
+	std::vector<std::string> *ReadDir(const char *dir);
+	ResourceRegistryInfo *LoadResourceLibrary(const char *typeString, int typeId);	// either typeString or typeId must by not-NULL/0
+	ResourceRegistryInfo *GetInfo(int typeId);
+
 	static PlainLock idLock;
 	static int nextId;
-	PlainLock infoLock;
+	PlainLock infoLock;	// guargs name2id, id2info and all creating/changing of ResourceRegistryInfos
 	std::tr1::unordered_map<std::string, int> name2id;
 	std::tr1::unordered_map<int, ResourceRegistryInfo*> id2info;
+
+	// files yet to be tested for resources
+	std::deque<std::string> nativeFilenames;
+	std::deque<std::string> perlFilenames;
 
 	PerlInterpreters *perl;
 
 	static log4cxx::LoggerPtr logger;
 };
+
+inline ResourceRegistry::ResourceRegistryInfo *ResourceRegistry::GetInfo(int typeId) {
+	std::tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.find(typeId);
+	if (iter != id2info.end())
+		return iter->second;
+	return LoadResourceLibrary(NULL, typeId);
+}
 
 #endif

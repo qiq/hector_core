@@ -18,7 +18,7 @@ hectorinclude_HEADERS = TestResource.h TestResource.i \
 	MarkerResource.h MarkerResource.i
 
 libTestResource_la_SOURCES = TestResource.h TestResource.cc
-libTestResource_la_LDFLAGS = $(AM_LDFLAGS)
+libTestResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 
 TestResource_la_SOURCES = TestResource.cc
 TestResource_la_CXXFLAGS = $(AM_CXXFLAGS) -DWRAPPER
@@ -29,6 +29,7 @@ EXTRA_DIST += TestResource.i
 ALIASES += TestResource.la
 
 libTestProtobufResource_la_SOURCES = TestProtobufResource.h TestProtobufResource.cc TestProtobufResource.pb.h TestProtobufResource.pb.cc
+libTestProtobufResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 
 BUILT_SOURCES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 TestProtobfuResource.pb.cc TestProtobufResource.pb.h: TestProtobufResource.proto
@@ -44,7 +45,7 @@ CLEANFILES += TestProtobufResource.pb.h TestProtobufResource.pb.cc
 ALIASES += TestProtobufResource.la
 
 libMarkerResource_la_SOURCES = MarkerResource.h MarkerResource.cc
-libMarkerResource_la_LDFLAGS = $(AM_LDFLAGS)
+libMarkerResource_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version
 
 MarkerResource_la_SOURCES = MarkerResource.cc
 MarkerResource_la_CXXFLAGS = $(AM_CXXFLAGS) -DWRAPPER

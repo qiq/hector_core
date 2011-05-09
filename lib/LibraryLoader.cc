@@ -34,12 +34,13 @@ LibraryLoader::~LibraryLoader() {
 	lock.Unlock();
 }
 
-void *LibraryLoader::LoadLibrary(const char *lib, const char *sym) {
+void *LibraryLoader::LoadLibrary(const char *lib, const char *sym, bool reportErrors) {
 	lock.Lock();
 	if (!initialized) {
 		if (lt_dlinit() != 0) {
 			lock.Unlock();
-			LOG4CXX_ERROR(logger, "Cannot initialize libtool: " << lt_dlerror());
+			if (reportErrors)
+				LOG4CXX_ERROR(logger, "Cannot initialize libtool: " << lt_dlerror());
 			return NULL;
 		}
 		initialized = true;
@@ -54,14 +55,15 @@ void *LibraryLoader::LoadLibrary(const char *lib, const char *sym) {
 		if (*handle == NULL) {
 			lock.Unlock();
 			delete handle;
-			LOG4CXX_ERROR(logger, "Cannot load library: " << lt_dlerror());
+			if (reportErrors)
+				LOG4CXX_ERROR(logger, "Cannot load library: " << lt_dlerror());
 			return NULL;
 		}
 		handles[lib] = handle;
 	}
 	void *p = lt_dlsym(*handle, sym);
 	lock.Unlock();
-	if (!p)
+	if (!p && reportErrors)
 		LOG4CXX_ERROR(logger, "Cannot find symbol: " << lt_dlerror());
 	return p;
 }

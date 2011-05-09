@@ -17,9 +17,6 @@ test11: read-write: one reader(1), one writer(1)
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>1</threads>

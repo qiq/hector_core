@@ -17,9 +17,6 @@ test12: multithreaded read-write: one reader(5), one writer(5)
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>5</threads>

@@ -8,8 +8,9 @@ Parameters:
 items		r/o	Total items processed
 maxItems	r/w	Number of items to load
 filename	r/w	File to load. Change it to process another file (and set wait)
-wait		r/w	Wait for another file when current one is exhausted?
+wait		r/w	Wait for another file when the current one is exhausted?
 resourceType	r/w	Resource type to load (we suppose there is only one resource type in the file)
+text		init	Whether to read/write binary or text format (mainly for debugging/testing)
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_
@@ -20,6 +21,7 @@ resourceType	r/w	Resource type to load (we suppose there is only one resource ty
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
 #include "CondLock.h"
 #include "Module.h"
 #include "ObjectProperties.h"
@@ -46,6 +48,7 @@ private:
 	bool wait;
 	int resourceType;
 	char *resourceTypeName;
+	bool text;
 	bool mark;
 
 	char *GetItems(const char *name);
@@ -59,6 +62,8 @@ private:
 	void SetResourceType(const char *name, const char *value);
 	char *GetMark(const char *name);
 	void SetMark(const char *name, const char *value);
+	char *GetText(const char *name);
+	void SetText(const char *name, const char *value);
 
 	ObjectProperties<Load> *props;
 	char *GetPropertySync(const char *name);
@@ -66,10 +71,13 @@ private:
 	bool IsInitOnly(const char *name);
 	std::vector<std::string> *ListPropertiesSync();
 
+	bool ReopenFile();
+
 	bool cancel;
 	bool markEmmited;
 	unsigned long long byteCount;
 	int fd;
+	std::ifstream *ifs;
 	ResourceInputStream *stream;
 	CondLock fileCond;	// for pause when source file is exhausted
 	int markerResourceTypeId; // MarkerResource typeId

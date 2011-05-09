@@ -17,16 +17,13 @@ test30: test of loading/saving module, using both TestResource and TestProtobufR
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-			<Resource id="R_pbtest" lib="TestProtobufResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_load">
 				<threads>1</threads>
 				<modules>
 					<Module id="M_load" lib="Load.la">
 						<param name="filename" value="$1"/>
+						<param name="mark" value="true"/>
 					</Module>
 					<Module id="M_dump" type="perl" lib="Dump.pm"/>
 				</modules>

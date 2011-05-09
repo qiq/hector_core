@@ -35,7 +35,7 @@ class PerlResource : public Resource {
 public:
 	PerlResource(PerlResourceInterpreter *perl, const char *name);
 	~PerlResource();
-	bool Init();
+	bool Init(bool reportErrors = true);
 	// create copy of a resource
 	Resource *Clone();
 	// Clear current resource (as would delete + new do)

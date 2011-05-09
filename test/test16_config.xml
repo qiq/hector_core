@@ -17,9 +17,6 @@ test16: sort according to status: two readers(1), connected to two intermediates
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_input1">
 				<threads>1</threads>

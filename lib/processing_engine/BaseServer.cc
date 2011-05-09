@@ -8,8 +8,8 @@
 #include "BaseServer.h"
 #include "Object.h"
 #include "ProcessingEngine.h"
-#include "ResourceInputStream.h"
-#include "ResourceOutputStream.h"
+#include "ResourceInputStreamBinary.h"
+#include "ResourceOutputStreamBinary.h"
 
 using namespace std;
 
@@ -145,7 +145,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		vector<int> resourceIdsOrdered;
 		string body = conn->GetRequestBody();
 		struct timeval timeout = { 0, 0 };
-		ResourceInputStream stream(body);
+		ResourceInputStreamBinary stream(body);
 		uint32_t typeId;
 		while (stream.ReadVarint32(&typeId)) {
 			Resource *r = Resource::Deserialize(stream, typeId, NULL);
@@ -177,7 +177,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 				map[result[i]->GetId()] = result[i];
 			}
 			string response;
-			ResourceOutputStream *stream = new ResourceOutputStream(&response);
+			ResourceOutputStreamBinary *stream = new ResourceOutputStreamBinary(&response);
 			for (int i = 0; i < (int)resourceIdsOrdered.size(); i++) {
 				Resource *r = map[resourceIdsOrdered[i]];
 				Resource::Serialize(r, *stream, true);

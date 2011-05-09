@@ -34,6 +34,18 @@ inline void die(const char *msg, ...) {
 std::string &skipWs(std::string &data);
 std::string &chomp(std::string &data);
 
+inline std::string &replace_all(std::string &s, const std::string &sub, const std::string &other) {
+	size_t offset = 0;
+	while (true) {
+		offset = s.find(sub, offset);
+		if (offset == s.npos)
+			break;
+		s.replace(offset, sub.size(), other);
+		offset += other.size();
+	}
+	return s;
+}
+
 inline uint32_t NativeEndian(uint32_t le) {
 	// Big-endian: convert from little endian (default) to native Big-endian
 	return htons(0xabcd) == 0xabcd ? htonl(le) : le;

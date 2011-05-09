@@ -41,9 +41,9 @@ PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	this->perl = perl;
 	this->name = strdup(name);
 	// remove .pm at the end of module name
-	char *dot = strrchr(this->name, '.');
-	if (dot)
-		*dot = '\0';
+	int len = strlen(this->name);
+	if (len > 4 && !memcmp(this->name+len-3, ".pm", 3))
+		this->name[len-3] = '\0';
 	typeId = 0;
 	ref = NULL;
 }
@@ -64,7 +64,7 @@ PerlResource::~PerlResource() {
 	free(name);
 }
 
-bool PerlResource::Init() {
+bool PerlResource::Init(bool reportErrors) {
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
@@ -78,14 +78,16 @@ bool PerlResource::Init() {
 	if (SvTRUE(ERRSV)) {
 		perl->GetPerl()->SetContext(old);
 		perl->Unlock();
-		LOG4CXX_ERROR(logger, "Error initialize resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		if (reportErrors)
+			LOG4CXX_ERROR(logger, "Error initialize resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
 		return false;
 	}
 	ref = get_sv(id, 0);
 	if (!SvOK(ref)) {
 		perl->GetPerl()->SetContext(old);
 		perl->Unlock();
-		LOG4CXX_ERROR(logger, "Error initialize resource " << name);
+		if (reportErrors)
+			LOG4CXX_ERROR(logger, "Error initialize resource " << name);
 		return false;
 	}
 	perl->GetPerl()->SetContext(old);

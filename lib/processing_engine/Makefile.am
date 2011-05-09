@@ -9,7 +9,7 @@ hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = Server.h ProcessingEngine.h Processor.h Module.h ResourceRegistry.h Resource.h \
 	SharedResource.h SharedResource.i \
 	ResourceAttrInfo.h ResourceAttrInfoT.h ResourceAttrInfoP.h \
-	ResourceInputStream.h ResourceOutputStream.h \
+	ResourceInputStream.h ResourceInputStreamBinary.h ResourceInputStreamText.h ResourceOutputStream.h ResourceOutputStreamBinary.h ResourceOutputStreamText.h \
 	PerlResourceInterpreter.h PerlResourceInterpreter.cc PerlInterpreters.h PerlResource.h PerlModule.h \
 	PythonModule.h \
 	CallProcessingEngine.h BaseServer.h \

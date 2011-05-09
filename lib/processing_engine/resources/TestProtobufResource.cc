@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <google/protobuf/text_format.h>
 #include "TestProtobufResource.h"
 #include "ResourceAttrInfoT.h"
 #include "ResourceInputStream.h"
@@ -47,19 +48,12 @@ void TestProtobufResource::Clear() {
 }
 
 bool TestProtobufResource::Serialize(ResourceOutputStream &output) {
-	output.WriteVarint32(r.ByteSize());
-	r.SerializeWithCachedSizes(output.GetCodedOutputStream());
+	output.SerializeMessage(r);
 	return true;
 }
 
 bool TestProtobufResource::Deserialize(ResourceInputStream &input) {
-	uint32_t size;
-	if (!input.ReadVarint32(&size))
-                return false;
-	google::protobuf::io::CodedInputStream::Limit l = input.PushLimit(size);
-	bool result = r.ParseFromCodedStream(input.GetCodedInputStream());
-	input.PopLimit(l);
-	return result;
+	return input.ParseMessage(r);
 }
 
 string TestProtobufResource::ToString(Object::LogLevel logLevel) {
@@ -70,7 +64,7 @@ string TestProtobufResource::ToString(Object::LogLevel logLevel) {
 
 #else
 
-extern "C" Resource* create() {
+extern "C" Resource* hector_resource_create() {
 	return (Resource*)new TestProtobufResource();
 }
 

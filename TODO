@@ -1,5 +1,12 @@
+- utility to read stream of resources (different types should be supported)
+	- obema smery (prbuf -> json, json -> protobuf)
+	- s typem/bez typu a s podporou id/status
+	- specialni typy souboru resit zvlast
+	- zkusit v pythonu, kdyz nepujde, tak v jave
+
 - allocate more Resources at a time (an array of resources and put them into
   the available array), so that it does consume less memory (use MemoryPool).
+	- must not delete resources, just Release() them
 
 - PythonModule a reference counting -- je to spravne? Zkontrolovat, ze neleakuje
 

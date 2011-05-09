@@ -9,6 +9,7 @@ AM_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(subdir-objects -Wall -Werror)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+dnl AH_TOP([#define __STDC_FORMAT_MACROS 1])
 
 AC_ARG_ENABLE(debug, [  --enable-debug          turn on debugging support], use_debug=yes, use_debug=no)
 

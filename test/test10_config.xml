@@ -17,9 +17,6 @@ test10: test of loading/saving module
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_load">
 				<threads>1</threads>
@@ -27,6 +24,7 @@ test10: test of loading/saving module
 					<Module id="M_load" lib="Load.la">
 						<param name="filename" value="$1"/>
 					</Module>
+					<Module id="dddd" lib="Dump.la"/>
 				</modules>
 				<output>
 					<nextProcessor ref="P_save"/>

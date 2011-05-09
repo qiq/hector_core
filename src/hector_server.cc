@@ -117,11 +117,11 @@ int main(int argc, char *argv[]) {
 	setenv("LD_LIBRARY_PATH", value, 1);
 
 	path = getenv("PERL5LIB");
-	snprintf(value, sizeof(value), "%s/modules/perl:%s", baseDir, path ? path : "");
+	snprintf(value, sizeof(value), "%s/modules/perl:%s/resources/perl:%s", baseDir, baseDir, path ? path : "");
 	setenv("PERL5LIB", value, 1);
 
 	path = getenv("PYTHONPATH");
-	snprintf(value, sizeof(value), "%s/modules/python:%s", baseDir, path ? path : "");
+	snprintf(value, sizeof(value), "%s/modules/python:%s/resources/python:%s", baseDir, baseDir, path ? path : "");
 	setenv("PYTHONPATH", value, 1);
 
 	// load config file

@@ -17,9 +17,6 @@ test8: loop, every resource is processed twice: one reader(1), one simple interm
 			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
 			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
 		</logConfig>
-		<resources>
-			<Resource id="R_test" lib="TestResource.la"/>
-		</resources>
 		<ProcessingEngine id="PE_test">
 			<Processor id="P_input">
 				<threads>1</threads>
