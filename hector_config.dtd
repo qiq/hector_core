@@ -18,22 +18,13 @@
 
 <!-- Main -->
 
-<!ELEMENT Server	(threads|serverHost|serverPort|resources|ProcessingEngine|param|logConfig)* >
+<!ELEMENT Server	(threads|serverHost|serverPort|ProcessingEngine|param|logConfig)* >
 <!ATTLIST Server
 	id		ID		#REQUIRED
 	lib		CDATA		#REQUIRED >
 <!ELEMENT serverHost	(#PCDATA) >
 <!ELEMENT serverPort	(#PCDATA) >
 <!ELEMENT logConfig	(#PCDATA) >
-
-<!-- resources -->
-
-<!ELEMENT resources	(Resource+) >
-<!ELEMENT Resource 	EMPTY >
-<!ATTLIST Resource
-	id		ID		#REQUIRED
-	lib		CDATA		#REQUIRED
-	type		CDATA		"native" >
 
 <!-- ProcessingEngine -->
 
