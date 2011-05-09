@@ -17,7 +17,7 @@ bool Resource::Serialize(Resource *resource, ResourceOutputStream &stream, bool 
 	if (saveType) {
 		int type = resource->GetTypeId();
 		if (saveIdStatus)
-			type |= 0x128;
+			type |= 0x80;
 		stream.WriteVarint32(type);
 		if (saveIdStatus) {
 			stream.WriteVarint32(resource->GetId());
@@ -38,9 +38,9 @@ Resource *Resource::Deserialize(ResourceInputStream &stream, int resourceType, i
 		uint32_t type;
 		if (!stream.ReadVarint32(&type))
 			return NULL;
-		if (type & 0x128)
+		if (type & 0x80)
 			readIdStatus = true;
-		resourceType = type & 0x127;
+		resourceType = type & 0x7f;
 	}
 	Resource *r = registry->AcquireResource(resourceType);
 	if (!r) {
