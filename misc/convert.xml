@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+Convert resource files from/to text format.
+-->
+<Config>
+	<Server id="convert" lib="TestServer.la">
+		<threads>2</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig><![CDATA[
+			log4j.rootLogger=ERROR, LOG
+			log4j.appender.LOG=org.apache.log4j.ConsoleAppender
+			log4j.appender.LOG.Target=System.err
+			log4j.appender.LOG.Threshold=DEBUG
+			log4j.appender.LOG.layout=org.apache.log4j.PatternLayout
+			log4j.appender.LOG.layout.ConversionPattern=%m%n ]]>
+		</logConfig>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load" lib="Load.la">
+						<param name="filename" value="$1"/>
+						<param name="text" value="$2"/>
+						<param name="resourceType" value="$3"/>
+					</Module>
+					<Module id="M_save" lib="Save.la">
+						<param name="filename" value="$4"/>
+						<param name="text" value="$5"/>
+						<param name="saveResourceType" value="$6"/>
+						<param name="saveResourceIdStatus" value="$7"/>
+					</Module>
+				</modules>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Convert data from binary to text format (or vice-versa) and/or change data
+# format.
+#
+# convert b tn <in >out
+# convert tr:TestResource b
+
+function usage() {
+	echo "usage: convert [input_format] [output_format] <in >out"
+	echo "  input_format: t: text, b: binary, r:resource_type"
+	echo "  output_format: t: text, b: binary, n: do not include type, s: save include status and id"
+	exit 1;
+}
+
+if [ $# -ne 2 ]; then
+	usage
+fi
+
+INF=$1
+OUTF=$2
+
+IN_TEXT=
+IN_RESTYPE=
+OUT_TEXT=
+OUT_SAVE_TYPE="true"
+OUT_SAVE_ID_STATUS="false"
+
+if echo $INF|grep '[^:]*t' >/dev/null; then
+	IN_TEXT="true"
+fi
+if echo $INF|grep '[^:]*b' >/dev/null; then
+	IN_TEXT="false"
+fi
+if echo $INF|grep '.*r:.\+' >/dev/null; then
+	IN_RESTYPE=`echo $INF|sed -e 's/.*r:\(.*\)/\1/'`
+fi
+
+if echo $OUTF|grep '[^:]*t' >/dev/null; then
+	OUT_TEXT="true"
+fi
+if echo $OUTF|grep '[^:]*b' >/dev/null; then
+	OUT_TEXT="false"
+fi
+if echo $OUTF|grep '[^:]*n' >/dev/null; then
+	OUT_SAVE_TYPE="false"
+fi
+if echo $OUTF|grep '[^:]*s' >/dev/null; then
+	OUT_SAVE_ID_STATUS="true"
+fi
+
+if [ -z "$IN_TEXT" -o -z "$OUT_TEXT" ]; then
+	usage
+fi
+
+hector_server -c convert.xml -f -b convert "/dev/stdin" "$IN_TEXT" "$IN_RESTYPE" "/dev/stdout" "$OUT_TEXT" "$OUT_SAVE_TYPE" "$OUT_SAVE_ID_STATUS"
