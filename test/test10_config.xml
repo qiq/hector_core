@@ -24,7 +24,6 @@ test10: test of loading/saving module
 					<Module id="M_load" lib="Load.la">
 						<param name="filename" value="$1"/>
 					</Module>
-					<Module id="dddd" lib="Dump.la"/>
 				</modules>
 				<output>
 					<nextProcessor ref="P_save"/>

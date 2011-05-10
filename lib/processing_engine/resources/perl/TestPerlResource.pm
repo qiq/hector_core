@@ -10,26 +10,27 @@ use warnings;
 use strict;
 use Storable;
 use Hector;
+use Resource;
+our @ISA = qw(Resource);
 
 sub new {
 	my ($proto, $resource, $id) = @_;
 	my $class = ref($proto) || $proto;
-	my $self = {
-		'_resource' => $resource,
-		'_id' => $id,
-		'a' => {
-			'type' => "STRING",
-			'value' => "",
-		},
-		'b' => {
-			'type' => "HASH_INT32",
-			'value' => {},
-		},
-		'c' => {
-			'type' => "ARRAY_STRING",
-			'value' => [],
-		},
+	my $self = $class->SUPER::new($resource, $id);
+
+	$self->{'a'} = {
+		'type' => "STRING",
+		'value' => "",
 	};
+	$self->{'b'} = {
+		'type' => "HASH_INT32",
+		'value' => {},
+	};
+	$self->{'c'} = {
+		'type' => "ARRAY_STRING",
+		'value' => [],
+	};
+
 	bless($self, $class);
 	return $self;
 }

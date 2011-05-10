@@ -13,19 +13,19 @@ package TestSimple;
 use warnings;
 use strict;
 use Hector;
+use Module;
+our @ISA = qw(Module);
 
 sub new {
 	my ($proto, $object, $id, $threadIndex) = @_;
 	my $class = ref($proto) || $proto;
-	my $self = {
-		'_object' => $object,
-		'_id' => $id,
-		'_threadIndex' => $threadIndex,
-		'items' => 0,
-		'foo' => 0,
-		'filpStatus' => 0,
-		'setStatus' => -1,
-	};
+	my $self = $class->SUPER::new($object, $id, $threadIndex);
+
+	$self->{'items'} = 0;
+	$self->{'foo'} = 0;
+	$self->{'filpStatus'} = 0;
+	$self->{'setStatus'} = -1;
+
 	bless($self, $class);
 	return $self;
 }
@@ -52,22 +52,6 @@ sub Init {
 sub GetType {
 	my ($self) = @_;
 	return $Hector::Module::SIMPLE;
-}
-
-sub Start {
-	my ($self) = @_;
-}
-
-sub Stop {
-	my ($self) = @_;
-}
-
-sub Pause {
-	my ($self) = @_;
-}
-
-sub Resume {
-	my ($self) = @_;
 }
 
 sub GetValue {
@@ -98,16 +82,6 @@ sub SetValue {
 sub ListNames {
 	my ($self) = @_;
 	return [ grep { $_ !~ /^_/ } keys %{$self}, 'alias' ];
-}
-
-sub SaveCheckpoint {
-	my ($self, $path, $id) = @_;
-	$self->{'_object'}->log_info("SaveCheckpoint($path, $id)");
-}
-
-sub RestoreCheckpoint {
-	my ($self, $path, $id) = @_;
-	$self->{'_object'}->log_info("RestoreCheckpoint($path, $id)");
 }
 
 sub ProcessSimple() {

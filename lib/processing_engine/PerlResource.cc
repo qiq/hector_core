@@ -68,12 +68,53 @@ bool PerlResource::Init(bool reportErrors) {
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
+	char s[1024];
+
+	// test whether it is a resource
+	snprintf(s, sizeof(s), "use %s;", name);
+	eval_pv(s, FALSE);
+	if (SvTRUE(ERRSV)) {
+		perl->GetPerl()->SetContext(old);
+		perl->Unlock();
+		if (reportErrors)
+			LOG4CXX_ERROR(logger, "Error initialize resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
+		return false;
+	}
+	snprintf(s, sizeof(s), "%s::ISA", name);
+	AV *isa = get_av(s, 0);
+	if (!isa) {
+		perl->GetPerl()->SetContext(old);
+		perl->Unlock();
+		if (reportErrors)
+			LOG4CXX_ERROR(logger, "Not a Resource descendant (no ISA) " << name);
+		return false;
+	}
+	bool found = false;
+	for (int i = 0; i <= av_len(isa); i++) {
+		SV **item = av_fetch(isa, i, 0);
+		if (item && SvPOK(*item)) {
+			STRLEN len;
+			char *s = SvPV(*item, len);
+			if (!strncmp(s, "Resource", 9)) {
+				found = true;
+				break;
+			}
+		}
+	}
+	if (!found) {
+		perl->GetPerl()->SetContext(old);
+		perl->Unlock();
+		if (reportErrors)
+			LOG4CXX_ERROR(logger, "Not a Resource descendant: " << name);
+		return false;
+	}
+
+	// create resource
 	char id[20];
 	snprintf(id, sizeof(id), "_resource%d", GetId());
 	SV *_object = get_sv("_object", TRUE);
 	sv_setsv(_object, perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Resource *", 0));
-	char s[1024];
-	snprintf(s, sizeof(s), "use %s; $%s = %s->new($_object);", name, id, name);
+	snprintf(s, sizeof(s), "use %s; $%s = %s->new($_object, %d);", name, id, name, GetId());
 	eval_pv(s, FALSE);
 	if (SvTRUE(ERRSV)) {
 		perl->GetPerl()->SetContext(old);

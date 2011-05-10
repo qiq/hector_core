@@ -156,8 +156,10 @@ ResourceRegistry::ResourceRegistryInfo *ResourceRegistry::LoadResourceLibrary(co
 			break;
 		}
 		PerlResource *pr = new PerlResource(pi, filename.c_str());
-		if (!pr->Init(false))
+		if (!pr->Init(false)) {
+			delete pr;
 			continue;
+		}
 		ResourceInfo *ri = pr->GetResourceInfo();
 		if (!ri)
 			continue;

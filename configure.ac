@@ -249,6 +249,7 @@ AC_CONFIG_FILES([Makefile
 		lib/perl/Makefile
 		lib/java/Makefile
 		lib/python/Makefile
+		misc/Makefile
 		test/Makefile
 		hector_core.pc
 ])
