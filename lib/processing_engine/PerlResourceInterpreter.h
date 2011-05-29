@@ -12,8 +12,9 @@
 class EmbeddedPerl;
 class PerlResourceInterpreter {
 public:
-	PerlResourceInterpreter(EmbeddedPerl *perl);
+	PerlResourceInterpreter();
 	~PerlResourceInterpreter();
+	bool Init();
 
 	void Lock();
 	void Unlock();
@@ -30,11 +31,6 @@ private:
 	PlainLock *lock;		// recursive lock
 	EmbeddedPerl *perl;
 };
-
-inline PerlResourceInterpreter::PerlResourceInterpreter(EmbeddedPerl *perl): count(0), position(0) {
-	this->perl = perl;
-	lock = new PlainLock(true);
-}
 
 inline void PerlResourceInterpreter::Lock() {
 	lock->Lock();

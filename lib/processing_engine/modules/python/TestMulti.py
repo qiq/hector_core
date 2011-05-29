@@ -85,7 +85,7 @@ class TestMulti:
 
     def ProcessMulti(self, inputResources, outputResources):
 	if inputResources is None or outputResources is None:
-	    return 0, TestMulti.MAX_RESOURCES
+	    return False, 0, TestMulti.MAX_RESOURCES
 
 	while len(inputResources) > 0 and len(self.resources) <= TestMulti.MAX_RESOURCES:
 	    resource = inputResources.pop(0)
@@ -95,7 +95,7 @@ class TestMulti:
 		outputResources.append(resource)
 
 	if len(self.resources) == 0:
-		return 0, TestMulti.MAX_RESOURCES
+		return False, 0, TestMulti.MAX_RESOURCES
 
 	select.select([], [], [], self.values['timeTick']/1000000)
 
@@ -103,4 +103,4 @@ class TestMulti:
 	outputResources.append(resource)
 	self._object.log_info(resource.ToStringShort()+" Processed ("+resource.GetStr()+")")
 	self.values['items'] += 1
-	return len(self.resources), TestMulti.MAX_RESOURCES-len(self.resources)
+	return len(self.resources) > 0, TestMulti.MAX_RESOURCES-len(self.resources), len(self.resources)

@@ -13,7 +13,7 @@ log4cxx::LoggerPtr Resource::logger(log4cxx::Logger::getLogger("Resource"));
 ResourceRegistry *Resource::registry = NULL;
 string Resource::empty;
 
-bool Resource::Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType, bool saveIdStatus) {
+bool Resource::SerializeResource(Resource *resource, ResourceOutputStream &stream, bool saveType, bool saveIdStatus) {
 	if (saveType) {
 		int type = resource->GetTypeId();
 		if (saveIdStatus)
@@ -29,7 +29,7 @@ bool Resource::Serialize(Resource *resource, ResourceOutputStream &stream, bool 
 	return true;
 }
 
-Resource *Resource::Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize) {
+Resource *Resource::DeserializeResource(ResourceInputStream &stream, int resourceType, int *totalSize) {
 	long current;
 	if (totalSize)
 		current = stream.ByteCount();

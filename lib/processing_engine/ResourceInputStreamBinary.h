@@ -39,7 +39,7 @@ public:
 	bool Skip(int count);
 	int ByteCount();
 
-	bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0);
+	bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0, bool skip = false);
 
 private:
 	google::protobuf::io::ZeroCopyInputStream *file;
@@ -92,12 +92,14 @@ inline int ResourceInputStreamBinary::ByteCount() {
 	return file->ByteCount();
 }
 
-inline bool ResourceInputStreamBinary::ParseMessage(google::protobuf::Message &msg, uint32_t size) {
+inline bool ResourceInputStreamBinary::ParseMessage(google::protobuf::Message &msg, uint32_t size, bool skip) {
 	bool result;
 	if (!size) {
 	        if (!stream->ReadVarint32(&size))
 	                return false;
         }
+	if (skip)
+		return stream->Skip(size);
 	google::protobuf::io::CodedInputStream::Limit l = stream->PushLimit(size);
 	result = msg.ParseFromCodedStream(stream);
 	stream->PopLimit(l);

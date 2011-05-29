@@ -27,7 +27,7 @@ public:
 	virtual bool Skip(int count) = 0;
 	virtual int ByteCount() = 0;
 
-	virtual bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0) = 0;
+	virtual bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0, bool skip = false) = 0;
 };
 
 #endif

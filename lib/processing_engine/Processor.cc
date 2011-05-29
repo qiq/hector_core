@@ -120,7 +120,7 @@ bool Processor::Init(Config *config) {
 			char *type = config->GetFirstValue(buffer);
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
-				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::LoadLibrary(name, "create");
+				Module *(*create)(ObjectRegistry*, const char*, int) = (Module*(*)(ObjectRegistry*, const char*, int))LibraryLoader::LoadLibrary(name, "hector_module_create");
 				if (!create) {
 					LOG_ERROR(this, "Module/lib not found: " << name);
 					return false;
@@ -604,12 +604,12 @@ void Processor::RunThread(int threadId) {
 			int delta = minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			int n;
 			LOG_TRACE(minfo->module, "< (" << minfo->inputResources->size() << ", " << minfo->outputResources->size() << ")");
-			minfo->processingResources = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources, &n);
+			bool busy = minfo->module->ProcessMulti(minfo->inputResources, minfo->outputResources, &n, &minfo->processingResources);
 			LOG_TRACE(minfo->module, "> (" << minfo->inputResources->size() << ", " << minfo->outputResources->size() << ")");
 			n -= minfo->inputResources->size();
 			if (n < minN)
 				minN = n;
-			if (minfo->processingResources > 0)
+			if (busy)
 				block = false;
 			delta -= minfo->inputResources->size()+minfo->outputResources->size()+minfo->processingResources;
 			// some resources were added

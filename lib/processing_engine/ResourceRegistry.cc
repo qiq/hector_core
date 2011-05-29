@@ -98,7 +98,7 @@ ResourceRegistry::~ResourceRegistry() {
 	delete perl;
 }
 
-// infoLock should be held
+// infoLock must be held
 ResourceRegistry::ResourceRegistryInfo *ResourceRegistry::LoadResourceLibrary(const char *typeString, int typeId) {
 	// either typeString or typeId must by not-NULL/0
 	assert(typeString || typeId != 0);

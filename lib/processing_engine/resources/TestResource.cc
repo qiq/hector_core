@@ -60,9 +60,16 @@ bool TestResource::Serialize(ResourceOutputStream &output) {
 	return true;
 }
 
-bool TestResource::Deserialize(ResourceInputStream &input) {
+bool TestResource::Deserialize(ResourceInputStream &input, bool headerOnly) {
+	if (headerOnly)
+		return true;
 	str.clear();
 	return input.ReadString(&str);
+}
+
+bool TestResource::Skip(ResourceInputStream &input) {
+	string s;
+	return input.ReadString(&s);
 }
 
 string TestResource::ToString(Object::LogLevel logLevel) {

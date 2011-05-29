@@ -90,6 +90,6 @@ Resource *TestSimple::ProcessSimpleSync(Resource *resource) {
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return new TestSimple(objects, id, threadIndex);
 }

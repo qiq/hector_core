@@ -10,6 +10,7 @@ public:
         ~ResourceRegistry();
 
         int NameToId(const char *name);
-        Resource *AcquireResource(int id);
+        Resource *AcquireResource(int typeId);
+        Resource *AcquireResource(const char *typeString);
         void ReleaseResource(Resource *resource);
 };

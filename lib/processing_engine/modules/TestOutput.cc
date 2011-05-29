@@ -45,6 +45,6 @@ Resource *TestOutput::ProcessOutputSync(Resource *resource) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return (Module*)new TestOutput(objects, id, threadIndex);
 }

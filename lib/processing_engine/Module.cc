@@ -31,9 +31,9 @@ Resource *Module::ProcessSimpleSync(Resource *resource) {
 	return NULL;
 }
 
-int Module::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
+bool Module::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int *processingResources) {
 	LOG_ERROR(this, "Unimplemented resource processing (ProcessMulti)");
-	return 0;
+	return false;
 }
 
 void Module::StartSync() {

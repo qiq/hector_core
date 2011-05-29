@@ -53,13 +53,20 @@ bool MarkerResource::Serialize(ResourceOutputStream &output) {
 	return true;
 }
 
-bool MarkerResource::Deserialize(ResourceInputStream &input) {
+bool MarkerResource::Deserialize(ResourceInputStream &input, bool headerOnly) {
+	if (headerOnly)
+		return true;
 	return input.ReadVarint32((uint32_t*)&mark);
+}
+
+bool MarkerResource::Skip(ResourceInputStream &input) {
+	uint32_t x;
+	return input.ReadVarint32(&x);
 }
 
 string MarkerResource::ToString(Object::LogLevel logLevel) {
 	char buf[1024];
-	snprintf(buf, sizeof(buf), "[TR %d %d] %d", id, IsSetFlag(DELETED) ? -1 : status, mark);
+	snprintf(buf, sizeof(buf), "[MR %d %d] %d", id, IsSetFlag(DELETED) ? -1 : status, mark);
 	return buf;
 }
 

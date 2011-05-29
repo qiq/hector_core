@@ -44,7 +44,7 @@ bool SimpleServer::GetRunning() {
 void SimpleServer::SetRunning(bool running) {
 	main_lock.Lock();
 	main_running = running;
-	if (!running) {
+	if (!running && main_socket != -1) {
 		shutdown(main_socket, SHUT_RDWR);
 		close(main_socket);
 	}

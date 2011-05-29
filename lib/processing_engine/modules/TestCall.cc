@@ -145,12 +145,15 @@ bool TestCall::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-int TestCall::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
-	return call->Process(inputResources, outputResources, expectingResources, timeTick);
+bool TestCall::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int *processingResources) {
+	int processing = call->Process(inputResources, outputResources, expectingResources, timeTick);
+	if (processingResources)
+		*processingResources = processing;
+	return processing > 0;
 }
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return new TestCall(objects, id, threadIndex);
 }

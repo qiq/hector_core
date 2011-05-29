@@ -60,7 +60,7 @@ bool TestMulti::Init(vector<pair<string, string> > *params) {
 	return true;
 }
 
-int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources) {
+bool TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources, int *processingResources) {
 	while (inputResources->size() > 0 && resources.size() <= MAX_RESOURCES) {
 		Resource *r = inputResources->front();
 		if (TestResource::IsInstance(r))
@@ -71,7 +71,9 @@ int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource
 	if (resources.size() == 0) {
 		if (expectResources)	
 			*expectResources = MAX_RESOURCES;
-		return 0;
+		if (processingResources)	
+			*processingResources = 0;
+		return false;
 	}
 
 	struct timeval tv;
@@ -82,7 +84,9 @@ int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource
 		LOG_INFO(this, "Error in select() = " << errno);
 		if (expectResources)	
 			*expectResources = 0;
-		return resources.size();
+		if (processingResources)
+			*processingResources = resources.size();
+		return resources.size() > 0;
 	}
 	TestResource *tr = resources.front();
 	resources.pop();
@@ -92,11 +96,13 @@ int TestMulti::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource
 
 	if (expectResources)
 		*expectResources = MAX_RESOURCES-resources.size();
-	return resources.size();
+	if (processingResources)
+		*processingResources = resources.size();
+	return resources.size() > 0;
 }
 
 // factory functions
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return new TestMulti(objects, id, threadIndex);
 }

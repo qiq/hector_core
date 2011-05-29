@@ -49,8 +49,7 @@ Load::~Load() {
 		flock(fd, LOCK_UN);
 		close(fd);
 	}
-	if (ifs)
-		delete ifs;
+	delete ifs;
 	free(filename);
 	free(resourceTypeName);
 	delete props;
@@ -202,7 +201,7 @@ Resource *Load::ProcessInputSync(bool sleep) {
 
 	while (1) {
 		int size = 0;
-		r = stream ? Resource::Deserialize(*stream, resourceType, &size) : NULL;
+		r = stream ? Resource::DeserializeResource(*stream, resourceType, &size) : NULL;
 		if (r) {
 			byteCount += size;
 			break;
@@ -214,6 +213,7 @@ Resource *Load::ProcessInputSync(bool sleep) {
 				markEmmited = true;
 				return mr;
 			}
+			LOG_INFO(this, "Resources read: " << items);
 			return NULL;
 		}
 		ObjectUnlock();
@@ -292,6 +292,6 @@ void Load::StopSync() {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return (Module*)new Load(objects, id, threadIndex);
 }

@@ -25,7 +25,7 @@ public:
 	Resource *ProcessInputSync(bool sleep);
 	Resource *ProcessOutputSync(Resource *resource);
 	Resource *ProcessSimpleSync(Resource *resource);
-	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	bool ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 
 protected:
 	char *GetPropertySync(const char *name);

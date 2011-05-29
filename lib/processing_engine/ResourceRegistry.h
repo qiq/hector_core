@@ -31,6 +31,9 @@ public:
 	// obtain resource of given type
 	Resource *AcquireResource(int typeId);
 
+	// obtain resource of given type
+	Resource *AcquireResource(const char *typeString);
+
 	// release resource
 	void ReleaseResource(Resource *resource);
 
@@ -60,7 +63,7 @@ protected:
 
 	static PlainLock idLock;
 	static int nextId;
-	PlainLock infoLock;	// guargs name2id, id2info and all creating/changing of ResourceRegistryInfos
+	PlainLock infoLock;	// guards name2id, id2info and all creating/changing of ResourceRegistryInfos
 	std::tr1::unordered_map<std::string, int> name2id;
 	std::tr1::unordered_map<int, ResourceRegistryInfo*> id2info;
 
@@ -73,6 +76,12 @@ protected:
 	static log4cxx::LoggerPtr logger;
 };
 
+inline Resource *ResourceRegistry::AcquireResource(const char *typeString) {
+	int typeId = NameToId(typeString);
+	return typeId != -1 ? AcquireResource(typeId) : NULL;
+}
+
+// infoLock must be held
 inline ResourceRegistry::ResourceRegistryInfo *ResourceRegistry::GetInfo(int typeId) {
 	std::tr1::unordered_map<int, ResourceRegistryInfo*>::iterator iter = id2info.find(typeId);
 	if (iter != id2info.end())

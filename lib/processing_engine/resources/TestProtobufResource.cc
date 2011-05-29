@@ -52,8 +52,14 @@ bool TestProtobufResource::Serialize(ResourceOutputStream &output) {
 	return true;
 }
 
-bool TestProtobufResource::Deserialize(ResourceInputStream &input) {
+bool TestProtobufResource::Deserialize(ResourceInputStream &input, bool headerOnly) {
+	if (headerOnly)
+		return true;
 	return input.ParseMessage(r);
+}
+
+bool TestProtobufResource::Skip(ResourceInputStream &input) {
+	return input.ParseMessage(r, 0, true);
 }
 
 string TestProtobufResource::ToString(Object::LogLevel logLevel) {

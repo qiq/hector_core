@@ -24,7 +24,7 @@ public:
 
 class MarkerResource : public Resource {
 public:
-	MarkerResource() {};
+	MarkerResource(): mark(0) {};
 	~MarkerResource() {};
 	// create copy of a resource
 	Resource *Clone();
@@ -32,7 +32,8 @@ public:
 	void Clear();
 	// save and restore resource
 	bool Serialize(ResourceOutputStream &output);
-	bool Deserialize(ResourceInputStream &input);
+	bool Deserialize(ResourceInputStream &input, bool headerOnly);
+	bool Skip(ResourceInputStream &input);
 	// used by queues in case there is limit on queue size
 	int GetSize();
 	// get info about this resource

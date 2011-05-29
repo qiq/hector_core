@@ -5,7 +5,7 @@
 id=test31
 rm -f $id.out
 ln -s "$test_base/test/$id.data.in" . 2>/dev/null
-test_server_start $id
+test_server_start $id test
 hector_client_set PE_test.run 1
 hector_client -c "PROCESS PE_test" $HECTOR_HOST <$id.data.in >$id.data.out
 hector_client_wait M_simple[0].items 1000

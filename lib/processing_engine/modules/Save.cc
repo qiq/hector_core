@@ -43,8 +43,7 @@ Save::~Save() {
 		flock(fd, LOCK_UN);
 		close(fd);
 	}
-	if (ofs)
-		delete ofs;
+	delete ofs;
 	free(filename);
 	delete props;
 }
@@ -159,7 +158,7 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 		LOG_ERROR_R(this, resource, "File not opened");
 		return resource;
 	}
-	bool res = Resource::Serialize(resource, *stream, saveResourceType, saveResourceIdStatus);
+	bool res = Resource::SerializeResource(resource, *stream, saveResourceType, saveResourceIdStatus);
 	if (res)
 		++items;
 	if (!res)
@@ -169,6 +168,6 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 
 // the class factories
 
-extern "C" Module* create(ObjectRegistry *objects, const char *id, int threadIndex) {
+extern "C" Module* hector_module_create(ObjectRegistry *objects, const char *id, int threadIndex) {
 	return (Module*)new Save(objects, id, threadIndex);
 }

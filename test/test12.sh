@@ -3,7 +3,7 @@
 . test_common.sh
 
 id=test12
-test_server_batch $id
+test_server_batch $id test
 grep "Resource arrived " $id.log|sed -e 's|M_output\[[0-9]\+\]:.*Resource arrived (\([-0-9]*\))|\1|'|sort -u|sort -n >$id.log.result
 test_compare_result $id
 exit $?

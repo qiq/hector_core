@@ -62,7 +62,8 @@ public:
 	virtual void Clear();
 	// save and restore resource
 	virtual bool Serialize(ResourceOutputStream &output) = 0;
-	virtual bool Deserialize(ResourceInputStream &input) = 0;
+	virtual bool Deserialize(ResourceInputStream &input, bool headerOnly = false) = 0;
+	virtual bool Skip(ResourceInputStream &input) = 0;
 	// used by queues in case there is limit on queue size, this size may
 	// be somewhat arbitrary
 	virtual int GetSize() = 0;
@@ -224,8 +225,8 @@ public:
 	static ResourceRegistry *GetRegistry();
 
 	// serializes resource (together with size and type), returns total bytes written
-	static bool Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
-	static Resource *Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize);
+	static bool SerializeResource(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
+	static Resource *DeserializeResource(ResourceInputStream &stream, int resourceType, int *totalSize);
 
 protected:
 	// following resource properties are usually memory-only

@@ -23,6 +23,6 @@ bool TestServer::HandleExtension(SimpleHTTPConn *conn) {
 
 // factory functions
 
-extern "C" BaseServer* create(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
+extern "C" BaseServer* hector_server_create(ObjectRegistry *objects, vector<ProcessingEngine*> *engines) {
 	return new TestServer(objects, engines);
 }

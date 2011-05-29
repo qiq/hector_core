@@ -55,7 +55,11 @@ PerlResource::~PerlResource() {
 	perl->GetPerl()->SetContext();
 	char s[1024];
 	snprintf(s, sizeof(s), "$_resource%d = undef;", GetId());
+	ENTER;
+	SAVETMPS;
 	eval_pv(s, FALSE);
+	FREETMPS;
+	LEAVE;
 	if (SvTRUE(ERRSV))
 		LOG4CXX_ERROR(logger, "Error destroying resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
 	perl->GetPerl()->SetContext(old);
@@ -72,7 +76,11 @@ bool PerlResource::Init(bool reportErrors) {
 
 	// test whether it is a resource
 	snprintf(s, sizeof(s), "use %s;", name);
+	ENTER;
+	SAVETMPS;
 	eval_pv(s, FALSE);
+	FREETMPS;
+	LEAVE;
 	if (SvTRUE(ERRSV)) {
 		perl->GetPerl()->SetContext(old);
 		perl->Unlock();
@@ -115,7 +123,11 @@ bool PerlResource::Init(bool reportErrors) {
 	SV *_object = get_sv("_object", TRUE);
 	sv_setsv(_object, perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Resource *", 0));
 	snprintf(s, sizeof(s), "use %s; $%s = %s->new($_object, %d);", name, id, name, GetId());
+	ENTER;
+	SAVETMPS;
 	eval_pv(s, FALSE);
+	FREETMPS;
+	LEAVE;
 	if (SvTRUE(ERRSV)) {
 		perl->GetPerl()->SetContext(old);
 		perl->Unlock();
@@ -198,7 +210,7 @@ bool PerlResource::Serialize(ResourceOutputStream &output) {
 	return result;
 }
 
-bool PerlResource::Deserialize(ResourceInputStream &input) {
+bool PerlResource::Deserialize(ResourceInputStream &input, bool headerOnly) {
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
 	perl->GetPerl()->SetContext();
@@ -209,6 +221,7 @@ bool PerlResource::Deserialize(ResourceInputStream &input) {
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv_2mortal(perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&input)), "ResourceInputStream", 0x01)));
+        XPUSHs(sv_2mortal(newSViv(headerOnly ? 1 : 0)));
         PUTBACK;
 	int count = call_method("Deserialize", G_SCALAR|G_EVAL);
 	SPAGAIN;
@@ -220,6 +233,40 @@ bool PerlResource::Deserialize(ResourceInputStream &input) {
 		SV *resultSV = POPs;
 		if (!SvIOK(resultSV)) {
 			LOG4CXX_ERROR(logger, "Error calling Deserialize (invalid result)");
+		} else {
+			result = (SvIV(resultSV) != 0);
+		}
+	}
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	perl->GetPerl()->SetContext(old);
+	perl->Unlock();
+	return result;
+}
+
+bool PerlResource::Skip(ResourceInputStream &input) {
+	perl->Lock();
+	void *old = perl->GetPerl()->GetContext();
+	perl->GetPerl()->SetContext();
+	bool result = false;
+	dSP;
+	ENTER;
+	SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        XPUSHs(sv_2mortal(perl->GetPerl()->NewPointerObj(const_cast<void*>(static_cast<const void*>(&input)), "ResourceInputStream", 0x01)));
+        PUTBACK;
+	int count = call_method("Skip", G_SCALAR|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV)) {
+		LOG4CXX_ERROR(logger, "Error calling Skip (" << SvPV_nolen(ERRSV) << ")");
+	} else if (count != 1) {
+		LOG4CXX_ERROR(logger, "Error calling Skip (no result)");
+	} else {
+		SV *resultSV = POPs;
+		if (!SvIOK(resultSV)) {
+			LOG4CXX_ERROR(logger, "Error calling Skip (invalid result)");
 		} else {
 			result = (SvIV(resultSV) != 0);
 		}

@@ -18,7 +18,8 @@ public:
         Resource *Clone();
         void Clear();
         bool Serialize(ResourceOutputStream &output);
-        bool Deserialize(ResourceInputStream &input);
+        bool Deserialize(ResourceInputStream &input, bool headerOnly);
+        bool Skip(ResourceInputStream &input);
         int GetSize();
         ResourceInfo *GetResourceInfo();
         std::string ToString(Object::LogLevel logLevel);
@@ -28,3 +29,9 @@ public:
 
         static bool IsInstance(Resource *resource);
 };
+
+%inline %{
+MarkerResource *ResourceToMarkerResource(Resource *r) {
+        return r && MarkerResource::IsInstance(r) ? static_cast<MarkerResource*>(r) : NULL;
+}
+%}

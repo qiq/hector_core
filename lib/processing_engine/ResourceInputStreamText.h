@@ -31,7 +31,7 @@ public:
 	bool Skip(int count);
 	int ByteCount();
 
-	bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0);
+	bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0, bool skip = false);
 
 private:
 	std::istream *is;
@@ -116,11 +116,13 @@ inline int ResourceInputStreamText::ByteCount() {
 	return is->tellg();
 }
 
-inline bool ResourceInputStreamText::ParseMessage(google::protobuf::Message &msg, uint32_t size) {
+inline bool ResourceInputStreamText::ParseMessage(google::protobuf::Message &msg, uint32_t size, bool skip) {
 	std::string s;
 	getline(*is, s, '\n');
 	if (is->fail())
 		return false;
+	if (skip)
+		return true;
 	return parser.ParseFromString(s, &msg);
 }
 

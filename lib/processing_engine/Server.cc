@@ -98,7 +98,7 @@ bool Server::Init(Config *config) {
 	}
 	
 	// load server library
-	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::LoadLibrary(s, "create");
+	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::LoadLibrary(s, "hector_server_create");
 	if (!create) {
 		LOG_ERROR(this, "Invalid library: " << s);
 		return false;

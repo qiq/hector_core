@@ -14,7 +14,8 @@ public:
         Resource *Clone();
         void Clear();
         bool Serialize(ResourceOutputStream &output);
-        bool Deserialize(ResourceInputStream &input);
+        bool Deserialize(ResourceInputStream &input, bool headerOnly);
+        bool Skip(ResourceInputStream &input);
         int GetSize();
         ResourceInfo *GetResourceInfo();
         std::string ToString(Object::LogLevel logLevel);

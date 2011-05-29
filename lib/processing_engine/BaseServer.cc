@@ -148,7 +148,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 		ResourceInputStreamBinary stream(body);
 		uint32_t typeId;
 		while (stream.ReadVarint32(&typeId)) {
-			Resource *r = Resource::Deserialize(stream, typeId, NULL);
+			Resource *r = Resource::DeserializeResource(stream, typeId, NULL);
 			if (!r) {
 				char buf[1024];
 				snprintf(buf, sizeof(buf), "Cannot deserialize resource of type %d", typeId);
@@ -180,7 +180,7 @@ bool BaseServer::HandleRequest(SimpleHTTPConn *conn) {
 			ResourceOutputStreamBinary *stream = new ResourceOutputStreamBinary(&response);
 			for (int i = 0; i < (int)resourceIdsOrdered.size(); i++) {
 				Resource *r = map[resourceIdsOrdered[i]];
-				Resource::Serialize(r, *stream, true);
+				Resource::SerializeResource(r, *stream, true);
 				Resource::GetRegistry()->ReleaseResource(r);
 			}
 			delete stream;

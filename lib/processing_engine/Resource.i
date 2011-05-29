@@ -81,7 +81,8 @@ public:
         virtual Resource *Clone() = 0;
         virtual void Clear();
         virtual bool Serialize(ResourceOutputStream &output) = 0;
-        virtual bool Deserialize(ResourceInputStream &input) = 0;
+        virtual bool Deserialize(ResourceInputStream &input, bool headerOnly) = 0;
+        virtual bool Skip(ResourceInputStream &input) = 0;
         virtual int GetSize() = 0;
         virtual ResourceInfo *GetResourceInfo() = 0;
         virtual std::string ToString(Object::LogLevel logLevel) = 0;
@@ -204,6 +205,6 @@ public:
         static void CreateRegistry();
         static void DeleteRegistry();
         static ResourceRegistry *GetRegistry();
-        static bool Serialize(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
-        static Resource *Deserialize(ResourceInputStream &stream, int resourceType, int *totalSize);
+        static bool SerializeResource(Resource *resource, ResourceOutputStream &stream, bool saveType = false, bool saveIdStatus = false);
+        static Resource *DeserializeResource(ResourceInputStream &stream, int resourceType, int *totalSize);
 };

@@ -248,10 +248,10 @@ Resource *PythonModule::ProcessSimpleSync(Resource *resource) {
 	return result;
 }
 
-int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
+bool PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int *processingResources) {
 	PyGILState_STATE gstate = python->Lock();
 
-	int result = 0;
+	bool result = false;
 	PyObject *inRes = PyList_New(inputResources->size());
 	int i = 0;
 	while (inputResources->size() > 0) {
@@ -298,10 +298,10 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 	Py_DECREF(inRes);
 	Py_DECREF(outRes);
 	if (out) {
-		if (PyTuple_Check(out) >= 0 || PyTuple_Size(out) != 2) {
+		if (PyTuple_Check(out) >= 0 || PyTuple_Size(out) != 3) {
 			PyObject *a = PyTuple_GetItem(out, 0);
 			if (PyLong_Check(a) >= 0) {
-				result = PyLong_AsLong(a);
+				result = PyLong_AsLong(a) != 0;
 			} else {
 				LOG_ERROR(this, "Error calling ProcessMulti: expected integer as result[0]");
 			}
@@ -311,6 +311,13 @@ int PythonModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resou
 					*expectingResources = PyLong_AsLong(b);
 			} else {
 				LOG_ERROR(this, "Error calling ProcessMulti: expected integer as result[1]");
+			}
+			PyObject *c = PyTuple_GetItem(out, 2);
+			if (PyLong_Check(c) >= 0) {
+				if (processingResources)
+					*processingResources = PyLong_AsLong(c);
+			} else {
+				LOG_ERROR(this, "Error calling ProcessMulti: expected integer as result[2]");
 			}
 		} else {
 			LOG_ERROR(this, "Error calling ProcessMulti: expected tuple(2)");

@@ -24,6 +24,8 @@ sub new {
 	$self->{'maxItems'} = 0;
 	$self->{'idPrefix'} = undef;
 
+	$self->{'_typeId'} = &Hector::Resource::GetRegistry()->NameToId("TestResource");
+
 	bless($self, $class);
 	return $self;
 }
@@ -44,7 +46,7 @@ sub ProcessInput() {
 		return undef;
 	}
 	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
-	$resource = Hector::TestResource->new();
+	$resource = &Hector::ResourceToTestResource(&Hector::Resource::GetRegistry()->AcquireResource($self->{'_typeId'}));
 	$resource->SetId($self->{'_threadIndex'}*10000+$self->{'items'});
 	$resource->SetStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}));
 	$self->{'_object'}->log_info($resource->ToStringShort()." Loading resource (".$resource->GetStr().")");

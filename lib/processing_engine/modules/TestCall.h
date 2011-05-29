@@ -43,7 +43,7 @@ public:
 	~TestCall();
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type GetType();
-	int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	bool ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 
 private:
 	int items;		// ObjectLock, items processed

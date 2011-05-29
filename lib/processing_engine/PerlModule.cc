@@ -39,7 +39,11 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		sv_setsv(_object, perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0));
 		char s[1024];
 		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, GetId(), threadIndex);
+		ENTER;
+		SAVETMPS;
 		eval_pv(s, FALSE);
+		FREETMPS;
+		LEAVE;
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR(this, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
 			return false;
@@ -350,11 +354,16 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	return result;
 }
 
-int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources) {
+bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectingResources, int *processingResources) {
 	perl->SetContext();
-	int processingResources = 0;
 	SV *inputResourcesSV;
 	SV *outputResourcesSV;
+	bool result = false;
+
+	if (processingResources)
+		*processingResources = 0;
+	if (expectingResources)
+		*expectingResources = 1;
 
 	// convert inputResources and outputResources into Perl objects
 	if (inputResources) {
@@ -365,7 +374,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 			snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 			SV *resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
 			if (!resourceSV)
-				return 0;
+				return false;
 			av_push(a, newSVsv(resourceSV));
 			inputResources->pop();
 		}
@@ -397,33 +406,43 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		return processingResources;
-	} else if (count != 2) {
+		return false;
+	} else if (count != 3) {
 		LOG_ERROR(this, "Error calling ProcesMulti (invalid number of return arguments)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		return processingResources;
+		return false;
 	}
 	SV *resultSV = POPs;
 	if (!SvIOK(resultSV)) {
-		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 1)");
+		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 3)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		return processingResources;
+		return false;
 	}
-	if (expectingResources)
-		*expectingResources = SvIV(resultSV);
+	if (processingResources)
+		*processingResources = SvIV(resultSV);
 	resultSV = POPs;
 	if (!SvIOK(resultSV)) {
 		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 2)");
 		PUTBACK;
 		FREETMPS;
 		LEAVE;
-		return processingResources;
+		return false;
 	}
-	processingResources = SvIV(resultSV);
+	if (expectingResources)
+		*expectingResources = SvIV(resultSV);
+	resultSV = POPs;
+	if (!SvIOK(resultSV)) {
+		LOG_ERROR(this, "Error calling ProcessMulti (invalid result 1)");
+		PUTBACK;
+		FREETMPS;
+		LEAVE;
+		return false;
+	}
+	result = SvIV(resultSV) != 0;
 	PUTBACK;
 	FREETMPS;
 	LEAVE;
@@ -454,7 +473,7 @@ int PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resourc
 	SvREFCNT_dec(inputResourcesSV);
 	SvREFCNT_dec(outputResourcesSV);
 
-	return processingResources;
+	return result;
 }
 
 char *PerlModule::GetPropertySync(const char *name) {

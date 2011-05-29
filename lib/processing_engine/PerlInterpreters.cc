@@ -26,8 +26,8 @@ PerlResourceInterpreter *PerlInterpreters::AcquirePerl() {
 	PerlResourceInterpreter *pi;
 	if (interpreters.size() < MAX_PERL_INTERPRETERS) {
 		// create new Perl interpreter
-		pi = new PerlResourceInterpreter(new EmbeddedPerl());
-		if (!pi->GetPerl()->Init()) {
+		pi = new PerlResourceInterpreter();
+		if (!pi->Init()) {
 			lock.Unlock();
 			return NULL;
 		}

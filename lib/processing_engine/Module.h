@@ -35,7 +35,8 @@ public:
 	Resource *ProcessInput(bool sleep);
 	Resource *ProcessOutput(Resource *resource);
 	Resource *ProcessSimple(Resource *resource);
-	int ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	// returns true if busy (working on resources)
+	bool ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 
 protected:
 	int threadIndex;
@@ -56,7 +57,7 @@ protected:
 	// outputResources). expectingResources is number of resources module is
 	// expecting on the input next time. ProcessMulti is allowed to produce
 	// new resources
-	virtual int ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources);
+	virtual bool ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 };
 
 inline int Module::GetThreadIndex() {
@@ -108,9 +109,9 @@ inline Resource *Module::ProcessSimple(Resource *resource) {
 	return resource;
 }
 
-inline int Module::ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources) {
+inline bool Module::ProcessMulti(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources) {
 	ObjectLockWrite();
-	int result = ProcessMultiSync(inputResources, outputResources, expectingResources);
+	bool result = ProcessMultiSync(inputResources, outputResources, expectingResources, processingResources);
 	ObjectUnlock();
 	return result;
 }
