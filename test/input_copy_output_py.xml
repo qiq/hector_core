@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+input_copy_output_py: copy of a resource: one reader(1), one simple module(1), two writers(1)
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig><![CDATA[
+			log4j.rootLogger=DEBUG, LOGFILE
+			log4j.appender.LOGFILE=org.apache.log4j.FileAppender
+			log4j.appender.LOGFILE.File=input_copy_output_py.log
+			log4j.appender.LOGFILE.Append=false
+			log4j.appender.LOGFILE.Threshold=DEBUG
+			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
+			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
+		</logConfig>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_input">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_input" type="python" lib="TestInput.py">
+						<param name="maxItems" value="1000"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_output1" copy="1"/>
+					<nextProcessor ref="P_output2"/>
+				</output>
+			</Processor>
+			<Processor id="P_output1">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_output1" type="python" lib="TestOutput.py"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+			<Processor id="P_output2">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_output2" type="python" lib="TestOutput.py"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>
