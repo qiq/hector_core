@@ -5,12 +5,16 @@ Save Resources to the file.
 Dependencies: protobuf
 
 Parameters:
-items		r/o		Total items processed
-filename	initOnly	File to save resources to.
-overwrite	initOnly	Should we overwrite output file?
-saveResourceType	r/w		Save type info (necessary if we are writing different resource types to one file)
-saveResourceIdStatus	r/w		Save Id & Status attributes to the file (usualy not desirable)
-text		init		Should we write text or binary form?
+moduleType		init	Type of module (output or multi)
+items			r/o	Total items processed
+filename		init	File to save resources to.
+overwrite		init	Should we overwrite output file?
+saveResourceType	r/w	Save type info (necessary if we are writing different resource types to one file)
+saveResourceIdStatus	r/w	Save Id & Status attributes to the file (usualy not desirable)
+text			init	Should we write text or binary form?
+timeTick		r/w	Max time to spend in ProcessMulti()
+resourceTypeFilter	r/w	Only save these resource types (only applied in
+				multi mode). Space-separated list of resource type names.
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
@@ -22,6 +26,7 @@ text		init		Should we write text or binary form?
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
+#include <tr1/unordered_set>
 #include "Module.h"
 #include "ObjectProperties.h"
 #include "Resource.h"
@@ -34,15 +39,21 @@ public:
 	bool Init(std::vector<std::pair<std::string, std::string> > *params);
 	Module::Type GetType();
 	Resource *ProcessOutputSync(Resource *resource);
+	bool ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 
 private:
+	bool isInputModuleType;
 	int items;
 	char *filename;
 	bool overwrite;
 	bool saveResourceType;
 	bool saveResourceIdStatus;
 	bool text;
+	std::string resourceTypesFilter;
+	int timeTick;
 
+	char *GetModuleType(const char *name);
+	void SetModuleType(const char *name, const char *value);
 	char *GetItems(const char *name);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
@@ -54,6 +65,10 @@ private:
 	void SetSaveResourceIdStatus(const char *name, const char *value);
 	char *GetText(const char *name);
 	void SetText(const char *name, const char *value);
+	char *GetResourceTypesFilter(const char *name);
+	void SetResourceTypesFilter(const char *name, const char *value);
+	char *GetTimeTick(const char *name);
+	void SetTimeTick(const char *name, const char *value);
 
 	ObjectProperties<Save> *props;
 	char *GetPropertySync(const char *name);
@@ -65,6 +80,7 @@ private:
 	int fd;
 	std::ofstream *ofs;
 	ResourceOutputStream *stream;
+	std::tr1::unordered_set<int> filter;
 };
 
 inline Module::Type Save::GetType() {

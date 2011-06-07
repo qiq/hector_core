@@ -18,6 +18,7 @@
 #include <string.h>
 #include <string>
 #include <sys/time.h>
+#include <vector>
 #include <tr1/unordered_map>
 #include <log4cxx/logger.h>
 
@@ -33,6 +34,7 @@ inline void die(const char *msg, ...) {
 
 std::string &skipWs(std::string &data);
 std::string &chomp(std::string &data);
+std::vector<std::string> *splitOnWs(std::string &data);
 
 inline std::string &replace_all(std::string &s, const std::string &sub, const std::string &other) {
 	size_t offset = 0;

@@ -30,6 +30,25 @@ string &chomp(string &data) {
 	return data;
 }
 
+vector<string> *splitOnWs(string &data) {
+	vector<string> *result = new vector<string>();
+	const char *b = data.c_str();
+	const char *e;
+	while (*b) {
+		while (*b && isspace(*b))
+			b++;
+		e = b;
+		while (*e && !isspace(*e))
+			e++;
+		if (*b) {
+			string s(b, e-b);
+			result->push_back(s);
+			b = e;
+		}
+	}
+	return result;
+}
+
 int WriteBytes(int fd, const char *data, int size) {
 	int offset = 0;
 	while (size > 0) {

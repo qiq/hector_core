@@ -17,7 +17,6 @@ timeTick	r/w	Max time to spend in ProcessMulti()
 
 #include <queue>
 #include <string>
-#include <tr1/unordered_map>
 #include "common.h"
 #include "Module.h"
 #include "ObjectProperties.h"

@@ -17,24 +17,33 @@
 
 using namespace std;
 
+#define MAX_RESOURCES 10000
+#define DEFAULT_TIMETICK 100*1000
+
 Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
-	filename = NULL;
 	items = 0;
+	filename = NULL;
 	overwrite = false;
 	saveResourceType = false;
 	saveResourceIdStatus = false;
 	text = false;
+	timeTick = DEFAULT_TIMETICK;
+	resourceTypesFilter = "";
+
 	fd = -1;
 	ofs = NULL;
 	stream = NULL;
 
 	props = new ObjectProperties<Save>(this);
+	props->Add("moduleType", &Save::GetModuleType, &Save::SetModuleType, true);
 	props->Add("items", &Save::GetItems);
 	props->Add("filename", &Save::GetFilename, &Save::SetFilename, true);
 	props->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
 	props->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
 	props->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
 	props->Add("text", &Save::GetText, &Save::SetText);
+	props->Add("resourceTypesFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
+	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
 }
 
 Save::~Save() {
@@ -46,6 +55,19 @@ Save::~Save() {
 	delete ofs;
 	free(filename);
 	delete props;
+}
+
+char *Save::GetModuleType(const char *name) {
+	return isInputModuleType ? strdup("OUTPUT") : strdup("MULTI");
+}
+
+void Save::SetModuleType(const char *name, const char *value) {
+	if (!strcmp(value, "OUTPUT"))
+		isInputModuleType = true;
+	else if (!strcmp(value, "MULTI"))
+		isInputModuleType = false;
+	else
+		LOG_ERROR(this, "Invalid moduleType value: " << value);
 }
 
 char *Save::GetItems(const char *name) {
@@ -125,12 +147,37 @@ void Save::SetSaveResourceIdStatus(const char *name, const char *value) {
 	saveResourceIdStatus = str2bool(value);
 }
 
+char *Save::GetResourceTypesFilter(const char *name) {
+	return strdup(resourceTypesFilter.c_str());
+}
+
+void Save::SetResourceTypesFilter(const char *name, const char *value) {
+	resourceTypesFilter = value;
+	vector<string> *v = splitOnWs(resourceTypesFilter);
+	filter.clear();
+	for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
+		int typeId = Resource::GetRegistry()->NameToId(iter->c_str());
+		if (typeId >= 0)
+			filter.insert(typeId);
+		else
+			LOG_ERROR(this, "Unknown resource type: " << *iter);
+	}
+}
+
 char *Save::GetText(const char *name) {
 	return bool2str(text);
 }
 
 void Save::SetText(const char *name, const char *value) {
 	text = str2bool(value);
+}
+
+char *Save::GetTimeTick(const char *name) {
+	return int2str(timeTick);
+}
+
+void Save::SetTimeTick(const char *name, const char *value) {
+	timeTick = str2int(value);
 }
 
 bool Save::Init(vector<pair<string, string> > *params) {
@@ -164,6 +211,38 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 	if (!res)
 		LOG_ERROR_R(this, resource, "Cannot serialize resource");
 	return resource;
+}
+
+bool Save::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources, int *processingResources) {
+	while (inputResources->size() > 0) {
+		// verbatim copy of resources from intput to output
+		Resource *r = inputResources->front();
+		uint32_t currentTime = time(NULL);
+		int resourcesProcessed = 0;
+		if (filter.size() == 0 || filter.find(r->GetTypeId()) == filter.end()) {
+			if (!stream) {
+				LOG_ERROR_R(this, r, "File not opened");
+			} else {
+				if (Resource::SerializeResource(r, *stream, saveResourceType, saveResourceIdStatus))
+					++items;
+				else
+					LOG_ERROR_R(this, r, "Cannot serialize resource");
+			}
+			r->SetFlag(Resource::DELETED);
+		}
+		outputResources->push(r);
+		inputResources->pop();
+
+		// check timeout every 100 SiteResources read
+		if (++resourcesProcessed % 100 == 0 && ((int)(time(NULL)-currentTime) > timeTick))
+			break;
+	}
+
+	if (expectResources)
+		*expectResources = MAX_RESOURCES;
+	if (processingResources)
+		*processingResources = 0;
+	return false;
 }
 
 // the class factories

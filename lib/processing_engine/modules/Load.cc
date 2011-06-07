@@ -18,22 +18,32 @@
 
 using namespace std;
 
+#define MAX_RESOURCES 10000
+#define DEFAULT_TIMETICK 100*1000
+
 Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+	isInputModuleType = true;
 	items = 0;
 	maxItems = 0;
 	filename = NULL;
 	wait = false;
 	resourceType = 0;
-	resourceTypeName = strdup("");
-	text = false;
 	mark = false;
+	text = false;
+	timeTick = DEFAULT_TIMETICK;
+
+	cancel = false;
+	resourceTypeName = strdup("");
+	markRead = false;
 	markEmmited = false;
 	byteCount = 0;
 	fd = -1;
 	ifs = NULL;
 	stream = NULL;
+	markerResourceTypeId = 0;
 
 	props = new ObjectProperties<Load>(this);
+	props->Add("moduleType", &Load::GetModuleType, &Load::SetModuleType, true);
 	props->Add("items", &Load::GetItems);
 	props->Add("maxItems", &Load::GetMaxItems, &Load::SetMaxItems);
 	props->Add("filename", &Load::GetFilename, &Load::SetFilename);
@@ -41,6 +51,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
 	props->Add("mark", &Load::GetMark, &Load::SetMark);
 	props->Add("text", &Load::GetText, &Load::SetText);
+	props->Add("timeTick", &Load::GetTimeTick, &Load::SetTimeTick);
 }
 
 Load::~Load() {
@@ -53,6 +64,19 @@ Load::~Load() {
 	free(filename);
 	free(resourceTypeName);
 	delete props;
+}
+
+char *Load::GetModuleType(const char *name) {
+	return isInputModuleType ? strdup("INPUT") : strdup("MULTI");
+}
+
+void Load::SetModuleType(const char *name, const char *value) {
+	if (!strcmp(value, "INPUT"))
+		isInputModuleType = true;
+	else if (!strcmp(value, "MULTI"))
+		isInputModuleType = false;
+	else
+		LOG_ERROR(this, "Invalid moduleType value: " << value);
 }
 
 char *Load::GetItems(const char *name) {
@@ -69,49 +93,6 @@ void Load::SetMaxItems(const char *name, const char *value) {
 
 char *Load::GetFilename(const char *name) {
 	return filename ? strdup(filename) : NULL;
-}
-
-bool Load::ReopenFile() {
-	fileCond.Lock();
-	delete stream;
-	stream = NULL;
-	if (fd >= 0) {
-		flock(fd, LOCK_UN);
-		close(fd);
-	}
-	if (ifs) {
-		delete ifs;
-		ifs = NULL;
-	}
-	markEmmited = false;
-	byteCount = 0;
-	int fd = open(filename, O_RDONLY);
-	if (fd < 0) {
-		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
-		fileCond.Unlock();
-		return false;
-	}
-	if (flock(fd, LOCK_SH) < 0) {
-		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
-		fileCond.Unlock();
-		return false;
-	}
-
-	if (!text) {
-		stream = new ResourceInputStreamBinary(fd);
-	} else {
-		ifs = new ifstream();
-		ifs->open(filename, ifstream::in|ifstream::binary);
-		if (ifs->fail()) {
-			LOG_ERROR(this, "Cannot open input file " << filename);
-			return false;
-		}
-		stream = new ResourceInputStreamText(ifs);
-	}
-
-	fileCond.SignalSend();
-	fileCond.Unlock();
-	return true;
 }
 
 void Load::SetFilename(const char *name, const char *value) {
@@ -162,6 +143,58 @@ char *Load::GetText(const char *name) {
 void Load::SetText(const char *name, const char *value) {
 	text = str2bool(value);
 }
+
+char *Load::GetTimeTick(const char *name) {
+	return int2str(timeTick);
+}
+
+void Load::SetTimeTick(const char *name, const char *value) {
+	timeTick = str2int(value);
+}
+
+bool Load::ReopenFile() {
+	fileCond.Lock();
+	delete stream;
+	stream = NULL;
+	if (fd >= 0) {
+		flock(fd, LOCK_UN);
+		close(fd);
+	}
+	if (ifs) {
+		delete ifs;
+		ifs = NULL;
+	}
+	markEmmited = false;
+	byteCount = 0;
+	int fd = open(filename, O_RDONLY);
+	if (fd < 0) {
+		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
+		fileCond.Unlock();
+		return false;
+	}
+	if (flock(fd, LOCK_SH) < 0) {
+		LOG_ERROR(this, "Cannot lock file " << filename << ": " << strerror(errno));
+		fileCond.Unlock();
+		return false;
+	}
+
+	if (!text) {
+		stream = new ResourceInputStreamBinary(fd);
+	} else {
+		ifs = new ifstream();
+		ifs->open(filename, ifstream::in|ifstream::binary);
+		if (ifs->fail()) {
+			LOG_ERROR(this, "Cannot open input file " << filename);
+			return false;
+		}
+		stream = new ResourceInputStreamText(ifs);
+	}
+
+	fileCond.SignalSend();
+	fileCond.Unlock();
+	return true;
+}
+
 
 bool Load::Init(vector<pair<string, string> > *params) {
 	// second stage?
@@ -226,6 +259,43 @@ Resource *Load::ProcessInputSync(bool sleep) {
 	}
 	++items;
 	return r;
+}
+
+bool Load::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *outputResources, int *expectResources, int *processingResources) {
+	while (inputResources->size() > 0) {
+		// verbatim copy of resources from intput to output
+		Resource *r = inputResources->front();
+		if (MarkerResource::IsInstance(r))
+			markRead = true;
+		outputResources->push(r);
+		inputResources->pop();
+	}
+	bool fileRead = false;
+	if (markRead) {
+		// we read resources from the file
+		uint32_t currentTime = time(NULL);
+		int resourcesProcessed = 0;
+		while (resourcesProcessed < MAX_RESOURCES) {
+			Resource *r = ProcessInputSync(false);
+			if (!r) {
+				fileRead = true;
+				break;
+			}
+			outputResources->push(r);
+			// check timeout every 100 SiteResources read
+			if (++resourcesProcessed % 100 == 0 && ((int)(time(NULL)-currentTime) > timeTick))
+				break;
+		}
+	}
+
+	if (expectResources)
+		*expectResources = MAX_RESOURCES;
+	if (processingResources)
+		*processingResources = 0;
+	// TRUE: when file is not exhausted, FALSE otherwise?
+	if (markRead && !fileRead)
+		return true;
+	return false;
 }
 
 bool Load::SaveCheckpointSync(const char *path) {

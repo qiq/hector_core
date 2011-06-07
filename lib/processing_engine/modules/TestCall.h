@@ -17,7 +17,6 @@ targetEngine;	init	engine to be called
 
 #include <config.h>
 
-#include <tr1/unordered_map>
 #include "CallProcessingEngine.h"
 #include "common.h"
 #include "Module.h"
