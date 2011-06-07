@@ -2,7 +2,7 @@
 
 . test_common.sh
 
-id=load_save
+id=load_save_multi
 rm -f $id.data.out
 test_server_batch $id test "$test_base/test/$id.data.in" $id.data.out
 

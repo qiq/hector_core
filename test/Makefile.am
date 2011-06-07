@@ -135,3 +135,8 @@ CLEANFILES += input_output_perl_resource.log input_output_perl_resource.log.resu
 TESTS += input_output_perl_resource_pl.sh
 EXTRA_DIST += input_output_perl_resource_pl.sh input_output_perl_resource_pl.xml input_output_perl_resource_pl.log.correct
 CLEANFILES += input_output_perl_resource_pl.log input_output_perl_resource_pl.log.result
+
+TESTS += load_save_multi.sh
+EXTRA_DIST += load_save_multi.sh load_save_multi.xml load_save_multi.log.correct load_save_multi.data.in
+CLEANFILES += load_save_multi.log load_save_multi.log.result load_save_multi.data.out
+

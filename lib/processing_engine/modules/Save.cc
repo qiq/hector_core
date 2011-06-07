@@ -21,6 +21,7 @@ using namespace std;
 #define DEFAULT_TIMETICK 100*1000
 
 Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(objects, id, threadIndex) {
+	isOutputModuleType = true;
 	items = 0;
 	filename = NULL;
 	overwrite = false;
@@ -28,7 +29,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	saveResourceIdStatus = false;
 	text = false;
 	timeTick = DEFAULT_TIMETICK;
-	resourceTypesFilter = "";
+	resourceTypeFilter = "";
 
 	fd = -1;
 	ofs = NULL;
@@ -42,7 +43,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
 	props->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
 	props->Add("text", &Save::GetText, &Save::SetText);
-	props->Add("resourceTypesFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
+	props->Add("resourceTypeFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
 	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
 }
 
@@ -58,14 +59,14 @@ Save::~Save() {
 }
 
 char *Save::GetModuleType(const char *name) {
-	return isInputModuleType ? strdup("OUTPUT") : strdup("MULTI");
+	return isOutputModuleType ? strdup("OUTPUT") : strdup("MULTI");
 }
 
 void Save::SetModuleType(const char *name, const char *value) {
 	if (!strcmp(value, "OUTPUT"))
-		isInputModuleType = true;
+		isOutputModuleType = true;
 	else if (!strcmp(value, "MULTI"))
-		isInputModuleType = false;
+		isOutputModuleType = false;
 	else
 		LOG_ERROR(this, "Invalid moduleType value: " << value);
 }
@@ -148,12 +149,12 @@ void Save::SetSaveResourceIdStatus(const char *name, const char *value) {
 }
 
 char *Save::GetResourceTypesFilter(const char *name) {
-	return strdup(resourceTypesFilter.c_str());
+	return strdup(resourceTypeFilter.c_str());
 }
 
 void Save::SetResourceTypesFilter(const char *name, const char *value) {
-	resourceTypesFilter = value;
-	vector<string> *v = splitOnWs(resourceTypesFilter);
+	resourceTypeFilter = value;
+	vector<string> *v = splitOnWs(resourceTypeFilter);
 	filter.clear();
 	for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 		int typeId = Resource::GetRegistry()->NameToId(iter->c_str());
@@ -219,7 +220,7 @@ bool Save::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *
 		Resource *r = inputResources->front();
 		uint32_t currentTime = time(NULL);
 		int resourcesProcessed = 0;
-		if (filter.size() == 0 || filter.find(r->GetTypeId()) == filter.end()) {
+		if (filter.size() == 0 || filter.find(r->GetTypeId()) != filter.end()) {
 			if (!stream) {
 				LOG_ERROR_R(this, r, "File not opened");
 			} else {

@@ -42,14 +42,14 @@ public:
 	bool ProcessMultiSync(std::queue<Resource*> *inputResources, std::queue<Resource*> *outputResources, int *expectingResources, int *processingResources);
 
 private:
-	bool isInputModuleType;
+	bool isOutputModuleType;
 	int items;
 	char *filename;
 	bool overwrite;
 	bool saveResourceType;
 	bool saveResourceIdStatus;
 	bool text;
-	std::string resourceTypesFilter;
+	std::string resourceTypeFilter;
 	int timeTick;
 
 	char *GetModuleType(const char *name);
@@ -84,7 +84,7 @@ private:
 };
 
 inline Module::Type Save::GetType() {
-	return OUTPUT;
+	return isOutputModuleType ? OUTPUT : MULTI;
 }
 
 inline char *Save::GetPropertySync(const char *name) {

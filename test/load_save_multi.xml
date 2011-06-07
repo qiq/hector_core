@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Config SYSTEM "hector_config.dtd">
+<!--
+load_save_multi: test of loading/saving module using multi type
+-->
+<Config>
+	<Server id="test" lib="TestServer.la">
+		<threads>1</threads>
+		<serverHost>*</serverHost>
+		<serverPort>1101</serverPort>
+		<logConfig><![CDATA[
+			log4j.rootLogger=DEBUG, LOGFILE
+			log4j.appender.LOGFILE=org.apache.log4j.FileAppender
+			log4j.appender.LOGFILE.File=load_save_multi.log
+			log4j.appender.LOGFILE.Append=false
+			log4j.appender.LOGFILE.Threshold=DEBUG
+			log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
+			log4j.appender.LOGFILE.layout.ConversionPattern=%m%n ]]>
+		</logConfig>
+		<ProcessingEngine id="PE_test">
+			<Processor id="P_load">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_load1" lib="Load.la">
+						<param name="filename" value="/dev/null"/>
+						<param name="mark" value="true"/>
+					</Module>
+					<Module id="M_load2" lib="Load.la">
+						<param name="moduleType" value="MULTI"/>
+						<param name="filename" value="$1"/>
+					</Module>
+				</modules>
+				<output>
+					<nextProcessor ref="P_save"/>
+				</output>
+			</Processor>
+			<Processor id="P_save">
+				<threads>1</threads>
+				<modules>
+					<Module id="M_save" lib="Save.la">
+						<param name="moduleType" value="MULTI"/>
+						<param name="filename" value="$2"/>
+						<param name="saveResourceType" value="true"/>
+						<param name="resourceTypeFilter" value="TestResource TestProtobufResource"/>
+					</Module>
+					<Module id="M_save2" lib="TestOutput.la"/>
+				</modules>
+				<input>
+					<queue/>
+				</input>
+			</Processor>
+		</ProcessingEngine>
+	</Server>
+</Config>
