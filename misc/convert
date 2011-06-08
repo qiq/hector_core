@@ -16,6 +16,8 @@ if [ $# -ne 2 ]; then
 	usage
 fi
 
+CONFIG=$0.xml
+
 INF=$1
 OUTF=$2
 
@@ -52,4 +54,4 @@ if [ -z "$IN_TEXT" -o -z "$OUT_TEXT" ]; then
 	usage
 fi
 
-hector_server -c convert.xml -f -b convert "/dev/stdin" "$IN_TEXT" "$IN_RESTYPE" "/dev/stdout" "$OUT_TEXT" "$OUT_SAVE_TYPE" "$OUT_SAVE_ID_STATUS"
+hector_server -c "$CONFIG" -f -b convert "/dev/stdin" "$IN_TEXT" "$IN_RESTYPE" "/dev/stdout" "$OUT_TEXT" "$OUT_SAVE_TYPE" "$OUT_SAVE_ID_STATUS"
