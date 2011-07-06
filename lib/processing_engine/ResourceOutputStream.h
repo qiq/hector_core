@@ -24,8 +24,10 @@ public:
 	virtual void WriteVarint32(uint32_t value) = 0;
 	virtual void WriteLittleEndian64(uint64_t value) = 0;
 	virtual void WriteVarint64(uint64_t value) = 0;
+	virtual void WriteRaw(const char *data, int size) = 0;
 
 	virtual void SerializeMessage(google::protobuf::Message &msg, bool saveSize = true) = 0;
+
 };
 
 #endif

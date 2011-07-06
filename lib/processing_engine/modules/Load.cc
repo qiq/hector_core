@@ -282,8 +282,8 @@ bool Load::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *
 				break;
 			}
 			outputResources->push(r);
-			// check timeout every 100 SiteResources read
-			if (++resourcesProcessed % 100 == 0 && ((int)(time(NULL)-currentTime) > timeTick))
+			// check timeout every 1000 SiteResources read
+			if (++resourcesProcessed % 1000 == 0 && ((int)(time(NULL)-currentTime) > timeTick))
 				break;
 		}
 	}

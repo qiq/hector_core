@@ -28,6 +28,7 @@ public:
 	bool ReadVarint32(uint32_t *value);
 	bool ReadLittleEndian64(uint64_t *value);
 	bool ReadVarint64(uint64_t *value);
+	bool ReadRaw(char *data, int size);
 	bool Skip(int count);
 	int ByteCount();
 
@@ -97,6 +98,15 @@ inline bool ResourceInputStreamText::ReadLittleEndian64(uint64_t *value) {
 inline bool ResourceInputStreamText::ReadVarint64(uint64_t *value) {
 	*is >> *value;
 	if (is->fail())
+		return false;
+	std::string s;
+	getline(*is, s, '\n');
+	return true;
+}
+
+inline bool ResourceInputStreamText::ReadRaw(char *data, int size) {
+	is->read(data, size);
+	if (is->bad())
 		return false;
 	std::string s;
 	getline(*is, s, '\n');

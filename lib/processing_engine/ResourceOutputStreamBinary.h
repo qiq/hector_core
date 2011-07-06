@@ -35,6 +35,7 @@ public:
 	void WriteVarint32(uint32_t value);
 	void WriteLittleEndian64(uint64_t value);
 	void WriteVarint64(uint64_t value);
+	void WriteRaw(const char *data, int size);
 
 	void SerializeMessage(google::protobuf::Message &msg, bool saveSize = true);
 
@@ -78,6 +79,10 @@ inline void ResourceOutputStreamBinary::WriteLittleEndian64(uint64_t value) {
 
 inline void ResourceOutputStreamBinary::WriteVarint64(uint64_t value) {
 	stream->WriteVarint64(value);
+}
+
+inline void ResourceOutputStreamBinary::WriteRaw(const char *data, int size) {
+	stream->WriteRaw(data, size);
 }
 
 inline void ResourceOutputStreamBinary::SerializeMessage(google::protobuf::Message &msg, bool saveSize) {

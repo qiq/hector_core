@@ -36,6 +36,7 @@ public:
 	bool ReadVarint32(uint32_t *value);
 	bool ReadLittleEndian64(uint64_t *value);
 	bool ReadVarint64(uint64_t *value);
+	bool ReadRaw(char *data, int size);
 	bool Skip(int count);
 	int ByteCount();
 
@@ -82,6 +83,10 @@ inline bool ResourceInputStreamBinary::ReadLittleEndian64(uint64_t *value) {
 
 inline bool ResourceInputStreamBinary::ReadVarint64(uint64_t *value) {
 	return stream->ReadVarint64(value);
+}
+
+inline bool ResourceInputStreamBinary::ReadRaw(char *data, int size) {
+	return stream->ReadRaw(data, size);
 }
 
 inline bool ResourceInputStreamBinary::Skip(int count) {
