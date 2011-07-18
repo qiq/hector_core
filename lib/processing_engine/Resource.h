@@ -250,6 +250,9 @@ protected:
 };
 
 inline ResourceInfo::~ResourceInfo() {
+	free(this->typeString);
+	free(this->typeStringTerse);
+	free(this->objectName);
 	if (attrInfoList) {
 		for (std::vector<ResourceAttrInfo*>::iterator iter = attrInfoList->begin(); iter != attrInfoList->end(); ++iter)
 			delete *iter;
