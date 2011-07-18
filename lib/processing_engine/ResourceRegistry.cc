@@ -57,7 +57,9 @@ ResourceRegistry::ResourceRegistry() {
 					continue;	// invalid file name
 				nativeFilenames.push_back(*iter2);
 			}
+			delete files;
 		}
+		delete paths;
 	}
 	// Perl resource candidates
 	s = getenv("PERL5LIB");
@@ -70,7 +72,9 @@ ResourceRegistry::ResourceRegistry() {
 					continue;	// invalid file name
 				perlFilenames.push_back(*iter2);
 			}
+			delete files;
 		}
+		delete paths;
 	}
 
 	perl = NULL;

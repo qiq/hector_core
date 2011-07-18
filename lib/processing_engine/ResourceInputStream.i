@@ -14,6 +14,7 @@ public:
         virtual bool ReadVarint32(uint32_t *value) = 0;
         virtual bool ReadLittleEndian64(uint64_t *value) = 0;
         virtual bool ReadVarint64(uint64_t *value) = 0;
+        virtual bool ReadRaw(char *data, int size) = 0;
         virtual bool Skip(int count) = 0;
         virtual int ByteCount() = 0;
 
