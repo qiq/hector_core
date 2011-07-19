@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+#include <locale.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -100,6 +101,8 @@ int processOptions(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 	char buffer[1024];
+
+	setlocale(LC_ALL, "");
 
 	// parse command line
 	int cmdIndex = processOptions(argc, argv);
