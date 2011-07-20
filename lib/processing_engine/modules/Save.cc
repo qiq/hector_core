@@ -28,6 +28,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	saveResourceType = false;
 	saveResourceIdStatus = false;
 	text = false;
+	compress = false;
 	timeTick = DEFAULT_TIMETICK;
 	resourceTypeFilter = "";
 
@@ -42,7 +43,8 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("overwrite", &Save::GetOverwrite, &Save::SetOverwrite, true);
 	props->Add("saveResourceType", &Save::GetSaveResourceType, &Save::SetSaveResourceType, true);
 	props->Add("saveResourceIdStatus", &Save::GetSaveResourceIdStatus, &Save::SetSaveResourceIdStatus, true);
-	props->Add("text", &Save::GetText, &Save::SetText);
+	props->Add("text", &Save::GetText, &Save::SetText, true);
+	props->Add("compress", &Save::GetCompress, &Save::SetCompress, true);
 	props->Add("resourceTypeFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
 	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
 }
@@ -104,7 +106,7 @@ bool Save::ReopenFile() {
 		return false;
 	}
 	if (!text) {
-		stream = new ResourceOutputStreamBinary(fd);
+		stream = new ResourceOutputStreamBinary(fd, compress);
 	} else {
 		ofs = new ofstream();
 		ofs->open(filename, ofstream::out|ifstream::binary);
@@ -171,6 +173,14 @@ char *Save::GetText(const char *name) {
 
 void Save::SetText(const char *name, const char *value) {
 	text = str2bool(value);
+}
+
+char *Save::GetCompress(const char *name) {
+	return bool2str(compress);
+}
+
+void Save::SetCompress(const char *name, const char *value) {
+	compress = str2bool(value);
 }
 
 char *Save::GetTimeTick(const char *name) {

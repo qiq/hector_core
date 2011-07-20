@@ -12,6 +12,7 @@ overwrite		init	Should we overwrite output file?
 saveResourceType	r/w	Save type info (necessary if we are writing different resource types to one file)
 saveResourceIdStatus	r/w	Save Id & Status attributes to the file (usualy not desirable)
 text			init	Should we write text or binary form?
+compress		init	Binary output files are compressed?
 timeTick		r/w	Max time to spend in ProcessMulti()
 resourceTypeFilter	r/w	Only save these resource types (only applied in
 				multi mode). Space-separated list of resource type names.
@@ -49,6 +50,7 @@ private:
 	bool saveResourceType;
 	bool saveResourceIdStatus;
 	bool text;
+	bool compress;
 	std::string resourceTypeFilter;
 	int timeTick;
 
@@ -65,6 +67,8 @@ private:
 	void SetSaveResourceIdStatus(const char *name, const char *value);
 	char *GetText(const char *name);
 	void SetText(const char *name, const char *value);
+	char *GetCompress(const char *name);
+	void SetCompress(const char *name, const char *value);
 	char *GetResourceTypesFilter(const char *name);
 	void SetResourceTypesFilter(const char *name, const char *value);
 	char *GetTimeTick(const char *name);

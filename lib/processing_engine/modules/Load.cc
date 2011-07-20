@@ -30,6 +30,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	resourceType = 0;
 	mark = false;
 	text = false;
+	compress = false;
 	timeTick = DEFAULT_TIMETICK;
 
 	cancel = false;
@@ -50,7 +51,8 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("wait", &Load::GetWait, &Load::SetWait);
 	props->Add("resourceType", &Load::GetResourceType, &Load::SetResourceType);
 	props->Add("mark", &Load::GetMark, &Load::SetMark);
-	props->Add("text", &Load::GetText, &Load::SetText);
+	props->Add("text", &Load::GetText, &Load::SetText, true);
+	props->Add("compress", &Load::GetCompress, &Load::SetCompress, true);
 	props->Add("timeTick", &Load::GetTimeTick, &Load::SetTimeTick);
 }
 
@@ -144,6 +146,14 @@ void Load::SetText(const char *name, const char *value) {
 	text = str2bool(value);
 }
 
+char *Load::GetCompress(const char *name) {
+	return bool2str(compress);
+}
+
+void Load::SetCompress(const char *name, const char *value) {
+	compress = str2bool(value);
+}
+
 char *Load::GetTimeTick(const char *name) {
 	return int2str(timeTick);
 }
@@ -179,7 +189,7 @@ bool Load::ReopenFile() {
 	}
 
 	if (!text) {
-		stream = new ResourceInputStreamBinary(fd);
+		stream = new ResourceInputStreamBinary(fd, compress);
 	} else {
 		ifs = new ifstream();
 		ifs->open(filename, ifstream::in|ifstream::binary);

@@ -14,6 +14,7 @@ resourceType	r/w	Resource type to load (we suppose there is one resource
 			file only in the file)
 mark		r/w	After all resources are read, emit MarkResource.
 text		init	Whether to read binary or text format (mainly for debugging/testing)
+compress	init	Binary input files are compressed?
 timeTick	r/w	Max time to spend in ProcessMulti()
 */
 
@@ -55,6 +56,7 @@ private:
 	int resourceType;
 	bool mark;
 	bool text;
+	bool compress;
 	int timeTick;
 
 	char *GetModuleType(const char *name);
@@ -72,6 +74,8 @@ private:
 	void SetMark(const char *name, const char *value);
 	char *GetText(const char *name);
 	void SetText(const char *name, const char *value);
+	char *GetCompress(const char *name);
+	void SetCompress(const char *name, const char *value);
 	char *GetTimeTick(const char *name);
 	void SetTimeTick(const char *name, const char *value);
 

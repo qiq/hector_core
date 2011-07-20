@@ -12,6 +12,7 @@
 #include <string>
 #include <google/protobuf/message.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/gzip_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <log4cxx/logger.h>
 #include "Resource.h"
@@ -27,8 +28,8 @@ namespace google {
 
 class ResourceInputStreamBinary : public ResourceInputStream {
 public:
-	ResourceInputStreamBinary(int fd);
-	ResourceInputStreamBinary(std::string &s);
+	ResourceInputStreamBinary(int fd, bool gzip = false);
+	ResourceInputStreamBinary(std::string &s, bool gzip = false);
 	~ResourceInputStreamBinary();
 
 	bool ReadString(std::string *buffer);
@@ -44,21 +45,35 @@ public:
 
 private:
 	google::protobuf::io::ZeroCopyInputStream *file;
+	google::protobuf::io::ZeroCopyInputStream *gzip;
 	google::protobuf::io::CodedInputStream *stream;
 };
 
-inline ResourceInputStreamBinary::ResourceInputStreamBinary(int fd) {
+inline ResourceInputStreamBinary::ResourceInputStreamBinary(int fd, bool compress) {
 	file = new google::protobuf::io::FileInputStream(fd);
-	stream = new google::protobuf::io::CodedInputStream(file);
+	if (compress) {
+		gzip = new google::protobuf::io::GzipInputStream(file);
+		stream = new google::protobuf::io::CodedInputStream(gzip);
+	} else {
+		gzip = NULL;
+		stream = new google::protobuf::io::CodedInputStream(file);
+	}
 }
 
-inline ResourceInputStreamBinary::ResourceInputStreamBinary(std::string &s) {
+inline ResourceInputStreamBinary::ResourceInputStreamBinary(std::string &s, bool compress) {
 	file = new google::protobuf::io::ArrayInputStream(s.data(), s.size());
-	stream = new google::protobuf::io::CodedInputStream(file);
+	if (compress) {
+		gzip = new google::protobuf::io::GzipInputStream(file);
+		stream = new google::protobuf::io::CodedInputStream(gzip);
+	} else {
+		gzip = NULL;
+		stream = new google::protobuf::io::CodedInputStream(file);
+	}
 }
 
 inline ResourceInputStreamBinary::~ResourceInputStreamBinary() {
 	delete stream;
+	delete gzip;
 	delete file;
 }
 
