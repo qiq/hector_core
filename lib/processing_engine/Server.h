@@ -11,6 +11,7 @@
 
 #include <log4cxx/logger.h>
 #include "common.h"
+#include "CondLock.h"
 #include "Config.h"
 #include "PlainLock.h"
 #include "Object.h"
@@ -44,6 +45,7 @@ protected:
 	int sleepingProcessingEngines;
 	bool wokenUp;
 	PlainLock usingWokenUp;
+	CondLock batchSleep;
 };
 
 #endif

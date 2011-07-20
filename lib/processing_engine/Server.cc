@@ -33,47 +33,8 @@ bool Server::Init(Config *config) {
 	char *s;
 	vector<string> *v;
 
-	// threads
-	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", GetId());
-	s = config->GetFirstValue(buffer);
-	if (!s || sscanf(s, "%d", &threads) != 1) {
-		LOG_ERROR(this, "Invalid number of threads, using 1 thread");
-		threads = 1;
-	}
-	free(s);
-
-	// serverHost
-	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverHost", GetId());
-	serverHost = config->GetFirstValue(buffer);
-	if (!serverHost) {
-		LOG_ERROR(this, "Server/serverHost not found");
-		return false;
-	}
-
-	// serverPort
-	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverPort", GetId());
-	s = config->GetFirstValue(buffer);
-	if (!s || sscanf(s, "%d", &serverPort) != 1) {
-		LOG_ERROR(this, "Server/serverPort not found");
-		return false;
-	}
-	free(s);
-
 	// resources to be loaded
 	Resource::CreateRegistry();
-#if 0
-	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/resources/Resource/@id", GetId());
-	v = config->GetValues(buffer);
-	if (v) {
-		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
-			if (!Resource::GetRegistry()->Load(iter->c_str(), config)) {
-				LOG_ERROR(this, "Cannot initialize resources");
-				return false;
-			}
-		}
-		delete v;
-	}
-#endif
 
 	// create processing engine(s)
 	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine/@id", GetId());
@@ -89,54 +50,92 @@ bool Server::Init(Config *config) {
 		delete v;
 	}
 
-	// server library
-	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", GetId());
-	s = config->GetFirstValue(buffer);
-	if (!s) {
-		LOG_ERROR(this, "Server/lib not found");
-		return false;
-	}
+	if (!batch) {
+		// threads
+		snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/threads", GetId());
+		s = config->GetFirstValue(buffer);
+		if (!s || sscanf(s, "%d", &threads) != 1) {
+			LOG_ERROR(this, "Invalid number of threads, using 1 thread");
+			threads = 1;
+		}
+		free(s);
+
+		// serverHost
+		snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverHost", GetId());
+		serverHost = config->GetFirstValue(buffer);
+		if (!serverHost) {
+			LOG_ERROR(this, "Server/serverHost not found");
+			return false;
+		}
+
+		// serverPort
+		snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/serverPort", GetId());
+		s = config->GetFirstValue(buffer);
+		if (!s || sscanf(s, "%d", &serverPort) != 1) {
+			LOG_ERROR(this, "Server/serverPort not found");
+			return false;
+		}
+		free(s);
+
+		// server library
+		snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/@lib", GetId());
+		s = config->GetFirstValue(buffer);
+		if (!s) {
+			LOG_ERROR(this, "Server/lib not found");
+			return false;
+		}
 	
-	// load server library
-	SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::LoadLibrary(s, "hector_server_create");
-	if (!create) {
-		LOG_ERROR(this, "Invalid library: " << s);
-		return false;
+		// load server library
+		SimpleHTTPServer *(*create)(ObjectRegistry*, vector<ProcessingEngine*>*) = (SimpleHTTPServer*(*)(ObjectRegistry*, vector<ProcessingEngine*>*))LibraryLoader::LoadLibrary(s, "hector_server_create");
+		if (!create) {
+			LOG_ERROR(this, "Invalid library: " << s);
+			return false;
+		}
+		free(s);
+		simpleHTTPServer = (*create)(objects, &processingEngines);
+		// TODO: really parse parameters, dummy for now
+		vector<pair<string, string> > params;
+		if (!simpleHTTPServer->Init(&params))
+			return false;
 	}
-	free(s);
-	simpleHTTPServer = (*create)(objects, &processingEngines);
-	// TODO: really parse parameters, dummy for now
-	vector<pair<string, string> > params;
-	if (!simpleHTTPServer->Init(&params))
-		return false;
 
 	// second stage
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		if (!(*iter)->Init(NULL))
 			return false;
 	}
-	if (!simpleHTTPServer->Init(NULL))
-		return false;
+	if (!batch) {
+		if (!simpleHTTPServer->Init(NULL))
+			return false;
+	}
+
 	return true;
 }
 
 void Server::Start(bool wait) {
-	// start processing engines (if requested, otherwise they may be started using hector_client)
-	if (batch) {
+	// start server, processing engines may be started using hector_client
+	if (!batch) {
+		LOG_INFO(this, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
+		simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
+	} else {
+		// batch mode: start processing engines
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Start();
 		}
+		if (wait) {
+			batchSleep.Lock();
+			batchSleep.WaitRecv(NULL);
+			batchSleep.Unlock();
+		}
 	}
-	// start server
-	LOG_INFO(this, "Starting server " << serverHost << ":" << serverPort << " (" << threads << ")");
-	simpleHTTPServer->Start(serverHost, serverPort, threads, wait);
 	if (wait) {
 		LOG_INFO(this, "Stopping processing engines");
 		for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 			(*iter)->Stop();
 		}
-		LOG_INFO(this, "Stopping server");
 	}
+	if (!batch)
+		LOG_INFO(this, "Stopping server");
 }
 
 void Server::Stop() {
@@ -144,8 +143,14 @@ void Server::Stop() {
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
 		(*iter)->Stop();
 	}
-	LOG_INFO(this, "Stopping server");
-	simpleHTTPServer->Stop();
+	if (!batch) {
+		LOG_INFO(this, "Stopping server");
+		simpleHTTPServer->Stop();
+	} else {
+		batchSleep.Lock();
+		batchSleep.SignalRecv();
+		batchSleep.Unlock();
+	}
 }
 
 void Server::Pause() {
@@ -170,8 +175,15 @@ void Server::ProcessingEngineSleeping() {
 		usingWokenUp.Unlock();
 	}
 	ObjectUnlock();
-	if (finished)
-		simpleHTTPServer->SetRunning(false);
+	if (finished) {
+		if (!batch) {
+			simpleHTTPServer->SetRunning(false);
+		} else {
+			batchSleep.Lock();
+			batchSleep.SignalRecv();
+			batchSleep.Unlock();
+		}
+	}
 }
 
 void Server::ProcessingEngineWakeup() {
