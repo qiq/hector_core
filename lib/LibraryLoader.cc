@@ -23,10 +23,10 @@ LibraryLoader::LibraryLoader() {
 }
 
 LibraryLoader::~LibraryLoader() {
-	if (getenv("HECTOR_NO_UNLOAD"))
-		return;
+	bool close = !getenv("HECTOR_NO_UNLOAD");
 	for (tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
-		lt_dlclose(*iter->second);
+		if (close)
+			lt_dlclose(*iter->second);
 		delete iter->second;
 	}
 	lt_dlexit();
