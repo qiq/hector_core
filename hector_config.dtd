@@ -21,7 +21,7 @@
 <!ELEMENT Server	(threads|serverHost|serverPort|ProcessingEngine|param|logConfig)* >
 <!ATTLIST Server
 	id		ID		#REQUIRED
-	lib		CDATA		#REQUIRED >
+	lib		CDATA		"" >
 <!ELEMENT serverHost	(#PCDATA) >
 <!ELEMENT serverPort	(#PCDATA) >
 <!ELEMENT logConfig	(#PCDATA) >
