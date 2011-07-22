@@ -28,7 +28,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	filename = NULL;
 	wait = false;
 	resourceType = 0;
-	mark = false;
+	mark = -1;
 	text = false;
 	compress = false;
 	timeTick = DEFAULT_TIMETICK;
@@ -131,11 +131,11 @@ void Load::SetResourceType(const char *name, const char *value) {
 }
 
 char *Load::GetMark(const char *name) {
-	return bool2str(mark);
+	return int2str(mark);
 }
 
 void Load::SetMark(const char *name, const char *value) {
-	mark = str2bool(value);
+	mark = str2int(value);
 }
 
 char *Load::GetText(const char *name) {
@@ -214,7 +214,7 @@ bool Load::Init(vector<pair<string, string> > *params) {
 	if (!props->InitProperties(params))
 		return false;
 
-	if (mark) {
+	if (mark >= 0) {
 		markerResourceTypeId = Resource::GetRegistry()->NameToId("MarkerResource");
 		if (markerResourceTypeId <= 0) {
 			LOG_ERROR(this, "Unknown resource type: MarkerResource");
@@ -233,9 +233,9 @@ bool Load::Init(vector<pair<string, string> > *params) {
 Resource *Load::ProcessInputSync(bool sleep) {
 	Resource *r = NULL;
 	if (maxItems && items >= maxItems) {
-		if (mark && !markEmmited) {
+		if (mark >= 0 && !markEmmited) {
 			MarkerResource *mr = static_cast<MarkerResource*>(Resource::GetRegistry()->AcquireResource(markerResourceTypeId));
-			mr->SetMark(1);
+			mr->SetMark(mark);
 			markEmmited = true;
 			return mr;
 		}
@@ -250,9 +250,9 @@ Resource *Load::ProcessInputSync(bool sleep) {
 			break;
 		}
 		if (!sleep || !wait) {
-			if (mark && !markEmmited) {
+			if (mark >= 0 && !markEmmited) {
 				MarkerResource *mr = static_cast<MarkerResource*>(Resource::GetRegistry()->AcquireResource(markerResourceTypeId));
-				mr->SetMark(1);
+				mr->SetMark(mark);
 				markEmmited = true;
 				return mr;
 			}

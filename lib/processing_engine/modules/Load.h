@@ -54,7 +54,7 @@ private:
 	char *filename;
 	bool wait;
 	int resourceType;
-	bool mark;
+	int mark;
 	bool text;
 	bool compress;
 	int timeTick;
