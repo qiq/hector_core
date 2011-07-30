@@ -35,6 +35,7 @@ inline void die(const char *msg, ...) {
 std::string &skipWs(std::string &data);
 std::string &chomp(std::string &data);
 std::vector<std::string> *splitOnWs(std::string &data);
+std::string join(std::string &glue, std::vector<std::string> &data);
 
 inline std::string &replace_all(std::string &s, const std::string &sub, const std::string &other) {
 	size_t offset = 0;

@@ -49,6 +49,19 @@ vector<string> *splitOnWs(string &data) {
 	return result;
 }
 
+string join(string &glue, vector<string> &data) {
+	string result;
+	bool first;
+	for (vector<string>::iterator iter = data.begin(); iter != data.end(); ++iter) {
+		if (first)
+			first = false;
+		else
+			result.append(glue);
+		result.append(*iter);
+	}
+	return result;
+}
+
 int WriteBytes(int fd, const char *data, int size) {
 	int offset = 0;
 	while (size > 0) {
