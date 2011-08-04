@@ -237,14 +237,14 @@ AC_CONFIG_FILES([Makefile
                 src/Makefile
 		lib/Makefile
 		lib/processing_engine/Makefile
-		lib/processing_engine/modules/Makefile
-		lib/processing_engine/modules/perl/Makefile
-		lib/processing_engine/modules/java/Makefile
-		lib/processing_engine/modules/python/Makefile
-		lib/processing_engine/resources/Makefile
-		lib/processing_engine/resources/perl/Makefile
-		lib/processing_engine/resources/python/Makefile
-		lib/processing_engine/servers/Makefile
+		lib/processing_engine/module/Makefile
+		lib/processing_engine/module/perl/Makefile
+		lib/processing_engine/module/java/Makefile
+		lib/processing_engine/module/python/Makefile
+		lib/processing_engine/resource/Makefile
+		lib/processing_engine/resource/perl/Makefile
+		lib/processing_engine/resource/python/Makefile
+		lib/processing_engine/server/Makefile
 		lib/server/Makefile
 		lib/perl/Makefile
 		lib/java/Makefile

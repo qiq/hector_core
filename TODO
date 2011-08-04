@@ -1,3 +1,5 @@
+- aby modul umel vypsat napovedu k parametrum, nejak obecne, pripadne i informace o modulu
+
 - zakazat primou konstrukci resource objektu -- jen pres resourceregistry
 	- i v Perlu!
 
