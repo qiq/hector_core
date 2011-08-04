@@ -9,8 +9,8 @@ BUILT_SOURCES =
 CLEANFILES =
 ALIASES =
 
-resourcesdir = $(libdir)/hector/resources
-resources_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la libMarkerResource.la MarkerResource.la
+resourcedir = $(libdir)/hector/resource
+resource_LTLIBRARIES = libTestResource.la TestResource.la libTestProtobufResource.la TestProtobufResource.la libMarkerResource.la MarkerResource.la
 
 hectorincludedir = $(includedir)/hector
 hectorinclude_HEADERS = TestResource.h TestResource.i \

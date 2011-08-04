@@ -8,9 +8,9 @@ base=`readlink -f "$base"`'/..'
 test_base=`readlink -f "$base"`
 
 export "PATH=$test_base/src:$PATH"
-export "LD_LIBRARY_PATH=$test_base/lib/.libs:$test_base/lib/processing_engine/servers/.libs:$test_base/lib/processing_engine/resources/.libs:$test_base/lib/processing_engine/modules/.libs:$test_base/lib/perl/.libs:$test_base/lib/python/.libs:$LD_LIBRARY_PATH"
-export "PERL5LIB=$test_base/lib/perl:$test_base/lib/processing_engine/modules/perl:$test_base/lib/processing_engine/resources/perl:$PERL5LIB"
-export "PYTHONPATH=$test_base/lib/python:$test_base/lib/python/.libs:$test_base/lib/processing_engine/modules/python:$PYTHONPATH"
+export "LD_LIBRARY_PATH=$test_base/lib/.libs:$test_base/lib/processing_engine/server/.libs:$test_base/lib/processing_engine/resource/.libs:$test_base/lib/processing_engine/module/.libs:$test_base/lib/perl/.libs:$test_base/lib/python/.libs:$LD_LIBRARY_PATH"
+export "PERL5LIB=$test_base/lib/perl:$test_base/lib/processing_engine/module/perl:$test_base/lib/processing_engine/resource/perl:$PERL5LIB"
+export "PYTHONPATH=$test_base/lib/python:$test_base/lib/python/.libs:$test_base/lib/processing_engine/module/python:$PYTHONPATH"
 HECTOR_HOST=localhost:1101
 
 # hector helper functions
