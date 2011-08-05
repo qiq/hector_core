@@ -30,23 +30,33 @@ string &chomp(string &data) {
 	return data;
 }
 
-vector<string> *splitOnWs(string &data) {
-	vector<string> *result = new vector<string>();
-	const char *b = data.c_str();
-	const char *e;
-	while (*b) {
-		while (*b && isspace(*b))
+void splitOnWs(vector<string> &result, string &data) {
+	result.clear();
+	unsigned b = 0;
+	unsigned e;
+	while (b < data.length()) {
+		while (b < data.length() && isspace(data[b]))
 			b++;
 		e = b;
-		while (*e && !isspace(*e))
+		while (e < data.length() && !isspace(data[e]))
 			e++;
-		if (*b) {
-			string s(b, e-b);
-			result->push_back(s);
+		if (b < data.length()) {
+			result.push_back(data.substr(b, e-b));
 			b = e;
 		}
 	}
-	return result;
+}
+
+void split(vector<string> &result, string &data, char split) {
+	result.clear();
+	unsigned b = 0;
+	for (unsigned i = 0; i < data.length(); i++) {
+		if (data[i] == split) {
+			result.push_back(data.substr(b, i-b));
+			b = i+1;
+		}
+	}
+	result.push_back(data.substr(b));
 }
 
 string join(string &glue, vector<string> &data) {

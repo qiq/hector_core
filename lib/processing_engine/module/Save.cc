@@ -156,9 +156,10 @@ char *Save::GetResourceTypesFilter(const char *name) {
 
 void Save::SetResourceTypesFilter(const char *name, const char *value) {
 	resourceTypeFilter = value;
-	vector<string> *v = splitOnWs(resourceTypeFilter);
+	vector<string> v;
+	splitOnWs(v, resourceTypeFilter);
 	filter.clear();
-	for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
+	for (vector<string>::iterator iter = v.begin(); iter != v.end(); ++iter) {
 		int typeId = Resource::GetRegistry()->NameToId(iter->c_str());
 		if (typeId >= 0)
 			filter.insert(typeId);
