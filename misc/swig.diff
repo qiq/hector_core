@@ -1,0 +1,55 @@
+Binary files swig.orig/bin/swig and swig/bin/swig differ
+diff -urN swig.orig/share/swig/2.0.1/perl5/perlrun.swg swig/share/swig/2.0.1/perl5/perlrun.swg
+--- swig.orig/share/swig/2.0.1/perl5/perlrun.swg	2011-01-19 11:23:13.000000000 +0100
++++ swig/share/swig/2.0.1/perl5/perlrun.swg	2011-01-13 00:41:22.000000000 +0100
+@@ -217,13 +217,13 @@
+         if (iter == ty->cast)
+           return iter;
+         /* Move iter to the top of the linked list */
+-        iter->prev->next = iter->next;
++        /*iter->prev->next = iter->next;
+         if (iter->next)
+           iter->next->prev = iter->prev;
+         iter->next = ty->cast;
+         iter->prev = 0;
+         if (ty->cast) ty->cast->prev = iter;
+-        ty->cast = iter;
++        ty->cast = iter;*/
+         return iter;
+       }
+       iter = iter->next;
+diff -urN swig.orig/share/swig/2.0.1/swigrun.swg swig/share/swig/2.0.1/swigrun.swg
+--- swig.orig/share/swig/2.0.1/swigrun.swg	2011-01-19 11:23:13.000000000 +0100
++++ swig/share/swig/2.0.1/swigrun.swg	2011-01-13 00:35:48.000000000 +0100
+@@ -281,13 +281,13 @@
+         if (iter == ty->cast)
+           return iter;
+         /* Move iter to the top of the linked list */
+-        iter->prev->next = iter->next;
++        /*iter->prev->next = iter->next;
+         if (iter->next)
+           iter->next->prev = iter->prev;
+         iter->next = ty->cast;
+         iter->prev = 0;
+         if (ty->cast) ty->cast->prev = iter;
+-        ty->cast = iter;
++        ty->cast = iter;*/
+         return iter;
+       }
+       iter = iter->next;
+@@ -308,13 +308,13 @@
+         if (iter == ty->cast)
+           return iter;
+         /* Move iter to the top of the linked list */
+-        iter->prev->next = iter->next;
++        /*iter->prev->next = iter->next;
+         if (iter->next)
+           iter->next->prev = iter->prev;
+         iter->next = ty->cast;
+         iter->prev = 0;
+         if (ty->cast) ty->cast->prev = iter;
+-        ty->cast = iter;
++        ty->cast = iter;*/
+         return iter;
+       }
+       iter = iter->next;
