@@ -4,6 +4,8 @@
 
 #include <config.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -146,9 +148,19 @@ long str2long(const char *value) {
 	return atoi(value);
 }
 
-char *long2str(long value) {
+char *long2str(int64_t value) {
 	char s[1024];
-	snprintf(s, sizeof(s), "%ld", value);
+	snprintf(s, sizeof(s), "%" PRId64, value);
+	return strdup(s);
+}
+
+double str2double(const char *value) {
+	return atof(value);
+}
+
+char *double2str(double value) {
+	char s[1024];
+	snprintf(s, sizeof(s), "%lf", value);
 	return strdup(s);
 }
 
