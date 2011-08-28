@@ -84,7 +84,7 @@ char *TestCall::GetTimeTick(const char *name) {
 }
 
 void TestCall::SetTimeTick(const char *name, const char *value) {
-	timeTick = str2long(value);
+	timeTick = str2int(value);
 }
 
 char *TestCall::GetResourceType(const char *name) {

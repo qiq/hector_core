@@ -116,15 +116,15 @@ int main(int argc, char *argv[]) {
 	// set environment variables according to baseDir
 	char value[10240];
 	const char *path = getenv("LD_LIBRARY_PATH");
-	snprintf(value, sizeof(value), "%s:%s/modules:%s/resources:%s", baseDir, baseDir, baseDir, path ? path : "");
+	snprintf(value, sizeof(value), "%s:%s/module:%s/resource:%s", baseDir, baseDir, baseDir, path ? path : "");
 	setenv("LD_LIBRARY_PATH", value, 1);
 
 	path = getenv("PERL5LIB");
-	snprintf(value, sizeof(value), "%s/modules/perl:%s/resources/perl:%s", baseDir, baseDir, path ? path : "");
+	snprintf(value, sizeof(value), "%s/module/perl:%s/resource/perl:%s", baseDir, baseDir, path ? path : "");
 	setenv("PERL5LIB", value, 1);
 
 	path = getenv("PYTHONPATH");
-	snprintf(value, sizeof(value), "%s/modules/python:%s/resources/python:%s", baseDir, baseDir, path ? path : "");
+	snprintf(value, sizeof(value), "%s/module/python:%s/resource/python:%s", baseDir, baseDir, path ? path : "");
 	setenv("PYTHONPATH", value, 1);
 
 	// load config file
