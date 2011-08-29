@@ -23,10 +23,11 @@ LibraryLoader::LibraryLoader() {
 }
 
 LibraryLoader::~LibraryLoader() {
-	bool close = !getenv("HECTOR_NO_UNLOAD");
+	// do not unload libraries to ease valgrind debugging
+	if (getenv("HECTOR_NO_UNLOAD"))
+		return;
 	for (tr1::unordered_map<string, lt_dlhandle*>::iterator iter = handles.begin(); iter != handles.end(); ++iter) {
-		if (close)
-			lt_dlclose(*iter->second);
+		lt_dlclose(*iter->second);
 		delete iter->second;
 	}
 	lt_dlexit();
