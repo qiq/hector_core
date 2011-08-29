@@ -27,8 +27,14 @@ public:
 	virtual bool ReadRaw(char *data, int size) = 0;
 	virtual bool Skip(int count) = 0;
 	virtual int ByteCount() = 0;
+	// CodedInputStream need to be re-created ocassionaly
+	virtual void Refresh();
 
 	virtual bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0, bool skip = false) = 0;
 };
+
+// by default, it does nothing
+inline void ResourceInputStream::Refresh() {
+}
 
 #endif

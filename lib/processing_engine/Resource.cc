@@ -64,6 +64,7 @@ Resource *Resource::DeserializeResource(ResourceInputStream &stream, int resourc
 	}
 	if (totalSize)
 		*totalSize = stream.ByteCount()-current;
+	stream.Refresh();
 	return r;
 }
 

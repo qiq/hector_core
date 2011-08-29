@@ -40,16 +40,19 @@ public:
 	bool ReadRaw(char *data, int size);
 	bool Skip(int count);
 	int ByteCount();
+	void Refresh();
 
 	bool ParseMessage(google::protobuf::Message &msg, uint32_t size = 0, bool skip = false);
 
 private:
+	bool compress;
 	google::protobuf::io::ZeroCopyInputStream *file;
 	google::protobuf::io::ZeroCopyInputStream *gzip;
 	google::protobuf::io::CodedInputStream *stream;
 };
 
 inline ResourceInputStreamBinary::ResourceInputStreamBinary(int fd, bool compress) {
+	this->compress = compress;
 	file = new google::protobuf::io::FileInputStream(fd);
 	if (compress) {
 		gzip = new google::protobuf::io::GzipInputStream(file);
@@ -58,9 +61,11 @@ inline ResourceInputStreamBinary::ResourceInputStreamBinary(int fd, bool compres
 		gzip = NULL;
 		stream = new google::protobuf::io::CodedInputStream(file);
 	}
+	stream->SetTotalBytesLimit(512*1024*1024, 256*1024*1024);
 }
 
 inline ResourceInputStreamBinary::ResourceInputStreamBinary(std::string &s, bool compress) {
+	this->compress = compress;
 	file = new google::protobuf::io::ArrayInputStream(s.data(), s.size());
 	if (compress) {
 		gzip = new google::protobuf::io::GzipInputStream(file);
@@ -69,6 +74,7 @@ inline ResourceInputStreamBinary::ResourceInputStreamBinary(std::string &s, bool
 		gzip = NULL;
 		stream = new google::protobuf::io::CodedInputStream(file);
 	}
+	stream->SetTotalBytesLimit(512*1024*1024, 256*1024*1024);
 }
 
 inline ResourceInputStreamBinary::~ResourceInputStreamBinary() {
@@ -110,6 +116,13 @@ inline bool ResourceInputStreamBinary::Skip(int count) {
 
 inline int ResourceInputStreamBinary::ByteCount() {
 	return file->ByteCount();
+}
+
+inline void ResourceInputStreamBinary::Refresh() {
+	// re-create CodedInputStream
+	stream->~CodedInputStream();
+	stream = compress ? new(stream) google::protobuf::io::CodedInputStream(gzip) : new(stream) google::protobuf::io::CodedInputStream(file);
+	stream->SetTotalBytesLimit(512*1024*1024, 256*1024*1024);
 }
 
 inline bool ResourceInputStreamBinary::ParseMessage(google::protobuf::Message &msg, uint32_t size, bool skip) {
