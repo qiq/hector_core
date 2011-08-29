@@ -24,7 +24,7 @@ class ProcessingEngine : public Object {
 public:
 	ProcessingEngine(ObjectRegistry *objects, const char *id, Server *server, bool batch);
 	~ProcessingEngine();
-	bool Init(Config *config);
+	bool Init(Config *config, const char *serverId);
 	void Start();
 	void Stop();
 	void Pause();

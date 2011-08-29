@@ -81,7 +81,7 @@ void Processor::SetPauseInput(const char *name, const char *value) {
 	ObjectLockWrite();		// so that Object can release ObjectLock
 }
 
-bool Processor::Init(Config *config) {
+bool Processor::Init(Config *config, const char *serverId, const char *processingEngineId) {
 	// second stage?
 	if (!config) {
 		for (int i = 0; i < nThreads; ++i) {
@@ -98,7 +98,7 @@ bool Processor::Init(Config *config) {
 	vector<string> *v;
 
 	// threads
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/threads", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/threads", serverId, processingEngineId, GetId());
 	s = config->GetFirstValue(buffer);
 	if (!s || sscanf(s, "%d", &nThreads) != 1 || nThreads <= 0 || nThreads > 100) {
 		LOG_ERROR(this, "Invalid number of threads: " << s);
@@ -109,14 +109,14 @@ bool Processor::Init(Config *config) {
 	modules = new vector<ModuleInfo*>[nThreads];
 
 	// module(s)
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/modules/Module/@id", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module/@id", serverId, processingEngineId, GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *mid = iter->c_str();
-			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/@lib", mid);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/@lib", serverId, processingEngineId, GetId(), mid);
 			char *name = config->GetFirstValue(buffer);
-			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/@type", mid);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/@type", serverId, processingEngineId, GetId(), mid);
 			char *type = config->GetFirstValue(buffer);
 			if (!type || !strcmp(type, "native")) {
 				// C++ library module
@@ -155,15 +155,15 @@ bool Processor::Init(Config *config) {
 				return false;
 			}
 			// create name-value argument pairs
-			snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param/@name", mid);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/param/@name", serverId, processingEngineId, GetId(), mid);
 			vector<string> *names = config->GetValues(buffer);
 			vector<pair<string, string> > *c = new vector<pair<string, string> >();
 			string logLevel;
 			for (int i = 0; names && i < (int)names->size(); i++) {
-				snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/@value", mid, i+1);
+				snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/param[%d]/@value", serverId, processingEngineId, GetId(), mid, i+1);
 				char *val = config->GetFirstValue(buffer);
 				if (!val) {
-					snprintf(buffer, sizeof(buffer), "//Module[@id='%s']/param[%d]/text()", mid, i+1);
+					snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/param[%d]/text()", serverId, processingEngineId, GetId(), mid, i+1);
 					val = config->GetFirstValue(buffer);
 					if (!val) {
 						LOG_ERROR(this, "No value for param: " << (*names)[i].c_str());
@@ -201,7 +201,7 @@ bool Processor::Init(Config *config) {
 
 	// input queue(s)
 	inputQueue = new SyncQueue<Resource>();
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/input/queue", serverId, processingEngineId, GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
@@ -209,7 +209,7 @@ bool Processor::Init(Config *config) {
 		for (int i = 0; i < n; i++) {
 			// priority
 			int priority = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@priority", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/input/queue[%d]/@priority", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &priority) != 1) {
@@ -220,7 +220,7 @@ bool Processor::Init(Config *config) {
 			}
 			// maxItems
 			int maxItems = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxItems", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/input/queue[%d]/@maxItems", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxItems) != 1) {
@@ -231,7 +231,7 @@ bool Processor::Init(Config *config) {
 			}
 			// maxSize
 			int maxSize = 0;
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/input/queue[%d]/@maxSize", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/input/queue[%d]/@maxSize", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (sscanf(s, "%d", &maxSize) != 1) {
@@ -249,7 +249,7 @@ bool Processor::Init(Config *config) {
 	}
 
 	// output queue(s)
-	snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/output/nextProcessor", serverId, processingEngineId, GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		int n = v->size();
@@ -258,7 +258,7 @@ bool Processor::Init(Config *config) {
 			OutputFilter *f = new OutputFilter();
 			outputFilters.push_back(f);
 			// reference
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@ref", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/output/nextProcessor[%d]/@ref", serverId, processingEngineId, GetId(), i+1);
 			char *ref = config->GetFirstValue(buffer);
 			if (!ref) {
 				LOG_ERROR(this, "Missing reference: " << s);
@@ -267,7 +267,7 @@ bool Processor::Init(Config *config) {
 			f->SetProcessor(ref);
 			free(ref);
 			// priority
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@priority", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/output/nextProcessor[%d]/@priority", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				int priority;
@@ -279,7 +279,7 @@ bool Processor::Init(Config *config) {
 				free(s);
 			}
 			// copy
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@copy", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/output/nextProcessor[%d]/@copy", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				if (!strcmp(s, "1") || !strcasecmp(s, "true"))
@@ -287,7 +287,7 @@ bool Processor::Init(Config *config) {
 				free(s);
 			}
 			// filter
-			snprintf(buffer, sizeof(buffer), "//Processor[@id='%s']/output/nextProcessor[%d]/@filter", GetId(), i+1);
+			snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/output/nextProcessor[%d]/@filter", serverId, processingEngineId, GetId(), i+1);
 			s = config->GetFirstValue(buffer);
 			if (s) {
 				int filter;

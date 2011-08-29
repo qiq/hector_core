@@ -43,7 +43,7 @@ bool Server::Init(Config *config) {
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *peid = iter->c_str();
 			ProcessingEngine *p = new ProcessingEngine(objects, peid, this, batch);
-			if (!p->Init(config))
+			if (!p->Init(config, GetId()))
 				return false;
 			processingEngines.push_back(p);
 		}
@@ -101,7 +101,7 @@ bool Server::Init(Config *config) {
 
 	// second stage
 	for (vector<ProcessingEngine*>::iterator iter = processingEngines.begin(); iter != processingEngines.end(); ++iter) {
-		if (!(*iter)->Init(NULL))
+		if (!(*iter)->Init(NULL, GetId()))
 			return false;
 	}
 	if (!batch) {

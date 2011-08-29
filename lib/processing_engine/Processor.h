@@ -26,7 +26,7 @@ class Processor : public Object {
 public:
 	Processor(ObjectRegistry *objects, const char *id, ProcessingEngine *engine, bool batch);
 	~Processor();
-	bool Init(Config *config);
+	bool Init(Config *config, const char *serverId, const char *processingEngineId);
 	bool IsRunning();
 	void RunThread(int id);
 	void ThreadFinished();

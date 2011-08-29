@@ -41,11 +41,11 @@ ProcessingEngine::~ProcessingEngine() {
 	delete values;
 }
 
-bool ProcessingEngine::Init(Config *config) {
+bool ProcessingEngine::Init(Config *config, const char *serverId) {
 	// second stage?
 	if (!config) {
 		for (vector<Processor*>::iterator iter = processors.begin(); iter != processors.end(); ++iter) {
-			if (!(*iter)->Init(NULL))
+			if (!(*iter)->Init(NULL, serverId, GetId()))
 				return false;
 		}
 		return true;
@@ -55,14 +55,14 @@ bool ProcessingEngine::Init(Config *config) {
 	vector<string> *v;
 
 	// create children: processors
-	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/Processor/@id", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor/@id", serverId, GetId());
 	v = config->GetValues(buffer);
 	if (v) {
 		// create and initialize all Processors
 		for (vector<string>::iterator iter = v->begin(); iter != v->end(); ++iter) {
 			const char *pid = iter->c_str();
 			Processor *p = new Processor(objects, pid, this, batch);
-			if (!p->Init(config))
+			if (!p->Init(config, serverId, GetId()))
 				return false;
 			processors.push_back(p);
 		}
@@ -72,7 +72,7 @@ bool ProcessingEngine::Init(Config *config) {
 	}
 
 	// input queue(s)
-	snprintf(buffer, sizeof(buffer), "//ProcessingEngine[@id='%s']/inputProcessor/@ref", GetId());
+	snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/inputProcessor/@ref", serverId, GetId());
 	char *ref = config->GetFirstValue(buffer);
 	if (ref) {
 		Processor *p = dynamic_cast<Processor*>(objects->GetObject(ref));
