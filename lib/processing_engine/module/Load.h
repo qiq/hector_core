@@ -5,17 +5,21 @@ Load Resources from the file and make an input out of them (or merge them with c
 Dependencies: protobuf
 
 Parameters:
-moduleType	init	Type of module (input or multi)
-items		r/o	Total items processed
-maxItems	r/w	Number of items to load
-filename	r/w	File to load. Change it to process another file (needs wait)
-wait		r/w	Wait for another file when the current one is exhausted?
-resourceType	r/w	Resource type to load (we suppose there is one resource
-			file only in the file)
-mark		r/w	After all resources are read, emit MarkResource.
-text		init	Whether to read binary or text format (mainly for debugging/testing)
-compress	init	Binary input files are compressed?
-timeTick	r/w	Max time to spend in ProcessMulti()
+moduleType	init	input	Type of module (input or multi)
+items		r/o	n/a	Total items processed
+maxItems	r/w	n/a	Number of items to load
+filename	r/w	n/a	File to load. Change it to process another file
+				(needs wait)
+wait		r/w	false	Wait for another file when the current one is
+				exhausted?
+resourceType	r/w	n/a	Resource type to load (we suppose there is one resource
+				file only in the file)
+mark		r/w	no	After all resources are read, emit
+				MarkResource.
+text		init	false	Whether to read binary or text format (mainly
+				for debugging/testing)
+compress	init	false	Binary input files are compressed?
+timeTick	r/w	100000	Max time to spend in ProcessMulti()
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_LOAD_H_

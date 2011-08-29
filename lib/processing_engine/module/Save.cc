@@ -24,13 +24,13 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	isOutputModuleType = true;
 	items = 0;
 	filename = NULL;
-	overwrite = false;
-	saveResourceType = false;
+	overwrite = true;
+	saveResourceType = true;
 	saveResourceIdStatus = false;
 	text = false;
 	compress = false;
-	timeTick = DEFAULT_TIMETICK;
 	resourceTypeFilter = "";
+	timeTick = DEFAULT_TIMETICK;
 
 	fd = -1;
 	ofs = NULL;
@@ -150,6 +150,22 @@ void Save::SetSaveResourceIdStatus(const char *name, const char *value) {
 	saveResourceIdStatus = str2bool(value);
 }
 
+char *Save::GetText(const char *name) {
+	return bool2str(text);
+}
+
+void Save::SetText(const char *name, const char *value) {
+	text = str2bool(value);
+}
+
+char *Save::GetCompress(const char *name) {
+	return bool2str(compress);
+}
+
+void Save::SetCompress(const char *name, const char *value) {
+	compress = str2bool(value);
+}
+
 char *Save::GetResourceTypesFilter(const char *name) {
 	return strdup(resourceTypeFilter.c_str());
 }
@@ -166,22 +182,6 @@ void Save::SetResourceTypesFilter(const char *name, const char *value) {
 		else
 			LOG_ERROR(this, "Unknown resource type: " << *iter);
 	}
-}
-
-char *Save::GetText(const char *name) {
-	return bool2str(text);
-}
-
-void Save::SetText(const char *name, const char *value) {
-	text = str2bool(value);
-}
-
-char *Save::GetCompress(const char *name) {
-	return bool2str(compress);
-}
-
-void Save::SetCompress(const char *name, const char *value) {
-	compress = str2bool(value);
 }
 
 char *Save::GetTimeTick(const char *name) {

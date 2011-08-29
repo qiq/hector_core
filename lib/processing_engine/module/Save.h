@@ -5,17 +5,17 @@ Save Resources to the file.
 Dependencies: protobuf
 
 Parameters:
-moduleType		init	Type of module (output or multi)
-items			r/o	Total items processed
-filename		init	File to save resources to.
-overwrite		init	Should we overwrite output file?
-saveResourceType	r/w	Save type info (necessary if we are writing different resource types to one file)
-saveResourceIdStatus	r/w	Save Id & Status attributes to the file (usualy not desirable)
-text			init	Should we write text or binary form?
-compress		init	Binary output files are compressed?
-timeTick		r/w	Max time to spend in ProcessMulti()
-resourceTypeFilter	r/w	Only save these resource types (only applied in
-				multi mode). Space-separated list of resource type names.
+moduleType		init	output	Type of module (output or multi)
+items			r/o	n/a	Total items processed
+filename		init	n/a	File to save resources to.
+overwrite		init	true	Should we overwrite output file?
+saveResourceType	r/w	true	Save type info (necessary if we are writing different resource types to one file)
+saveResourceIdStatus	r/w	false	Save Id & Status attributes to the file (usualy not desirable)
+text			init	false	Should we write text or binary form?
+compress		init	false	Binary output files are compressed?
+resourceTypeFilter	r/w	n/a	Only save these resource types (only applied in
+					multi mode). Space-separated list of resource type names.
+timeTick		r/w	100000	Max time to spend in ProcessMulti()
 */
 
 #ifndef _LIB_PROCESSING_ENGINE_MODULES_SAVE_H_
