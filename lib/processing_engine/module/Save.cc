@@ -32,10 +32,6 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	resourceTypeFilter = "";
 	timeTick = DEFAULT_TIMETICK;
 
-	fd = -1;
-	ofs = NULL;
-	stream = NULL;
-
 	props = new ObjectProperties<Save>(this);
 	props->Add("moduleType", &Save::GetModuleType, &Save::SetModuleType, true);
 	props->Add("items", &Save::GetItems);
@@ -47,6 +43,10 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("compress", &Save::GetCompress, &Save::SetCompress, true);
 	props->Add("resourceTypeFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
 	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
+
+	fd = -1;
+	ofs = NULL;
+	stream = NULL;
 }
 
 Save::~Save() {

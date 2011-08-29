@@ -1,5 +1,5 @@
 /**
-Save.la, output, native
+Save.la, output/multi, native
 Save Resources to the file.
 
 Dependencies: protobuf
