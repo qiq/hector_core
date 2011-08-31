@@ -27,7 +27,8 @@ PerlModule::~PerlModule() {
 
 bool PerlModule::Init(vector<pair<string, string> > *c) {
 	perl->SetContext();
-	SV *sv = &PL_sv_undef;
+	SV *sv;
+	dSP;
 	// first stage?
 	if (c) {
 		// run Perl
@@ -35,19 +36,21 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 			return false;
 
 		// create Perl module
+		ENTER;
+		SAVETMPS;
 		SV *_object = get_sv("_object", TRUE);
 		sv_setsv(_object, perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0));
 		char s[1024];
 		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, GetId(), threadIndex);
-		ENTER;
-		SAVETMPS;
 		eval_pv(s, FALSE);
-		FREETMPS;
-		LEAVE;
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR(this, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+			FREETMPS;
+			LEAVE;
 			return false;
 		}
+		FREETMPS;
+		LEAVE;
 		ref = get_sv("_module", 0);
 		if (!SvOK(ref)) {
 			LOG_ERROR(this, "Error initialize module " << name);
@@ -61,14 +64,16 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 			av_push(row, newSVpv(iter->second.c_str(), 0));
 			av_push(table, newRV_noinc((SV*)row ));
 		}
+		ENTER;
+		SAVETMPS;
 		sv = sv_2mortal(newRV_noinc((SV*)table));
-		
+	} else {
+		ENTER;
+		SAVETMPS;
+		sv = &PL_sv_undef;
 	}
 	// call Init()
 	bool result = false;
-	dSP;
-	ENTER;
-	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(sv);
@@ -245,20 +250,24 @@ Resource *PerlModule::ProcessOutputSync(Resource *resource) {
 	perl->SetContext();
 	Resource *result = NULL;
 	SV *resourceSV;
+
+	dSP;
+	ENTER;
+	SAVETMPS;
 	if (resource) {
 		char buffer[100];
 		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
-		if (!resourceSV)
+		if (!resourceSV) {
+			FREETMPS;
+			LEAVE;
 			return NULL;
+		}
 	} else {
 		resourceSV = &PL_sv_undef;
 	}
 
 	// call Process method: $module->Process($resource)
-	dSP;
-	ENTER;
-	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(resourceSV);
@@ -301,21 +310,24 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 	perl->SetContext();
 	Resource *result = NULL;
 	SV *resourceSV;
+
+	dSP;
+	ENTER;
+	SAVETMPS;
 	if (resource) {
 		// create new instance of a resource (of given type)
 		char buffer[100];
 		snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 		resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
-		if (!resourceSV)
+		if (!resourceSV) {
+			FREETMPS;
+			LEAVE;
 			return NULL;
+		}
 	} else {
 		resourceSV = &PL_sv_undef;
 	}
-
 	// call Process method: $module->Process($resource)
-	dSP;
-	ENTER;
-	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(resourceSV);
@@ -335,11 +347,7 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 		LEAVE;
 		return result;
 	}
-	resourceSV = SvREFCNT_inc(POPs);
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
+	resourceSV = POPs;
 	// get Resource C++ pointer & DISOWN
 	void *r = NULL;
 	if (perl->ConvertPtr(resourceSV, &r, "Resource *", 0x01) >= 0) {
@@ -348,8 +356,9 @@ Resource *PerlModule::ProcessSimpleSync(Resource *resource) {
 		LOG_ERROR(this, "Error calling ProcessSimple");
 	}
 
-	// delete Perl resource object
-	SvREFCNT_dec(resourceSV);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
 
 	return result;
 }
@@ -365,6 +374,10 @@ bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resour
 	if (expectingResources)
 		*expectingResources = 1;
 
+	dSP;
+	ENTER;
+	SAVETMPS;
+
 	// convert inputResources and outputResources into Perl objects
 	if (inputResources) {
 		AV *a = newAV();
@@ -373,8 +386,11 @@ bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resour
 			char buffer[100];
 			snprintf(buffer, sizeof(buffer), "%s *", resource->GetObjectName());
 			SV *resourceSV = perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(resource)), buffer, 0x01);
-			if (!resourceSV)
+			if (!resourceSV) {
+				FREETMPS;
+				LEAVE;
 				return false;
+			}
 			av_push(a, newSVsv(resourceSV));
 			inputResources->pop();
 		}
@@ -391,9 +407,6 @@ bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resour
 	}
 
 	// call Process method: $module->Process($resource)
-	dSP;
-	ENTER;
-	SAVETMPS;
         PUSHMARK(SP);
         XPUSHs(ref);
         XPUSHs(inputResourcesSV);
@@ -443,9 +456,6 @@ bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resour
 		return false;
 	}
 	result = SvIV(resultSV) != 0;
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
 
 	// create back inputResource and outputResource from Perl objects & DISOWN them
 	// inputResources queue was cleaned before, outputResource was not
@@ -468,6 +478,9 @@ bool PerlModule::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resour
 			LOG_ERROR(this, "Error calling ProcessMulti: invalid outputresource");
 		}
 	}
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
 
 	// delete Perl resource object
 	SvREFCNT_dec(inputResourcesSV);
