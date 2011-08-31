@@ -4,7 +4,10 @@
 
 #include <config.h>
 
+#ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
+#endif
+
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
@@ -144,8 +147,10 @@ char *int2str(int value) {
 	return strdup(s);
 }
 
-long str2long(const char *value) {
-	return atoi(value);
+int64_t str2long(const char *value) {
+	int64_t result = 0;
+	sscanf(value, "%" PRId64, &result);
+	return result;
 }
 
 char *long2str(int64_t value) {
