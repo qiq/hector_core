@@ -14,6 +14,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <google/protobuf/stubs/common.h>
 #include <log4cxx/helpers/properties.h>
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -23,8 +24,10 @@
 
 log4cxx::LoggerPtr logger = log4cxx::Logger::getLogger("bin.server");
 
-const char *configFile = "config.xml";
-const char *baseDir = PREFIX "/lib/hector";
+char *configFile = NULL;
+const char *configFileDefault = "config.xml";
+char *baseDir = NULL;
+const char *baseDirDefault = PREFIX "/lib/hector";
 bool batch = false;
 bool foreground = false;
 bool help = false;
@@ -42,7 +45,7 @@ options:\n\
   --verbose, -v		Be verbose\n\
   --help, -h		This help\n\
   --version, -V		Version information\n\n\
-$1, $2, ... are substituted by args in the config file.\n", configFile, baseDir);
+$1, $2, ... are substituted by args in the config file.\n", configFileDefault, baseDirDefault);
 	exit(EXIT_SUCCESS);
 }
 
@@ -71,9 +74,11 @@ int processOptions(int argc, char *argv[]) {
 
 		switch (c) {
 		case 'c':
+			free(configFile);
 			configFile = strdup(optarg);
 			break;
 		case 'B':
+			free(baseDir);
 			baseDir = strdup(optarg);
 			break;
 		case 'b':
@@ -95,6 +100,11 @@ int processOptions(int argc, char *argv[]) {
 			break;
 		}
 	}
+
+	if (!configFile)
+		configFile = strdup(configFileDefault);
+	if (!baseDir)
+		baseDir = strdup(baseDirDefault);
 
 	return optind;
 }
@@ -216,6 +226,11 @@ int main(int argc, char *argv[]) {
 
 	delete server;
 	delete config;
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	free(configFile);
+	free(baseDir);
 	
 	exit(EXIT_SUCCESS);
 }
