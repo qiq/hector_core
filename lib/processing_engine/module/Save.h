@@ -9,12 +9,18 @@ moduleType		init	output	Type of module (output or multi)
 items			r/o	n/a	Total items processed
 filename		init	n/a	File to save resources to.
 overwrite		init	true	Should we overwrite output file?
-saveResourceType	r/w	true	Save type info (necessary if we are writing different resource types to one file)
-saveResourceIdStatus	r/w	false	Save Id & Status attributes to the file (usualy not desirable)
+saveResourceType	r/w	true	Save type info (necessary if we are
+					writing different resource types to one
+					file)
+saveResourceIdStatus	r/w	false	Save Id & Status attributes to the file
+					(usualy not desirable)
 text			init	false	Should we write text or binary form?
 compress		init	false	Binary output files are compressed?
 resourceTypeFilter	r/w	n/a	Only save these resource types (only applied in
-					multi mode). Space-separated list of resource type names.
+					multi mode). Space-separated list of
+					resource type names.
+maxItemsPerFile		r/w	0	Change filename (append .1, .2, ...
+					etc.) after n resources are being procesed.
 timeTick		r/w	100000	Max time to spend in ProcessMulti()
 */
 
@@ -52,6 +58,7 @@ private:
 	bool text;
 	bool compress;
 	std::string resourceTypeFilter;
+	int maxItemsPerFile;
 	int timeTick;
 
 	char *GetModuleType(const char *name);
@@ -71,6 +78,8 @@ private:
 	void SetCompress(const char *name, const char *value);
 	char *GetResourceTypesFilter(const char *name);
 	void SetResourceTypesFilter(const char *name, const char *value);
+	char *GetMaxItemsPerFile(const char *name);
+	void SetMaxItemsPerFile(const char *name, const char *value);
 	char *GetTimeTick(const char *name);
 	void SetTimeTick(const char *name, const char *value);
 
@@ -85,6 +94,7 @@ private:
 	std::ofstream *ofs;
 	ResourceOutputStream *stream;
 	std::tr1::unordered_set<int> filter;
+	int fileId;
 };
 
 inline Module::Type Save::GetType() {

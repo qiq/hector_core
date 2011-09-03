@@ -30,6 +30,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	text = false;
 	compress = false;
 	resourceTypeFilter = "";
+	maxItemsPerFile = 0;
 	timeTick = DEFAULT_TIMETICK;
 
 	props = new ObjectProperties<Save>(this);
@@ -42,11 +43,13 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("text", &Save::GetText, &Save::SetText, true);
 	props->Add("compress", &Save::GetCompress, &Save::SetCompress, true);
 	props->Add("resourceTypeFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
+	props->Add("maxItemsPerFile", &Save::GetMaxItemsPerFile, &Save::SetMaxItemsPerFile, true);
 	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
 
 	fd = -1;
 	ofs = NULL;
 	stream = NULL;
+	fileId = 1;
 }
 
 Save::~Save() {
@@ -96,7 +99,10 @@ bool Save::ReopenFile() {
 		flags |= O_APPEND;
 	else
 		flags |= O_TRUNC;
-	fd = open(filename, flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	string s = filename;
+	if (maxItemsPerFile > 0)
+		s += "." + fileId;
+	fd = open(s.c_str(), flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
 		return false;
@@ -184,6 +190,14 @@ void Save::SetResourceTypesFilter(const char *name, const char *value) {
 	}
 }
 
+char *Save::GetMaxItemsPerFile(const char *name) {
+	return bool2str(maxItemsPerFile);
+}
+
+void Save::SetMaxItemsPerFile(const char *name, const char *value) {
+	maxItemsPerFile = str2bool(value);
+}
+
 char *Save::GetTimeTick(const char *name) {
 	return int2str(timeTick);
 }
@@ -218,8 +232,15 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 		return resource;
 	}
 	bool res = Resource::SerializeResource(resource, *stream, saveResourceType, saveResourceIdStatus);
-	if (res)
+	if (res) {
 		++items;
+		if (maxItemsPerFile > 0 && items % maxItemsPerFile == 0) {
+			// update filename
+			fileId++;
+			// open new file
+			ReopenFile();
+		}
+	}
 	if (!res)
 		LOG_ERROR_R(this, resource, "Cannot serialize resource");
 	return resource;
@@ -235,10 +256,17 @@ bool Save::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *
 			if (!stream) {
 				LOG_ERROR_R(this, r, "File not opened");
 			} else {
-				if (Resource::SerializeResource(r, *stream, saveResourceType, saveResourceIdStatus))
+				if (Resource::SerializeResource(r, *stream, saveResourceType, saveResourceIdStatus)) {
 					++items;
-				else
+					if (maxItemsPerFile > 0 && items % maxItemsPerFile == 0) {
+						// update filename
+						fileId++;
+						// open new file
+						ReopenFile();
+					}
+				} else {
 					LOG_ERROR_R(this, r, "Cannot serialize resource");
+				}
 			}
 			r->SetFlag(Resource::DELETED);
 		}
