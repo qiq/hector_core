@@ -66,12 +66,25 @@ void split(vector<string> &result, string &data, char split) {
 
 string join(string &glue, vector<string> &data) {
 	string result;
-	bool first;
+	bool first = true;
 	for (vector<string>::iterator iter = data.begin(); iter != data.end(); ++iter) {
 		if (first)
 			first = false;
 		else
 			result.append(glue);
+		result.append(*iter);
+	}
+	return result;
+}
+
+string join(char glue, vector<string> &data) {
+	string result;
+	bool first = true;
+	for (vector<string>::iterator iter = data.begin(); iter != data.end(); ++iter) {
+		if (first)
+			first = false;
+		else
+			result.append(1, glue);
 		result.append(*iter);
 	}
 	return result;
