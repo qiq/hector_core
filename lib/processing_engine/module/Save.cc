@@ -100,8 +100,11 @@ bool Save::ReopenFile() {
 	else
 		flags |= O_TRUNC;
 	string s = filename;
-	if (maxItemsPerFile > 0)
-		s += "." + fileId;
+	if (maxItemsPerFile > 0) {
+		char id[20];
+		snprintf(id, sizeof(id), ".%d", fileId);
+		s += id;
+	}
 	fd = open(s.c_str(), flags, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd < 0) {
 		LOG_ERROR(this, "Cannot open file " << filename << ": " << strerror(errno));
@@ -191,11 +194,11 @@ void Save::SetResourceTypesFilter(const char *name, const char *value) {
 }
 
 char *Save::GetMaxItemsPerFile(const char *name) {
-	return bool2str(maxItemsPerFile);
+	return int2str(maxItemsPerFile);
 }
 
 void Save::SetMaxItemsPerFile(const char *name, const char *value) {
-	maxItemsPerFile = str2bool(value);
+	maxItemsPerFile = str2int(value);
 }
 
 char *Save::GetTimeTick(const char *name) {
