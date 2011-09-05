@@ -52,7 +52,7 @@ void splitOnWs(vector<string> &result, string &data) {
 	}
 }
 
-void split(vector<string> &result, string &data, char split) {
+void split(vector<string> &result, char split, string &data) {
 	result.clear();
 	unsigned b = 0;
 	for (unsigned i = 0; i < data.length(); i++) {
@@ -61,7 +61,8 @@ void split(vector<string> &result, string &data, char split) {
 			b = i+1;
 		}
 	}
-	result.push_back(data.substr(b));
+	if (b < data.length())
+		result.push_back(data.substr(b));
 }
 
 string join(string &glue, vector<string> &data) {

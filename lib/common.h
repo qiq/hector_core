@@ -35,7 +35,7 @@ inline void die(const char *msg, ...) {
 std::string &skipWs(std::string &data);
 std::string &chomp(std::string &data);
 void splitOnWs(std::vector<std::string> &result, std::string &data);
-void split(std::vector<std::string> &result, std::string &data, char split);
+void split(std::vector<std::string> &result, char split, std::string &data);
 std::string join(std::string &glue, std::vector<std::string> &data);
 std::string join(char glue, std::vector<std::string> &data);
 
