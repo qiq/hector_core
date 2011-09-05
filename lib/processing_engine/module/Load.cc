@@ -199,6 +199,7 @@ bool Load::ReopenFile() {
 		}
 		stream = new ResourceInputStreamText(ifs);
 	}
+	LOG_DEBUG(this, "Reading from: " << filename);
 
 	fileCond.SignalSend();
 	fileCond.Unlock();

@@ -125,6 +125,7 @@ bool Save::ReopenFile() {
 		}
 		stream = new ResourceOutputStreamText(ofs);
 	}
+	LOG_DEBUG(this, "Writing to: " << s);
 	return true;
 }
 
