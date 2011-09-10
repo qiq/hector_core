@@ -31,6 +31,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	compress = false;
 	resourceTypeFilter = "";
 	maxItemsPerFile = 0;
+	maxSizePerFile = 0;
 	timeTick = DEFAULT_TIMETICK;
 
 	props = new ObjectProperties<Save>(this);
@@ -44,12 +45,15 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	props->Add("compress", &Save::GetCompress, &Save::SetCompress, true);
 	props->Add("resourceTypeFilter", &Save::GetResourceTypesFilter, &Save::SetResourceTypesFilter);
 	props->Add("maxItemsPerFile", &Save::GetMaxItemsPerFile, &Save::SetMaxItemsPerFile, true);
+	props->Add("maxSizePerFile", &Save::GetMaxSizePerFile, &Save::SetMaxSizePerFile, true);
 	props->Add("timeTick", &Save::GetTimeTick, &Save::SetTimeTick);
 
 	fd = -1;
 	ofs = NULL;
 	stream = NULL;
 	fileId = 1;
+	savedItems = 0;
+	savedSize = 0;
 }
 
 Save::~Save() {
@@ -100,7 +104,7 @@ bool Save::ReopenFile() {
 	else
 		flags |= O_TRUNC;
 	string s = filename;
-	if (maxItemsPerFile > 0) {
+	if (maxItemsPerFile > 0 || maxSizePerFile > 0) {
 		char id[20];
 		snprintf(id, sizeof(id), ".%d", fileId);
 		s += id;
@@ -202,6 +206,14 @@ void Save::SetMaxItemsPerFile(const char *name, const char *value) {
 	maxItemsPerFile = str2int(value);
 }
 
+char *Save::GetMaxSizePerFile(const char *name) {
+	return long2str(maxSizePerFile);
+}
+
+void Save::SetMaxSizePerFile(const char *name, const char *value) {
+	maxSizePerFile = str2long(value);
+}
+
 char *Save::GetTimeTick(const char *name) {
 	return int2str(timeTick);
 }
@@ -235,18 +247,25 @@ Resource *Save::ProcessOutputSync(Resource *resource) {
 		LOG_ERROR_R(this, resource, "File not opened");
 		return resource;
 	}
+	int64_t size = 0;
+	if (maxSizePerFile > 0)
+		size = resource->GetSize();
+	if ((maxItemsPerFile > 0 && savedItems == maxItemsPerFile) || (maxSizePerFile > 0 && savedSize + size > maxSizePerFile)) {
+		// update filename
+		fileId++;
+		// open new file
+		ReopenFile();
+		savedItems = 0;
+		savedSize = 0;
+	}
 	bool res = Resource::SerializeResource(resource, *stream, saveResourceType, saveResourceIdStatus);
 	if (res) {
-		++items;
-		if (maxItemsPerFile > 0 && items % maxItemsPerFile == 0) {
-			// update filename
-			fileId++;
-			// open new file
-			ReopenFile();
-		}
-	}
-	if (!res)
+		items++;
+		savedItems++;
+		savedSize += size;
+	} else {
 		LOG_ERROR_R(this, resource, "Cannot serialize resource");
+	}
 	return resource;
 }
 

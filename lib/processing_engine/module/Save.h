@@ -21,6 +21,8 @@ resourceTypeFilter	r/w	n/a	Only save these resource types (only applied in
 					resource type names.
 maxItemsPerFile		r/w	0	Change filename (append .1, .2, ...
 					etc.) after n resources are being procesed.
+maxSizePerFile		r/w	0	Change filename (append .1, .2, ...
+					etc.) after size n has been reached.
 timeTick		r/w	100000	Max time to spend in ProcessMulti()
 */
 
@@ -59,6 +61,7 @@ private:
 	bool compress;
 	std::string resourceTypeFilter;
 	int maxItemsPerFile;
+	int64_t maxSizePerFile;
 	int timeTick;
 
 	char *GetModuleType(const char *name);
@@ -80,6 +83,8 @@ private:
 	void SetResourceTypesFilter(const char *name, const char *value);
 	char *GetMaxItemsPerFile(const char *name);
 	void SetMaxItemsPerFile(const char *name, const char *value);
+	char *GetMaxSizePerFile(const char *name);
+	void SetMaxSizePerFile(const char *name, const char *value);
 	char *GetTimeTick(const char *name);
 	void SetTimeTick(const char *name, const char *value);
 
@@ -95,6 +100,8 @@ private:
 	ResourceOutputStream *stream;
 	std::tr1::unordered_set<int> filter;
 	int fileId;
+	int savedItems;
+	int64_t savedSize;
 };
 
 inline Module::Type Save::GetType() {
