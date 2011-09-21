@@ -16,20 +16,12 @@ our @ISA = qw(Module);
 sub new {
 	my ($proto, $object, $id, $threadIndex) = @_;
 	my $class = ref($proto) || $proto;
-	my $self = $class->SUPER::new($object, $id, $threadIndex);
+	my $self = $class->SUPER::new('OUTPUT', $object, $id, $threadIndex);
 
 	$self->{'items'} = 0;
 
 	bless($self, $class);
 	return $self;
-}
-
-sub DESTROY {
-}
-
-sub GetType {
-	my ($self) = @_;
-	return $Hector::Module::OUTPUT;
 }
 
 sub ProcessOutput() {

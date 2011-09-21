@@ -18,7 +18,7 @@ our @ISA = qw(Module);
 sub new {
 	my ($proto, $object, $id, $threadIndex) = @_;
 	my $class = ref($proto) || $proto;
-	my $self = $class->SUPER::new($object, $id, $threadIndex);
+	my $self = $class->SUPER::new('MULTI', $object, $id, $threadIndex);
 
 	$self->{'_resources'} = [];
 	$self->{'items'} = 0;
@@ -30,11 +30,6 @@ sub new {
 }
 
 sub DESTROY {
-}
-
-sub GetType {
-	my ($self) = @_;
-	return $Hector::Module::MULTI;
 }
 
 my $MAX_RESOURCES = 100;

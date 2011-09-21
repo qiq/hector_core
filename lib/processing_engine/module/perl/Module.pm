@@ -7,11 +7,22 @@ use strict;
 use Hector;
 
 sub new {
-	my ($proto, $object, $id, $threadIndex) = @_;
+	die("Invalid call: Module::new() requires 4 arguments.") if (@_ != 5);
+	my ($proto, $type, $object, $id, $threadIndex) = @_;
 	my $class = ref($proto) || $proto;
+	if ($type eq 'SIMPLE') {
+		$type = $Hector::Module::SIMPLE;
+	} elsif ($type eq 'MULTI') {
+		$type = $Hector::Module::MULTI;
+	} elsif ($type eq 'INPUT') {
+		$type = $Hector::Module::INPUT;
+	} elsif ($type eq 'OUTPUT') {
+		$type = $Hector::Module::OUTPUT;
+	}
 	my $self = {
 		'_object' => $object,
 		'_id' => $id,
+		'_type' => $type,
 		'_threadIndex' => $threadIndex,
 	};
 	bless($self, $class);
@@ -38,7 +49,7 @@ sub Init {
 sub GetType {
 	my ($self) = @_;
 
-	return $Hector::Module::SIMPLE;
+	return $self->{'_type'};
 }
 
 sub Start {
