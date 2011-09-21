@@ -32,7 +32,7 @@ sub GetType {
 sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
-	$self->{'_object'}->log_debug($resource->ToString($Hector::Object::INFO));
+	$self->LOG_DEBUG($resource->ToString($Hector::Object::INFO));
 
 	return $resource;
 }

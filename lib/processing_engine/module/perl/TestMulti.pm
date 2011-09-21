@@ -58,7 +58,7 @@ sub ProcessMulti() {
 
 	my $resource = shift(@{$self->{'_resources'}});
 	push(@{$outputResources}, $resource);
-	$self->{'_object'}->log_info($resource->ToStringShort()." Processed (".$resource->GetStr().")");
+	$self->LOG_INFO($resource, "Processed (".$resource->GetStr().")");
 	$self->{'items'}++;
 
 	return (@{$self->{'_resources'}} > 0, $MAX_RESOURCES-@{$self->{'_resources'}}, scalar @{$self->{'_resources'}});

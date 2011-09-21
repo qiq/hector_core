@@ -36,11 +36,11 @@ sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
 	if (not defined $resource or $resource->GetTypeString(0) ne 'TestPerlResource') {
-		$self->{'_object'}->log_error("Invalid resource: ".$resource->GetTypeString(0));
+		$self->LOG_ERROR("Invalid resource: ".$resource->GetTypeString(0));
 		return $resource;
 	}
 	$resource->SetAttrString("a", "xyz");
-	$self->{'_object'}->log_info("xyz = ".$resource->GetAttrString("a"));
+	$self->LOG_INFO($resource, "xyz = ".$resource->GetAttrString("a"));
 	$self->{'items'}++;
 
 	return $resource;

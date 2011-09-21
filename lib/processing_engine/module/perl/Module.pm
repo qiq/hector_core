@@ -62,7 +62,7 @@ sub GetValue {
 	if (exists $self->{$name}) {
 		return $self->{$name};
 	} else {
-		$self->{'_object'}->log_error("Invalid value name: $name");
+		$self->LOG_ERROR("Invalid value name: $name");
 		return undef;
 	}
 }
@@ -72,7 +72,7 @@ sub SetValue {
 	if (exists $self->{$name}) {
 		$self->{$name} = $value;
 	} else {
-		$self->{'_object'}->log_error("Invalid value name: $name");
+		$self->LOG_ERROR("Invalid value name: $name");
 		return 0;
 	}
 	return 1;
@@ -85,18 +85,68 @@ sub ListNames {
 
 sub SaveCheckpoint {
 	my ($self, $path, $id) = @_;
-	$self->{'_object'}->log_info("SaveCheckpoint($path, $id)");
+	$self->LOG_INFO("SaveCheckpoint($path, $id)");
 }
 
 sub RestoreCheckpoint {
 	my ($self, $path, $id) = @_;
-	$self->{'_object'}->log_info("RestoreCheckpoint($path, $id)");
+	$self->LOG_INFO("RestoreCheckpoint($path, $id)");
 }
 
 sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
 	return $resource;
+}
+
+sub LOG_TRACE() {
+	my ($self, $resource, $message) = @_;
+	if (defined $message) {
+		$message = ": ".$resource->ToStringShort()." ".$message;
+	} else {
+		$message = $resource;
+	}
+	$self->{'_object'}->log_trace($message);
+}
+
+sub LOG_DEBUG() {
+	my ($self, $resource, $message) = @_;
+	if (defined $message) {
+		$message = ": ".$resource->ToStringShort()." ".$message;
+	} else {
+		$message = $resource;
+	}
+	$self->{'_object'}->log_debug($message);
+}
+
+sub LOG_INFO() {
+	my ($self, $resource, $message) = @_;
+	if (defined $message) {
+		$message = ": ".$resource->ToStringShort()." ".$message;
+	} else {
+		$message = $resource;
+	}
+	$self->{'_object'}->log_info($message);
+}
+
+sub LOG_WARN() {
+	my ($self, $resource, $message) = @_;
+	if (defined $message) {
+		$message = ": ".$resource->ToStringShort()." ".$message;
+	} else {
+		$message = $resource;
+	}
+	$self->{'_object'}->log_warn($message);
+}
+
+sub LOG_ERROR() {
+	my ($self, $resource, $message) = @_;
+	if (defined $message) {
+		$message = ": ".$resource->ToStringShort()." ".$message;
+	} else {
+		$message = $resource;
+	}
+	$self->{'_object'}->log_error($message);
 }
 
 1;

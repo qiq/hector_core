@@ -42,14 +42,14 @@ sub ProcessInput() {
 	my ($self, $resource) = @_;
 
 	if (defined $resource) {
-		$self->{'_object'}->log_error("TestInput: resource is already defined.");
+		$self->LOG_ERROR($resource, "TestInput: resource is already defined.");
 		return undef;
 	}
 	return undef if ($self->{'maxItems'} and $self->{'items'} >= $self->{'maxItems'});
 	$resource = &Hector::ResourceToTestResource(&Hector::Resource::GetRegistry()->AcquireResource($self->{'_typeId'}));
 	$resource->SetId($self->{'_threadIndex'}*10000+$self->{'items'});
 	$resource->SetStr(sprintf("%s%d-%d", defined $self->{'idPrefix'} ? $self->{'idPrefix'} : "", $self->{'_threadIndex'}, $self->{'items'}));
-	$self->{'_object'}->log_info($resource->ToStringShort()." Loading resource (".$resource->GetStr().")");
+	$self->LOG_INFO($resource, "Loading resource (".$resource->GetStr().")");
 	$self->{'items'}++;
 
 	return $resource;

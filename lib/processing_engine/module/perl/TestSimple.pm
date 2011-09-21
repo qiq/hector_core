@@ -61,7 +61,7 @@ sub GetValue {
 	} elsif ($name eq 'alias') {
 		return $self->{'foo'};
 	} else {
-		$self->{'_object'}->log_error("Invalid value name: $name");
+		$self->LOG_ERROR("Invalid value name: $name");
 		return undef;
 	}
 }
@@ -73,7 +73,7 @@ sub SetValue {
 	} elsif ($name eq 'alias') {
 		$self->{'foo'} = $value;
 	} else {
-		$self->{'_object'}->log_error("Invalid value name: $name");
+		$self->LOG_ERROR("Invalid value name: $name");
 		return 0;
 	}
 	return 1;
@@ -88,10 +88,10 @@ sub ProcessSimple() {
 	my ($self, $resource) = @_;
 
 	if (not defined $resource or $resource->GetTypeString() ne 'TestResource') {
-		$self->{'_object'}->log_error("Invalid resource: ".$resource->GetTypeString());
+		$self->LOG_ERROR("Invalid resource: ".$resource->GetTypeString());
 		return $resource;
 	}
-	$self->{'_object'}->log_info($resource->ToStringShort()." Processing (".$resource->GetStr().")");
+	$self->LOG_INFO($resource, "Processing (".$resource->GetStr().")");
 	$resource->SetStatus($resource->GetStatus() == 0 ? 1 : 0) if ($self->{'flipStatus'});
 	$resource->SetStatus($self->{'setStatus'}) if ($self->{'setStatus'} >= 0);
 	$self->{'items'}++;
