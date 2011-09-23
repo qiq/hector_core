@@ -2,7 +2,7 @@ TESTS_ENVIRONMENT = PATH='$(top_srcdir)/test:$(top_builddir)/src:$(PATH)' LD_LIB
 
 TESTS =
 EXTRA_DIST = test_common.sh
-CLEANFILES = test*.log.valgrind
+CLEANFILES = *.log.valgrind
 
 TESTS += input_output.sh
 EXTRA_DIST += input_output.sh input_output.xml input_output.log.correct

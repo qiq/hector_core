@@ -12,11 +12,7 @@ if [ -z "$HECTOR_HOST" ]; then
 fi
 
 function hector_server_start {
-	if [ -z "$USE_VALGRIND" ]; then
-		hector_server -c $@
-	else
-		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=20 --trace-children=yes --log-file=hector_server.log.valgrind `which hector_server` -f -c $@ &
-	fi
+	hector_server -c $@
 }
 
 function hector_server_shutdown {

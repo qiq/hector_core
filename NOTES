@@ -1,3 +1,4 @@
+- make check VALGRIND=1 checks for memory leaks
 - why there is Resource::Clone() and not a copy-constructor? Because copy
   constructor may not be virtual, so that we would not clone the right object
 - set USE_VALGRIND=1 to run server using valgrind memcheck tool (log is hector_server.log.valgrind)
