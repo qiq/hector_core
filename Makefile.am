@@ -8,4 +8,4 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hector_core.pc
 
 hectordatadir = $(datadir)/hector
-hectordata_DATA = hector_config.dtd
+hectordata_DATA = hector_config.dtd hector_core.supp

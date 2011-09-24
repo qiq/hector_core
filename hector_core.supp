@@ -1,0 +1,117 @@
+{
+   dlopen
+   Memcheck:Leak
+   ...
+   fun:dlopen_doit
+}
+
+{
+   lt_dlopen
+   Memcheck:Leak
+   ...
+   fun:lt_dlopenadvise
+   fun:lt_dlopen
+}
+
+{
+   LibraryLoader
+   Memcheck:Leak
+   ...
+   fun:lt_dlopenadvise
+   fun:_ZN13LibraryLoader11LoadLibraryEPKcS1_b
+}
+
+{
+   LibraryLoader2
+   Memcheck:Leak
+   ...
+   fun:lt_dlclose
+   fun:_ZN13LibraryLoaderD1Ev
+}
+
+{
+   Perl1
+   Memcheck:Leak
+   ...
+   fun:PerlIO_stdstreams
+   ...
+   fun:perl_parse
+   fun:_ZN12EmbeddedPerl4InitEv
+}
+
+{
+   Perl2
+   Memcheck:Leak
+   ...
+   fun:XS_DynaLoader_dl_load_file
+   ...
+   fun:Perl_eval_pv
+   fun:_ZN12EmbeddedPerl4InitEv
+}
+
+{
+   Perl3
+   Memcheck:Leak
+   ...
+   fun:boot_DynaLoader
+   ...
+   fun:Perl_pp_require
+}
+
+{
+   Perl4
+   Memcheck:Leak
+   ...
+   fun:PerlIO_open
+   ...
+   fun:perl_parse
+   fun:_ZN12EmbeddedPerl4InitEv
+}
+
+{
+   PerlSwig
+   Memcheck:Leak
+   ...
+   fun:_swig_create_magic
+   fun:boot_Hector
+   ...
+   fun:_ZN12EmbeddedPerl4InitEv
+}
+
+{
+   Python1
+   Memcheck:Leak
+   ...
+   fun:Py_InitializeEx
+   fun:_ZN14EmbeddedPythonC1Ev
+}
+
+{
+   Python2
+   Memcheck:Leak
+   ...
+   fun:PyImport_ImportModuleLevel
+}
+
+{
+   Python3
+   Memcheck:Leak
+   ...
+   fun:PyEval_EvalCode
+   fun:PyImport_ExecCodeModuleEx
+}
+
+{
+   Python4
+   Memcheck:Leak
+   ...
+   fun:PyEval_CallObjectWithKeywords
+   fun:_ZN14EmbeddedPython11_CallMethodEP7_objectPKcS1_
+}
+
+{
+   Python5
+   Memcheck:Leak
+   ...
+   fun:PyEval_CallObjectWithKeywords
+}
