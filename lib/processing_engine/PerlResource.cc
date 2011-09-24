@@ -11,31 +11,6 @@
 using namespace std;
 
 log4cxx::LoggerPtr PerlResource::logger(log4cxx::Logger::getLogger("PerlResource"));
-PerlInfoMap PerlResource::infoMap;
-
-PerlInfoMap::~PerlInfoMap() {
-	infoLock.Lock();
-	for (tr1::unordered_map<int, ResourceInfo*>::iterator iter = infoMap.begin(); iter != infoMap.end(); ++iter)
-		delete iter->second;
-	infoLock.Unlock();
-}
-
-void PerlInfoMap::Lock() {
-	infoLock.Lock();
-}
-
-void PerlInfoMap::Unlock() {
-	infoLock.Unlock();
-}
-
-ResourceInfo *PerlInfoMap::GetResourceInfo(int typeId) {
-	tr1::unordered_map<int, ResourceInfo*>::iterator iter = infoMap.find(typeId);
-	return iter == infoMap.end() ? NULL : iter->second;
-}
-
-void PerlInfoMap::SetResourceInfo(ResourceInfo *info) {
-	infoMap[info->GetTypeId()] = info;
-}
 
 PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	this->perl = perl;
@@ -44,7 +19,7 @@ PerlResource::PerlResource(PerlResourceInterpreter *perl, const char *name) {
 	int len = strlen(this->name);
 	if (len > 4 && !memcmp(this->name+len-3, ".pm", 3))
 		this->name[len-3] = '\0';
-	typeId = 0;
+	resourceInfo = NULL;
 	ref = NULL;
 }
 
@@ -64,6 +39,8 @@ PerlResource::~PerlResource() {
 		LOG4CXX_ERROR(logger, "Error destroying resource " << name << " (" << SvPV_nolen(ERRSV) << ")");
 	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
+
+	delete resourceInfo;
 	
 	free(name);
 }
@@ -280,15 +257,12 @@ bool PerlResource::Skip(ResourceInputStream &input) {
 }
 
 inline ResourceInfo *PerlResource::GetResourceInfo() {
-	ResourceInfo *result = NULL;
-	if (typeId) {
-		infoMap.Lock();
-		result = infoMap.GetResourceInfo(typeId);
-		if (result) {
-			infoMap.Unlock();
-			return result;
-		}
+	riLock.Lock();
+	if (resourceInfo) {
+		riLock.Unlock();
+		return resourceInfo;
 	}
+	ResourceInfo *result = NULL;
 
 	perl->Lock();
 	void *old = perl->GetPerl()->GetContext();
@@ -447,12 +421,8 @@ inline ResourceInfo *PerlResource::GetResourceInfo() {
 	perl->GetPerl()->SetContext(old);
 	perl->Unlock();
 
-	if (result) {
-		typeId = result->GetTypeId();
-		infoMap.SetResourceInfo(result);
-	}
-	infoMap.Unlock();
-
+	resourceInfo = result;
+	riLock.Unlock();
 	return result;
 }
 

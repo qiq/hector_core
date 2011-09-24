@@ -18,19 +18,6 @@
 #include "PlainLock.h"
 #include "Resource.h"
 
-class PerlInfoMap {
-public:
-	PerlInfoMap() {};
-	~PerlInfoMap();
-	void Lock();
-	void Unlock();
-	ResourceInfo *GetResourceInfo(int typeId);
-	void SetResourceInfo(ResourceInfo *info);
-private:
-	PlainLock infoLock;
-	std::tr1::unordered_map<int, ResourceInfo*> infoMap;
-};
-
 class PerlResource : public Resource {
 public:
 	PerlResource(PerlResourceInterpreter *perl, const char *name);
@@ -117,8 +104,8 @@ protected:
 	// reference to the resource
 	SV *ref;
 
-	int typeId;
-	static PerlInfoMap infoMap;
+	PlainLock riLock;
+	ResourceInfo *resourceInfo;
 
 	SV *GetValue(const char *prefix, const char *name);
 	SV *GetArrayValue(const char *name, int index);
