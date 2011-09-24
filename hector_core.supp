@@ -115,3 +115,10 @@
    ...
    fun:PyEval_CallObjectWithKeywords
 }
+
+{
+   Python6
+   Memcheck:Leak
+   ...
+   fun:PyEval_InitThreads
+}

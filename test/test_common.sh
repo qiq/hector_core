@@ -48,7 +48,7 @@ function test_server_batch {
 	if [ -z "$VALGRIND" ]; then
 		hector_server_start "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
 	else
-		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --show-reachable=yes --num-callers=40 --trace-children=yes --gen-suppressions=all --suppressions=../hector_core.supp --suppressions=../python.supp --log-file=$id.log.valgrind `which hector_server` -c "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
+		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --show-reachable=yes --num-callers=40 --trace-children=yes --gen-suppressions=all --suppressions=../hector_core.supp --log-file=$id.log.valgrind `which hector_server` -c "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
 	fi
 }
 
