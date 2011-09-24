@@ -25,7 +25,11 @@ function test_server_start {
 	fi
 	shift; shift
 	hector_server_shutdown 2>/dev/null
-	hector_server_start "$test_base/test/${id}.xml" -B "$test_base" $server $@
+	if [ -z "$VALGRIND" ]; then
+		hector_server_start "$test_base/test/${id}.xml" -B "$test_base" $server $@
+	else
+		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --show-reachable=yes --num-callers=40 --trace-children=yes --gen-suppressions=all --suppressions=../hector_core.supp --log-file=$id.log.valgrind `which hector_server` -c "$test_base/test/${id}.xml" -B "$test_base" -f $server $@ &
+	fi
 	hector_client_wait_dontfail PE_test.run 0
 }
 
@@ -44,7 +48,7 @@ function test_server_batch {
 	if [ -z "$VALGRIND" ]; then
 		hector_server_start "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
 	else
-		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --show-reachable=yes --num-callers=20 --trace-children=yes --suppressions=../valgrind.supp --log-file=$id.log.valgrind `which hector_server` -c "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
+		libtool --mode=execute valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --show-reachable=yes --num-callers=40 --trace-children=yes --gen-suppressions=all --suppressions=../hector_core.supp --suppressions=../python.supp --log-file=$id.log.valgrind `which hector_server` -c "$test_base/test/${id}.xml" -B "$test_base" -f -b $server $@
 	fi
 }
 
@@ -57,10 +61,10 @@ function test_compare_result {
 	diff -u "$test_base/test/${id}.log.correct" "${id}.log.result"
 	result=$?
 	if [ -n "$VALGRIND" ]; then
-		definitely=`grep "definitely lost:" ${id}.log.valgrind | sed -e 's/.*definitely lost: \([0-9]\+\).*/\1/'`
-		indirectly=`grep "indirectly lost:" ${id}.log.valgrind | sed -e 's/.*indirectly lost: \([0-9]\+\).*/\1/'`
-		possibly=`grep "possibly lost:" ${id}.log.valgrind | sed -e 's/.*possibly lost: \([0-9]\+\).*/\1/'`
-		reachable=`grep "still reachable:" ${id}.log.valgrind | sed -e 's/.*still reachable: \([0-9]\+\).*/\1/'`
+		definitely=`grep "definitely lost:" ${id}.log.valgrind | sed -e 's/.*definitely lost: \([0-9,]\+\).*/\1/'|sed -e 's/,//g'`
+		indirectly=`grep "indirectly lost:" ${id}.log.valgrind | sed -e 's/.*indirectly lost: \([0-9,]\+\).*/\1/'|sed -e 's/,//g'`
+		possibly=`grep "possibly lost:" ${id}.log.valgrind | sed -e 's/.*possibly lost: \([0-9,]\+\).*/\1/'|sed -e 's/,//g'`
+		reachable=`grep "still reachable:" ${id}.log.valgrind | sed -e 's/.*still reachable: \([0-9,]\+\).*/\1/'|sed -e 's/,//g'`
 		if [ "$definitely" != "0" -o "$indirectly" != "0" -o "$possibly" != "0" -o "$reachable" != "0" ]; then
 			echo "memleaks: $definitely $indirectly $possibly $reachable"
 			result=1;
