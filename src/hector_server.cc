@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 	// load config file
 	Config *config = new Config();
 	if (!config->ParseFile(configFile, &args))
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 
 	// check that serverId does exist
 	snprintf(buffer, sizeof(buffer), "/Config/Server[@id='%s']", serverId);
@@ -198,15 +198,15 @@ int main(int argc, char *argv[]) {
 
         	pid = fork();
 		if (pid < 0)
-			exit(EXIT_FAILURE);
+			return EXIT_FAILURE;
 		if (pid > 0)
-			exit(EXIT_SUCCESS);
+			return EXIT_SUCCESS;
 
 		// Create a new SID for the child process
 		sid = setsid();
 		if (sid < 0) {
 			LOG4CXX_ERROR(logger, "Error calling setsid()");
-			exit(EXIT_FAILURE);
+			return EXIT_FAILURE;
 		}
 
 		// close standard file descriptors (but replace them with
@@ -232,5 +232,5 @@ int main(int argc, char *argv[]) {
 	free(configFile);
 	free(baseDir);
 	
-	exit(EXIT_SUCCESS);
+	return EXIT_SUCCESS;
 }
