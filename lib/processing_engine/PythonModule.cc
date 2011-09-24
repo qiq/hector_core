@@ -16,7 +16,7 @@ PythonModule::PythonModule(ObjectRegistry *objects, const char *id, int threadIn
 	if (dot)
 		*dot = '\0';
 	this->threadIndex = threadIndex;
-	python = NULL;
+	python = new EmbeddedPython();
 	module = NULL;
 	obj = NULL;
 }
@@ -30,17 +30,15 @@ PythonModule::~PythonModule() {
 	if (obj)
 		Py_DECREF(obj);
 	python->Unlock(gstate);
+	delete python;
 }
 
 bool PythonModule::Init(vector<pair<string, string> > *c) {
 	PyObject *args;
 	PyObject *r = NULL;
-	if (!python) {
-		python = EmbeddedPython::GetPython();
-		if (!python) {
-			LOG_ERROR(this, "Cannot instantiate Python");
-			return false;
-		}
+	if (!python->Init()) {
+		LOG_ERROR(this, "Cannot instantiate Python");
+		return false;
 	}
 	PyGILState_STATE gstate = python->Lock();
 	// first stage?

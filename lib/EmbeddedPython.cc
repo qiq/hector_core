@@ -13,8 +13,9 @@
 
 using namespace std;
 
-PlainLock EmbeddedPython::lock;
-EmbeddedPython *EmbeddedPython::python = NULL;
+PlainLock EmbeddedPython::usedLock;
+int EmbeddedPython::used = 0;
+bool EmbeddedPython::initialized = false;
 swig_type_info *(*EmbeddedPython::Python_TypeQuery)(const char *type);
 PyObject *(*EmbeddedPython::Python_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
 int (*EmbeddedPython::Python_ConvertPtr)(PyObject *obj, void **ptr, swig_type_info *ty, int flags);
@@ -22,8 +23,10 @@ tr1::unordered_map<string, swig_type_info*> EmbeddedPython::typeInfoCache;
 log4cxx::LoggerPtr EmbeddedPython::logger(log4cxx::Logger::getLogger("lib.EmbeddedPython"));
 
 EmbeddedPython::EmbeddedPython() {
-	Py_Initialize();
-	PyEval_InitThreads();
+	usedLock.Lock();
+	if (!used) {
+		Py_Initialize();
+		PyEval_InitThreads();
 
 //PyThreadState* tcur = PyThreadState_Get() ;
 //
@@ -38,45 +41,58 @@ EmbeddedPython::EmbeddedPython() {
 //PyThreadState *pts = PyGILState_GetThisThreadState();
 //PyEval_ReleaseThread(pts);
 
-	PyThreadState_Swap(NULL);
-	PyEval_ReleaseLock();
+		PyThreadState_Swap(NULL);
+		PyEval_ReleaseLock();
+	}
+	used++;
+	usedLock.Unlock();
 }
 
 EmbeddedPython::~EmbeddedPython() {
-	Py_Finalize();
+	usedLock.Lock();
+	if (!--used) {
+		Lock();
+		Py_Finalize();
+	}
+	usedLock.Unlock();
 }
 
-EmbeddedPython *EmbeddedPython::GetPython() {
-	lock.Lock();
-	if (!python) {
-		python = new EmbeddedPython();
-		PyGILState_STATE gstate = python->Lock();
+bool EmbeddedPython::Init() {
+	usedLock.Lock();
+	if (!initialized) {
+		PyGILState_STATE gstate = Lock();
 		PyObject *module = PyImport_ImportModule("Hector");
 		if (!module) {
-			python->LogError();
+			LogError();
 			LOG4CXX_ERROR(logger, "Cannot import Hector module");
-			return NULL;
+			Unlock(gstate);
+			usedLock.Unlock();
+			return false;
 		}
-		python->Unlock(gstate);
+		Unlock(gstate);
 		Python_TypeQuery = (swig_type_info*(*)(const char*))LibraryLoader::LoadLibrary("_Hector.so", "Python_TypeQuery_Wrapper");
 		if (!Python_TypeQuery) {
 			LOG4CXX_ERROR(logger, "Cannot find Python_TypeQuery_Wrapper");
-			return NULL;
+			usedLock.Unlock();
+			return false;
 		}
 		Python_NewPointerObj = (PyObject*(*)(void*, swig_type_info*, int))LibraryLoader::LoadLibrary("_Hector.so", "Python_NewPointerObj_Wrapper");
 		if (!Python_NewPointerObj) {
 			LOG4CXX_ERROR(logger, "Cannot find Python_NewPointerObj_Wrapper");
-			return NULL;
+			usedLock.Unlock();
+			return false;
 		}
 		Python_ConvertPtr = (int(*)(PyObject*, void**, swig_type_info *ty, int))LibraryLoader::LoadLibrary("_Hector.so", "Python_ConvertPtr_Wrapper");
 		if (!Python_ConvertPtr) {
 			LOG4CXX_ERROR(logger, "Cannot find Python_ConvertPtr_Wrapper");
-			return NULL;
+			usedLock.Unlock();
+			return false;
 		}
+		initialized = true;
 	}
-	EmbeddedPython *result = python;
-	lock.Unlock();
-	return result;
+	usedLock.Unlock();
+
+	return true;
 }
 
 void EmbeddedPython::LogError() {

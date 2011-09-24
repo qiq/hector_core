@@ -27,7 +27,7 @@ public:
 	EmbeddedPython();
 	~EmbeddedPython();
 
-	static EmbeddedPython *GetPython();
+	bool Init();
 
 	PyGILState_STATE Lock();
 	void Unlock(PyGILState_STATE gstate);
@@ -40,8 +40,9 @@ public:
 	int ConvertPtr(PyObject *obj, void **ptr, const char *type, int flags);
 
 private:
-	static PlainLock lock;
-	static EmbeddedPython *python;
+	static PlainLock usedLock;
+	static int used;
+	static bool initialized;
 	static swig_type_info *(*Python_TypeQuery)(const char *type);
 	static PyObject *(*Python_NewPointerObj)(void *ptr, swig_type_info *type, int flags);
 	static int (*Python_ConvertPtr)(PyObject *obj, void **ptr, swig_type_info *ty, int flags);
