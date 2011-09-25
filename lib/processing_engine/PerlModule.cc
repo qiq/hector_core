@@ -38,17 +38,22 @@ bool PerlModule::Init(vector<pair<string, string> > *c) {
 		// create Perl module
 		ENTER;
 		SAVETMPS;
+		PUSHMARK(SP);
+		PUTBACK;
 		SV *_object = get_sv("_object", TRUE);
 		sv_setsv(_object, perl->NewPointerObj(const_cast<void*>(static_cast<const void*>(this)), "Object *", 0));
 		char s[1024];
 		snprintf(s, sizeof(s), "use %s; $_module = %s->new($_object, '%s', %d);", name, name, GetId(), threadIndex);
 		eval_pv(s, FALSE);
+		SPAGAIN;
 		if (SvTRUE(ERRSV)) {
 			LOG_ERROR(this, "Error initialize module " << name << " (" << SvPV_nolen(ERRSV) << ")");
+			PUTBACK;
 			FREETMPS;
 			LEAVE;
 			return false;
 		}
+		PUTBACK;
 		FREETMPS;
 		LEAVE;
 		ref = get_sv("_module", 0);
