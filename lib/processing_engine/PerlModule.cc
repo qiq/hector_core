@@ -21,8 +21,27 @@ PerlModule::PerlModule(ObjectRegistry *objects, const char *id, int threadIndex,
 }
 
 PerlModule::~PerlModule() {
+	ObjectLockWrite();
+
+	perl->SetContext();
+	dSP;
+	ENTER;
+	SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs(ref);
+        PUTBACK;
+	call_method("Finish", G_DISCARD|G_EVAL);
+	SPAGAIN;
+	if (SvTRUE(ERRSV))
+		LOG_ERROR(this, "Error calling Finish");
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+
 	delete perl;
 	free(name);
+
+	ObjectUnlock();
 }
 
 bool PerlModule::Init(vector<pair<string, string> > *c) {

@@ -46,6 +46,9 @@ sub Init {
 	return 1;
 }
 
+sub Finish {
+}
+
 sub GetType {
 	my ($self) = @_;
 
