@@ -291,7 +291,6 @@ bool Save::ProcessMultiSync(queue<Resource*> *inputResources, queue<Resource*> *
 					LOG_ERROR_R(this, r, "Cannot serialize resource");
 				}
 			}
-			r->SetFlag(Resource::DELETED);
 		}
 		outputResources->push(r);
 		inputResources->pop();
