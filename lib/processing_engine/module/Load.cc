@@ -25,6 +25,7 @@ Load::Load(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 	isInputModuleType = true;
 	items = 0;
 	maxItems = 0;
+	skipItems = 0;
 	filename = NULL;
 	wait = false;
 	resourceType = 0;
@@ -91,6 +92,14 @@ char *Load::GetMaxItems(const char *name) {
 
 void Load::SetMaxItems(const char *name, const char *value) {
 	maxItems = str2int(value);
+}
+
+char *Load::GetSkipItems(const char *name) {
+	return int2str(skipItems);
+}
+
+void Load::SetSkipItems(const char *name, const char *value) {
+	skipItems = str2int(value);
 }
 
 char *Load::GetFilename(const char *name) {
@@ -241,6 +250,23 @@ Resource *Load::ProcessInputSync(bool sleep) {
 			return mr;
 		}
 		return NULL;
+	}
+
+	while (skipItems > 0) {
+		r = stream ? Resource::DeserializeResource(*stream, resourceType, NULL) : NULL;
+		if (r) {
+			skipItems--;
+		} else {
+			if (!sleep || !wait)
+				return NULL;
+			ObjectUnlock();
+			fileCond.Lock();
+			fileCond.WaitSend(NULL);
+			fileCond.Unlock();
+			ObjectLockWrite();
+			if (cancel)
+				return NULL;
+		}
 	}
 
 	while (1) {

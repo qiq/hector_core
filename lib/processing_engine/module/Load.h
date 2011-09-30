@@ -8,6 +8,7 @@ Parameters:
 moduleType	init	input	Type of module (input or multi)
 items		r/o	n/a	Total items processed
 maxItems	r/w	n/a	Number of items to load
+skipItems	r/w	0	Number of items to skip at the beginning.
 filename	r/w	n/a	File to load. Change it to process another file
 				(needs wait)
 wait		r/w	false	Wait for another file when the current one is
@@ -55,6 +56,7 @@ private:
 	bool isInputModuleType;
 	int items;
 	int maxItems;
+	int skipItems;
 	char *filename;
 	bool wait;
 	int resourceType;
@@ -68,6 +70,8 @@ private:
 	char *GetItems(const char *name);
 	char *GetMaxItems(const char *name);
 	void SetMaxItems(const char *name, const char *value);
+	char *GetSkipItems(const char *name);
+	void SetSkipItems(const char *name, const char *value);
 	char *GetFilename(const char *name);
 	void SetFilename(const char *name, const char *value);
 	char *GetWait(const char *name);
