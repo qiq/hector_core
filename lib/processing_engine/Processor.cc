@@ -166,7 +166,7 @@ bool Processor::Init(Config *config, const char *serverId, const char *processin
 					snprintf(buffer, sizeof(buffer), "//Server[@id='%s']/ProcessingEngine[@id='%s']/Processor[@id='%s']/modules/Module[@id='%s']/param[%d]/text()", serverId, processingEngineId, GetId(), mid, i+1);
 					val = config->GetFirstValue(buffer);
 					if (!val) {
-						LOG_ERROR(this, "No value for param: " << (*names)[i].c_str());
+						LOG_ERROR(this, "(" << mid << ") No value for param: " << (*names)[i].c_str());
 						return false;
 					}
 				}
