@@ -57,6 +57,7 @@ Save::Save(ObjectRegistry *objects, const char *id, int threadIndex): Module(obj
 }
 
 Save::~Save() {
+	LOG_INFO(this, "Resources written: " << items);
 	delete stream;
 	if (fd >= 0) {
 		flock(fd, LOCK_UN);
